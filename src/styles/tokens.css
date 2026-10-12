@@ -1,0 +1,88 @@
+/*
+ * ReadMate AI — design tokens (Tailwind CSS 4, khai báo bằng @theme).
+ * Mỗi biến sinh ra utility tương ứng, ví dụ --color-brand-600 → bg-brand-600, text-brand-600.
+ *
+ * Nguyên tắc màu: nền ấm như giấy, màu chủ đạo xanh lá mạ (tăng trưởng), vàng nắng (khích lệ),
+ * xanh hồ (bình tĩnh) và san hô (năng lượng). Chữ trên nền màu đậm đạt tương phản WCAG AA
+ * (ví dụ trắng trên brand-600 ≈ 5,3:1). Không dùng màu làm tín hiệu duy nhất.
+ */
+
+@theme {
+  /* Nền và chữ */
+  --color-canvas: #fffaf2;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f0e6;
+  --color-line: #eadfce;
+  --color-line-strong: #d8c9b3;
+  --color-ink: #1d2433;
+  --color-ink-soft: #465066;
+  --color-ink-faint: #5f687c;
+
+  /* Xanh lá mạ — màu chủ đạo */
+  --color-brand-50: #ecfdf6;
+  --color-brand-100: #d2f8ea;
+  --color-brand-200: #a7efd5;
+  --color-brand-300: #6ddfbb;
+  --color-brand-400: #32c69d;
+  --color-brand-500: #12a07f;
+  --color-brand-600: #0b7a63;
+  --color-brand-700: #0a6352;
+  --color-brand-800: #0b4f42;
+  --color-brand-900: #0b3f36;
+
+  /* Vàng nắng — khích lệ, điểm nhấn */
+  --color-sun-50: #fff9e6;
+  --color-sun-100: #fff1bf;
+  --color-sun-200: #ffe38a;
+  --color-sun-300: #ffd44d;
+  --color-sun-400: #fdc126;
+  --color-sun-500: #f2a900;
+  --color-sun-700: #8f6100;
+  --color-sun-800: #6e4a00;
+
+  /* Xanh hồ — lộ trình Khởi động, thông tin */
+  --color-lagoon-50: #eef7ff;
+  --color-lagoon-100: #d9edff;
+  --color-lagoon-200: #b5dcff;
+  --color-lagoon-400: #5aaef0;
+  --color-lagoon-500: #2f8fdc;
+  --color-lagoon-600: #1f72bd;
+  --color-lagoon-700: #1a5b96;
+  --color-lagoon-800: #164a78;
+
+  /* San hô — lộ trình Tăng tốc, điểm nhấn ấm */
+  --color-coral-50: #fff3ef;
+  --color-coral-100: #ffe1d8;
+  --color-coral-200: #ffc3b2;
+  --color-coral-400: #ff8a6b;
+  --color-coral-500: #f2683f;
+  --color-coral-600: #cf4e27;
+  --color-coral-700: #a43c1e;
+  --color-coral-800: #7f2f18;
+
+  /* Ngữ nghĩa */
+  --color-primary: #0b7a63;
+  --color-primary-hover: #0a6352;
+  --color-focus: #1d5fd8;
+
+  /* Kiểu chữ: cỡ chữ có line-height đủ thoáng cho dấu tiếng Việt chồng tầng (ỗ, ẫ, ặ) */
+  --text-display: clamp(2.25rem, 1.55rem + 3.1vw, 3.75rem);
+  --text-display--line-height: 1.2;
+  --text-display--letter-spacing: -0.02em;
+  --text-read: 1.75rem;
+  --text-read--line-height: 1.35;
+  --text-read-lg: 2.5rem;
+  --text-read-lg--line-height: 1.3;
+  --text-read-xl: 3.5rem;
+  --text-read-xl--line-height: 1.25;
+
+  /* Khoảng cách và vùng chạm: 48px cho người lớn, 64px cho học sinh */
+  --spacing-touch: 3rem;
+  --spacing-touch-kid: 4rem;
+
+  /* Bo góc và đổ bóng */
+  --radius-card: 1.5rem;
+  --radius-tile: 1.25rem;
+  --shadow-soft: 0 1px 2px rgb(29 36 51 / 0.06), 0 8px 24px -12px rgb(29 36 51 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(29 36 51 / 0.06), 0 18px 40px -18px rgb(29 36 51 / 0.28);
+}

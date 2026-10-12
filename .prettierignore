@@ -1,0 +1,4 @@
+# Prettier tự bỏ qua các mục trong .gitignore.
+# Tài liệu viết tay (bảng Markdown tiếng Việt) giữ nguyên định dạng gốc.
+*.md
+package-lock.json

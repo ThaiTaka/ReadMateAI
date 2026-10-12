@@ -1,0 +1,54 @@
+# ReadMate AI — .gitignore
+# LƯU Ý: Repository GitHub đang ở chế độ PUBLIC.
+# Không bao giờ commit secret, khóa API, hoặc dữ liệu học sinh thật.
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Next.js / build output
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Environment & secrets (chỉ cho phép tệp mẫu .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Vercel / Supabase local state
+.vercel/
+supabase/.branches/
+supabase/.temp/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Claude Code: thiết lập cá nhân trên máy (không chia sẻ)
+.claude/settings.local.json
+
+# Dữ liệu xuất / bản sao CSDL — có thể chứa dữ liệu trẻ em, tuyệt đối không commit
+exports/
+*.dump
+*.backup
+*.sql.gz
