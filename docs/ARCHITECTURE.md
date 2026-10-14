@@ -1,8 +1,8 @@
 # ReadMate AI — Kiến trúc kỹ thuật
 
-> **Phiên bản:** 0.1 — bản thiết kế của Giai đoạn 1
-> **Ngày cập nhật:** 2026-10-12
-> **Trạng thái:** Chờ người điều phối dự án đánh giá
+> **Phiên bản:** 0.2 — cập nhật sau Giai đoạn 2 (nền tảng kỹ thuật: §3.1, AD-19 → AD-24, §5.1, §6.1, §18, §19, §20, §22)
+> **Ngày cập nhật:** 2026-10-14
+> **Trạng thái:** GĐ1 đã được nghiệm thu; phần GĐ2 chờ người điều phối đánh giá
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -11,7 +11,7 @@
 2. [Sơ đồ ngữ cảnh hệ thống](#2-sơ-đồ-ngữ-cảnh-hệ-thống)
 3. [Ngăn xếp công nghệ đã xác minh](#3-ngăn-xếp-công-nghệ-đã-xác-minh)
 4. [Các quyết định kiến trúc chính](#4-các-quyết-định-kiến-trúc-chính)
-5. [Cấu trúc thư mục dự kiến](#5-cấu-trúc-thư-mục-dự-kiến)
+5. [Cấu trúc thư mục](#5-cấu-trúc-thư-mục)
 6. [Frontend](#6-frontend)
 7. [Backend và API](#7-backend-và-api)
 8. [Xác thực và phân quyền](#8-xác-thực-và-phân-quyền)
@@ -143,9 +143,46 @@ Trạng thái: **Chốt** = áp dụng cho MVP · **POC** = cần thử nghiệm
 | AD-23 | `typedRoutes: true`; script `typecheck` = `next typegen && tsc --noEmit` | Liên kết nội bộ được kiểm tra kiểu; `next-env.d.ts` (bị gitignore) được sinh trước khi `tsc` chạy, kể cả trên CI | | Chốt (GĐ2) |
 | AD-24 | Tách module header bảo mật `src/config/security-headers.ts`, nạp từ `next.config.ts` với đuôi `.ts` tường minh | Node 24 nạp `next.config.ts` bằng bộ phân giải TypeScript gốc → cần đuôi tệp, chỉ cú pháp "xóa được" (`erasableSyntaxOnly`); module có unit test riêng | Viết thẳng trong `next.config.ts` (khó kiểm thử) | Chốt (GĐ2) |
 
-## 5. Cấu trúc thư mục dự kiến
+## 5. Cấu trúc thư mục
 
-Sẽ tạo ở GĐ2–GĐ5; có thể điều chỉnh nhỏ khi scaffold.
+### 5.1 Đã tạo ở GĐ2
+
+Chỉ tạo các thư mục có mã thật — không tạo sẵn module rỗng cho giai đoạn sau.
+
+```text
+ReadMateAI/
+├── .github/workflows/ci.yml      # lint → typecheck → unit test → build
+├── src/
+│   ├── app/
+│   │   ├── (site)/               # route group có header/footer: / · /demo · /join
+│   │   ├── teacher/              # /teacher — layout có sidebar (chưa xác thực)
+│   │   ├── learn/                # /learn — layout cho trẻ, điều hướng dưới cùng
+│   │   ├── layout.tsx · fonts.ts · globals.css · icon.svg
+│   │   └── error.tsx · not-found.tsx
+│   ├── components/
+│   │   ├── ui/                   # button, card, badge, container, section-heading, notice, empty-state, loading-state, tabs
+│   │   ├── layout/               # logo, skip-link, nav-link, mobile-nav, site-header, site-footer, teacher-sidebar, student-bottom-nav
+│   │   ├── learning/visuals.tsx  # biểu tượng hướng dẫn + màu/biểu tượng lộ trình
+│   │   └── illustrations/        # minh họa ghép tiếng "bà", linh vật cú
+│   ├── config/                   # site.ts (điều hướng), security-headers.ts (nạp bởi next.config.ts)
+│   ├── features/
+│   │   ├── exercises/catalog.ts       # 6 dạng bài (mô tả, chưa có Player/grade)
+│   │   ├── learning-paths/catalog.ts  # 3 lộ trình ↔ 3 nhóm năng lực
+│   │   └── demo/demo-data.ts          # dữ liệu minh họa hư cấu
+│   ├── lib/                      # cn.ts, vietnamese/normalize.ts
+│   ├── strings/vi.ts             # toàn bộ câu chữ giao diện (NFC)
+│   ├── styles/tokens.css         # design tokens Tailwind 4 (@theme)
+│   └── types/learning.ts
+├── tests/unit/                   # Vitest: strings, normalize, security-headers, catalog, components, pages, repo-hygiene
+├── tests/e2e/                    # Playwright: routes, navigation, responsive, vietnamese, security-headers, privacy
+└── next.config.ts · vitest.config.mts · playwright.config.ts · eslint.config.mjs · vercel.json · .env.example
+```
+
+Khác với dự kiến ở §5.2: route giáo viên và học sinh là thư mục thường `teacher/`, `learn/` (mỗi khu vực một layout riêng nên không cần route group); trang công khai nằm trong `(site)/`; `/demo` dùng chung header/footer công khai. Thành phần giao diện cho trẻ hiện dùng `components/ui` với cỡ `kid` (nút ≥ 64 px) — sẽ tách `components/kid` khi có Player ở GĐ4.
+
+### 5.2 Định hướng cho các giai đoạn sau
+
+Có thể điều chỉnh khi triển khai; chỉ tạo thư mục khi có mã thật.
 
 ```text
 ReadMateAI/
@@ -193,13 +230,13 @@ Quy ước: `features/*` chứa nghiệp vụ theo miền; `lib/*` là thư vi�
 
 | Route | Đối tượng | Mô tả | Giai đoạn |
 |---|---|---|---|
-| `/` | Mọi người | Giới thiệu ngắn, liên kết đăng nhập GV; không có công cụ theo dõi | GĐ2 |
-| `/demo` | Mọi người | Chơi thử 6 dạng bài với dữ liệu mẫu, không đăng nhập, không gửi dữ liệu | GĐ4 |
-| `/join` | Phụ huynh | Liên kết thiết bị bằng mã QR (mã nằm ở phần fragment của URL) hoặc mã dự phòng | GĐ5 |
-| `/learn` | HS | Chọn hồ sơ, "Bài hôm nay" | GĐ7 |
+| `/` | Mọi người | Giới thiệu ngắn, liên kết đăng nhập GV; không có công cụ theo dõi | GĐ2 ✅ |
+| `/demo` | Mọi người | GĐ2 ✅: giới thiệu 3 lộ trình, buổi luyện mẫu, H3→H0, 6 dạng bài (dữ liệu hư cấu). GĐ4: chơi thử 6 dạng bài, không đăng nhập, không gửi dữ liệu | GĐ2 / GĐ4 |
+| `/join` | Phụ huynh | GĐ2 ✅: giao diện bị khóa, không nhận mã. GĐ5: liên kết thiết bị bằng mã QR (mã nằm ở phần fragment của URL) hoặc mã dự phòng | GĐ2 / GĐ5 |
+| `/learn` | HS | GĐ2 ✅: khung giao diện (lời chào, nhiệm vụ, khu bài tập, thành tích — chưa có dữ liệu). GĐ7: chọn hồ sơ, "Bài hôm nay" | GĐ2 / GĐ7 |
 | `/learn/session/[id]` | HS | Bộ chạy phiên luyện | GĐ7 |
 | `/learn/parents` | Phụ huynh | Góc phụ huynh | GĐ7 |
-| `/teacher` | GV | Tổng quan lớp | GĐ5–GĐ9 |
+| `/teacher` | GV | GĐ2 ✅: khung bảng điều khiển (chưa xác thực, không dữ liệu). GĐ5–GĐ9: tổng quan lớp | GĐ2 / GĐ5–GĐ9 |
 | `/teacher/classes/[id]/students` | GV | Học sinh, thẻ học, thiết bị, đồng ý, nhóm | GĐ5 |
 | `/teacher/content` · `/teacher/review` | GV | Soạn và duyệt bài | GĐ6 |
 | `/teacher/audio` | GV | Ghi âm, quản lý âm thanh (chỉ route này được bật microphone) | GĐ6 |
@@ -499,6 +536,18 @@ interface StructuredLlm {
 
 **Tiêu đề HTTP** (đặt trong `next.config` / `proxy.ts`): `Content-Security-Policy` (nonce khi cần), `Permissions-Policy: camera=(), microphone=(), geolocation=()` (ngoại lệ: `/teacher/audio` cho phép microphone), `Referrer-Policy: no-referrer` cho `/join` và `strict-origin-when-cross-origin` cho phần còn lại, `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'`.
 
+**Đã triển khai ở GĐ2** (`src/config/security-headers.ts`, áp dụng cho mọi route qua `headers()` của `next.config.ts`; kiểm thử bằng Vitest và Playwright trên bản production):
+
+| Header | Giá trị |
+|---|---|
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; manifest-src 'self'; worker-src 'self' blob:` — khi `next dev` thêm `'unsafe-eval'` (React dev) và `ws: wss:` (HMR) |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=(), usb=()` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin`; riêng `/join`: `no-referrer` |
+| `X-Content-Type-Options` · `X-Frame-Options` | `nosniff` · `DENY` |
+| `X-Powered-By` | Tắt (`poweredByHeader: false`) |
+
+Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này có thể khiến trình duyệt, nhất là WebKit, chuyển tài nguyên sang HTTPS khi chạy `next start` qua HTTP cục bộ để kiểm thử). `'unsafe-inline'` cho script là đánh đổi có chủ đích của CSP không nonce (AD-20) — xem lại khi có dữ liệu thật.
+
 **Khác:** bảng `audit_logs` cho thao tác nhạy cảm; cập nhật phụ thuộc định kỳ (`npm audit`, Dependabot); kiểm tra bảo mật trước thí điểm (GĐ10).
 
 ## 19. Triển khai trên Vercel
@@ -511,7 +560,7 @@ interface StructuredLlm {
 
 - Liên kết dự án Vercel với GitHub `ThaiTaka/ReadMateAI` (chưa làm — cần quyết định của chủ dự án).
 - Thiết lập: Node.js **24.x**; region Functions **`sin1`** (`vercel.json`); biến môi trường theo §8.4 cho từng môi trường; Preview không bao giờ dùng khóa của Production.
-- **CI (GitHub Actions):** cài đặt → lint → typecheck → unit test → `content:check` → build; E2E trên Preview khi cần. Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
+- **CI (GitHub Actions):** `.github/workflows/ci.yml` (GĐ2) chạy `npm ci` → lint → typecheck → unit test → build trên `ubuntu-latest`, Node theo `.nvmrc`, quyền `contents: read`, `persist-credentials: false`; thêm `content:check` khi có script đó (GĐ3); E2E trên Preview khi cần. Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
 - **Cron:** dọn người dùng ẩn danh, tính đề xuất đổi nhóm, thu hồi thiết bị không dùng, áp dụng thời hạn lưu giữ (kiểm tra giới hạn cron theo gói khi triển khai).
 - **Giám sát:** log của Vercel; cảnh báo lỗi cho khu vực GV (cân nhắc dịch vụ giám sát có lọc dữ liệu cá nhân — quyết định ở GĐ10).
 - **Rollback:** dùng tính năng promote/rollback deployment của Vercel; migration viết theo hướng tương thích ngược (thêm trước, xóa sau).
@@ -525,7 +574,8 @@ interface StructuredLlm {
 | Component | Vitest + Testing Library | Player của 6 dạng bài | GĐ4 |
 | Nội dung | `npm run content:check` | Toàn bộ seed và nội dung mẫu | GĐ3 |
 | CSDL/RLS | pgTAP (`supabase test db`) hoặc Vitest tích hợp với nhiều người dùng | Cách ly lớp, cách ly học sinh, thiết bị bị thu hồi, ẩn danh chưa liên kết | GĐ5 |
-| E2E | Playwright: Pixel (Android Chrome), iPhone (WebKit), iPad, desktop | Luồng HS, luồng GV, chính sách âm thanh | GĐ4 |
+| Vệ sinh repo | Vitest (`tests/unit/repo-hygiene.test.ts`) | Không secret/token, không email/số điện thoại trong `src`/`tests`/`public`, không URL ngoài trong `src`, mọi tệp văn bản ở dạng NFC, `.env.example` không chứa giá trị secret, `.gitignore` chặn `.env*` | GĐ2 ✅ |
+| E2E | Playwright: Pixel (Android Chrome), iPhone (WebKit), iPad, desktop | GĐ2 ✅: route, điều hướng, 360 px không tràn ngang, tiếng Việt/NFC/font, header bảo mật, quyền riêng tư (chỉ request cùng nguồn). GĐ4+: luồng HS, luồng GV, chính sách âm thanh | GĐ2 / GĐ4 |
 | Trợ năng | axe (Playwright) | Trang GV và HS | GĐ4 |
 | Thủ công | GV + quan sát học sinh (có đồng ý) | Khả dụng của `/demo` | GĐ4 |
 
@@ -549,8 +599,10 @@ interface StructuredLlm {
 
 | Mã | Rủi ro / điểm chưa chắc chắn | Hành động | Giai đoạn |
 |---|---|---|---|
-| T-01 | `create-next-app` từ chối scaffold vào thư mục đã có `CLAUDE.md`, `TASKS.md`, `PROGRESS.md` (chỉ cho phép `.git`, `.gitignore`, `.gitattributes`, `docs`, `LICENSE`, …) | Scaffold vào thư mục tạm rồi hợp nhất, hoặc tạo cấu hình thủ công | GĐ2 |
-| T-02 | Phiên bản "latest" không khớp hệ sinh thái (TypeScript 7, ESLint 10, `@types/node` 20 vs Vitest 5) | Ghim theo §3; kiểm tra lại khi cài | GĐ2 |
+| T-01 | `create-next-app` từ chối scaffold vào thư mục đã có `CLAUDE.md`, `TASKS.md`, `PROGRESS.md` (chỉ cho phép `.git`, `.gitignore`, `.gitattributes`, `docs`, `LICENSE`, …) | ✅ Đã xử lý ở GĐ2: scaffold vào thư mục tạm rồi hợp nhất | GĐ2 |
+| T-02 | Phiên bản "latest" không khớp hệ sinh thái (TypeScript 7, ESLint 10, `@types/node` 20 vs Vitest 5) | ✅ Đã xử lý ở GĐ2: ghim TypeScript `^5`, ESLint `^9`, `@types/node` `^24` (§3.1) | GĐ2 |
+| T-12 | ESLint 9 bị npm đánh dấu hết hỗ trợ; `npm audit` báo 5 lỗ hổng mức cao (ReDoS trong `braces` qua chuỗi phụ thuộc của `eslint-config-next`, chưa có bản vá) — chỉ ở công cụ dev, không vào bundle | Theo dõi bản phát hành `eslint-config-next`/plugin hỗ trợ ESLint 10; không dùng `npm audit fix --force` (sẽ hạ `eslint-config-next` xuống 14.x) | GĐ3+ |
+| T-13 | `next.config.ts` được Node 24 nạp bằng bộ phân giải TypeScript gốc: import nội bộ phải có đuôi `.ts`, không dùng alias `@/`, không dùng cú pháp TypeScript cần biên dịch (enum, namespace) | Giữ cấu hình tối giản; logic đặt trong module có unit test (AD-24) | GĐ2+ |
 | T-03 | Luồng đăng nhập ẩn danh + liên kết thiết bị + Turnstile với `@supabase/ssr` và `proxy.ts` | POC trước khi xây giao diện | GĐ5 |
 | T-04 | Serwist/service worker với Turbopack của Next 16 | POC; dự phòng service worker viết tay | GĐ4/GĐ7 |
 | T-05 | `@react-pdf/renderer` trong Route Handler Next 16 + font Andika + dấu tiếng Việt | POC dựng 1 trang mẫu, kiểm tra trích xuất văn bản | GĐ8 (có thể sớm hơn) |

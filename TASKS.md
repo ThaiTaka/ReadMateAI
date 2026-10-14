@@ -1,6 +1,6 @@
 # TASKS — Kế hoạch phát triển ReadMate AI
 
-> **Cập nhật:** 2026-10-12 · **Giai đoạn hiện tại:** GĐ1 đã hoàn thành — chờ người điều phối đánh giá
+> **Cập nhật:** 2026-10-14 · **Giai đoạn hiện tại:** GĐ2 đã hoàn thành — chờ người điều phối đánh giá
 > **Quy ước:** mỗi giai đoạn triển khai và kiểm thử độc lập; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**.
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa làm · Quy mô ước lượng thô: **S** (≤ 1 phiên làm việc), **M** (2–3 phiên), **L** (≥ 4 phiên).
 > **Tài liệu:** [PRD](docs/PRD.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [DATA_MODEL](docs/DATA_MODEL.md) · [PROGRESS](PROGRESS.md)
@@ -9,8 +9,8 @@
 
 | GĐ | Tên | Kết quả có thể kiểm thử độc lập | Phụ thuộc | Quy mô | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Khởi tạo & thiết kế kiến trúc | Bộ tài liệu, Git cục bộ | — | S | ✅ Chờ duyệt |
-| 2 | Nền móng kỹ thuật | Ứng dụng khung build/lint/test xanh, CI | GĐ1 | M | ⏸ |
+| 1 | Khởi tạo & thiết kế kiến trúc | Bộ tài liệu, Git cục bộ | — | S | ✅ Đã duyệt |
+| 2 | Nền móng kỹ thuật | Ứng dụng khung build/lint/test xanh, CI | GĐ1 | M | ✅ Chờ duyệt |
 | 3 | Lõi Tiếng Việt & kho tri thức dạng mã | Thư viện phân tích tiếng + dữ liệu lõi có kiểm thử | GĐ2 | M–L | ⏸ |
 | 4 | Bộ máy bài tập + 6 dạng bài + `/demo` | Bản chơi thử chạy trên điện thoại, chưa cần CSDL | GĐ2, GĐ3 | L | ⏸ |
 | 5 | Supabase: CSDL nền, RLS, xác thực | GV đăng nhập, thẻ học, liên kết thiết bị, kiểm thử RLS | GĐ3 | L | ⏸ |
@@ -45,34 +45,35 @@
 - [x] Sáu tài liệu tồn tại trên ổ đĩa, đã đọc lại và đối chiếu với yêu cầu giai đoạn
 - [x] Không push GitHub, không deploy, không tạo dịch vụ bên ngoài
 - [x] Không xóa/ghi đè dữ liệu có sẵn (thư mục ban đầu rỗng)
-- [ ] Người điều phối phê duyệt kiến trúc và kế hoạch
+- [x] Người điều phối phê duyệt kiến trúc và kế hoạch (khi giao GĐ2)
 
 ---
 
-## GĐ2 — Nền móng kỹ thuật (M)
+## GĐ2 — Nền móng kỹ thuật (M) ✅
 
 **Điều kiện bắt đầu:** GĐ1 được duyệt · chủ dự án quyết định có commit/push lên GitHub (repo đang **public**) trong GĐ2 hay không · (tùy chọn) tài khoản Vercel nếu muốn có Preview.
+**Phạm vi được giao (2026-10-12):** chỉ commit cục bộ — **không push, không đổi public/private, không deploy Vercel**.
 
-- [ ] 2.1 Scaffold Next.js 16.4 + React 19.3 + TypeScript 5.9 + Tailwind 4.3 (App Router, thư mục `src/`, alias `@/*`). Vì `create-next-app` từ chối thư mục đã có `CLAUDE.md`/`TASKS.md`/`PROGRESS.md`: tạo trong thư mục tạm rồi hợp nhất, hoặc tạo cấu hình thủ công — **không ghi đè** tài liệu hiện có
-- [ ] 2.2 Kiểm tra lại phiên bản bằng `npm view` ngay trước khi cài; cập nhật ARCHITECTURE §3
-- [ ] 2.3 `package.json`: `engines.node = "24.x"`; scripts `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:e2e`, `format`, `content:check` (tạm thời)
-- [ ] 2.4 TypeScript `strict` (+ `noUncheckedIndexedAccess`); ESLint 9 + `eslint-config-next`; Prettier
-- [ ] 2.5 Vitest 5 (`@types/node@^24`) + 1 unit test; Playwright 1.64 với các cấu hình Pixel, iPhone, iPad, Desktop + 1 smoke test
-- [ ] 2.6 Cấu trúc thư mục theo ARCHITECTURE §5
-- [ ] 2.7 Font Andika + Be Vietnam Pro (subset `vietnamese`), design tokens, `<html lang="vi">`, trang `/` tối giản, khung `/demo`
-- [ ] 2.8 Tiêu đề bảo mật cơ bản: CSP khởi điểm, `Permissions-Policy` (tắt camera/microphone/geolocation), `Referrer-Policy`, `X-Content-Type-Options`
-- [ ] 2.9 `src/strings/vi.ts`; `.env.example` chỉ chứa tên biến
-- [ ] 2.10 GitHub Actions CI: install → lint → typecheck → test → build
-- [ ] 2.11 *(Chỉ khi được phép)* commit đầu tiên, thêm remote `origin` → `https://github.com/ThaiTaka/ReadMateAI.git`, push `main`; *(khi có tài khoản)* liên kết Vercel, Node 24.x, region `sin1`
+- [x] 2.1 Scaffold Next.js 16.4 + React 19.3 + TypeScript 5.9 + Tailwind 4.3 (App Router, `src/`, alias `@/*`) bằng `create-next-app@16.4.0` trong thư mục tạm rồi hợp nhất — không ghi đè tài liệu; đã xóa thư mục tạm
+- [x] 2.2 Kiểm tra lại phiên bản bằng `npm view` ngay trước khi cài; cập nhật ARCHITECTURE §3.1
+- [x] 2.3 `package.json`: `engines.node = "24.x"`; scripts `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:run`, `test:e2e`, `format`, `format:check` — *điều chỉnh:* **không** thêm `content:check` tạm thời (yêu cầu GĐ2: mọi script phải chạy thật) → chuyển sang 3.8
+- [x] 2.4 TypeScript `strict` (+ `noUncheckedIndexedAccess`, `erasableSyntaxOnly`); ESLint 9 + `eslint-config-next` 16.4; Prettier 3
+- [x] 2.5 Vitest 5 + jsdom + Testing Library (7 tệp, 80 test); Playwright 1.64 với 4 cấu hình: Desktop Chrome, Pixel 7, Desktop Safari, iPhone 13 (6 tệp spec) — *điều chỉnh:* cấu hình iPad chuyển sang 4.8
+- [x] 2.6 Cấu trúc thư mục — thực tế ghi ở ARCHITECTURE §5.1 (chỉ tạo thư mục có mã thật)
+- [x] 2.7 Font Andika + Be Vietnam Pro (subset `vietnamese`), design tokens, `<html lang="vi">`; trang `/`, `/demo`, `/teacher`, `/learn`, `/join` (khung giao diện, ghi rõ "bản xem trước"/"đang phát triển"), trang 404 và trang lỗi
+- [x] 2.8 Header bảo mật: CSP, `Permissions-Policy` (tắt camera/microphone/geolocation/payment/usb), `Referrer-Policy` (`/join`: `no-referrer`), `X-Content-Type-Options`, `X-Frame-Options`, tắt `X-Powered-By`
+- [x] 2.9 `src/strings/vi.ts` (NFC, có test); `.env.example` chỉ chứa tên biến và giá trị không bí mật
+- [x] 2.10 GitHub Actions CI (`.github/workflows/ci.yml`): `npm ci` → lint → typecheck → unit test → build — **chưa chạy trên GitHub** vì chưa push
+- [x] 2.11 Commit cục bộ đầu tiên + thêm remote `origin` → `https://github.com/ThaiTaka/ReadMateAI.git` (đã xác minh repo thuộc tài khoản đang đăng nhập) — **không push**; Vercel chưa liên kết (ngoài phạm vi GĐ2)
 
 **Tiêu chí nghiệm thu**
 
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build` thành công trên Windows và trên CI (Linux)
-- [ ] `/` và `/demo` hiển thị đúng tiếng Việt có dấu ở chiều rộng 360 px, không cuộn ngang
-- [ ] Playwright smoke test xanh trên Chromium và WebKit
-- [ ] Header bảo mật có trong response (có test)
-- [ ] Không có secret trong repo; `git status` không chứa tệp `.env`
-- [ ] Phiên bản thực tế đã ghi vào ARCHITECTURE §3
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:run`, `npm run build` thành công trên Windows — [ ] trên CI (Linux): **chưa kiểm chứng** (cần push)
+- [x] `/` và `/demo` (và cả 5 route) hiển thị đúng tiếng Việt có dấu ở chiều rộng 360 px, không cuộn ngang (E2E)
+- [x] Playwright xanh trên Chromium và WebKit (desktop + điện thoại)
+- [x] Header bảo mật có trong response của bản production (Vitest + Playwright + kiểm tra HTTP thủ công)
+- [x] Không có secret trong repo (test vệ sinh repo, đã thử âm tính); `git status` không chứa tệp `.env`
+- [x] Phiên bản thực tế đã ghi vào ARCHITECTURE §3.1
 
 ---
 
@@ -87,7 +88,7 @@
 - [ ] 3.5 `content/kb`: 29 chữ cái; các âm (kể cả chữ ghép) kèm cách gọi khi dạy; 6 thanh; danh sách vần; quy tắc dạng máy đọc được; quan hệ nhầm lẫn (b–d, p–q, l–n, an–ang, hỏi–ngã…)
 - [ ] 3.6 `content/curriculum/<bộ-sách>.json`: thứ tự bài và đơn vị được giới thiệu (chỉ dữ kiện)
 - [ ] 3.7 Bộ từ vựng khởi đầu 300–500 từ phù hợp trẻ em, theo chủ đề, gắn hình có ghi nguồn/giấy phép
-- [ ] 3.8 Lệnh `npm run content:check` kiểm tra toàn bộ dữ liệu lõi (chạy trong CI)
+- [ ] 3.8 Lệnh `npm run content:check` kiểm tra toàn bộ dữ liệu lõi; thêm bước này vào `.github/workflows/ci.yml`
 - [ ] 3.9 *(Tùy chọn)* trang tra cứu kho tri thức tĩnh để GV rà soát
 
 **Tiêu chí nghiệm thu**
@@ -111,7 +112,7 @@
 - [ ] 4.5 Bộ kiểm tra chung: NFC, đáp án duy nhất, phương án trùng, `AUDIO_LEAKS_ANSWER`, `TEXT_LEAKS_ANSWER`
 - [ ] 4.6 Bộ biểu tượng hướng dẫn SVG (có bản đen trắng cho phiếu)
 - [ ] 4.7 `/demo`: chơi đủ 6 dạng, không đăng nhập, không gửi dữ liệu
-- [ ] 4.8 Kiểm thử component + E2E (Pixel, iPhone, iPad, Desktop) + kiểm tra trợ năng axe
+- [ ] 4.8 Kiểm thử component + E2E (Pixel, iPhone, Desktop đã có từ GĐ2; thêm cấu hình iPad) + kiểm tra trợ năng axe
 - [ ] 4.9 Buổi thử khả dụng với GV (và học sinh nếu nhà trường, phụ huynh đồng ý — không thu dữ liệu); ghi nhận phản hồi vào PROGRESS
 
 **Tiêu chí nghiệm thu**

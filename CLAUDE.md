@@ -35,7 +35,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Windows 11; thư mục dự án **`D:\ReadMateAI`** (không có dấu cách). Shell chính PowerShell 5.1 — **không hỗ trợ `&&`**, dùng `;` hoặc `if ($?) { … }`; Git Bash có sẵn.
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
 - **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
-- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC** và rỗng; Git cục bộ nhánh `main`, **chưa có remote, chưa có commit**.
+- Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2).
+- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**, trên GitHub **chưa có commit nào** (chưa push). Git cục bộ nhánh `main` đã có commit; remote `origin` → `https://github.com/ThaiTaka/ReadMateAI.git` (thêm ở GĐ2, cập nhật 2026-10-14).
 - `core.autocrlf=true` ở cấp hệ thống → `.gitattributes` chuẩn hóa LF.
 
 ## 5. Kiến trúc tóm tắt
@@ -96,11 +97,24 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Giao diện học sinh: vùng chạm ≥ 64 px, chạm-để-chọn (không bắt buộc kéo–thả), một nhiệm vụ/màn hình, không truyền tin chỉ bằng màu.
 - Comment chỉ giải thích "vì sao"; commit theo Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`…).
 
+### 9.1 Quy tắc kỹ thuật rút ra ở GĐ2 (BẮT BUỘC)
+
+1. **Next.js 16.4 khác dữ liệu huấn luyện:** trước khi viết mã Next, đọc tài liệu đi kèm ở `node_modules/next/dist/docs/` (xem [AGENTS.md](AGENTS.md) — tệp do `next dev` quản lý, không sửa tay).
+2. `cacheComponents` đang bật: **không** export `dynamic`, `revalidate`, `fetchCache` ở route (sẽ lỗi build) — dùng `'use cache'` + `cacheLife`; phần dữ liệu theo request đặt trong `<Suspense>`. Trang lỗi dùng prop `retry()` (không dùng `reset()`).
+3. `typedRoutes` đang bật: liên kết nội bộ dùng kiểu `Route`; `npm run typecheck` chạy `next typegen` trước `tsc`.
+4. `next.config.ts` được Node 24 nạp bằng TypeScript gốc: import nội bộ phải có đuôi `.ts`, không dùng alias `@/`, không dùng enum/namespace. Header bảo mật chỉ sửa ở `src/config/security-headers.ts` và cập nhật test tương ứng.
+5. `cn()` chỉ nối class, **không** gộp class Tailwind xung đột: không truyền `hidden` để đè `inline-flex` của component — bọc bằng phần tử ngoài (ví dụ `<span className="hidden sm:inline-flex">`).
+6. Câu chữ giao diện ở `src/strings/vi.ts`; dữ liệu miền (dạng bài, lộ trình) ở `src/features/*/catalog.ts`; dữ liệu minh họa phải **hư cấu** và nằm ở `src/features/demo/`.
+7. Chức năng chưa hoạt động phải ghi rõ "Sắp có" / "Chức năng đang phát triển" / "Dự kiến"; không giả lập đăng nhập hay dữ liệu thật; không dùng `<form>` cho chức năng chưa có (tránh dữ liệu lọt vào query string) — dùng `fieldset disabled`.
+8. Chữ tiếng Việt có dấu chồng (ví dụ "Mỗi", "Ấ"): không đặt line-height < 1.2 (như `leading-none`) vì dấu sẽ bị cắt hoặc chạm dòng trên.
+9. Không cài gói với `--force`/`--legacy-peer-deps`, không chạy `npm audit fix --force`; không tắt luật lint/TypeScript hay bỏ qua test để "cho xanh".
+10. Fixture Playwright: đặt tên tham số callback là `provide` (không phải `use`) để tránh báo nhầm của luật `react-hooks`.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
 
-- [ ] `npm run lint`, `npm run typecheck`, `npm run test` (và `npm run build` khi có thay đổi lớn) đều xanh.
+- [ ] `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:run` và `npm run build` đều xanh; thay đổi giao diện, route hay header thì chạy thêm `npm run test:e2e`.
 - [ ] Logic mới có test; bảng mới có policy RLS + test cách ly.
 - [ ] Không có secret, dữ liệu thật hay `.env` trong thay đổi.
 - [ ] Tiêu chí nghiệm thu tương ứng trong `TASKS.md` được kiểm tra thật (không suy đoán).
@@ -108,7 +122,18 @@ Một nhiệm vụ chỉ "xong" khi:
 
 ## 11. Lệnh thường dùng
 
-Chưa có mã nguồn ứng dụng (sẽ bổ sung ở GĐ2). Dự kiến: `npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck` · `npm run test` · `npm run test:e2e` · `npm run content:check` · `npx supabase …` (từ GĐ5).
+| Lệnh | Tác dụng |
+|---|---|
+| `npm ci` | Cài đúng theo `package-lock.json` |
+| `npm run dev` | Máy chủ phát triển (Turbopack) ở http://localhost:3000 |
+| `npm run build` · `npm run start` | Build production · chạy bản đã build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `next typegen && tsc --noEmit` |
+| `npm run test` · `npm run test:run` | Vitest chế độ theo dõi · chạy một lần |
+| `npm run test:e2e` | Playwright: tự build + `next start` cổng 3100; Chromium/WebKit × desktop/điện thoại (lần đầu: `npx playwright install chromium webkit`) |
+| `npm run format` · `npm run format:check` | Prettier (bỏ qua `*.md`, `package-lock.json`) |
+
+Dự kiến thêm: `npm run content:check` (GĐ3), `npx supabase …` (GĐ5). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 
 ## 12. Thuật ngữ
 
