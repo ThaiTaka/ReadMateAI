@@ -1,0 +1,21 @@
+{
+  "id": "profile:class-1a2",
+  "classLabel": "1A2",
+  "status": "unconfirmed",
+  "seriesId": null,
+  "currentLessonOrdinal": null,
+  "additionalTaughtUnits": [],
+  "excludedUnits": [],
+  "reviewFocusUnits": [],
+  "extendingAllowedUnits": [],
+  "conventions": {
+    "quAnalysis": null,
+    "giAnalysis": null,
+    "giSharedI": null,
+    "tonePlacement": null
+  },
+  "confirmation": null,
+  "notes": "Hồ sơ tiến độ của lớp 1A2 CHƯA được giáo viên xác nhận: chưa biết bộ sách (Q-01), vị trí bài học hiện tại và quy ước phân tích qu/gi, kiểu đặt dấu thanh (Q-02). Vì vậy hồ sơ không có danh sách kiến thức đã học và mọi kiểm tra theo hồ sơ này đều trả về “chưa xác định”. Không dùng để giao bài.",
+  "updatedAt": "2026-10-14",
+  "version": 1
+}

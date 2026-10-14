@@ -1,0 +1,135 @@
+{
+  "kind": "confusions",
+  "description": "Cặp đơn vị học sinh lớp 1 hay nhầm lẫn — dùng để chọn phương án nhiễu có chủ đích và gắn thẻ lỗi ở các giai đoạn sau. Cặp nhầm về âm thường phụ thuộc phương ngữ của lớp.",
+  "review": {
+    "status": "pending_review",
+    "note": "GV cần xác nhận cặp nào thực sự hay gặp ở lớp 1A2 (phụ thuộc giọng vùng miền — Q-03)."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Tổng hợp các lỗi nhầm lẫn phổ biến khi học đọc tiếng Việt; chưa có số liệu của lớp."
+  },
+  "items": [
+    {
+      "id": "confusion:b-d",
+      "units": ["phoneme:b", "phoneme:d"],
+      "confusionType": "visual",
+      "dialectDependent": false,
+      "note": "Hai chữ đối xứng nhau."
+    },
+    {
+      "id": "confusion:p-q",
+      "units": ["letter:p", "letter:q"],
+      "confusionType": "visual",
+      "dialectDependent": false,
+      "note": "Hai chữ đối xứng nhau."
+    },
+    {
+      "id": "confusion:m-n",
+      "units": ["phoneme:m", "phoneme:n"],
+      "confusionType": "visual",
+      "dialectDependent": false,
+      "note": "Khác nhau ở số nét móc."
+    },
+    {
+      "id": "confusion:n-u",
+      "units": ["letter:n", "letter:u"],
+      "confusionType": "visual",
+      "dialectDependent": false,
+      "note": "Hình chữ lật ngược của nhau."
+    },
+    {
+      "id": "confusion:l-n",
+      "units": ["phoneme:l", "phoneme:n"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Lẫn l/n ở một số vùng phía Bắc."
+    },
+    {
+      "id": "confusion:s-x",
+      "units": ["phoneme:s", "phoneme:x"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Nhiều vùng phát âm giống nhau."
+    },
+    {
+      "id": "confusion:ch-tr",
+      "units": ["phoneme:ch", "phoneme:tr"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Nhiều vùng phát âm giống nhau."
+    },
+    {
+      "id": "confusion:d-gi",
+      "units": ["phoneme:d", "phoneme:gi"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Giọng Bắc phát âm d, gi (và r) giống nhau."
+    },
+    {
+      "id": "confusion:d-r",
+      "units": ["phoneme:d", "phoneme:r"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Giọng Bắc phát âm r giống d."
+    },
+    {
+      "id": "confusion:c-k",
+      "units": ["phoneme:c", "phoneme:k"],
+      "confusionType": "spelling",
+      "dialectDependent": false,
+      "note": "Cùng một âm, chọn chữ theo nguyên âm đứng sau (spelling.c_k)."
+    },
+    {
+      "id": "confusion:g-gh",
+      "units": ["phoneme:g", "phoneme:gh"],
+      "confusionType": "spelling",
+      "dialectDependent": false,
+      "note": "Cùng một âm, chọn chữ theo nguyên âm đứng sau (spelling.g_gh)."
+    },
+    {
+      "id": "confusion:ng-ngh",
+      "units": ["phoneme:ng", "phoneme:ngh"],
+      "confusionType": "spelling",
+      "dialectDependent": false,
+      "note": "Cùng một âm, chọn chữ theo nguyên âm đứng sau (spelling.ng_ngh)."
+    },
+    {
+      "id": "confusion:i-y",
+      "units": ["phoneme:i", "phoneme:y"],
+      "confusionType": "spelling",
+      "dialectDependent": false,
+      "note": "Cùng một âm, khác chữ viết."
+    },
+    {
+      "id": "confusion:an-ang",
+      "units": ["rime:an", "rime:ang"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Giọng Nam thường phát âm hai vần gần giống nhau."
+    },
+    {
+      "id": "confusion:at-ac",
+      "units": ["rime:at", "rime:ac"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Giọng Nam thường phát âm hai vần gần giống nhau."
+    },
+    {
+      "id": "confusion:en-eng",
+      "units": ["rime:en", "rime:eng"],
+      "confusionType": "sound",
+      "dialectDependent": true,
+      "note": "Âm cuối n và ng dễ lẫn."
+    },
+    {
+      "id": "confusion:hoi-nga",
+      "units": ["tone:hoi", "tone:nga"],
+      "confusionType": "tone",
+      "dialectDependent": true,
+      "note": "Nhiều vùng không phân biệt thanh hỏi và thanh ngã khi nói."
+    }
+  ]
+}

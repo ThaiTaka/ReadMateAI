@@ -1,0 +1,303 @@
+{
+  "kind": "sentences",
+  "description": "Ngân hàng câu ngắn minh họa, viết mới cho dự án. Mỗi câu có chủ đề, độ khó dự kiến và câu hỏi đọc hiểu gợi ý cho GV (bộ máy không tự đánh giá đọc hiểu). Một số câu cố ý dùng vần ngoài chuỗi bài minh họa để kiểm thử trạng thái “chưa học”.",
+  "review": {
+    "status": "pending_review",
+    "note": "Từng câu cần GV duyệt: chính tả, nghĩa, độ phù hợp, tên nhân vật hư cấu."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Câu viết mới; không sao chép bài đọc của sách giáo khoa."
+  },
+  "items": [
+    {
+      "id": "sentence:001",
+      "text": "Bà có cá.",
+      "topics": ["topic:family", "topic:food"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bà có gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:002",
+      "text": "Bố có bơ.",
+      "topics": ["topic:family", "topic:food"],
+      "difficulty": 2,
+      "comprehensionFocus": "Ai có bơ?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:003",
+      "text": "Cô có cờ đỏ.",
+      "topics": ["topic:people"],
+      "difficulty": 2,
+      "comprehensionFocus": "Cờ màu gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:004",
+      "text": "Bé có lá cờ.",
+      "topics": ["topic:family"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bé có gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:005",
+      "text": "Bé đi bộ.",
+      "topics": ["topic:activities"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bé làm gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:006",
+      "text": "Mẹ bế bé.",
+      "topics": ["topic:family"],
+      "difficulty": 2,
+      "comprehensionFocus": "Ai bế bé?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:007",
+      "text": "Bà có ghế gỗ.",
+      "topics": ["topic:home"],
+      "difficulty": 2,
+      "comprehensionFocus": "Ghế làm bằng gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:008",
+      "text": "Nhà bà có khế.",
+      "topics": ["topic:home", "topic:plants"],
+      "difficulty": 2,
+      "comprehensionFocus": "Nhà bà có cây gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:009",
+      "text": "Bé nghỉ hè ở nhà bà.",
+      "topics": ["topic:family", "topic:places"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bé nghỉ hè ở đâu?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:010",
+      "text": "Bé vẽ chú chó.",
+      "topics": ["topic:activities", "topic:animals"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bé vẽ con gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:011",
+      "text": "Mẹ đi chợ.",
+      "topics": ["topic:family", "topic:places"],
+      "difficulty": 2,
+      "comprehensionFocus": "Mẹ đi đâu?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:012",
+      "text": "Bố đi xe ra phố.",
+      "topics": ["topic:transport", "topic:places"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bố đi đâu?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:013",
+      "text": "Bà về quê.",
+      "topics": ["topic:family", "topic:places"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bà về đâu?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:014",
+      "text": "Bé có giỏ nho.",
+      "topics": ["topic:food"],
+      "difficulty": 3,
+      "comprehensionFocus": "Trong giỏ có gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:015",
+      "text": "Mẹ mua cua.",
+      "topics": ["topic:family", "topic:food"],
+      "difficulty": 2,
+      "comprehensionFocus": "Mẹ mua gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:016",
+      "text": "Bà có quả dừa.",
+      "topics": ["topic:family", "topic:plants"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bà có quả gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:017",
+      "text": "Bò ăn cỏ.",
+      "topics": ["topic:animals"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bò ăn gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:018",
+      "text": "Bé hát cho bà nghe.",
+      "topics": ["topic:activities", "topic:family"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bé hát cho ai nghe?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:019",
+      "text": "Bé đọc sách.",
+      "topics": ["topic:school", "topic:activities"],
+      "difficulty": 2,
+      "comprehensionFocus": "Bé làm gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:020",
+      "text": "Ông có cá vàng.",
+      "topics": ["topic:family", "topic:animals"],
+      "difficulty": 2,
+      "comprehensionFocus": "Ông có con gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:021",
+      "text": "Bà cho bé quả táo.",
+      "topics": ["topic:family", "topic:food"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bà cho bé quả gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:022",
+      "text": "Trời mưa to.",
+      "topics": ["topic:nature"],
+      "difficulty": 2,
+      "comprehensionFocus": "Trời thế nào?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:023",
+      "text": "Bé chơi với con mèo.",
+      "topics": ["topic:toys", "topic:animals"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bé chơi với con gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:024",
+      "text": "Mẹ có bó hoa.",
+      "topics": ["topic:family", "topic:plants"],
+      "difficulty": 3,
+      "comprehensionFocus": "Mẹ có gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:025",
+      "text": "Bố tưới cây.",
+      "topics": ["topic:family", "topic:plants"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bố làm gì?",
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Có vần ươi, ây — ngoài chuỗi bài minh họa."
+    },
+    {
+      "id": "sentence:026",
+      "text": "Thuyền đi trên sông.",
+      "topics": ["topic:transport", "topic:nature"],
+      "difficulty": 4,
+      "comprehensionFocus": "Thuyền đi ở đâu?",
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Có vần uyên, ên — ngoài chuỗi bài minh họa."
+    },
+    {
+      "id": "sentence:027",
+      "text": "Bé Na vẽ hoa.",
+      "topics": ["topic:activities", "topic:plants"],
+      "difficulty": 3,
+      "comprehensionFocus": "Ai vẽ hoa?",
+      "properNouns": ["Na"],
+      "review": {
+        "status": "pending_review",
+        "note": "“Na” là tên nhân vật hư cấu — GV kiểm tra không trùng biệt danh học sinh của lớp."
+      },
+      "version": 1
+    },
+    {
+      "id": "sentence:028",
+      "text": "Bà kể chuyện.",
+      "topics": ["topic:family", "topic:activities"],
+      "difficulty": 4,
+      "comprehensionFocus": "Bà làm gì?",
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Có vần uyên — ngoài chuỗi bài minh họa."
+    },
+    {
+      "id": "sentence:029",
+      "text": "Bé có bi, có bóng.",
+      "topics": ["topic:toys"],
+      "difficulty": 3,
+      "comprehensionFocus": "Bé có những đồ chơi gì?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "sentence:030",
+      "text": "Bé vẽ gì?",
+      "topics": ["topic:activities"],
+      "difficulty": 2,
+      "comprehensionFocus": "Câu này hỏi về điều gì?",
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Câu hỏi; tiếng “gì” phụ thuộc quy ước phân tích gi."
+    },
+    {
+      "id": "sentence:031",
+      "text": "A, mẹ về!",
+      "topics": ["topic:family"],
+      "difficulty": 2,
+      "comprehensionFocus": "Ai về?",
+      "review": { "status": "pending_review" },
+      "version": 1
+    }
+  ]
+}

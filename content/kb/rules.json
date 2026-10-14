@@ -1,0 +1,219 @@
+{
+  "kind": "rules",
+  "description": "Quy tắc chính tả, thanh điệu và cấu tạo tiếng ở dạng máy đọc được. Quy tắc 'established' là quy tắc chắc chắn của chữ quốc ngữ (vi phạm = lỗi); quy tắc 'convention' là quy ước cần giáo viên xác nhận (chỉ cảnh báo). Mỗi quy tắc có ví dụ đúng và ví dụ sai kèm mã lỗi mong đợi — bộ kiểm tra nội dung chạy bộ máy trên các ví dụ này.",
+  "review": {
+    "status": "pending_review",
+    "note": "Các quy tắc 'established' khớp CLAUDE.md §7.5; các quy tắc 'convention' chờ GV trả lời Q-02."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Tổng hợp từ quy tắc chính tả tiếng Việt phổ biến; ví dụ do dự án tự soạn."
+  },
+  "items": [
+    {
+      "id": "spelling.c_k",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "Viết c hay k",
+      "description": "Âm “cờ” viết là k khi đứng trước i, y, e, ê; viết là c khi đứng trước các nguyên âm còn lại.",
+      "spec": {
+        "kind": "onset_by_following_vowel",
+        "beforeFrontVowel": "k",
+        "elsewhere": "c",
+        "frontVowels": ["i", "y", "e", "ê"]
+      },
+      "detectedBy": ["SPELLING_C_K"],
+      "examples": ["cá", "cỏ", "cô", "cũ", "kẻ", "kê", "kìa", "kỳ"],
+      "counterExamples": [
+        { "text": "cẻ", "expectedCode": "SPELLING_C_K" },
+        { "text": "cê", "expectedCode": "SPELLING_C_K" },
+        { "text": "kà", "expectedCode": "SPELLING_C_K" },
+        { "text": "kô", "expectedCode": "SPELLING_C_K" }
+      ]
+    },
+    {
+      "id": "spelling.g_gh",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "Viết g hay gh",
+      "description": "Âm “gờ” viết là gh khi đứng trước i, e, ê; viết là g khi đứng trước các nguyên âm còn lại.",
+      "spec": {
+        "kind": "onset_by_following_vowel",
+        "beforeFrontVowel": "gh",
+        "elsewhere": "g",
+        "frontVowels": ["i", "e", "ê"]
+      },
+      "detectedBy": ["SPELLING_G_GH"],
+      "examples": ["gà", "gỗ", "gù", "ghế", "ghi", "ghẹ"],
+      "counterExamples": [
+        { "text": "gế", "expectedCode": "SPELLING_G_GH" },
+        { "text": "ge", "expectedCode": "SPELLING_G_GH" },
+        { "text": "ghà", "expectedCode": "SPELLING_G_GH" },
+        { "text": "ghô", "expectedCode": "SPELLING_G_GH" }
+      ]
+    },
+    {
+      "id": "spelling.ng_ngh",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "Viết ng hay ngh",
+      "description": "Âm “ngờ” viết là ngh khi đứng trước i, e, ê; viết là ng khi đứng trước các nguyên âm còn lại.",
+      "spec": {
+        "kind": "onset_by_following_vowel",
+        "beforeFrontVowel": "ngh",
+        "elsewhere": "ng",
+        "frontVowels": ["i", "e", "ê"]
+      },
+      "detectedBy": ["SPELLING_NG_NGH"],
+      "examples": ["ngõ", "ngủ", "ngà", "nghé", "nghỉ", "nghề"],
+      "counterExamples": [
+        { "text": "ngé", "expectedCode": "SPELLING_NG_NGH" },
+        { "text": "ngỉ", "expectedCode": "SPELLING_NG_NGH" },
+        { "text": "nghà", "expectedCode": "SPELLING_NG_NGH" },
+        { "text": "nghô", "expectedCode": "SPELLING_NG_NGH" }
+      ]
+    },
+    {
+      "id": "spelling.qu",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "q luôn đi với u",
+      "description": "Chữ q luôn viết kèm u thành “qu”. Âm “cờ” có âm đệm (cờ + oa, cờ + uê …) viết là qu, không viết co, cu, ko, ku.",
+      "spec": { "kind": "labialized_k", "onsetsReplaced": ["c", "k"], "writtenAs": "qu" },
+      "detectedBy": ["SPELLING_QU", "Q_WITHOUT_U"],
+      "examples": ["quả", "quê", "quạt", "quăn", "quân"],
+      "counterExamples": [
+        { "text": "coa", "expectedCode": "SPELLING_QU" },
+        { "text": "kuê", "expectedCode": "SPELLING_QU" },
+        { "text": "cuân", "expectedCode": "SPELLING_QU" },
+        { "text": "qa", "expectedCode": "Q_WITHOUT_U" }
+      ]
+    },
+    {
+      "id": "spelling.ie_ye",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "Viết iê hay yê",
+      "description": "Nguyên âm đôi có âm cuối viết là iê khi có âm đầu (tiên, kiến) và viết là yê khi không có âm đầu (yên, yêu) hoặc sau âm đệm u (uyên).",
+      "spec": { "kind": "ie_ye_by_onset", "withOnset": "iê", "withoutOnset": "yê" },
+      "detectedBy": ["SPELLING_IE_YE"],
+      "examples": ["yên", "yêu", "tiên", "kiến", "thuyền"],
+      "counterExamples": [
+        { "text": "iên", "expectedCode": "SPELLING_IE_YE" },
+        { "text": "tyên", "expectedCode": "SPELLING_IE_YE" }
+      ]
+    },
+    {
+      "id": "spelling.diphthong_coda",
+      "ruleType": "spelling",
+      "certainty": "established",
+      "title": "Nguyên âm đôi khi có và không có âm cuối",
+      "description": "Khi có âm cuối viết iê/yê, uô, ươ (tiếng, muốn, người); khi không có âm cuối viết ia/ya, ua, ưa (mía, cua, mưa).",
+      "spec": {
+        "kind": "diphthong_by_coda",
+        "withCoda": ["iê", "yê", "uô", "ươ"],
+        "withoutCoda": ["ia", "ya", "ua", "ưa"]
+      },
+      "detectedBy": ["RIME_FORM_INVALID"],
+      "examples": ["mía", "cua", "mưa", "tiếng", "muốn", "người"],
+      "counterExamples": [
+        { "text": "mian", "expectedCode": "RIME_FORM_INVALID" },
+        { "text": "muô", "expectedCode": "RIME_FORM_INVALID" },
+        { "text": "mươ", "expectedCode": "RIME_FORM_INVALID" },
+        { "text": "tuan", "expectedCode": "RIME_FORM_INVALID" }
+      ]
+    },
+    {
+      "id": "tone.stop_coda",
+      "ruleType": "tone",
+      "certainty": "established",
+      "title": "Âm cuối p, t, c, ch chỉ đi với thanh sắc, nặng",
+      "description": "Tiếng có âm cuối p, t, c, ch chỉ mang thanh sắc hoặc thanh nặng.",
+      "spec": { "kind": "tone_by_coda", "codas": ["p", "t", "c", "ch"], "allowedTones": ["sac", "nang"] },
+      "detectedBy": ["TONE_STOP_CODA"],
+      "examples": ["học", "sách", "đẹp", "mắt", "tốt", "lạc"],
+      "counterExamples": [
+        { "text": "bàt", "expectedCode": "TONE_STOP_CODA" },
+        { "text": "cảc", "expectedCode": "TONE_STOP_CODA" },
+        { "text": "mãp", "expectedCode": "TONE_STOP_CODA" },
+        { "text": "sach", "expectedCode": "TONE_STOP_CODA" }
+      ]
+    },
+    {
+      "id": "tone.single_mark",
+      "ruleType": "tone",
+      "certainty": "established",
+      "title": "Mỗi tiếng mang một thanh",
+      "description": "Mỗi tiếng có đúng một thanh: thanh ngang không có dấu, năm thanh còn lại có đúng một dấu thanh.",
+      "detectedBy": ["MULTIPLE_TONE_MARKS"],
+      "examples": ["ba", "bà", "người"],
+      "counterExamples": [
+        { "text": "mèó", "expectedCode": "MULTIPLE_TONE_MARKS" },
+        { "text": "tóàn", "expectedCode": "MULTIPLE_TONE_MARKS" }
+      ]
+    },
+    {
+      "id": "syllable.has_vowel",
+      "ruleType": "syllable_structure",
+      "certainty": "established",
+      "title": "Tiếng phải có nguyên âm",
+      "description": "Mỗi tiếng có âm chính là nguyên âm; chuỗi chỉ gồm phụ âm không phải là tiếng.",
+      "detectedBy": ["NO_VOWEL"],
+      "examples": ["ba", "ơ"],
+      "counterExamples": [
+        { "text": "nh", "expectedCode": "NO_VOWEL" },
+        { "text": "bc", "expectedCode": "NO_VOWEL" }
+      ]
+    },
+    {
+      "id": "tone.placement",
+      "ruleType": "tone_placement",
+      "certainty": "established",
+      "title": "Dấu thanh đặt trên âm chính",
+      "description": "Dấu thanh đặt trên nguyên âm chính của vần: chữ thứ hai của iê, yê, uô, ươ khi có âm cuối (tiếng, người); chữ thứ nhất của ia, ua, ưa (mía, của, mưa); sau qu, gi đặt trên vần (quả, già). Các vị trí khác là sai theo mọi kiểu đặt dấu.",
+      "detectedBy": ["TONE_MARK_MISPLACED"],
+      "examples": ["mùa", "quả", "già", "tiếng", "người", "khuấy"],
+      "counterExamples": [
+        { "text": "muà", "expectedCode": "TONE_MARK_MISPLACED" },
+        { "text": "qủa", "expectedCode": "TONE_MARK_MISPLACED" },
+        { "text": "gìa", "expectedCode": "TONE_MARK_MISPLACED" },
+        { "text": "tíêng", "expectedCode": "TONE_MARK_MISPLACED" }
+      ]
+    },
+    {
+      "id": "tone.placement_style",
+      "ruleType": "tone_placement",
+      "certainty": "convention",
+      "title": "Kiểu đặt dấu với oa, oe, uy (hoà/hòa)",
+      "description": "Với vần có âm đệm, không có âm cuối và âm chính là a, e, y, hai kiểu đặt dấu cùng tồn tại: trên âm chính (hoà, khoẻ, thuỷ) hoặc trên âm đệm (hòa, khỏe, thủy). Nhà trường cần chọn một kiểu (Q-02).",
+      "detectedBy": ["TONE_PLACEMENT_CONVENTION"],
+      "examples": ["hoà", "hòa", "khoẻ", "khỏe", "thuỷ", "thủy"],
+      "counterExamples": []
+    },
+    {
+      "id": "syllable.qu_onset",
+      "ruleType": "syllable_structure",
+      "certainty": "convention",
+      "title": "Phân tích qu",
+      "description": "Quy ước tạm: “qu” là một âm đầu (quả = qu + a + thanh hỏi). Khi “qu” đứng trước y (quý, quýt, quyển), cách phân tích phụ thuộc bộ sách nên bộ máy trả về trạng thái chưa xác định.",
+      "detectedBy": ["CONVENTION_DEPENDENT", "AMBIGUOUS_QU_Y"],
+      "examples": ["quả", "quê"],
+      "counterExamples": [
+        { "text": "quýt", "expectedCode": "AMBIGUOUS_QU_Y" },
+        { "text": "quyển", "expectedCode": "AMBIGUOUS_QU_Y" }
+      ]
+    },
+    {
+      "id": "syllable.gi_onset",
+      "ruleType": "syllable_structure",
+      "certainty": "convention",
+      "title": "Phân tích gi",
+      "description": "Quy ước tạm: “gi” là một âm đầu (giỏ = gi + o + thanh hỏi). Với gì, gìn, giếng, chữ i được coi là dùng chung với vần (gi + i, gi + in, gi + iêng). Cả hai điểm đều cần GV xác nhận.",
+      "detectedBy": ["CONVENTION_DEPENDENT"],
+      "examples": ["giỏ", "gió", "giữa", "gì", "giếng"],
+      "counterExamples": []
+    }
+  ]
+}

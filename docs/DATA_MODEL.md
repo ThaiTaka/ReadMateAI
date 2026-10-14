@@ -1,7 +1,7 @@
 # ReadMate AI — Mô hình dữ liệu dự kiến
 
-> **Phiên bản:** 0.1 — bản thiết kế của Giai đoạn 1 (chưa tạo migration)
-> **Ngày cập nhật:** 2026-10-12
+> **Phiên bản:** 0.1.1 — bản thiết kế của Giai đoạn 1 (chưa tạo migration); GĐ3 thêm ghi chú đối chiếu với `content/` ở §4.C
+> **Ngày cập nhật:** 2026-10-14
 > **CSDL:** PostgreSQL trên Supabase (schema `public` cho nghiệp vụ, `private` cho hàm trợ giúp RLS)
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [TASKS.md](../TASKS.md)
 
@@ -298,6 +298,12 @@ Không lưu IP, user-agent đầy đủ hay dấu vân tay thiết bị.
 | `status` | text | check in (`draft`, `in_review`, `approved`, `retired`) | |
 | `source` | text | | `project_team`, `teacher`, `ai` |
 | `created_by` / `approved_by` / `approved_at` | | | |
+
+> **Ghi chú GĐ3 (2026-10-14) — đối chiếu với dữ liệu nguồn `content/`** ([VIETNAMESE_ENGINE.md](VIETNAMESE_ENGINE.md)):
+> - Dữ liệu nguồn dùng trạng thái `draft` · `pending_review` · `approved` · `rejected` và ghi `reviewedBy`, `reviewedAt`, `contentHash` khi duyệt. Khi seed ở GĐ5: `pending_review` ↔ `in_review`; migration GĐ5 cần **thêm giá trị `rejected`** vào ràng buộc `status` của `kb_units` (bảng này hiện chỉ có `draft`, `in_review`, `approved`, `retired`).
+> - `component_unit_ids` tương ứng kết quả `requiredUnitsOf()` (âm đầu, vần — hoặc âm nếu vần chỉ một nguyên âm —, thanh); `parser_version` nên ghi phiên bản dữ liệu (`content/manifest.json`).
+> - `spoken_label` lấy từ `teachingLabel.proposed` của `content/kb/phonemes.json` — chỉ hiển thị cho học sinh sau khi GV xác nhận.
+> - Quy ước của lớp (qu, gi, "i" dùng chung, kiểu đặt dấu) đang nằm ở hồ sơ `content/curriculum/profiles/*.json` → GĐ5 cần nơi lưu tương ứng (đề xuất: `classes.settings.language_conventions`, kèm người/ngày xác nhận).
 
 **`kb_unit_relations`** — Quan hệ giữa các đơn vị. *GĐ5*
 

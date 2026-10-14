@@ -1,20 +1,22 @@
 # PROGRESS — Tiến độ dự án ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-14 — Phiên Claude Code #2 (Giai đoạn 2)
+> **Cập nhật lần cuối:** 2026-10-14 — Phiên Claude Code #3 (Giai đoạn 3)
 > Tệp này là "bộ nhớ" giữa các phiên: đọc đầu tiên khi bắt đầu phiên mới; cập nhật trước khi kết thúc phiên.
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn hiện tại:** GĐ2 — Nền móng kỹ thuật → **HOÀN THÀNH, chờ người điều phối đánh giá**. GĐ1 đã được nghiệm thu.
-- **Giai đoạn kế tiếp đề xuất:** GĐ3 — Lõi Tiếng Việt và kho tri thức dạng mã → **chưa bắt đầu** (chỉ bắt đầu khi được phê duyệt).
-- **Ứng dụng:** Next.js 16.4 chạy được (dev và production); 5 trang khung giao diện `/`, `/demo`, `/teacher`, `/learn`, `/join` + trang 404/lỗi. **Chưa** có bài tập tương tác, tài khoản, CSDL, AI.
-- **Git:** nhánh `main` có commit cục bộ; remote `origin` → `https://github.com/ThaiTaka/ReadMateAI.git`. **Chưa push** (GitHub vẫn rỗng), chưa đổi public/private, chưa deploy Vercel, chưa tạo dịch vụ bên ngoài.
+- **Giai đoạn hiện tại:** GĐ3 — Vietnamese Knowledge Engine → **HOÀN THÀNH về mã nguồn, dữ liệu và kiểm thử; chờ người điều phối đánh giá.** GĐ1, GĐ2 đã được nghiệm thu.
+- **Điểm còn phụ thuộc giáo viên:** toàn bộ dữ liệu kho tri thức ở trạng thái **chờ duyệt** (0 mục `approved`); hồ sơ lớp 1A2 **`unconfirmed`** (chưa biết bộ sách, vị trí bài, quy ước qu/gi/kiểu dấu — Q-01, Q-02) → mọi kiểm tra theo lớp 1A2 trả về `unknown`. Danh sách "đọc được" ở 3 mốc bài minh họa đã sinh, chờ GV nhận xét.
+- **Giai đoạn kế tiếp đề xuất:** GĐ4 — bộ máy bài tập + 6 dạng bài + `/demo` → **chưa bắt đầu** (chỉ bắt đầu khi được phê duyệt).
+- **Ứng dụng:** 5 trang khung giao diện của GĐ2 (không đổi giao diện ở GĐ3). Thêm thư viện `src/lib/vietnamese/`, lớp `src/features/knowledge/`, dữ liệu `content/`, lệnh `npm run content:check`. **Chưa** có bài tập tương tác, tài khoản, CSDL, AI.
+- **Git:** xem §3.3 (commit GĐ3; push `main` lên GitHub được phép ở GĐ3 sau khi rà soát an toàn).
 
 | GĐ | Tên | Trạng thái |
 |---|---|---|
 | 1 | Khởi tạo & thiết kế kiến trúc | ✅ Đã nghiệm thu |
-| 2 | Nền móng kỹ thuật | ✅ Hoàn thành — chờ duyệt (CI trên GitHub chưa chạy vì chưa push) |
-| 3–10 | MVP (xem [TASKS.md](TASKS.md)) | ⏸ Chưa bắt đầu |
+| 2 | Nền móng kỹ thuật | ✅ Đã nghiệm thu |
+| 3 | Lõi Tiếng Việt & kho tri thức | ✅ Hoàn thành — chờ duyệt (dữ liệu chờ GV) |
+| 4–10 | MVP (xem [TASKS.md](TASKS.md)) | ⏸ Chưa bắt đầu |
 | 11+ | Sau MVP (AI, nâng cao) | ⏸ Chưa bắt đầu |
 
 ## 2. Môi trường đã kiểm tra
@@ -25,10 +27,11 @@
 | Hệ điều hành / shell | Windows 11 Pro; PowerShell 5.1 (CurrentUser `RemoteSigned` → `npm.ps1` chạy được); Git Bash có sẵn |
 | Ổ đĩa D: | Còn trống khoảng 174 GB (GĐ1) |
 | Git | 2.54.0; `git init -b main` ở GĐ1; `user.name`/`user.email` cấu hình toàn cục; `core.autocrlf=true` (system) — `.gitattributes` đưa mọi tệp về LF (đã kiểm tra `git ls-files --eol`) |
-| Git remote | `origin` → `https://github.com/ThaiTaka/ReadMateAI.git` (thêm 2026-10-14 sau khi xác minh). Repo GitHub thuộc tài khoản đang đăng nhập `ThaiTaka` (quyền ADMIN), **PUBLIC**, **rỗng** — chưa có nhánh |
-| Node.js / npm | Node 24.18.0 (win32 x64), npm 11.16.0 (npm báo đã có 12.2.0 — chưa nâng cấp) |
+| Git remote | `origin` → `https://github.com/ThaiTaka/ReadMateAI.git`. Repo GitHub thuộc tài khoản đang đăng nhập `ThaiTaka` (quyền ADMIN), **PUBLIC**; trước GĐ3 **rỗng** (kiểm tra lại ngày 2026-10-14) |
+| Node.js / npm | Node 24.18.0 (win32 x64), npm 11.16.0 (npm báo đã có 12.2.0 — chưa nâng cấp). Node 24 chạy TypeScript gốc (bỏ kiểu) — dùng cho `content:check` |
 | pnpm / yarn / bun | Không có |
 | GitHub CLI | 2.100.0; đã đăng nhập `ThaiTaka` (https, có quyền `repo`, `workflow`) |
+| GitHub Actions | `actions/checkout` mới nhất v7.0.1, `actions/setup-node` v7.1.0 — thẻ `v7` tồn tại (kiểm tra 2026-10-14 bằng `gh api`) |
 | Playwright | 1.64.0; trình duyệt Chromium 156 + WebKit 27.2 cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2) |
 | Vercel CLI / Supabase CLI | **Chưa cài** (dùng `npx` khi được phép) |
 | Docker | Docker Desktop đã cài (client 29.5.3) nhưng **daemon không chạy** |
@@ -37,56 +40,59 @@
 
 ## 3. Công việc đã hoàn thành
 
-### GĐ2 — 2026-10-12 → 2026-10-14
+### GĐ3 — 2026-10-14 (Vietnamese Knowledge Engine)
 
-1. Đọc đầy đủ 8 tệp của GĐ1 (`CLAUDE.md`, `PRD`, `ARCHITECTURE`, `DATA_MODEL`, `TASKS`, `PROGRESS`, `.gitignore`, `.gitattributes`).
-2. Kiểm tra lại phiên bản bằng `npm view` trước khi cài; scaffold `create-next-app@16.4.0` (TypeScript, Tailwind, ESLint, App Router, `src/`, alias `@/*`) trong thư mục tạm ngoài dự án → chuyển các tệp cần thiết vào `D:\ReadMateAI`, giữ nguyên `.git`, tài liệu và cấu hình; hợp nhất `.gitignore`; **xóa thư mục tạm** sau khi ứng dụng chạy được. Không dùng `--force`/`--legacy-peer-deps`.
-3. Cấu hình: `package.json` (`engines.node = 24.x`, 10 script đều chạy thật), `.nvmrc`, `tsconfig.json` (strict + `noUncheckedIndexedAccess` + `erasableSyntaxOnly`), `eslint.config.mjs`, Prettier, `next.config.ts` (Cache Components, Partial Prefetching, typedRoutes, tắt `X-Powered-By`, header bảo mật), `vercel.json` (`sin1`), `.env.example`.
-4. Design system: tokens Tailwind 4 (màu thương hiệu, nền, chữ, cỡ chữ đọc, vùng chạm 48/64 px, bo góc, đổ bóng), font Be Vietnam Pro (giao diện) + Andika (học liệu) tự host qua `next/font`, focus ring rõ, `prefers-reduced-motion`; thành phần `Button`/`ButtonLink` (4 kiểu, 4 cỡ gồm `kid`), `Card`, `Badge`, `Container`, `SectionHeading`, `Notice`, `EmptyState`, `LoadingState`/`Skeleton`, `Tabs` (WAI-ARIA, điều khiển bằng bàn phím), header + menu di động, footer, sidebar giáo viên, thanh điều hướng học sinh, skip link, minh họa ghép tiếng, linh vật.
-5. Trang: `/` (giới thiệu, sứ mệnh, 3 hướng hỗ trợ, quy trình nhà → lớp, công cụ dự kiến cho GV, an toàn dữ liệu), `/demo` (3 lộ trình Khởi động/Vững bước/Tăng tốc, buổi luyện mẫu, hỗ trợ giảm dần H3→H0, 6 dạng bài — dữ liệu hư cấu), `/teacher` (khung bảng điều khiển, "Chức năng đang phát triển", không giả lập đăng nhập), `/learn` (mobile-first, không lưu thông tin), `/join` (giao diện bị khóa, không có `<form>`, không nhận mã), 404, trang lỗi.
-6. Header bảo mật (`src/config/security-headers.ts`): CSP, `Permissions-Policy` (tắt camera/microphone/geolocation/payment/usb), `Referrer-Policy` (`/join`: `no-referrer`), `X-Content-Type-Options`, `X-Frame-Options`.
-7. Kiểm thử: Vitest (7 tệp, 80 test — gồm test vệ sinh repo), Playwright (6 tệp spec × 4 cấu hình).
-8. Soát giao diện bằng ảnh chụp thật (desktop, iPhone 13, 360 px) và sửa: chữ nút bị xuống dòng, nút CTA ở header vẫn hiện ở 360 px (xung đột `hidden`/`inline-flex`), tên thương hiệu xuống dòng, bố cục sidebar GV, tiêu đề mục GV quá lớn, thanh điều hướng học sinh trong suốt, nhãn liên kết `/demo`, bố cục thẻ quyền riêng tư `/join`, biểu tượng nhiệm vụ "Ôn chữ và âm" (Tai → Mắt cho khớp "Nhìn hình, chọn chữ").
-9. GitHub Actions `.github/workflows/ci.yml` (lint → typecheck → unit test → build); `README.md`.
-10. Cập nhật `CLAUDE.md` (§4, §9.1 quy tắc mới, §10, §11), `TASKS.md`, `docs/ARCHITECTURE.md` (§3.1, AD-19→AD-24, §5.1, §6.1, §18, §19, §20, §22), tệp này.
-11. Git: xác minh repo GitHub, thêm remote `origin`, commit cục bộ (mục 3.2). **Không push.**
+1. Đọc `CLAUDE.md`, `TASKS.md`, `PROGRESS.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`; kiểm tra cấu trúc mã, Git (nhánh `main`, 2 commit, working tree sạch), scripts; xác minh nền GĐ2 vẫn xanh (format, lint, typecheck, 80 unit test, build) **trước** khi thay đổi.
+2. Cài `zod@^4.6.7` (đã `npm view zod version engines peerDependencies`; MIT, không peer) — phụ thuộc production duy nhất được thêm.
+3. **Thư viện `src/lib/vietnamese/`** (hàm thuần): `characters`, `tone`, `normalize` (mở rộng, giữ API cũ), `tokenize`, `syllable` (phân tích theo danh mục vần; `ok`/`invalid`/`unrecognized`/`ambiguous`), `spelling-rules`, `tone-placement`, `diagnostics`, `decodability` (4 kết luận), `difficulty`, `index`.
+4. **Kho tri thức `content/`** (JSON, mọi mục **chờ GV duyệt**): 29 chữ cái (tên chữ tách khỏi cách gọi âm), 39 âm (11 tổ hợp chữ), 6 thanh, 153 vần (cấu tạo khai báo tường minh), 13 quy tắc (10 `established`, 3 `convention`; spec máy đọc + ví dụ đúng/sai), 17 cặp dễ nhầm, 18 mục tiên quyết (25 cạnh khai báo + 404 cạnh suy ra theo cấu tạo), 14 chủ đề; ngữ liệu nguyên bản **149 mục**: 58 tiếng, 60 từ, 31 câu (147 `pending_review`, 2 `draft`, 0 `approved`).
+5. **Tiến độ học tập `content/curriculum/`**: chuỗi **minh họa** 17 bài (`seriesKind: "illustrative"`, ghi rõ không phải SGK); hồ sơ `class-1a2` (`unconfirmed`, không có bộ sách/vị trí bài/quy ước); hồ sơ `illustrative-demo` (hư cấu, bài 10, quy ước tạm).
+6. **Lớp nghiệp vụ `src/features/knowledge/`**: `schema` (zod `strictObject`), `load`, `default-kb` (import JSON qua bundler), `curriculum` (`resolveKnowledgeState`: Nhóm 3 lùi một bài, Nhóm 1 thêm đơn vị GV cho phép), `readability` (`checkReadability`: giải mã + từ vựng + đọc hiểu tách bạch), `selection` (`selectCorpusItems`: giao bài chỉ khi hồ sơ `confirmed` + mục `approved`), `prerequisites` (đồ thị + phát hiện vòng), `content-validation` (chỉ Node).
+7. **`npm run content:check`** (`scripts/content-check.ts`, Node 24 chạy TypeScript trực tiếp): lỗi chặn / cảnh báo cho GV / thông tin. Thêm vào CI cùng `format:check`.
+8. **Kiểm thử:** 10 tệp mới, **524 ca** (tổng 604). Kiểm tra độ nhạy bằng 4 đột biến tạm thời trong bộ máy (cho thanh ngang đi với âm cuối tắc; bỏ lùi bài Nhóm 3; bỏ quy tắc "i" dùng chung; bỏ qua quy ước chưa xác nhận) → lần lượt 8, 2, 11, 1 ca thất bại; đã khôi phục. Mở rộng test vệ sinh repo sang `content/` và `scripts/`.
+9. Kiểm chứng giả định kiến trúc: Turbopack (Next 16.4) đóng gói được thư viện dùng import tương đối có đuôi `.ts` + JSON từ `content/` (trang thử tạm `/kb-probe` prerender ra `153|readable`, **đã xóa** ngay sau đó).
+10. Tài liệu: tạo `docs/VIETNAMESE_ENGINE.md`, `docs/TEACHER_REVIEW_CHECKLIST.md`; cập nhật `CLAUDE.md` (§3, §5, §9.2 mới, §10, §11), `TASKS.md`, `docs/ARCHITECTURE.md` (v0.3: §3.1, AD-25→AD-31, §5.1, §10, §19, §20, §22), `docs/DATA_MODEL.md` (ghi chú đối chiếu §4.C), `README.md`, tệp này.
 
-### 3.1 Kết quả kiểm tra cuối GĐ2 (chạy thật ngày 2026-10-14, Windows 11, Node 24.18.0)
+**Lỗi phát hiện và đã sửa trong phiên** (ghi lại để không lặp lại):
+
+- Dữ liệu tự sinh ghi sai `tone:ngang.allowedWithStopCoda = true` → `content:check` bắt (`TONE_DATA_MISMATCH`), đã sửa; thêm test hồi quy.
+- Lược đồ thiếu vị trí `medial` cho âm o, u → `content:check` bắt (`SCHEMA_INVALID`), đã sửa.
+- Chuỗi thoát `\u…` trong mã/test bị ghi thành **ký tự thật** (dấu tổ hợp đứng riêng, U+200B, U+FEFF, U+00AD, chữ Kirin) → test vệ sinh repo bắt một tệp không NFC; đã chuyển toàn bộ về dạng thoát và kiểm tra byte; thêm quy tắc CLAUDE.md §9.2.2.
+- Một ca test sai dữ liệu ("mưa" không có dấu thanh) và một ca có thể báo nhầm («» là dấu ngoặc hợp lệ) → đã sửa test/bộ phát hiện.
+
+### 3.1 Kết quả kiểm tra cuối GĐ3 (chạy thật ngày 2026-10-14, Windows 11, Node 24.18.0)
 
 | Kiểm tra | Kết quả |
 |---|---|
 | `npm run format:check` | ✅ exit 0 |
 | `npm run lint` | ✅ exit 0, không lỗi/cảnh báo |
-| `npm run typecheck` | ✅ exit 0 (`next typegen` + `tsc --noEmit`) |
-| `npm run test:run` | ✅ 7 tệp, **80/80** test đạt |
-| `npm run build` | ✅ exit 0; 7 route đều tĩnh (○): `/`, `/_not-found`, `/demo`, `/icon.svg`, `/join`, `/learn`, `/teacher` |
-| `npm run test:e2e` | ✅ exit 0: **139 đạt, 0 lỗi, 25 bỏ qua có chủ đích** (~70 giây, gồm build) — routes 24, privacy 48, vietnamese 28, responsive 24, navigation 9, security-headers 6 |
-| 25 test bỏ qua | Header bảo mật chỉ kiểm trên `chromium-desktop` vì do server trả, giống nhau mọi trình duyệt (18); skip link bỏ qua trên WebKit (Safari không Tab tới liên kết theo mặc định) và điện thoại (3); menu di động bỏ qua trên desktop (2); menu desktop bỏ qua trên điện thoại (2) |
-| Responsive 360 px | ✅ 5 route không cuộn ngang × 4 cấu hình; vùng chạm `/learn` ≥ 64 px |
-| Server production (`npm run start`) | ✅ sẵn sàng sau ~1,1 giây; `/`, `/demo`, `/teacher`, `/learn`, `/join`, `/icon.svg` → 200; route không tồn tại → 404; đủ header; không có `X-Powered-By` |
-| Server dev (`npm run dev`) | ✅ sẵn sàng sau ~6,7 giây; 5 route → 200; CSP dev có thêm `'unsafe-eval'` và `ws:` như thiết kế |
-| Kiểm thử âm tính test vệ sinh repo | ✅ Cài tạm khóa giả dạng Anthropic, email và tệp NFD → 3 test thất bại đúng chỗ; xóa tệp tạm → 18/18 đạt |
-| `npm audit` | ⚠️ Dependency production: **0** lỗ hổng. Toàn bộ: 5 mức cao, đều trong công cụ dev (`braces` ← `micromatch` ← `fast-glob` ← `@next/eslint-plugin-next` ← `eslint-config-next`), chưa có bản vá — không dùng `--force` |
-| Workflow CI | ✅ YAML hợp lệ (đã phân tích bằng `js-yaml`); các bước khớp script thật. ⏸ **Chưa chạy trên GitHub** vì chưa push |
-| Lockfile cho Linux | ✅ `package-lock.json` có binary `linux-x64-gnu` của Next SWC, lightningcss, Tailwind oxide, unrs-resolver, rolldown (cần cho `npm ci` trên CI) |
-| Ảnh chụp giao diện | Ảnh từng trang (full-page, 4 cấu hình) do E2E lưu ở `test-results/` (bị gitignore); ảnh soát thủ công nằm trong thư mục scratchpad của phiên, không thuộc repo |
+| `npm run typecheck` | ✅ exit 0 |
+| `npm run content:check` | ✅ exit 0 — **ĐẠT: 0 lỗi, 33 cảnh báo** (19 `CONVENTION_DEPENDENT` — qu/gi/kiểu dấu, 11 `PENDING_REVIEW`, 2 `UNVERIFIED_SYLLABLE` — quýt, 1 `PROFILE_UNCONFIRMED` — đều là việc chờ GV), 4 thông tin |
+| `npm run test:run` | ✅ 17 tệp, **604/604** (80 cũ + 524 mới) |
+| `npm run build` | ✅ exit 0; 7 route tĩnh như GĐ2 (không thêm route) |
+| `npm run test:e2e` | ✅ **139 đạt, 25 bỏ qua có chủ đích, 0 lỗi** (giống GĐ2) |
+| Phân bố 524 ca mới | phân tích tiếng 122 · chính tả + chẩn đoán 63 · vị trí dấu 38 · ký tự/thanh 44 · soát văn bản 25 · tách token/độ khó 16 · giải mã 37 · kho tri thức 95 (gồm 57 ca đối chiếu ngân hàng tiếng) · hồ sơ lớp/kiểm tra theo hồ sơ/chọn ngữ liệu 39 · content:check với dữ liệu gài lỗi 45 |
+| Ngữ liệu đọc được (hồ sơ minh họa, Nhóm 2) | bài 5: 14 từ / 4 câu · bài 10: 34 / 16 · bài 16: 56 / 28 · bài 17 (cả 149 mục): 136 `readable`, 11 `not_yet_learned` (cố ý), 2 `unknown` (quýt) |
 
-### 3.2 Git trong GĐ2
+### 3.2 Rà soát Git trước khi push (2026-10-14)
 
-- `16d1413` — *WIP: cap nhat truoc khi chuyen qua cloud session* — commit gốc **do chủ dự án tự tạo** ngày 2026-10-14 bằng `git add .` (82 tệp). Đã kiểm tra: không có `node_modules`, `.next`, `.env*`, `next-env.d.ts`, kết quả test, `.claude/`; mọi tệp LF. Lệnh `git push` đi kèm của chủ dự án **không chạy** (cú pháp còn placeholder `<tên-nhánh-của-bạn>`, và lúc đó chưa có remote).
-- Commit kế tiếp (Claude): cập nhật tài liệu cuối GĐ2 (`PROGRESS.md`, `TASKS.md`, `CLAUDE.md`, `docs/ARCHITECTURE.md`) — xem `git log`.
-- Remote `origin` đã thêm; **chưa push**. Khi được phép: `git push -u origin main` (repo đang PUBLIC — xem Q-11).
+- Lịch sử: 2 commit (`16d1413`, `d1210e6`), một nhánh `main`, remote `origin` đúng repo.
+- Tệp từng có trong lịch sử với tên nhạy cảm: chỉ `.env.example` (không có giá trị bí mật).
+- Quét **mọi blob của mọi commit** bằng mẫu khóa Anthropic/OpenAI/Supabase/JWT/GitHub/AWS/Google/khóa riêng/gán `PASSWORD|SECRET|TOKEN|API_KEY|PEPPER=`: chỉ trúng chính biểu thức dò secret trong `tests/e2e/privacy.spec.ts` (dương tính giả). Quét email/số điện thoại trong tệp: không có.
+- `.gitignore` chặn `.env*` (trừ `.env.example`), `node_modules`, `.next`, kết quả test, `exports/`, `*.dump`… — đã kiểm tra lại.
+- Lưu ý: siêu dữ liệu commit (tác giả) chứa **email cá nhân** cấu hình trong Git của chủ dự án → sẽ công khai khi push lên repo PUBLIC (Q-13). Không phải secret hay dữ liệu học sinh nên không chặn push, nhưng chủ dự án nên cân nhắc dùng email `noreply` của GitHub cho các commit sau.
 
-### 3.3 Điều chỉnh so với kế hoạch GĐ2 ban đầu
+### 3.3 Git trong GĐ3
 
-1. Không thêm script `content:check` tạm thời (yêu cầu GĐ2: mọi script phải chạy thật) → chuyển sang nhiệm vụ 3.8.
-2. Playwright dùng 4 cấu hình (Desktop Chrome, Pixel 7, Desktop Safari, iPhone 13); cấu hình iPad chuyển sang GĐ4 (4.8).
-3. Cấu trúc thư mục: dùng route group `(site)/` cho trang công khai và thư mục thường `teacher/`, `learn/` thay vì `(public)/`, `(student)/`, `(teacher)/` — chỉ tạo thư mục có mã thật (ARCHITECTURE §5.1).
-4. Thêm script `test:run`, `format:check` (theo yêu cầu GĐ2 và cho CI).
+- Commit GĐ3 (mã + dữ liệu + tài liệu) trên `main`, sau đó push `main` lên `origin` (lần push đầu tiên của repo). Kết quả push và GitHub Actions được ghi ở commit tài liệu kế tiếp — xem `git log`.
+
+### GĐ2 — 2026-10-12 → 2026-10-14 (tóm tắt)
+
+Scaffold Next 16.4 qua thư mục tạm; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; soát giao diện bằng ảnh chụp và sửa 9 lỗi hiển thị; format/lint/typecheck/80 unit/build/139 E2E đều xanh; chủ dự án tự tạo commit `16d1413` (82 tệp, đã kiểm tra không có tệp nhạy cảm); thêm remote `origin`; commit tài liệu cuối GĐ2 `d1210e6`. Điều chỉnh: không thêm `content:check` tạm (chuyển GĐ3 — đã làm); Playwright 4 cấu hình (iPad chuyển GĐ4); cấu trúc route `(site)/`, `teacher/`, `learn/`; thêm `test:run`, `format:check`.
 
 ### GĐ1 — 2026-10-12 (tóm tắt)
 
-Kiểm tra môi trường; `git init -b main`; xác minh phiên bản (27 gói) và tài liệu chính thức; viết `CLAUDE.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `TASKS.md`, `PROGRESS.md`, `.gitignore`, `.gitattributes`; kiểm tra mã hóa (UTF-8, NFC, LF), 93 liên kết nội bộ, 6 sơ đồ Mermaid, quét secret — tất cả đạt; đọc lại và sửa 5 điểm chưa nhất quán (đồng bộ H1 với chính sách âm thanh; F-AT-01; ví dụ JSON dạng 1 và mã `TEXT_LEAKS_ANSWER`; student gateway; Deployment Protection).
+Kiểm tra môi trường; `git init -b main`; xác minh phiên bản (27 gói) và tài liệu chính thức; viết `CLAUDE.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `TASKS.md`, `PROGRESS.md`, `.gitignore`, `.gitattributes`; kiểm tra mã hóa, liên kết, sơ đồ, quét secret — tất cả đạt.
 
 ## 4. Nhật ký quyết định kỹ thuật
 
@@ -104,7 +110,7 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | D-008 | Exercise Type Module; 6 dạng MVP: `letter_sound`, `build_syllable`, `identify_unit`, `fill_blank`, `word_picture`, `sentence_reading` | Chốt (chờ GV góp ý nội dung) | PRD §9, AD-06 |
 | D-009 | Mức hỗ trợ H3→H0 theo từng HS × dạng bài, luật mặc định có tham số | Chốt (hiệu chỉnh khi thí điểm) | PRD §11 |
 | D-010 | Chính sách âm thanh chống lộ đáp án A1–A7 + bộ kiểm tra chặn duyệt | Chốt | PRD §12 |
-| D-011 | Kho tri thức lõi là dữ liệu trong repo (`content/`) + thư viện xác định `lib/vietnamese`; không vector DB | Chốt | AD-07, AD-17 |
+| D-011 | Kho tri thức lõi là dữ liệu trong repo (`content/`) + thư viện xác định `lib/vietnamese`; không vector DB | Chốt (hiện thực ở GĐ3) | AD-07, AD-17, AD-25 |
 | D-012 | Âm thanh sinh trước/ghi âm GV; âm/vần đơn lẻ bắt buộc ghi âm GV; nhà cung cấp TTS chọn sau POC | Chốt / POC (GĐ6) | AD-09 |
 | D-013 | PDF bằng `@react-pdf/renderer` + font Andika (OFL) | Chốt / POC kỹ thuật (GĐ8) | AD-10 |
 | D-014 | Phân hóa dựa trên luật: mastery trung bình trượt, Leitner 1–5, mức hỗ trợ, câu bắc cầu; đề xuất đổi nhóm do GV quyết định | Chốt cho MVP | AD-11 |
@@ -120,26 +126,39 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | D-024 | Tách `src/config/security-headers.ts` (có unit test), nạp từ `next.config.ts` bằng đuôi `.ts` | Chốt | AD-24 |
 | D-025 | Ba lộ trình hiển thị cho phụ huynh/GV: Khởi động (`foundation`), Vững bước (`developing`), Tăng tốc (`extending`); **không** hiển thị cho học sinh | Chốt (chờ GV góp ý tên gọi) | `src/features/learning-paths/catalog.ts` |
 | D-026 | Câu chữ giao diện tập trung ở `src/strings/vi.ts`; dữ liệu demo hư cấu tách riêng ở `src/features/demo/` (cờ `DEMO_DATA_IS_FICTIONAL`) | Chốt | CLAUDE.md §9.1 |
-| D-027 | Không thêm Supabase/zod/thư viện chưa dùng ở GĐ2; chỉ tạo thư mục có mã thật (đơn giản hóa so với ARCHITECTURE §5.2) | Chốt | |
+| D-027 | Không thêm Supabase/zod/thư viện chưa dùng ở GĐ2; chỉ tạo thư mục có mã thật | Chốt (GĐ3 thêm zod khi thực sự dùng) | |
+| D-028 | Kho tri thức = JSON trong `content/kb` (ngôn ngữ) + `content/curriculum` (tiến độ), lược đồ zod `strictObject` | Chốt | AD-25 |
+| D-029 | Phân tích tiếng dựa trên danh mục 153 vần (khớp chính xác); không khớp → `unrecognized`/`ambiguous` | Chốt | AD-26 |
+| D-030 | Quy ước qu / gi / "i" dùng chung / kiểu đặt dấu là tham số hồ sơ lớp; quy ước tạm của bộ máy: `qu_onset`, `gi_onset`, `shared_i`; qu + y luôn `ambiguous` | **Chờ xác nhận** (Q-02, Q-16) | AD-27 |
+| D-031 | Đơn vị giải mã = âm đầu + vần + thanh; vần một nguyên âm tính là âm; không tự ghép vần; 4 kết luận | Chốt (chờ GV nhận xét) | AD-28 |
+| D-032 | `content:check` chạy TypeScript gốc bằng Node 24, import tương đối có đuôi `.ts`; tắt riêng cảnh báo `MODULE_TYPELESS_PACKAGE_JSON` | Chốt | AD-29 |
+| D-033 | Duyệt gắn `contentHash` (SHA-256, bỏ trường `review`); AI/hệ thống không được duyệt; giao bài chỉ với hồ sơ `confirmed` + mục `approved` | Chốt | AD-30 |
+| D-034 | Chuỗi bài minh họa tách khỏi bộ sách thật; hồ sơ 1A2 `unconfirmed` không có tiến độ | Chốt | AD-31 |
+| D-035 | Ngữ liệu khởi đầu 149 mục (yêu cầu GĐ3: 100–150, ưu tiên chất lượng) thay cho 300–500 từ của kế hoạch GĐ1; hình minh họa để GĐ6 | Chốt | TASKS 3.7 |
+| D-036 | CI thêm `format:check` và `content:check` | Chốt | `.github/workflows/ci.yml` |
 
 ## 5. Câu hỏi mở
 
 | Mã | Câu hỏi | Ảnh hưởng tới |
 |---|---|---|
-| Q-01 | Lớp 1A2 dùng bộ sách Tiếng Việt 1 nào? | **GĐ3** (thứ tự âm/vần) |
-| Q-02 | Quy ước của lớp: cách gọi tên âm ("bờ", "cờ", "ngờ kép"…), phân tích "qu"/"gi", vị trí dấu thanh ("hoà"/"hòa") | **GĐ3** |
-| Q-03 | GV có thể ghi âm bao nhiêu âm/vần/câu lệnh? Giọng vùng miền của lớp? | GĐ4 (âm thanh demo), GĐ6 |
+| Q-01 | Lớp 1A2 dùng bộ sách Tiếng Việt 1 nào? Đang học đến bài nào? | **Then chốt** — chưa có thì hồ sơ 1A2 không dùng được (GĐ4 demo dùng hồ sơ minh họa) |
+| Q-02 | Quy ước của lớp: cách gọi tên chữ và tên âm ("bờ", "cờ", "ngờ kép"…), phân tích "qu"/"gi", "i" dùng chung (gì, giếng), vị trí dấu thanh ("hoà"/"hòa") | **Then chốt** — phiếu rà soát mục B, C, D |
+| Q-03 | GV có thể ghi âm bao nhiêu âm/vần/câu lệnh? Giọng vùng miền của lớp? | GĐ4 (âm thanh demo), GĐ6; cặp dễ nhầm theo phương ngữ (phiếu mục G) |
 | Q-04 | Thiết bị và chất lượng mạng phổ biến của phụ huynh; thời gian trẻ luyện mỗi ngày | GĐ4, GĐ7 |
 | Q-05 | Bên kiểm soát dữ liệu (nhà trường hay GV)? Quy trình xin đồng ý của phụ huynh? | GĐ10 (nên bắt đầu trao đổi sớm) |
 | Q-06 | Máy in ở trường: đen trắng hay màu, khổ A4? | GĐ8 |
 | Q-07 | Sĩ số lớp, số học sinh mỗi nhóm hiện tại | GĐ5, GĐ9 |
 | Q-08 | Xưng hô trong lời đọc: "cô – con" hay "cô – em"? (khung `/learn` đang dùng "Chào con!") | GĐ4 |
-| Q-09 | Ai duyệt nội dung: một GV hay tổ chuyên môn? | GĐ6 |
+| Q-09 | Ai duyệt nội dung: một GV hay tổ chuyên môn? | GĐ3 (duyệt kho tri thức), GĐ6 |
 | Q-10 | Ngân sách cho Supabase Pro / Vercel Pro; có cần tên miền riêng? | GĐ10 |
-| Q-11 | Repo GitHub để **public** là có chủ ý? Có muốn chuyển sang private trước khi push? | Trước lần push đầu tiên |
-| Q-12 | Khi nào được push `main` (để chạy CI trên Linux) và tạo dự án Vercel? GĐ5 có được tạo dự án Supabase không? | Push, CI, GĐ5 |
-| Q-13 | Email cấu hình trong Git cục bộ đã liên kết với tài khoản GitHub `ThaiTaka` chưa (để commit hiển thị đúng tác giả)? | Trước khi push |
+| Q-11 | Repo GitHub để **public** là có chủ ý? | Đã push ở GĐ3 theo chỉ đạo; không tự đổi public/private |
+| Q-13 | Email trong siêu dữ liệu commit là email cá nhân và sẽ công khai — có muốn dùng email `noreply` của GitHub cho commit sau? | Quyền riêng tư của chủ dự án |
 | Q-14 | Tên ba lộ trình (Khởi động, Vững bước, Tăng tốc) và nội dung trang chủ có phù hợp với GV/phụ huynh không? | GĐ4 |
+| Q-15 | Thứ tự bài và danh sách âm/vần của bộ sách (sau khi có Q-01): ai nhập, nguồn đối chiếu nào? | Hồ sơ 1A2, GĐ4–GĐ5 |
+| Q-16 | Cách đánh vần qu + y (quý, quýt, quyển, quỳnh) theo bộ sách của lớp | Các tiếng này đang `unknown` |
+| Q-17 | GV đánh giá danh sách "đọc được" ở 3 mốc bài minh họa có hợp lý không (phiếu rà soát mục I)? | Tiêu chí nghiệm thu GĐ3 còn mở |
+
+*(Q-12 — cho phép push `main` — đã được trả lời ở yêu cầu GĐ3.)*
 
 ## 6. Rủi ro đang theo dõi
 
@@ -148,41 +167,39 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | R-01 | Pháp lý: Luật 91/2025/QH15 (hiệu lực 01/01/2026) — dữ liệu trẻ em (Điều 24); xử lý trên nền tảng ở nước ngoài được coi là chuyển dữ liệu xuyên biên giới (Điều 20) | Cao | Tối thiểu hóa dữ liệu; `/demo` không lưu; chỉ thu dữ liệu thật sau rà soát pháp lý và đồng ý (GĐ10) |
 | R-02 | Vercel Hobby chỉ cho sử dụng cá nhân phi thương mại | Trung bình | Xác nhận với Vercel/nhà trường hoặc dùng Pro cho production |
 | R-03 | Supabase Free tạm dừng sau 1 tuần không hoạt động và không có sao lưu | Cao (với production) | Dùng Supabase Pro cho thí điểm |
-| R-04 | Repo public: lộ secret hoặc dữ liệu nếu commit nhầm | Trung bình | `.gitignore`; test vệ sinh repo (đã thử âm tính); quy tắc CLAUDE.md; GitHub secret scanning sau khi push |
+| R-04 | Repo public: lộ secret hoặc dữ liệu nếu commit nhầm | Trung bình | `.gitignore`; test vệ sinh repo (mở rộng sang `content/`, `scripts/`); `content:check` chặn mẫu dữ liệu cá nhân; quét toàn bộ lịch sử trước push; GitHub secret scanning |
 | R-05 | TTS phát âm sai âm/vần tách rời, khác giọng cô | Trung bình | Ghi âm GV cho âm/vần; POC TTS |
 | R-06 | Trẻ 6 tuổi chưa tự thao tác được | Cao | Thử `/demo` ở GĐ4 trước khi xây CSDL |
 | R-07 | Tương thích phiên bản: Serwist + Turbopack, react-pdf trên Next 16 | Trung bình | POC (GĐ4, GĐ8) |
-| R-08 | ~~`create-next-app` từ chối thư mục đã có tài liệu~~ | Đã xử lý | Scaffold vào thư mục tạm rồi hợp nhất (GĐ2) |
 | R-09 | Khóa `anon`/`service_role` của Supabase bị khai tử cuối 2026 | Thấp | Dùng khóa publishable/secret ngay từ đầu |
 | R-10 | Lạm dụng đăng nhập ẩn danh | Thấp–TB | Giới hạn tần suất riêng + Turnstile ở `/join` + dọn người dùng ẩn danh |
 | R-11 | Docker daemon chưa chạy; Windows long paths tắt | Thấp | Bật Docker Desktop khi cần Supabase local |
-| R-12 | Bản quyền nội dung SGK, hình ảnh | Trung bình | Chỉ lưu thứ tự bài/đơn vị; ghi nguồn và giấy phép mọi media |
-| R-13 | GV quá tải khi duyệt nội dung | Trung bình | Thư viện khởi đầu + tạo nhanh theo quy tắc + bộ kiểm tra tự động |
-| R-14 | ESLint 9 bị npm đánh dấu hết hỗ trợ; 5 lỗ hổng mức cao (ReDoS `braces`) trong chuỗi `eslint-config-next` — chỉ công cụ dev, production 0 lỗ hổng | Thấp | Theo dõi bản `eslint-config-next`/plugin hỗ trợ ESLint 10; không `npm audit fix --force` |
-| R-15 | CI chưa từng chạy trên Linux (chưa push) — có thể lộ khác biệt Windows/Linux (phân biệt hoa thường tên tệp, binary gốc) | Trung bình | Đã kiểm tra lockfile có binary Linux, bật `forceConsistentCasingInFileNames`; kiểm chứng ngay sau lần push đầu |
-| R-16 | CSP cho phép `'unsafe-inline'` cho script (không nonce) | Thấp ở GĐ2 | Không có script bên thứ ba và không hiển thị HTML do người dùng nhập; xem lại nonce/SRI ở GĐ5 |
-| R-17 | `npm install` chặn script cài đặt của `unrs-resolver` (tính năng allow-scripts của npm 11) — module vẫn nạp được binary có sẵn | Thấp | Đã kiểm tra lint chạy đúng; theo dõi khi nâng cấp npm/ESLint |
-| R-18 | `next.config.ts` nạp bằng TypeScript gốc của Node 24 (cần đuôi `.ts`, cấm enum) | Thấp | Quy tắc CLAUDE.md §9.1; unit test cho module header |
+| R-12 | Bản quyền nội dung SGK, hình ảnh | Trung bình | Chỉ lưu thứ tự bài/đơn vị; ngữ liệu GĐ3 viết mới; `seriesKind: "textbook"` bắt buộc `source` |
+| R-13 | GV quá tải khi duyệt nội dung (149 mục + dữ liệu tham chiếu) | Trung bình | Phiếu rà soát gom theo nhóm; duyệt dữ liệu tham chiếu cấp tệp; GĐ6 có giao diện duyệt |
+| R-14 | ESLint 9 hết hỗ trợ; 5 lỗ hổng mức cao (ReDoS `braces`) trong chuỗi `eslint-config-next` — chỉ công cụ dev | Thấp | Theo dõi bản hỗ trợ ESLint 10; không `npm audit fix --force` |
+| R-15 | CI chưa từng chạy trên Linux trước GĐ3 — khác biệt Windows/Linux (hoa thường tên tệp, binary gốc, Node chạy TypeScript) | Trung bình | Kiểm chứng ở lần push đầu (kết quả ghi ở commit tài liệu kế tiếp) |
+| R-16 | CSP cho phép `'unsafe-inline'` cho script (không nonce) | Thấp ở GĐ2–3 | Xem lại nonce/SRI ở GĐ5 |
+| R-17 | `npm install` chặn script cài đặt của `unrs-resolver` (allow-scripts của npm 11) | Thấp | Lint vẫn chạy đúng |
+| R-18 | `next.config.ts` nạp bằng TypeScript gốc của Node 24 (cần đuôi `.ts`, cấm enum) | Thấp | Quy tắc CLAUDE.md §9.1 |
+| R-19 | Dữ liệu kho tri thức do trợ lý AI soạn, **chưa** được GV kiểm chứng (tên chữ, cách gọi âm, danh mục vần, ngữ liệu) | Trung bình | 0 mục `approved`; AI không được duyệt; phiếu rà soát cho GV; `selectCorpusItems` chặn giao bài |
+| R-20 | Ký tự vô hình/dấu tổ hợp lọt vào mã khi soạn (đã xảy ra ở GĐ3) | Thấp (đã xử lý) | Dạng thoát `\uXXXX`; test vệ sinh NFC; quy tắc CLAUDE.md §9.2.2 |
+| R-21 | Quy ước phân tích tạm (qu, gi, i dùng chung) có thể khác bộ sách thật | Trung bình | Là tham số; quy ước chưa xác nhận → `unknown`; chờ Q-02, Q-16 |
+| R-22 | Email cá nhân trong siêu dữ liệu commit trên repo public | Thấp | Q-13 — cân nhắc email `noreply` cho commit sau |
 
 ## 7. Bước tiếp theo
 
-**Đề xuất GĐ3 — Lõi Tiếng Việt và kho tri thức dạng mã** (chi tiết: [TASKS.md](TASKS.md#gđ3--lõi-tiếng-việt-và-kho-tri-thức-dạng-mã-ml)).
+**Đề xuất GĐ4 — Bộ máy bài tập + 6 dạng bài + `/demo`** (chi tiết: [TASKS.md](TASKS.md#gđ4--bộ-máy-bài-tập-6-dạng-bài-và-bản-chơi-thử-demo-l)), tận dụng trực tiếp bộ máy GĐ3: `validate()` của từng dạng gọi `checkReadability`/`diagnoseSyllable`; sinh bài theo quy tắc từ `selectCorpusItems({ purpose: "preview" })` (demo không cần nội dung đã duyệt nhưng phải ghi rõ "minh họa"); phương án nhiễu từ `confusions.json`; ràng buộc theo nhóm từ `resolveKnowledgeState`.
 
 Điều kiện trước khi bắt đầu:
 
-1. Người điều phối nghiệm thu GĐ2.
-2. Trả lời Q-01, Q-02 (bộ sách, quy ước gọi tên âm, "qu"/"gi", vị trí dấu thanh) — nếu chưa có, GĐ3 làm với quy ước tạm và đánh dấu "chờ xác nhận".
-3. Quyết định Q-11, Q-12, Q-13 trước lần push đầu tiên (để chạy CI trên Linux).
-
-Lệnh push khi được phép (repo đang PUBLIC):
-
-```powershell
-git -C D:\ReadMateAI push -u origin main
-```
+1. Người điều phối nghiệm thu GĐ3.
+2. Nên có trước: GV trả lời Q-01, Q-02, Q-16 và điền phiếu [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) — nếu chưa có, GĐ4 vẫn làm được với hồ sơ minh họa nhưng `/demo` phải ghi rõ dữ liệu minh họa.
+3. Bộ âm thanh mẫu tạm thời cho demo (Q-03).
 
 ## 8. Nhật ký phiên
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
 | 2026-10-12 | #1 | GĐ1 | Kiểm tra môi trường; `git init -b main`; xác minh phiên bản và tài liệu; tạo 6 tài liệu + `.gitignore` + `.gitattributes`; kiểm tra mã hóa, 93 liên kết, 6 sơ đồ Mermaid, quét secret — tất cả đạt. Không commit/push/deploy. **Kết thúc GĐ1 — đã được nghiệm thu.** |
-| 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4 qua thư mục tạm; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; soát giao diện bằng ảnh chụp và sửa 9 lỗi hiển thị; format/lint/typecheck/80 unit/build/139 E2E đều xanh; chủ dự án tự tạo commit `16d1413`; thêm remote `origin`; commit tài liệu cuối GĐ2. **Không push, không deploy. Kết thúc GĐ2 — chờ duyệt.** |
+| 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4 qua thư mục tạm; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; soát giao diện và sửa 9 lỗi hiển thị; format/lint/typecheck/80 unit/build/139 E2E đều xanh; commit `16d1413` (chủ dự án), `d1210e6`; thêm remote `origin`. **Không push, không deploy. Kết thúc GĐ2 — đã được nghiệm thu.** |
+| 2026-10-14 | #3 | GĐ3 | Cài zod 4.6.7; thư viện `src/lib/vietnamese/` (11 module); kho tri thức `content/` (29 chữ, 39 âm, 6 thanh, 153 vần, 13 quy tắc, 149 ngữ liệu — tất cả chờ GV); lớp tiến độ (chuỗi minh họa, hồ sơ 1A2 `unconfirmed`); `src/features/knowledge/`; `npm run content:check` (0 lỗi, 33 cảnh báo) + CI; 524 test mới (tổng 604) + 4 đột biến kiểm độ nhạy; E2E 139 đạt; tài liệu VIETNAMESE_ENGINE, TEACHER_REVIEW_CHECKLIST; rà soát toàn bộ lịch sử Git; commit + push `main` (kết quả CI ở commit kế tiếp). **Kết thúc GĐ3 — chờ duyệt. Không deploy, không Supabase, không AI.** |

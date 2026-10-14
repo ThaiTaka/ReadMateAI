@@ -1,6 +1,6 @@
 # TASKS — Kế hoạch phát triển ReadMate AI
 
-> **Cập nhật:** 2026-10-14 · **Giai đoạn hiện tại:** GĐ2 đã hoàn thành — chờ người điều phối đánh giá
+> **Cập nhật:** 2026-10-14 · **Giai đoạn hiện tại:** GĐ3 đã hoàn thành — chờ người điều phối đánh giá (GĐ2 đã được nghiệm thu)
 > **Quy ước:** mỗi giai đoạn triển khai và kiểm thử độc lập; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**.
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa làm · Quy mô ước lượng thô: **S** (≤ 1 phiên làm việc), **M** (2–3 phiên), **L** (≥ 4 phiên).
 > **Tài liệu:** [PRD](docs/PRD.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [DATA_MODEL](docs/DATA_MODEL.md) · [PROGRESS](PROGRESS.md)
@@ -10,8 +10,8 @@
 | GĐ | Tên | Kết quả có thể kiểm thử độc lập | Phụ thuộc | Quy mô | Trạng thái |
 |---|---|---|---|---|---|
 | 1 | Khởi tạo & thiết kế kiến trúc | Bộ tài liệu, Git cục bộ | — | S | ✅ Đã duyệt |
-| 2 | Nền móng kỹ thuật | Ứng dụng khung build/lint/test xanh, CI | GĐ1 | M | ✅ Chờ duyệt |
-| 3 | Lõi Tiếng Việt & kho tri thức dạng mã | Thư viện phân tích tiếng + dữ liệu lõi có kiểm thử | GĐ2 | M–L | ⏸ |
+| 2 | Nền móng kỹ thuật | Ứng dụng khung build/lint/test xanh, CI | GĐ1 | M | ✅ Đã duyệt |
+| 3 | Lõi Tiếng Việt & kho tri thức dạng mã | Thư viện phân tích tiếng + dữ liệu lõi có kiểm thử | GĐ2 | M–L | ✅ Chờ duyệt (dữ liệu chờ GV) |
 | 4 | Bộ máy bài tập + 6 dạng bài + `/demo` | Bản chơi thử chạy trên điện thoại, chưa cần CSDL | GĐ2, GĐ3 | L | ⏸ |
 | 5 | Supabase: CSDL nền, RLS, xác thực | GV đăng nhập, thẻ học, liên kết thiết bị, kiểm thử RLS | GĐ3 | L | ⏸ |
 | 6 | Soạn & kiểm duyệt nội dung + âm thanh | Thư viện bài đã duyệt có âm thanh | GĐ4, GĐ5 | L | ⏸ |
@@ -49,7 +49,7 @@
 
 ---
 
-## GĐ2 — Nền móng kỹ thuật (M) ✅
+## GĐ2 — Nền móng kỹ thuật (M) ✅ (đã nghiệm thu)
 
 **Điều kiện bắt đầu:** GĐ1 được duyệt · chủ dự án quyết định có commit/push lên GitHub (repo đang **public**) trong GĐ2 hay không · (tùy chọn) tài khoản Vercel nếu muốn có Preview.
 **Phạm vi được giao (2026-10-12):** chỉ commit cục bộ — **không push, không đổi public/private, không deploy Vercel**.
@@ -68,7 +68,7 @@
 
 **Tiêu chí nghiệm thu**
 
-- [x] `npm run lint`, `npm run typecheck`, `npm run test:run`, `npm run build` thành công trên Windows — [ ] trên CI (Linux): **chưa kiểm chứng** (cần push)
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:run`, `npm run build` thành công trên Windows — trên CI (Linux): kiểm chứng ở lần push đầu tiên (GĐ3, xem PROGRESS §3)
 - [x] `/` và `/demo` (và cả 5 route) hiển thị đúng tiếng Việt có dấu ở chiều rộng 360 px, không cuộn ngang (E2E)
 - [x] Playwright xanh trên Chromium và WebKit (desktop + điện thoại)
 - [x] Header bảo mật có trong response của bản production (Vitest + Playwright + kiểm tra HTTP thủ công)
@@ -77,27 +77,28 @@
 
 ---
 
-## GĐ3 — Lõi Tiếng Việt và kho tri thức dạng mã (M–L)
+## GĐ3 — Lõi Tiếng Việt và kho tri thức dạng mã (M–L) ✅
 
 **Điều kiện bắt đầu:** GV xác nhận bộ sách, cách gọi tên âm, cách phân tích "qu"/"gi", quy ước vị trí dấu thanh (Q-01, Q-02 trong PROGRESS). Nếu chưa có, làm với quy ước tạm và đánh dấu "chờ xác nhận".
+**Thực tế (2026-10-14):** GV **chưa** trả lời Q-01, Q-02 → làm với quy ước tạm, mọi dữ liệu ở trạng thái chờ duyệt; hồ sơ lớp 1A2 `unconfirmed`. Được phép push `main` sau khi rà soát an toàn. Tài liệu: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md), [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md).
 
-- [ ] 3.1 `lib/vietnamese/normalize`: NFC; phát hiện văn bản dán từ bảng mã cũ (TCVN3, VNI); chuẩn hóa vị trí dấu thanh theo cấu hình
-- [ ] 3.2 `lib/vietnamese/syllable`: phân tích tiếng → âm đầu, âm đệm, âm chính, âm cuối, thanh, vần (quy ước nhà trường là tham số)
-- [ ] 3.3 `lib/vietnamese/spelling-rules`: c/k/q; g/gh; ng/ngh; iê/ia/yê/ya; uô/ua; ươ/ưa; âm cuối p, t, c, ch chỉ đi với thanh sắc/nặng
-- [ ] 3.4 `lib/vietnamese/decodability`: tính đơn vị cấu thành, `isDecodable(word, taughtSet)`
-- [ ] 3.5 `content/kb`: 29 chữ cái; các âm (kể cả chữ ghép) kèm cách gọi khi dạy; 6 thanh; danh sách vần; quy tắc dạng máy đọc được; quan hệ nhầm lẫn (b–d, p–q, l–n, an–ang, hỏi–ngã…)
-- [ ] 3.6 `content/curriculum/<bộ-sách>.json`: thứ tự bài và đơn vị được giới thiệu (chỉ dữ kiện)
-- [ ] 3.7 Bộ từ vựng khởi đầu 300–500 từ phù hợp trẻ em, theo chủ đề, gắn hình có ghi nguồn/giấy phép
-- [ ] 3.8 Lệnh `npm run content:check` kiểm tra toàn bộ dữ liệu lõi; thêm bước này vào `.github/workflows/ci.yml`
-- [ ] 3.9 *(Tùy chọn)* trang tra cứu kho tri thức tĩnh để GV rà soát
+- [x] 3.1 `lib/vietnamese/normalize`: NFC, chữ thường, khoảng trắng, soát ký tự ẩn/dấu sót/chữ Kirin giả dạng, **phát hiện** (không chuyển mã) TCVN3/VNI — *điều chỉnh:* không tự "chuẩn hóa vị trí dấu thanh" (đó là quy ước chưa xác nhận); thay bằng `tone-placement.ts` chỉ **báo cáo** kiểu đặt dấu
+- [x] 3.2 `lib/vietnamese/syllable`: phân tích tiếng theo **danh mục vần** (khớp chính xác, không tách chuỗi tùy ý); quy ước qu/gi/i dùng chung ghi trong `conventionDependencies`; trạng thái `ok`/`invalid`/`unrecognized`/`ambiguous`
+- [x] 3.3 `lib/vietnamese/spelling-rules` (+ `diagnostics`, `tone-placement`): c/k, g/gh, ng/ngh, qu, iê/yê, nguyên âm đôi theo âm cuối, âm cuối p/t/c/ch, một dấu thanh, vị trí dấu — kèm gợi ý, không tự sửa
+- [x] 3.4 `lib/vietnamese/decodability`: `requiredUnitsOf`, `checkDecodability(text, { taughtUnits, conventions })` với 4 kết luận `readable`/`not_yet_learned`/`unknown`/`invalid`; + `difficulty.ts` (độ khó theo cấu tạo, không chỉ độ dài)
+- [x] 3.5 `content/kb`: 29 chữ cái (tên chữ ≠ cách gọi âm), 39 âm (11 tổ hợp chữ), 6 thanh, 153 vần, 13 quy tắc (spec máy đọc + ví dụ đúng/sai), 17 cặp dễ nhầm, 18 mục tiên quyết, 14 chủ đề — **tất cả chờ GV duyệt**
+- [x] 3.6 `content/curriculum`: lớp tiến độ tách khỏi lớp ngôn ngữ — *điều chỉnh:* chưa biết bộ sách (Q-01) nên **không** tạo `<bộ-sách>.json`; có chuỗi **minh họa** 17 bài (ghi rõ không phải SGK) + hồ sơ `class-1a2` (`unconfirmed`, chưa có tiến độ) + hồ sơ minh họa; API `resolveKnowledgeState`, `checkReadability`, `selectCorpusItems`
+- [x] 3.7 Ngữ liệu khởi đầu — *điều chỉnh theo yêu cầu GĐ3:* **149 mục** nguyên bản (58 tiếng, 60 từ, 31 câu) thay vì 300–500 từ; chưa gắn hình (GĐ6: media có nguồn/giấy phép)
+- [x] 3.8 `npm run content:check` (lỗi chặn / cảnh báo cho GV / thông tin) + bước trong CI (kèm `format:check`)
+- [ ] 3.9 *(Tùy chọn)* trang tra cứu kho tri thức tĩnh để GV rà soát — **chưa làm** (đề xuất cho GĐ4 hoặc khi GV cần)
 
 **Tiêu chí nghiệm thu**
 
-- [ ] ≥ 300 ca kiểm thử parser, bao phủ gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa và đủ 6 thanh — 100% đạt
-- [ ] 100% từ trong dữ liệu khởi đầu phân tích được và qua quy tắc chính tả
-- [ ] Danh sách từ "đọc được" ở 3 mốc bài học mẫu được GV xem và xác nhận hợp lý
-- [ ] Không có bài đọc/hình sao chép từ SGK (chỉ thứ tự bài và đơn vị kiến thức)
-- [ ] Quy ước ngôn ngữ được ghi lại kèm trạng thái xác nhận của GV
+- [x] ≥ 300 ca kiểm thử parser, bao phủ gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa và đủ 6 thanh — 100% đạt (≈ 317 ca liên quan bộ phân tích: phân tích tiếng 122, chính tả 63, vị trí dấu 38, đối chiếu ngân hàng tiếng 57, giải mã 37; tổng unit test 604)
+- [x] 100% từ trong dữ liệu khởi đầu qua quy tắc chính tả (0 lỗi) — 59/60 từ phân tích được hoàn toàn; "quả quýt" **cố ý** để `unknown` (qu + y phụ thuộc quy ước, Q-02)
+- [ ] Danh sách từ "đọc được" ở 3 mốc bài học mẫu được GV xem và xác nhận hợp lý — danh sách đã sinh (VIETNAMESE_ENGINE §9.3, phiếu rà soát mục I), **chờ GV**
+- [x] Không có bài đọc/hình sao chép từ SGK (ngữ liệu viết mới, chuỗi bài là minh họa tự đặt; chưa có hình)
+- [x] Quy ước ngôn ngữ được ghi lại kèm trạng thái xác nhận của GV (hồ sơ `conventions` = `null` cho 1A2; rules.json đánh dấu `convention`)
 
 ---
 

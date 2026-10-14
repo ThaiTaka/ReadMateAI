@@ -1,0 +1,487 @@
+{
+  "kind": "syllables",
+  "description": "Ngân hàng tiếng minh họa. Mỗi tiếng khai báo tường minh âm đầu, vần và thanh; bộ kiểm tra nội dung đối chiếu với bộ phân tích và báo lỗi nếu lệch. Gồm cả một số tiếng ngoài chuỗi bài minh họa (uyên, iêng, uya, yêu) và tiếng còn phụ thuộc quy ước (quýt) để kiểm thử.",
+  "review": { "status": "pending_review", "note": "Từng tiếng cần GV duyệt riêng." },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Ngữ liệu minh họa nguyên bản; không sao chép từ sách giáo khoa."
+  },
+  "items": [
+    {
+      "id": "syllable:ba",
+      "text": "ba",
+      "expected": { "onset": "b", "rime": "a", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bà",
+      "text": "bà",
+      "expected": { "onset": "b", "rime": "a", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bé",
+      "text": "bé",
+      "expected": { "onset": "b", "rime": "e", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bò",
+      "text": "bò",
+      "expected": { "onset": "b", "rime": "o", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bố",
+      "text": "bố",
+      "expected": { "onset": "b", "rime": "ô", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bơ",
+      "text": "bơ",
+      "expected": { "onset": "b", "rime": "ơ", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cá",
+      "text": "cá",
+      "expected": { "onset": "c", "rime": "a", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cò",
+      "text": "cò",
+      "expected": { "onset": "c", "rime": "o", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cỏ",
+      "text": "cỏ",
+      "expected": { "onset": "c", "rime": "o", "tone": "hoi" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cô",
+      "text": "cô",
+      "expected": { "onset": "c", "rime": "ô", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cờ",
+      "text": "cờ",
+      "expected": { "onset": "c", "rime": "ơ", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:đỏ",
+      "text": "đỏ",
+      "expected": { "onset": "đ", "rime": "o", "tone": "hoi" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:đò",
+      "text": "đò",
+      "expected": { "onset": "đ", "rime": "o", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:lá",
+      "text": "lá",
+      "expected": { "onset": "l", "rime": "a", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:lê",
+      "text": "lê",
+      "expected": { "onset": "l", "rime": "ê", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:mẹ",
+      "text": "mẹ",
+      "expected": { "onset": "m", "rime": "e", "tone": "nang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:nơ",
+      "text": "nơ",
+      "expected": { "onset": "n", "rime": "ơ", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:kẻ",
+      "text": "kẻ",
+      "expected": { "onset": "k", "rime": "e", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:gà",
+      "text": "gà",
+      "expected": { "onset": "g", "rime": "a", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:ghế",
+      "text": "ghế",
+      "expected": { "onset": "gh", "rime": "ê", "tone": "sac" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:thỏ",
+      "text": "thỏ",
+      "expected": { "onset": "th", "rime": "o", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:nhà",
+      "text": "nhà",
+      "expected": { "onset": "nh", "rime": "a", "tone": "huyen" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:khế",
+      "text": "khế",
+      "expected": { "onset": "kh", "rime": "ê", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:ngõ",
+      "text": "ngõ",
+      "expected": { "onset": "ng", "rime": "o", "tone": "nga" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:nghé",
+      "text": "nghé",
+      "expected": { "onset": "ngh", "rime": "e", "tone": "sac" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:nho",
+      "text": "nho",
+      "expected": { "onset": "nh", "rime": "o", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:chó",
+      "text": "chó",
+      "expected": { "onset": "ch", "rime": "o", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:tre",
+      "text": "tre",
+      "expected": { "onset": "tr", "rime": "e", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:vở",
+      "text": "vở",
+      "expected": { "onset": "v", "rime": "ơ", "tone": "hoi" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:chữ",
+      "text": "chữ",
+      "expected": { "onset": "ch", "rime": "ư", "tone": "nga" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:quả",
+      "text": "quả",
+      "expected": { "onset": "qu", "rime": "a", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Phân tích theo quy ước tạm “qu” là một âm đầu."
+    },
+    {
+      "id": "syllable:quê",
+      "text": "quê",
+      "expected": { "onset": "qu", "rime": "ê", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Phân tích theo quy ước tạm “qu” là một âm đầu."
+    },
+    {
+      "id": "syllable:giỏ",
+      "text": "giỏ",
+      "expected": { "onset": "gi", "rime": "o", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Phân tích theo quy ước tạm “gi” là một âm đầu."
+    },
+    {
+      "id": "syllable:xe",
+      "text": "xe",
+      "expected": { "onset": "x", "rime": "e", "tone": "ngang" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:phố",
+      "text": "phố",
+      "expected": { "onset": "ph", "rime": "ô", "tone": "sac" },
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:mía",
+      "text": "mía",
+      "expected": { "onset": "m", "rime": "ia", "tone": "sac" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cua",
+      "text": "cua",
+      "expected": { "onset": "c", "rime": "ua", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:mưa",
+      "text": "mưa",
+      "expected": { "onset": "m", "rime": "ưa", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:dừa",
+      "text": "dừa",
+      "expected": { "onset": "d", "rime": "ưa", "tone": "huyen" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:bàn",
+      "text": "bàn",
+      "expected": { "onset": "b", "rime": "an", "tone": "huyen" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:cam",
+      "text": "cam",
+      "expected": { "onset": "c", "rime": "am", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:sách",
+      "text": "sách",
+      "expected": { "onset": "s", "rime": "ach", "tone": "sac" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:xanh",
+      "text": "xanh",
+      "expected": { "onset": "x", "rime": "anh", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:con",
+      "text": "con",
+      "expected": { "onset": "c", "rime": "on", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:ngọt",
+      "text": "ngọt",
+      "expected": { "onset": "ng", "rime": "ot", "tone": "nang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:voi",
+      "text": "voi",
+      "expected": { "onset": "v", "rime": "oi", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:tay",
+      "text": "tay",
+      "expected": { "onset": "t", "rime": "ay", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:rau",
+      "text": "rau",
+      "expected": { "onset": "r", "rime": "au", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:hoa",
+      "text": "hoa",
+      "expected": { "onset": "h", "rime": "oa", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:khoẻ",
+      "text": "khoẻ",
+      "expected": { "onset": "kh", "rime": "oe", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Viết theo kiểu đặt dấu trên âm chính (khoẻ); kiểu còn lại là khỏe — chờ nhà trường chọn."
+    },
+    {
+      "id": "syllable:thuỷ",
+      "text": "thuỷ",
+      "expected": { "onset": "th", "rime": "uy", "tone": "hoi" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Viết theo kiểu đặt dấu trên âm chính (thuỷ); kiểu còn lại là thủy — chờ nhà trường chọn."
+    },
+    {
+      "id": "syllable:gì",
+      "text": "gì",
+      "expected": { "onset": "gi", "rime": "i", "tone": "huyen" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Quy ước tạm: chữ i của “gi” dùng chung với vần — cần GV xác nhận."
+    },
+    {
+      "id": "syllable:giếng",
+      "text": "giếng",
+      "expected": { "onset": "gi", "rime": "iêng", "tone": "sac" },
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Quy ước tạm: gi + iêng (chữ i dùng chung) — cần GV xác nhận."
+    },
+    {
+      "id": "syllable:quýt",
+      "text": "quýt",
+      "expected": null,
+      "difficulty": 3,
+      "review": {
+        "status": "draft",
+        "note": "Chưa phân tích chắc chắn: qu + uyt (u dùng chung) hay cách khác tùy bộ sách."
+      },
+      "version": 1
+    },
+    {
+      "id": "syllable:thuyền",
+      "text": "thuyền",
+      "expected": { "onset": "th", "rime": "uyên", "tone": "huyen" },
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:nghiêng",
+      "text": "nghiêng",
+      "expected": { "onset": "ngh", "rime": "iêng", "tone": "ngang" },
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:khuya",
+      "text": "khuya",
+      "expected": { "onset": "kh", "rime": "uya", "tone": "ngang" },
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "syllable:yêu",
+      "text": "yêu",
+      "expected": { "onset": null, "rime": "yêu", "tone": "ngang" },
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    }
+  ]
+}

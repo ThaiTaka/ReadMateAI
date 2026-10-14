@@ -1,0 +1,76 @@
+{
+  "kind": "tones",
+  "description": "Sáu thanh tiếng Việt, dấu thanh tương ứng (mã Unicode dạng tổ hợp) và khả năng đi với âm cuối p, t, c, ch.",
+  "review": {
+    "status": "pending_review",
+    "note": "Dữ kiện chuẩn của chữ viết; cần GV xác nhận cách gọi (“thanh ngang”/“không dấu”)."
+  },
+  "provenance": {
+    "origin": "standard_reference",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Soạn theo chữ viết tiếng Việt chuẩn; chưa được giáo viên rà soát."
+  },
+  "items": [
+    {
+      "id": "tone:ngang",
+      "toneId": "ngang",
+      "name": "ngang",
+      "markName": "không dấu",
+      "combiningMark": null,
+      "markPosition": "none",
+      "example": "a",
+      "allowedWithStopCoda": false
+    },
+    {
+      "id": "tone:huyen",
+      "toneId": "huyen",
+      "name": "huyền",
+      "markName": "dấu huyền",
+      "combiningMark": "U+0300",
+      "markPosition": "above",
+      "example": "à",
+      "allowedWithStopCoda": false
+    },
+    {
+      "id": "tone:sac",
+      "toneId": "sac",
+      "name": "sắc",
+      "markName": "dấu sắc",
+      "combiningMark": "U+0301",
+      "markPosition": "above",
+      "example": "á",
+      "allowedWithStopCoda": true
+    },
+    {
+      "id": "tone:hoi",
+      "toneId": "hoi",
+      "name": "hỏi",
+      "markName": "dấu hỏi",
+      "combiningMark": "U+0309",
+      "markPosition": "above",
+      "example": "ả",
+      "allowedWithStopCoda": false
+    },
+    {
+      "id": "tone:nga",
+      "toneId": "nga",
+      "name": "ngã",
+      "markName": "dấu ngã",
+      "combiningMark": "U+0303",
+      "markPosition": "above",
+      "example": "ã",
+      "allowedWithStopCoda": false
+    },
+    {
+      "id": "tone:nang",
+      "toneId": "nang",
+      "name": "nặng",
+      "markName": "dấu nặng",
+      "combiningMark": "U+0323",
+      "markPosition": "below",
+      "example": "ạ",
+      "allowedWithStopCoda": true
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "datasetVersion": "0.1.0",
+  "updatedAt": "2026-10-14",
+  "description": "Kho tri thức tiếng Việt của ReadMate AI (GĐ3). Lớp 1 — kiến thức ngôn ngữ (content/kb); lớp 2 — tiến độ học tập (content/curriculum). Toàn bộ nội dung đang chờ giáo viên duyệt; kiểm tra bằng npm run content:check."
+}

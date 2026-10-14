@@ -1,0 +1,167 @@
+{
+  "id": "series:illustrative-v1",
+  "seriesKind": "illustrative",
+  "title": "Chuỗi bài minh họa ReadMate (không phải bộ sách)",
+  "description": "Thứ tự bài do dự án tự đặt để kiểm thử bộ máy và làm bản demo. KHÔNG phản ánh thứ tự của bất kỳ bộ sách Tiếng Việt 1 nào và không được dùng để giao bài thật. Khi GV xác nhận bộ sách của lớp (Q-01), thứ tự bài thật sẽ được thêm thành một tệp riêng có nguồn.",
+  "source": null,
+  "lessons": [
+    {
+      "ordinal": 1,
+      "code": "MH01",
+      "title": "Âm a, b, c, o",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:a", "phoneme:b", "phoneme:c", "phoneme:o", "tone:ngang"],
+      "reviews": []
+    },
+    {
+      "ordinal": 2,
+      "code": "MH02",
+      "title": "Thanh huyền, thanh sắc",
+      "lessonType": "new_units",
+      "introduces": ["tone:huyen", "tone:sac"],
+      "reviews": ["phoneme:a", "phoneme:o"]
+    },
+    {
+      "ordinal": 3,
+      "code": "MH03",
+      "title": "Âm ô, ơ, d, đ",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:ô", "phoneme:ơ", "phoneme:d", "phoneme:đ"],
+      "reviews": []
+    },
+    {
+      "ordinal": 4,
+      "code": "MH04",
+      "title": "Thanh hỏi, thanh ngã, thanh nặng",
+      "lessonType": "new_units",
+      "introduces": ["tone:hoi", "tone:nga", "tone:nang"],
+      "reviews": ["tone:huyen", "tone:sac"]
+    },
+    {
+      "ordinal": 5,
+      "code": "MH05",
+      "title": "Âm e, ê, h, l",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:e", "phoneme:ê", "phoneme:h", "phoneme:l"],
+      "reviews": []
+    },
+    {
+      "ordinal": 6,
+      "code": "MH06",
+      "title": "Âm i, k, m, n",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:i", "phoneme:k", "phoneme:m", "phoneme:n"],
+      "reviews": ["phoneme:c"]
+    },
+    {
+      "ordinal": 7,
+      "code": "MH07",
+      "title": "Âm g, gh, t, th",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:g", "phoneme:gh", "phoneme:t", "phoneme:th"],
+      "reviews": []
+    },
+    {
+      "ordinal": 8,
+      "code": "MH08",
+      "title": "Âm ng, ngh, nh, kh",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:ng", "phoneme:ngh", "phoneme:nh", "phoneme:kh"],
+      "reviews": ["phoneme:g", "phoneme:gh"]
+    },
+    {
+      "ordinal": 9,
+      "code": "MH09",
+      "title": "Âm u, ư, ch, tr, v",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:u", "phoneme:ư", "phoneme:ch", "phoneme:tr", "phoneme:v"],
+      "reviews": []
+    },
+    {
+      "ordinal": 10,
+      "code": "MH10",
+      "title": "Âm qu, gi, s, x, r, ph, p",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:qu", "phoneme:gi", "phoneme:s", "phoneme:x", "phoneme:r", "phoneme:ph", "phoneme:p"],
+      "reviews": []
+    },
+    {
+      "ordinal": 11,
+      "code": "MH11",
+      "title": "Âm y; vần ia, ua, ưa",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:y", "rime:ia", "rime:ua", "rime:ưa"],
+      "reviews": ["phoneme:i"]
+    },
+    {
+      "ordinal": 12,
+      "code": "MH12",
+      "title": "Âm ă, â; vần an, ăn, ân, at, ăt, ât",
+      "lessonType": "new_units",
+      "introduces": ["phoneme:ă", "phoneme:â", "rime:an", "rime:ăn", "rime:ân", "rime:at", "rime:ăt", "rime:ât"],
+      "reviews": []
+    },
+    {
+      "ordinal": 13,
+      "code": "MH13",
+      "title": "Vần am, ap, ang, ac, anh, ach",
+      "lessonType": "new_units",
+      "introduces": ["rime:am", "rime:ap", "rime:ang", "rime:ac", "rime:anh", "rime:ach"],
+      "reviews": ["rime:an", "rime:at"]
+    },
+    {
+      "ordinal": 14,
+      "code": "MH14",
+      "title": "Vần on, ôn, ơn, ot, ôt, ơt, oc, ôc, ong, ông",
+      "lessonType": "new_units",
+      "introduces": [
+        "rime:on",
+        "rime:ôn",
+        "rime:ơn",
+        "rime:ot",
+        "rime:ôt",
+        "rime:ơt",
+        "rime:oc",
+        "rime:ôc",
+        "rime:ong",
+        "rime:ông"
+      ],
+      "reviews": []
+    },
+    {
+      "ordinal": 15,
+      "code": "MH15",
+      "title": "Vần oi, ôi, ơi, ai, ao, au, ay, eo",
+      "lessonType": "new_units",
+      "introduces": ["rime:oi", "rime:ôi", "rime:ơi", "rime:ai", "rime:ao", "rime:au", "rime:ay", "rime:eo"],
+      "reviews": []
+    },
+    {
+      "ordinal": 16,
+      "code": "MH16",
+      "title": "Vần oa, oe, uy",
+      "lessonType": "new_units",
+      "introduces": ["rime:oa", "rime:oe", "rime:uy"],
+      "reviews": []
+    },
+    {
+      "ordinal": 17,
+      "code": "MH17",
+      "title": "Ôn tập vần",
+      "lessonType": "review",
+      "introduces": [],
+      "reviews": ["rime:an", "rime:ang", "rime:at", "rime:ac", "rime:oa"]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "note": "Chuỗi minh họa phục vụ kiểm thử — không gửi duyệt và không dùng cho lớp thật."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Thứ tự tự đặt theo nguyên tắc: âm đơn → thanh → chữ ghép → vần; không sao chép sách giáo khoa."
+  },
+  "version": 1
+}

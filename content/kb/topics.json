@@ -1,0 +1,72 @@
+{
+  "kind": "topics",
+  "description": "Chủ đề ngữ nghĩa dùng để phân loại từ và câu (con vật, gia đình, …).",
+  "review": {
+    "status": "pending_review",
+    "note": "Cần GV xác nhận danh sách chủ đề phù hợp với lớp."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Soạn theo chữ viết tiếng Việt chuẩn; chưa được giáo viên rà soát."
+  },
+  "items": [
+    {
+      "id": "topic:animals",
+      "label": "Con vật"
+    },
+    {
+      "id": "topic:family",
+      "label": "Gia đình"
+    },
+    {
+      "id": "topic:food",
+      "label": "Món ăn, đồ uống"
+    },
+    {
+      "id": "topic:plants",
+      "label": "Cây, hoa, quả"
+    },
+    {
+      "id": "topic:home",
+      "label": "Đồ vật trong nhà"
+    },
+    {
+      "id": "topic:school",
+      "label": "Trường lớp"
+    },
+    {
+      "id": "topic:nature",
+      "label": "Thiên nhiên, thời tiết"
+    },
+    {
+      "id": "topic:body",
+      "label": "Cơ thể"
+    },
+    {
+      "id": "topic:transport",
+      "label": "Xe cộ, đi lại"
+    },
+    {
+      "id": "topic:activities",
+      "label": "Hoạt động hằng ngày"
+    },
+    {
+      "id": "topic:places",
+      "label": "Nơi chốn"
+    },
+    {
+      "id": "topic:people",
+      "label": "Người và nghề"
+    },
+    {
+      "id": "topic:toys",
+      "label": "Đồ chơi, vui chơi"
+    },
+    {
+      "id": "topic:colors",
+      "label": "Màu sắc, tính chất"
+    }
+  ]
+}

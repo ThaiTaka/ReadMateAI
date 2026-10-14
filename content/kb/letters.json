@@ -1,0 +1,309 @@
+{
+  "kind": "letters",
+  "description": "29 chữ cái của bảng chữ cái tiếng Việt: chữ thường, chữ hoa, thứ tự và tên chữ cái. Tên chữ cái (đọc bảng chữ cái) là trường riêng, KHÔNG phải cách gọi âm khi đánh vần (xem phonemes.json).",
+  "review": {
+    "status": "pending_review",
+    "note": "Bảng 29 chữ cái là dữ kiện chuẩn; tên gọi chữ cái có nhiều biến thể giữa các trường — cần GV xác nhận cách gọi của lớp."
+  },
+  "provenance": {
+    "origin": "standard_reference",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Soạn theo chữ viết tiếng Việt chuẩn; chưa được giáo viên rà soát."
+  },
+  "items": [
+    {
+      "id": "letter:a",
+      "lower": "a",
+      "upper": "A",
+      "order": 1,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "a"
+      }
+    },
+    {
+      "id": "letter:ă",
+      "lower": "ă",
+      "upper": "Ă",
+      "order": 2,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "á"
+      }
+    },
+    {
+      "id": "letter:â",
+      "lower": "â",
+      "upper": "Â",
+      "order": 3,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "ớ"
+      }
+    },
+    {
+      "id": "letter:b",
+      "lower": "b",
+      "upper": "B",
+      "order": 4,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "bê"
+      }
+    },
+    {
+      "id": "letter:c",
+      "lower": "c",
+      "upper": "C",
+      "order": 5,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "xê"
+      }
+    },
+    {
+      "id": "letter:d",
+      "lower": "d",
+      "upper": "D",
+      "order": 6,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "dê"
+      }
+    },
+    {
+      "id": "letter:đ",
+      "lower": "đ",
+      "upper": "Đ",
+      "order": 7,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "đê"
+      }
+    },
+    {
+      "id": "letter:e",
+      "lower": "e",
+      "upper": "E",
+      "order": 8,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "e"
+      }
+    },
+    {
+      "id": "letter:ê",
+      "lower": "ê",
+      "upper": "Ê",
+      "order": 9,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "ê"
+      }
+    },
+    {
+      "id": "letter:g",
+      "lower": "g",
+      "upper": "G",
+      "order": 10,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "giê"
+      }
+    },
+    {
+      "id": "letter:h",
+      "lower": "h",
+      "upper": "H",
+      "order": 11,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "hát"
+      }
+    },
+    {
+      "id": "letter:i",
+      "lower": "i",
+      "upper": "I",
+      "order": 12,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "i"
+      },
+      "note": "Còn gọi là “i ngắn” để phân biệt với y."
+    },
+    {
+      "id": "letter:k",
+      "lower": "k",
+      "upper": "K",
+      "order": 13,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "ca"
+      }
+    },
+    {
+      "id": "letter:l",
+      "lower": "l",
+      "upper": "L",
+      "order": 14,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "e-lờ"
+      }
+    },
+    {
+      "id": "letter:m",
+      "lower": "m",
+      "upper": "M",
+      "order": 15,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "em-mờ"
+      }
+    },
+    {
+      "id": "letter:n",
+      "lower": "n",
+      "upper": "N",
+      "order": 16,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "en-nờ"
+      }
+    },
+    {
+      "id": "letter:o",
+      "lower": "o",
+      "upper": "O",
+      "order": 17,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "o"
+      }
+    },
+    {
+      "id": "letter:ô",
+      "lower": "ô",
+      "upper": "Ô",
+      "order": 18,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "ô"
+      }
+    },
+    {
+      "id": "letter:ơ",
+      "lower": "ơ",
+      "upper": "Ơ",
+      "order": 19,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "ơ"
+      }
+    },
+    {
+      "id": "letter:p",
+      "lower": "p",
+      "upper": "P",
+      "order": 20,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "pê"
+      }
+    },
+    {
+      "id": "letter:q",
+      "lower": "q",
+      "upper": "Q",
+      "order": 21,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "quy",
+        "alternatives": ["cu"]
+      }
+    },
+    {
+      "id": "letter:r",
+      "lower": "r",
+      "upper": "R",
+      "order": 22,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "e-rờ"
+      }
+    },
+    {
+      "id": "letter:s",
+      "lower": "s",
+      "upper": "S",
+      "order": 23,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "ét-xì"
+      }
+    },
+    {
+      "id": "letter:t",
+      "lower": "t",
+      "upper": "T",
+      "order": 24,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "tê"
+      }
+    },
+    {
+      "id": "letter:u",
+      "lower": "u",
+      "upper": "U",
+      "order": 25,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "u"
+      }
+    },
+    {
+      "id": "letter:ư",
+      "lower": "ư",
+      "upper": "Ư",
+      "order": 26,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "ư"
+      }
+    },
+    {
+      "id": "letter:v",
+      "lower": "v",
+      "upper": "V",
+      "order": 27,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "vê"
+      }
+    },
+    {
+      "id": "letter:x",
+      "lower": "x",
+      "upper": "X",
+      "order": 28,
+      "letterClass": "consonant",
+      "name": {
+        "proposed": "ích-xì"
+      }
+    },
+    {
+      "id": "letter:y",
+      "lower": "y",
+      "upper": "Y",
+      "order": 29,
+      "letterClass": "vowel",
+      "name": {
+        "proposed": "i dài",
+        "alternatives": ["i-grếc"]
+      }
+    }
+  ]
+}

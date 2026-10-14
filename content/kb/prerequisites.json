@@ -1,0 +1,108 @@
+{
+  "kind": "prerequisites",
+  "description": "Quan hệ tiên quyết KHAI BÁO TƯỜNG MINH giữa các đơn vị kiến thức (thứ tự dạy hợp lý). Ngoài các cạnh này, bộ máy tự suy ra quan hệ theo cấu tạo: âm → các chữ cái tạo nên âm; vần → các nguyên âm và âm cuối tạo nên vần. Bộ kiểm tra nội dung chặn quan hệ vòng tròn.",
+  "review": {
+    "status": "pending_review",
+    "note": "Thứ tự dạy là quyết định sư phạm — GV cần đối chiếu với bộ sách của lớp."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14"
+  },
+  "items": [
+    {
+      "unit": "phoneme:gh",
+      "requires": ["phoneme:g"],
+      "basis": "orthographic",
+      "note": "Cùng âm “gờ”; gh là cách viết theo vị trí, dạy sau g."
+    },
+    {
+      "unit": "phoneme:ngh",
+      "requires": ["phoneme:ng"],
+      "basis": "orthographic",
+      "note": "Cùng âm “ngờ”; ngh là cách viết theo vị trí, dạy sau ng."
+    },
+    {
+      "unit": "phoneme:k",
+      "requires": ["phoneme:c"],
+      "basis": "orthographic",
+      "note": "Cùng âm “cờ”; k là cách viết theo vị trí, dạy sau c."
+    },
+    {
+      "unit": "phoneme:y",
+      "requires": ["phoneme:i"],
+      "basis": "orthographic",
+      "note": "Cùng âm với i, khác chữ viết."
+    },
+    {
+      "unit": "rime:yên",
+      "requires": ["rime:iên"],
+      "basis": "orthographic",
+      "note": "Cùng vần, cách viết khi không có âm đầu."
+    },
+    {
+      "unit": "rime:yêu",
+      "requires": ["rime:iêu"],
+      "basis": "orthographic",
+      "note": "Cùng vần, cách viết khi không có âm đầu."
+    },
+    { "unit": "rime:iêng", "requires": ["rime:iên"], "basis": "pedagogical", "note": "Học vần iên trước iêng." },
+    { "unit": "rime:uông", "requires": ["rime:uôn"], "basis": "pedagogical", "note": "Học vần uôn trước uông." },
+    { "unit": "rime:ương", "requires": ["rime:ươn"], "basis": "pedagogical", "note": "Học vần ươn trước ương." },
+    {
+      "unit": "rime:oan",
+      "requires": ["rime:oa", "rime:an"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:oang",
+      "requires": ["rime:oa", "rime:ang"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:oanh",
+      "requires": ["rime:oa", "rime:anh"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:oat",
+      "requires": ["rime:oa", "rime:at"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:oai",
+      "requires": ["rime:oa", "rime:ai"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:oay",
+      "requires": ["rime:oa", "rime:ay"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:uân",
+      "requires": ["rime:ân"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:uât",
+      "requires": ["rime:ât"],
+      "basis": "pedagogical",
+      "note": "Vần có âm đệm dạy sau vần không có âm đệm tương ứng."
+    },
+    {
+      "unit": "rime:uyên",
+      "requires": ["rime:uy", "rime:yên"],
+      "basis": "pedagogical",
+      "note": "Học uy và yên trước uyên."
+    }
+  ]
+}

@@ -1,0 +1,474 @@
+{
+  "kind": "phonemes",
+  "description": "Âm (chữ ghi âm) dùng khi dạy đọc: chữ đơn và tổ hợp chữ (ch, gh, gi, kh, ng, ngh, nh, ph, qu, th, tr). Mỗi âm ghi rõ gồm những chữ cái nào, đứng ở vị trí nào trong tiếng và cách gọi khi đánh vần (đề xuất, chờ GV xác nhận).",
+  "review": {
+    "status": "pending_review",
+    "note": "Cách gọi âm khi đánh vần (bờ, cờ, ngờ kép, …) là quy ước của lớp (Q-02) — mọi teachingLabel đều là đề xuất."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Soạn theo chữ viết tiếng Việt chuẩn; chưa được giáo viên rà soát."
+  },
+  "items": [
+    {
+      "id": "phoneme:b",
+      "text": "b",
+      "letters": ["letter:b"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "bờ"
+      }
+    },
+    {
+      "id": "phoneme:c",
+      "text": "c",
+      "letters": ["letter:c"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "cờ"
+      },
+      "soundGroup": "k",
+      "spellingRule": "spelling.c_k"
+    },
+    {
+      "id": "phoneme:d",
+      "text": "d",
+      "letters": ["letter:d"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "dờ"
+      },
+      "note": "Phát âm khác nhau theo vùng miền (gần với gi, r ở một số vùng)."
+    },
+    {
+      "id": "phoneme:đ",
+      "text": "đ",
+      "letters": ["letter:đ"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "đờ"
+      }
+    },
+    {
+      "id": "phoneme:g",
+      "text": "g",
+      "letters": ["letter:g"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "gờ"
+      },
+      "soundGroup": "g",
+      "spellingRule": "spelling.g_gh"
+    },
+    {
+      "id": "phoneme:h",
+      "text": "h",
+      "letters": ["letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "hờ"
+      }
+    },
+    {
+      "id": "phoneme:k",
+      "text": "k",
+      "letters": ["letter:k"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "ca",
+        "note": "Ghi cùng âm với c; nhiều lớp gọi “ca” để phân biệt chữ viết — cần GV xác nhận."
+      },
+      "soundGroup": "k",
+      "spellingRule": "spelling.c_k"
+    },
+    {
+      "id": "phoneme:l",
+      "text": "l",
+      "letters": ["letter:l"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "lờ"
+      }
+    },
+    {
+      "id": "phoneme:m",
+      "text": "m",
+      "letters": ["letter:m"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "mờ"
+      }
+    },
+    {
+      "id": "phoneme:n",
+      "text": "n",
+      "letters": ["letter:n"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "nờ"
+      }
+    },
+    {
+      "id": "phoneme:p",
+      "text": "p",
+      "letters": ["letter:p"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "pờ"
+      },
+      "note": "Làm âm đầu chủ yếu trong từ mượn; thường làm âm cuối (ap, ấp, ếp…)."
+    },
+    {
+      "id": "phoneme:r",
+      "text": "r",
+      "letters": ["letter:r"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "rờ"
+      }
+    },
+    {
+      "id": "phoneme:s",
+      "text": "s",
+      "letters": ["letter:s"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "sờ"
+      }
+    },
+    {
+      "id": "phoneme:t",
+      "text": "t",
+      "letters": ["letter:t"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "tờ"
+      }
+    },
+    {
+      "id": "phoneme:v",
+      "text": "v",
+      "letters": ["letter:v"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "vờ"
+      }
+    },
+    {
+      "id": "phoneme:x",
+      "text": "x",
+      "letters": ["letter:x"],
+      "phonemeClass": "consonant",
+      "graphemeType": "single",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "xờ"
+      }
+    },
+    {
+      "id": "phoneme:ch",
+      "text": "ch",
+      "letters": ["letter:c", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "chờ"
+      }
+    },
+    {
+      "id": "phoneme:gh",
+      "text": "gh",
+      "letters": ["letter:g", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "gờ kép",
+        "alternatives": ["gờ ghép"]
+      },
+      "soundGroup": "g",
+      "spellingRule": "spelling.g_gh"
+    },
+    {
+      "id": "phoneme:gi",
+      "text": "gi",
+      "letters": ["letter:g", "letter:i"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "di",
+        "alternatives": ["gi"],
+        "note": "Cách gọi và cách phân tích “gi” (gì, giếng) là quy ước của lớp — cần GV xác nhận."
+      },
+      "note": "Quy ước tạm: gi là một âm đầu (syllable.gi_onset)."
+    },
+    {
+      "id": "phoneme:kh",
+      "text": "kh",
+      "letters": ["letter:k", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "khờ"
+      }
+    },
+    {
+      "id": "phoneme:ng",
+      "text": "ng",
+      "letters": ["letter:n", "letter:g"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "ngờ",
+        "alternatives": ["ngờ đơn"]
+      },
+      "soundGroup": "ng",
+      "spellingRule": "spelling.ng_ngh"
+    },
+    {
+      "id": "phoneme:ngh",
+      "text": "ngh",
+      "letters": ["letter:n", "letter:g", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "trigraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "ngờ kép"
+      },
+      "soundGroup": "ng",
+      "spellingRule": "spelling.ng_ngh"
+    },
+    {
+      "id": "phoneme:nh",
+      "text": "nh",
+      "letters": ["letter:n", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset", "coda"],
+      "teachingLabel": {
+        "proposed": "nhờ"
+      }
+    },
+    {
+      "id": "phoneme:ph",
+      "text": "ph",
+      "letters": ["letter:p", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "phờ"
+      }
+    },
+    {
+      "id": "phoneme:qu",
+      "text": "qu",
+      "letters": ["letter:q", "letter:u"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "quờ"
+      },
+      "spellingRule": "spelling.qu",
+      "note": "Về cấu tạo, u trong qu là âm đệm; quy ước tạm coi qu là một âm đầu (syllable.qu_onset) — cần GV xác nhận."
+    },
+    {
+      "id": "phoneme:th",
+      "text": "th",
+      "letters": ["letter:t", "letter:h"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "thờ"
+      }
+    },
+    {
+      "id": "phoneme:tr",
+      "text": "tr",
+      "letters": ["letter:t", "letter:r"],
+      "phonemeClass": "consonant",
+      "graphemeType": "digraph",
+      "positions": ["onset"],
+      "teachingLabel": {
+        "proposed": "trờ"
+      }
+    },
+    {
+      "id": "phoneme:a",
+      "text": "a",
+      "letters": ["letter:a"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "a"
+      }
+    },
+    {
+      "id": "phoneme:ă",
+      "text": "ă",
+      "letters": ["letter:ă"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "á"
+      },
+      "note": "Không đứng một mình làm vần; luôn có âm cuối (ăn, ăm…)."
+    },
+    {
+      "id": "phoneme:â",
+      "text": "â",
+      "letters": ["letter:â"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "ớ"
+      },
+      "note": "Không đứng một mình làm vần; luôn có âm cuối (ân, âu…)."
+    },
+    {
+      "id": "phoneme:e",
+      "text": "e",
+      "letters": ["letter:e"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "e"
+      }
+    },
+    {
+      "id": "phoneme:ê",
+      "text": "ê",
+      "letters": ["letter:ê"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "ê"
+      }
+    },
+    {
+      "id": "phoneme:i",
+      "text": "i",
+      "letters": ["letter:i"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus", "coda"],
+      "teachingLabel": {
+        "proposed": "i",
+        "alternatives": ["i ngắn"]
+      },
+      "soundGroup": "i"
+    },
+    {
+      "id": "phoneme:y",
+      "text": "y",
+      "letters": ["letter:y"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus", "coda"],
+      "teachingLabel": {
+        "proposed": "i",
+        "alternatives": ["i dài"],
+        "note": "Cùng âm với i; gọi “i dài” để phân biệt chữ viết."
+      },
+      "soundGroup": "i"
+    },
+    {
+      "id": "phoneme:o",
+      "text": "o",
+      "letters": ["letter:o"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["medial", "nucleus", "coda"],
+      "teachingLabel": {
+        "proposed": "o"
+      }
+    },
+    {
+      "id": "phoneme:ô",
+      "text": "ô",
+      "letters": ["letter:ô"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "ô"
+      }
+    },
+    {
+      "id": "phoneme:ơ",
+      "text": "ơ",
+      "letters": ["letter:ơ"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "ơ"
+      }
+    },
+    {
+      "id": "phoneme:u",
+      "text": "u",
+      "letters": ["letter:u"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["medial", "nucleus", "coda"],
+      "teachingLabel": {
+        "proposed": "u"
+      }
+    },
+    {
+      "id": "phoneme:ư",
+      "text": "ư",
+      "letters": ["letter:ư"],
+      "phonemeClass": "vowel",
+      "graphemeType": "single",
+      "positions": ["nucleus"],
+      "teachingLabel": {
+        "proposed": "ư"
+      }
+    }
+  ]
+}

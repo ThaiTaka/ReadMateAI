@@ -1,0 +1,979 @@
+{
+  "kind": "rimes",
+  "description": "Danh mục vần theo chữ viết, mỗi vần khai báo tường minh âm đệm (o/u), âm chính và âm cuối. Bộ phân tích tiếng chỉ chấp nhận vần có trong danh mục này. Vần có âm đệm sau “qu” được viết bỏ âm đệm theo quy ước qu là âm đầu.",
+  "review": {
+    "status": "pending_review",
+    "note": "Danh mục vần cần GV đối chiếu với bộ sách của lớp (vần nào được dạy, tên gọi, các vần ít gặp)."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Soạn theo chữ viết tiếng Việt chuẩn; chưa được giáo viên rà soát."
+  },
+  "items": [
+    {
+      "id": "rime:a",
+      "text": "a",
+      "nucleus": "a",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:e",
+      "text": "e",
+      "nucleus": "e",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:ê",
+      "text": "ê",
+      "nucleus": "ê",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:i",
+      "text": "i",
+      "nucleus": "i",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:y",
+      "text": "y",
+      "nucleus": "y",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:o",
+      "text": "o",
+      "nucleus": "o",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:ô",
+      "text": "ô",
+      "nucleus": "ô",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:ơ",
+      "text": "ơ",
+      "nucleus": "ơ",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:u",
+      "text": "u",
+      "nucleus": "u",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:ư",
+      "text": "ư",
+      "nucleus": "ư",
+      "note": "Vần chỉ gồm một nguyên âm: khi dạy được tính là âm (phoneme)."
+    },
+    {
+      "id": "rime:ia",
+      "text": "ia",
+      "nucleus": "ia"
+    },
+    {
+      "id": "rime:ua",
+      "text": "ua",
+      "nucleus": "ua"
+    },
+    {
+      "id": "rime:ưa",
+      "text": "ưa",
+      "nucleus": "ưa"
+    },
+    {
+      "id": "rime:ac",
+      "text": "ac",
+      "nucleus": "a",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ach",
+      "text": "ach",
+      "nucleus": "a",
+      "coda": "ch"
+    },
+    {
+      "id": "rime:ai",
+      "text": "ai",
+      "nucleus": "a",
+      "coda": "i"
+    },
+    {
+      "id": "rime:am",
+      "text": "am",
+      "nucleus": "a",
+      "coda": "m"
+    },
+    {
+      "id": "rime:an",
+      "text": "an",
+      "nucleus": "a",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ang",
+      "text": "ang",
+      "nucleus": "a",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:anh",
+      "text": "anh",
+      "nucleus": "a",
+      "coda": "nh"
+    },
+    {
+      "id": "rime:ao",
+      "text": "ao",
+      "nucleus": "a",
+      "coda": "o"
+    },
+    {
+      "id": "rime:ap",
+      "text": "ap",
+      "nucleus": "a",
+      "coda": "p"
+    },
+    {
+      "id": "rime:at",
+      "text": "at",
+      "nucleus": "a",
+      "coda": "t"
+    },
+    {
+      "id": "rime:au",
+      "text": "au",
+      "nucleus": "a",
+      "coda": "u"
+    },
+    {
+      "id": "rime:ay",
+      "text": "ay",
+      "nucleus": "a",
+      "coda": "y"
+    },
+    {
+      "id": "rime:ăc",
+      "text": "ăc",
+      "nucleus": "ă",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ăm",
+      "text": "ăm",
+      "nucleus": "ă",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ăn",
+      "text": "ăn",
+      "nucleus": "ă",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ăng",
+      "text": "ăng",
+      "nucleus": "ă",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:ăp",
+      "text": "ăp",
+      "nucleus": "ă",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ăt",
+      "text": "ăt",
+      "nucleus": "ă",
+      "coda": "t"
+    },
+    {
+      "id": "rime:âc",
+      "text": "âc",
+      "nucleus": "â",
+      "coda": "c"
+    },
+    {
+      "id": "rime:âm",
+      "text": "âm",
+      "nucleus": "â",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ân",
+      "text": "ân",
+      "nucleus": "â",
+      "coda": "n"
+    },
+    {
+      "id": "rime:âng",
+      "text": "âng",
+      "nucleus": "â",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:âp",
+      "text": "âp",
+      "nucleus": "â",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ât",
+      "text": "ât",
+      "nucleus": "â",
+      "coda": "t"
+    },
+    {
+      "id": "rime:âu",
+      "text": "âu",
+      "nucleus": "â",
+      "coda": "u"
+    },
+    {
+      "id": "rime:ây",
+      "text": "ây",
+      "nucleus": "â",
+      "coda": "y"
+    },
+    {
+      "id": "rime:ec",
+      "text": "ec",
+      "nucleus": "e",
+      "coda": "c"
+    },
+    {
+      "id": "rime:em",
+      "text": "em",
+      "nucleus": "e",
+      "coda": "m"
+    },
+    {
+      "id": "rime:en",
+      "text": "en",
+      "nucleus": "e",
+      "coda": "n"
+    },
+    {
+      "id": "rime:eng",
+      "text": "eng",
+      "nucleus": "e",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:eo",
+      "text": "eo",
+      "nucleus": "e",
+      "coda": "o"
+    },
+    {
+      "id": "rime:ep",
+      "text": "ep",
+      "nucleus": "e",
+      "coda": "p"
+    },
+    {
+      "id": "rime:et",
+      "text": "et",
+      "nucleus": "e",
+      "coda": "t"
+    },
+    {
+      "id": "rime:êch",
+      "text": "êch",
+      "nucleus": "ê",
+      "coda": "ch"
+    },
+    {
+      "id": "rime:êm",
+      "text": "êm",
+      "nucleus": "ê",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ên",
+      "text": "ên",
+      "nucleus": "ê",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ênh",
+      "text": "ênh",
+      "nucleus": "ê",
+      "coda": "nh"
+    },
+    {
+      "id": "rime:êp",
+      "text": "êp",
+      "nucleus": "ê",
+      "coda": "p"
+    },
+    {
+      "id": "rime:êt",
+      "text": "êt",
+      "nucleus": "ê",
+      "coda": "t"
+    },
+    {
+      "id": "rime:êu",
+      "text": "êu",
+      "nucleus": "ê",
+      "coda": "u"
+    },
+    {
+      "id": "rime:ich",
+      "text": "ich",
+      "nucleus": "i",
+      "coda": "ch"
+    },
+    {
+      "id": "rime:im",
+      "text": "im",
+      "nucleus": "i",
+      "coda": "m"
+    },
+    {
+      "id": "rime:in",
+      "text": "in",
+      "nucleus": "i",
+      "coda": "n"
+    },
+    {
+      "id": "rime:inh",
+      "text": "inh",
+      "nucleus": "i",
+      "coda": "nh"
+    },
+    {
+      "id": "rime:ip",
+      "text": "ip",
+      "nucleus": "i",
+      "coda": "p"
+    },
+    {
+      "id": "rime:it",
+      "text": "it",
+      "nucleus": "i",
+      "coda": "t"
+    },
+    {
+      "id": "rime:iu",
+      "text": "iu",
+      "nucleus": "i",
+      "coda": "u"
+    },
+    {
+      "id": "rime:oc",
+      "text": "oc",
+      "nucleus": "o",
+      "coda": "c"
+    },
+    {
+      "id": "rime:oi",
+      "text": "oi",
+      "nucleus": "o",
+      "coda": "i"
+    },
+    {
+      "id": "rime:om",
+      "text": "om",
+      "nucleus": "o",
+      "coda": "m"
+    },
+    {
+      "id": "rime:on",
+      "text": "on",
+      "nucleus": "o",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ong",
+      "text": "ong",
+      "nucleus": "o",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:op",
+      "text": "op",
+      "nucleus": "o",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ot",
+      "text": "ot",
+      "nucleus": "o",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ooc",
+      "text": "ooc",
+      "nucleus": "oo",
+      "coda": "c",
+      "note": "O dài viết hai chữ o (quần soóc). Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oong",
+      "text": "oong",
+      "nucleus": "oo",
+      "coda": "ng",
+      "note": "O dài viết hai chữ o (cái xoong)."
+    },
+    {
+      "id": "rime:ôc",
+      "text": "ôc",
+      "nucleus": "ô",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ôi",
+      "text": "ôi",
+      "nucleus": "ô",
+      "coda": "i"
+    },
+    {
+      "id": "rime:ôm",
+      "text": "ôm",
+      "nucleus": "ô",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ôn",
+      "text": "ôn",
+      "nucleus": "ô",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ông",
+      "text": "ông",
+      "nucleus": "ô",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:ôp",
+      "text": "ôp",
+      "nucleus": "ô",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ôt",
+      "text": "ôt",
+      "nucleus": "ô",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ơi",
+      "text": "ơi",
+      "nucleus": "ơ",
+      "coda": "i"
+    },
+    {
+      "id": "rime:ơm",
+      "text": "ơm",
+      "nucleus": "ơ",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ơn",
+      "text": "ơn",
+      "nucleus": "ơ",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ơp",
+      "text": "ơp",
+      "nucleus": "ơ",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ơt",
+      "text": "ơt",
+      "nucleus": "ơ",
+      "coda": "t"
+    },
+    {
+      "id": "rime:uc",
+      "text": "uc",
+      "nucleus": "u",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ui",
+      "text": "ui",
+      "nucleus": "u",
+      "coda": "i"
+    },
+    {
+      "id": "rime:um",
+      "text": "um",
+      "nucleus": "u",
+      "coda": "m"
+    },
+    {
+      "id": "rime:un",
+      "text": "un",
+      "nucleus": "u",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ung",
+      "text": "ung",
+      "nucleus": "u",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:up",
+      "text": "up",
+      "nucleus": "u",
+      "coda": "p"
+    },
+    {
+      "id": "rime:ut",
+      "text": "ut",
+      "nucleus": "u",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ưc",
+      "text": "ưc",
+      "nucleus": "ư",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ưi",
+      "text": "ưi",
+      "nucleus": "ư",
+      "coda": "i"
+    },
+    {
+      "id": "rime:ưng",
+      "text": "ưng",
+      "nucleus": "ư",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:ưt",
+      "text": "ưt",
+      "nucleus": "ư",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ưu",
+      "text": "ưu",
+      "nucleus": "ư",
+      "coda": "u"
+    },
+    {
+      "id": "rime:iêc",
+      "text": "iêc",
+      "nucleus": "iê",
+      "coda": "c"
+    },
+    {
+      "id": "rime:iêm",
+      "text": "iêm",
+      "nucleus": "iê",
+      "coda": "m"
+    },
+    {
+      "id": "rime:iên",
+      "text": "iên",
+      "nucleus": "iê",
+      "coda": "n"
+    },
+    {
+      "id": "rime:iêng",
+      "text": "iêng",
+      "nucleus": "iê",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:iêp",
+      "text": "iêp",
+      "nucleus": "iê",
+      "coda": "p"
+    },
+    {
+      "id": "rime:iêt",
+      "text": "iêt",
+      "nucleus": "iê",
+      "coda": "t"
+    },
+    {
+      "id": "rime:iêu",
+      "text": "iêu",
+      "nucleus": "iê",
+      "coda": "u"
+    },
+    {
+      "id": "rime:yêm",
+      "text": "yêm",
+      "nucleus": "yê",
+      "coda": "m"
+    },
+    {
+      "id": "rime:yên",
+      "text": "yên",
+      "nucleus": "yê",
+      "coda": "n"
+    },
+    {
+      "id": "rime:yêt",
+      "text": "yêt",
+      "nucleus": "yê",
+      "coda": "t",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:yêu",
+      "text": "yêu",
+      "nucleus": "yê",
+      "coda": "u"
+    },
+    {
+      "id": "rime:uôc",
+      "text": "uôc",
+      "nucleus": "uô",
+      "coda": "c"
+    },
+    {
+      "id": "rime:uôi",
+      "text": "uôi",
+      "nucleus": "uô",
+      "coda": "i"
+    },
+    {
+      "id": "rime:uôm",
+      "text": "uôm",
+      "nucleus": "uô",
+      "coda": "m"
+    },
+    {
+      "id": "rime:uôn",
+      "text": "uôn",
+      "nucleus": "uô",
+      "coda": "n"
+    },
+    {
+      "id": "rime:uông",
+      "text": "uông",
+      "nucleus": "uô",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:uôt",
+      "text": "uôt",
+      "nucleus": "uô",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ươc",
+      "text": "ươc",
+      "nucleus": "ươ",
+      "coda": "c"
+    },
+    {
+      "id": "rime:ươi",
+      "text": "ươi",
+      "nucleus": "ươ",
+      "coda": "i"
+    },
+    {
+      "id": "rime:ươm",
+      "text": "ươm",
+      "nucleus": "ươ",
+      "coda": "m"
+    },
+    {
+      "id": "rime:ươn",
+      "text": "ươn",
+      "nucleus": "ươ",
+      "coda": "n"
+    },
+    {
+      "id": "rime:ương",
+      "text": "ương",
+      "nucleus": "ươ",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:ươp",
+      "text": "ươp",
+      "nucleus": "ươ",
+      "coda": "p",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:ươt",
+      "text": "ươt",
+      "nucleus": "ươ",
+      "coda": "t"
+    },
+    {
+      "id": "rime:ươu",
+      "text": "ươu",
+      "nucleus": "ươ",
+      "coda": "u",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oa",
+      "text": "oa",
+      "medial": "o",
+      "nucleus": "a"
+    },
+    {
+      "id": "rime:oac",
+      "text": "oac",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "c"
+    },
+    {
+      "id": "rime:oach",
+      "text": "oach",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "ch",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oai",
+      "text": "oai",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "i"
+    },
+    {
+      "id": "rime:oam",
+      "text": "oam",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "m",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oan",
+      "text": "oan",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "n"
+    },
+    {
+      "id": "rime:oang",
+      "text": "oang",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "ng"
+    },
+    {
+      "id": "rime:oanh",
+      "text": "oanh",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "nh"
+    },
+    {
+      "id": "rime:oap",
+      "text": "oap",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "p",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oat",
+      "text": "oat",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "t"
+    },
+    {
+      "id": "rime:oay",
+      "text": "oay",
+      "medial": "o",
+      "nucleus": "a",
+      "coda": "y"
+    },
+    {
+      "id": "rime:oăc",
+      "text": "oăc",
+      "medial": "o",
+      "nucleus": "ă",
+      "coda": "c",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oăm",
+      "text": "oăm",
+      "medial": "o",
+      "nucleus": "ă",
+      "coda": "m",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oăn",
+      "text": "oăn",
+      "medial": "o",
+      "nucleus": "ă",
+      "coda": "n",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oăng",
+      "text": "oăng",
+      "medial": "o",
+      "nucleus": "ă",
+      "coda": "ng",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oăt",
+      "text": "oăt",
+      "medial": "o",
+      "nucleus": "ă",
+      "coda": "t",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oe",
+      "text": "oe",
+      "medial": "o",
+      "nucleus": "e"
+    },
+    {
+      "id": "rime:oen",
+      "text": "oen",
+      "medial": "o",
+      "nucleus": "e",
+      "coda": "n",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:oeo",
+      "text": "oeo",
+      "medial": "o",
+      "nucleus": "e",
+      "coda": "o"
+    },
+    {
+      "id": "rime:oet",
+      "text": "oet",
+      "medial": "o",
+      "nucleus": "e",
+      "coda": "t"
+    },
+    {
+      "id": "rime:uy",
+      "text": "uy",
+      "medial": "u",
+      "nucleus": "y"
+    },
+    {
+      "id": "rime:uych",
+      "text": "uych",
+      "medial": "u",
+      "nucleus": "y",
+      "coda": "ch",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:uynh",
+      "text": "uynh",
+      "medial": "u",
+      "nucleus": "y",
+      "coda": "nh"
+    },
+    {
+      "id": "rime:uyt",
+      "text": "uyt",
+      "medial": "u",
+      "nucleus": "y",
+      "coda": "t"
+    },
+    {
+      "id": "rime:uyu",
+      "text": "uyu",
+      "medial": "u",
+      "nucleus": "y",
+      "coda": "u",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:uya",
+      "text": "uya",
+      "medial": "u",
+      "nucleus": "ya"
+    },
+    {
+      "id": "rime:uyên",
+      "text": "uyên",
+      "medial": "u",
+      "nucleus": "yê",
+      "coda": "n"
+    },
+    {
+      "id": "rime:uyêt",
+      "text": "uyêt",
+      "medial": "u",
+      "nucleus": "yê",
+      "coda": "t"
+    },
+    {
+      "id": "rime:uê",
+      "text": "uê",
+      "medial": "u",
+      "nucleus": "ê"
+    },
+    {
+      "id": "rime:uênh",
+      "text": "uênh",
+      "medial": "u",
+      "nucleus": "ê",
+      "coda": "nh",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:uân",
+      "text": "uân",
+      "medial": "u",
+      "nucleus": "â",
+      "coda": "n"
+    },
+    {
+      "id": "rime:uâng",
+      "text": "uâng",
+      "medial": "u",
+      "nucleus": "â",
+      "coda": "ng",
+      "note": "Ít gặp ở lớp 1."
+    },
+    {
+      "id": "rime:uât",
+      "text": "uât",
+      "medial": "u",
+      "nucleus": "â",
+      "coda": "t"
+    },
+    {
+      "id": "rime:uây",
+      "text": "uây",
+      "medial": "u",
+      "nucleus": "â",
+      "coda": "y"
+    },
+    {
+      "id": "rime:uơ",
+      "text": "uơ",
+      "medial": "u",
+      "nucleus": "ơ",
+      "note": "Chỉ gặp trong vài tiếng (huơ, thuở). Ít gặp ở lớp 1."
+    }
+  ]
+}

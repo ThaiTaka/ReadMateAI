@@ -4,7 +4,7 @@
 
 ReadMate AI là nền tảng hỗ trợ học sinh lớp 1 luyện Tiếng Việt — nhận diện chữ, âm, vần, đánh vần, đọc trơn và phát triển vốn từ. Triết lý cốt lõi: **học có hướng dẫn ở nhà → tự thực hiện ở lớp**. Ở nhà, các em làm quen từng dạng bài với lời đọc yêu cầu, hình ảnh và gợi ý; mức hỗ trợ giảm dần; ở lớp, các em tự làm phiếu tương đương mà ít cần giáo viên hướng dẫn riêng.
 
-**Trạng thái hiện tại: Giai đoạn 2 — nền tảng kỹ thuật (bản xem trước).** Website đã chạy được với giao diện các trang nền tảng; **chưa** có bài tập tương tác, tài khoản, cơ sở dữ liệu hay AI. Xem lộ trình ở [TASKS.md](TASKS.md) và tiến độ ở [PROGRESS.md](PROGRESS.md).
+**Trạng thái hiện tại: Giai đoạn 3 — bộ máy tiếng Việt và kho tri thức (bản xem trước).** Website chạy được với giao diện các trang nền tảng; đã có thư viện phân tích tiếng Việt, kho tri thức có kiểm thử và lệnh kiểm tra nội dung. **Chưa** có bài tập tương tác, tài khoản, cơ sở dữ liệu hay AI; toàn bộ dữ liệu kho tri thức **đang chờ giáo viên duyệt**. Xem lộ trình ở [TASKS.md](TASKS.md) và tiến độ ở [PROGRESS.md](PROGRESS.md).
 
 ## Yêu cầu
 
@@ -47,6 +47,7 @@ rồi mở `http://<địa-chỉ-IP-máy-tính>:3000` trên điện thoại (Win
 | `npm run test:run` | Vitest chạy một lần: unit test, component test, kiểm tra vệ sinh repo |
 | `npm run test:e2e` | Playwright: tự build production, chạy `next start` ở cổng 3100, kiểm thử trên Chromium và WebKit (desktop + điện thoại) |
 | `npm run format` / `npm run format:check` | Prettier |
+| `npm run content:check` | Kiểm tra kho tri thức `content/`: JSON/lược đồ, ID, NFC, tham chiếu, chính tả, kiểm duyệt, dữ liệu cá nhân. Lỗi → thoát mã 1; cảnh báo = việc cần giáo viên rà soát |
 
 Kết quả E2E (ảnh chụp từng trang, báo cáo HTML) nằm trong `test-results/` và `playwright-report/` — đã được bỏ qua trong Git.
 
@@ -74,16 +75,26 @@ src/
 │   ├── learning/           # Biểu tượng hướng dẫn, màu/biểu tượng lộ trình
 │   └── illustrations/      # Minh họa ghép tiếng, linh vật
 ├── config/                 # site.ts (điều hướng), security-headers.ts (CSP, Permissions-Policy…)
-├── features/               # exercises/ (6 dạng bài), learning-paths/ (3 lộ trình), demo/ (dữ liệu giả lập)
-├── lib/                    # cn.ts, vietnamese/normalize.ts (chuẩn hóa NFC)
+├── features/               # exercises/ (6 dạng bài), learning-paths/ (3 lộ trình), demo/ (dữ liệu giả lập),
+│                           # knowledge/ (kho tri thức: nạp, hồ sơ lớp, kiểm tra ngữ liệu, content:check)
+├── lib/                    # cn.ts, vietnamese/ (NFC, thanh, phân tích tiếng, chính tả, giải mã, độ khó)
 ├── strings/vi.ts           # Toàn bộ câu chữ giao diện tiếng Việt
 ├── styles/tokens.css       # Design tokens (màu, cỡ chữ, vùng chạm, bo góc, đổ bóng)
 └── types/learning.ts       # Kiểu dùng chung
+content/                    # Kho tri thức (JSON): kb/ (chữ, âm, thanh, vần, quy tắc, tiếng, từ, câu), curriculum/ (bộ bài, hồ sơ lớp)
+scripts/content-check.ts    # npm run content:check
 tests/
-├── unit/                   # Vitest + Testing Library
+├── unit/                   # Vitest + Testing Library (vietnamese/, knowledge/ từ GĐ3)
 └── e2e/                    # Playwright
-docs/                       # PRD, kiến trúc, mô hình dữ liệu
+docs/                       # PRD, kiến trúc, mô hình dữ liệu, bộ máy tiếng Việt, phiếu rà soát cho GV
 ```
+
+## Bộ máy tiếng Việt và kho tri thức (Giai đoạn 3)
+
+- **Thư viện** `src/lib/vietnamese/`: chuẩn hóa NFC và soát văn bản (ký tự ẩn, dấu sót, dấu hiệu bảng mã cũ TCVN3/VNI — chỉ phát hiện, không tự sửa); tách dấu thanh; phân tích tiếng thành âm đầu – âm đệm – âm chính – âm cuối – thanh theo **danh mục 153 vần**; quy tắc chính tả c/k, g/gh, ng/ngh, qu, iê/yê, nguyên âm đôi, âm cuối p/t/c/ch; vị trí dấu thanh; kiểm tra “đọc được bằng kiến thức đã học” với 4 kết luận `readable` / `not_yet_learned` / `unknown` / `invalid`; ước lượng độ khó.
+- **Kho tri thức** `content/`: 29 chữ cái, 39 âm (11 tổ hợp chữ), 6 thanh, 153 vần, 13 quy tắc, 17 cặp dễ nhầm, quan hệ tiên quyết, 149 mục ngữ liệu nguyên bản (58 tiếng, 60 từ, 31 câu). **Chưa mục nào được duyệt.**
+- **Tiến độ học tập**: hồ sơ lớp 1A2 **chưa được giáo viên xác nhận** (chưa biết bộ sách, vị trí bài, quy ước) nên mọi kiểm tra theo lớp 1A2 trả về “chưa xác định”; chuỗi bài minh họa chỉ dùng để kiểm thử.
+- Tài liệu: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) · Phiếu rà soát cho giáo viên: [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md).
 
 ## Chức năng đã có (Giai đoạn 2)
 
@@ -98,7 +109,7 @@ docs/                       # PRD, kiến trúc, mô hình dữ liệu
 
 ## Chức năng chưa phát triển
 
-Bộ máy tiếng Việt và kho tri thức (GĐ3), sáu dạng bài tương tác và âm thanh (GĐ4, GĐ6), Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị (GĐ5), giao bài và lưu kết quả (GĐ7), phiếu PDF (GĐ8), dashboard có dữ liệu (GĐ9), triển khai production (GĐ10), AI hỗ trợ giáo viên tạo bài (GĐ11).
+Sáu dạng bài tương tác và âm thanh (GĐ4, GĐ6), giao diện duyệt nội dung cho giáo viên (GĐ6), Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị (GĐ5), giao bài và lưu kết quả (GĐ7), phiếu PDF (GĐ8), dashboard có dữ liệu (GĐ9), triển khai production (GĐ10), AI hỗ trợ giáo viên tạo bài (GĐ11).
 
 ## Triển khai
 
@@ -109,12 +120,13 @@ Bộ máy tiếng Việt và kho tri thức (GĐ3), sáu dạng bài tương tá
 - [docs/PRD.md](docs/PRD.md) — yêu cầu sản phẩm
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — kiến trúc kỹ thuật
 - [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — mô hình dữ liệu dự kiến
+- [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) — bộ máy tiếng Việt và kho tri thức · [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) — phiếu rà soát cho giáo viên
 - [TASKS.md](TASKS.md) — kế hoạch theo giai đoạn · [PROGRESS.md](PROGRESS.md) — tiến độ
 - [CLAUDE.md](CLAUDE.md) — quy tắc phát triển bắt buộc · [AGENTS.md](AGENTS.md) — ghi chú của Next.js cho trợ lý lập trình
 
 ## Bảo vệ dữ liệu trẻ em
 
-Dự án không thu thập dữ liệu học sinh ở giai đoạn này. Repository đang **công khai**: không commit secret, dữ liệu thật hay bản xuất cơ sở dữ liệu. Các quy tắc chi tiết nằm ở [CLAUDE.md](CLAUDE.md) §6.
+Dự án không thu thập dữ liệu học sinh ở giai đoạn này. Kho tri thức chỉ chứa ngữ liệu minh họa và tên nhân vật hư cấu; `npm run content:check` chặn chuỗi giống email/số điện thoại/số định danh và các trường dữ liệu cá nhân. Repository đang **công khai**: không commit secret, dữ liệu thật hay bản xuất cơ sở dữ liệu. Các quy tắc chi tiết nằm ở [CLAUDE.md](CLAUDE.md) §6.
 
 ## Giấy phép
 

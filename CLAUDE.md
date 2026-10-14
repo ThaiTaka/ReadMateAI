@@ -27,6 +27,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/PRD.md](docs/PRD.md) | Yêu cầu sản phẩm, 6 dạng bài, chính sách âm thanh, mức hỗ trợ H3→H0, chỉ số |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Kiến trúc, phiên bản đã xác minh, quyết định AD-xx, bảo mật, triển khai |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Bảng, quan hệ, ma trận RLS, lưu giữ dữ liệu, kế hoạch migration |
+| [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) | Bộ máy tiếng Việt + kho tri thức (GĐ3): mô hình, dữ liệu, hàm, giới hạn, cập nhật tiến độ, thêm học liệu, kiểm duyệt |
+| [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) | Phiếu rà soát cho GV: bộ sách, quy ước, tên chữ, cách gọi âm, vần, quy tắc, ngữ liệu |
 | [TASKS.md](TASKS.md) | Giai đoạn, nhiệm vụ, tiêu chí nghiệm thu |
 | [PROGRESS.md](PROGRESS.md) | Trạng thái hiện tại, quyết định, câu hỏi mở, rủi ro |
 
@@ -47,7 +49,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - GV: email/mật khẩu (không tự đăng ký). HS: người dùng ẩn danh Supabase + liên kết thiết bị bằng thẻ học QR/mã dự phòng.
 - **Student gateway**: mọi thao tác ghi của HS và nội dung phiên luyện đi qua server; HS chỉ đọc dữ liệu của mình qua RLS.
 - **Exercise Type Module**: mỗi dạng bài là một thư mục gồm lược đồ zod, `grade()`, `validate()`, gợi ý, `audioPolicy`, `Player.tsx`, `Paper.tsx`.
-- Kho tri thức lõi là dữ liệu trong repo (`content/`) có kiểm thử; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/`.
+- Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
 - Âm thanh sinh trước (TTS) hoặc ghi âm GV; PDF bằng `@react-pdf/renderer` + font Andika; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được.
 
 ## 6. BẮT BUỘC — Bảo vệ trẻ em và dữ liệu
@@ -110,11 +112,20 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 9. Không cài gói với `--force`/`--legacy-peer-deps`, không chạy `npm audit fix --force`; không tắt luật lint/TypeScript hay bỏ qua test để "cho xanh".
 10. Fixture Playwright: đặt tên tham số callback là `provide` (không phải `use`) để tránh báo nhầm của luật `react-hooks`.
 
+### 9.2 Quy tắc rút ra ở GĐ3 (BẮT BUỘC)
+
+1. `src/lib/vietnamese/**` và `src/features/knowledge/**` (trừ `default-kb.ts`) được `npm run content:check` chạy **trực tiếp bằng Node 24**: import nội bộ dùng đường dẫn **tương đối có đuôi `.ts`**, không dùng alias `@/`, không dùng enum/namespace. `content-validation.ts` dùng `node:crypto` — **không** import vào mã giao diện.
+2. Ký tự đặc biệt trong mã (dấu tổ hợp U+0300…, ký tự ẩn U+200B/U+FEFF/U+00AD/U+00A0, chữ Kirin/Ð giả dạng) phải viết dạng thoát `\uXXXX`. GĐ3 đã gặp lỗi chuỗi thoát bị ghi thành ký tự thật → sau khi ghi tệp có ký tự đặc biệt, **kiểm tra byte thực tế**.
+3. Dữ liệu kho tri thức chỉ sửa trong `content/`; mục mới luôn bắt đầu `draft`/`pending_review`; **không bao giờ** đặt `approved` thay giáo viên (cần `reviewedBy` là GV, `reviewedAt`, `contentHash`). Sau mọi thay đổi: `npm run content:check` phải 0 lỗi.
+4. Điểm cần quyết định chuyên môn chưa được GV xác nhận (quy ước qu/gi, "i" dùng chung, kiểu đặt dấu, qu + y, thứ tự bài của bộ sách) phải trả `unknown`/cảnh báo — không mã hóa thành kết luận chắc chắn. Không tạo dữ liệu tiến độ rồi trình bày như chương trình thật của lớp (chuỗi bài minh họa có `seriesKind: "illustrative"`).
+5. Thêm tệp bộ bài/hồ sơ trong `content/curriculum/` thì đăng ký vào `src/features/knowledge/default-kb.ts` (unit test báo nếu quên).
+6. Fixture kiểm thử cần chuỗi giống email/số điện thoại phải **ghép chuỗi lúc chạy** để không vi phạm test vệ sinh repo.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
 
-- [ ] `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:run` và `npm run build` đều xanh; thay đổi giao diện, route hay header thì chạy thêm `npm run test:e2e`.
+- [ ] `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run content:check`, `npm run test:run` và `npm run build` đều xanh; thay đổi giao diện, route hay header thì chạy thêm `npm run test:e2e`.
 - [ ] Logic mới có test; bảng mới có policy RLS + test cách ly.
 - [ ] Không có secret, dữ liệu thật hay `.env` trong thay đổi.
 - [ ] Tiêu chí nghiệm thu tương ứng trong `TASKS.md` được kiểm tra thật (không suy đoán).
@@ -132,8 +143,9 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run test` · `npm run test:run` | Vitest chế độ theo dõi · chạy một lần |
 | `npm run test:e2e` | Playwright: tự build + `next start` cổng 3100; Chromium/WebKit × desktop/điện thoại (lần đầu: `npx playwright install chromium webkit`) |
 | `npm run format` · `npm run format:check` | Prettier (bỏ qua `*.md`, `package-lock.json`) |
+| `npm run content:check` | Kiểm tra kho tri thức `content/`: lỗi (thoát mã 1) / cảnh báo cần GV rà soát / thông tin |
 
-Dự kiến thêm: `npm run content:check` (GĐ3), `npx supabase …` (GĐ5). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
+Dự kiến thêm: `npx supabase …` (GĐ5). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 
 ## 12. Thuật ngữ
 

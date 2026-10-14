@@ -49,7 +49,8 @@ const toPosix = (path: string) => relative(ROOT, path).split(sep).join("/");
 const textFiles = walk(ROOT)
   .filter((file) => TEXT_EXTENSIONS.has(extname(file)) || TEXT_DOTFILES.has(basename(file)))
   .map((file) => ({ path: toPosix(file), content: readFileSync(file, "utf8") }));
-const sourceFiles = textFiles.filter((file) => /^(src|tests|public)\//.test(file.path));
+// content/ (kho tri thức, GĐ3) cũng không được chứa email/số điện thoại — xem thêm content:check.
+const sourceFiles = textFiles.filter((file) => /^(src|tests|public|content|scripts)\//.test(file.path));
 const THIS_FILE = "tests/unit/repo-hygiene.test.ts";
 
 const SECRET_PATTERNS: Array<[label: string, pattern: RegExp]> = [

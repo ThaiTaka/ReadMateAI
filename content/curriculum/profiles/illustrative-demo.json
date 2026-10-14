@@ -1,0 +1,21 @@
+{
+  "id": "profile:illustrative-demo",
+  "classLabel": "Lớp minh họa",
+  "status": "illustrative",
+  "seriesId": "series:illustrative-v1",
+  "currentLessonOrdinal": 10,
+  "additionalTaughtUnits": [],
+  "excludedUnits": [],
+  "reviewFocusUnits": ["phoneme:b", "phoneme:d"],
+  "extendingAllowedUnits": ["rime:ia", "rime:ua", "rime:ưa"],
+  "conventions": {
+    "quAnalysis": "qu_onset",
+    "giAnalysis": "gi_onset",
+    "giSharedI": "shared_i",
+    "tonePlacement": "on_main_vowel"
+  },
+  "confirmation": null,
+  "notes": "Hồ sơ hư cấu dùng cho kiểm thử và bản demo: lớp đang ở bài MH10 của chuỗi minh họa; các quy ước là giá trị tạm thời, KHÔNG phải quyết định của nhà trường. Nhóm 1 (extending) được phép dùng thêm vần ia, ua, ưa; GV minh họa muốn ôn b–d.",
+  "updatedAt": "2026-10-14",
+  "version": 1
+}

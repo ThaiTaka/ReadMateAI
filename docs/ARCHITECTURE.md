@@ -1,8 +1,8 @@
 # ReadMate AI — Kiến trúc kỹ thuật
 
-> **Phiên bản:** 0.2 — cập nhật sau Giai đoạn 2 (nền tảng kỹ thuật: §3.1, AD-19 → AD-24, §5.1, §6.1, §18, §19, §20, §22)
+> **Phiên bản:** 0.3 — cập nhật sau Giai đoạn 3 (Vietnamese Knowledge Engine: §3.1, AD-25 → AD-31, §5.1, §10, §19, §20, §22)
 > **Ngày cập nhật:** 2026-10-14
-> **Trạng thái:** GĐ1 đã được nghiệm thu; phần GĐ2 chờ người điều phối đánh giá
+> **Trạng thái:** GĐ1, GĐ2 đã được nghiệm thu; phần GĐ3 chờ người điều phối đánh giá
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -88,6 +88,7 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 | Testing Library | `@testing-library/react` · `dom` · `jest-dom` | 16.3.3 · 10.4.2 · 7.0.1 | |
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
 | Kiểu Node | `@types/node` | 24.19.2 (`^24`) | Template mặc định `^20` lệch peer của Vitest 5 |
+| Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`) |
 
 ### 3.2 Đánh giá công nghệ cho các giai đoạn sau
 
@@ -142,16 +143,39 @@ Trạng thái: **Chốt** = áp dụng cho MVP · **POC** = cần thử nghiệm
 | AD-22 | Kiểm thử: Vitest (jsdom) + Testing Library cho unit/component; Playwright chạy trên **bản production** vừa build (webServer: build + `next start`), 4 cấu hình Chromium/WebKit × desktop/điện thoại | Kiểm tra đúng hành vi thật (prerender, header, CSP); hai engine phổ biến của phụ huynh (Android Chrome, iPhone Safari) | Chạy E2E trên `next dev` (khác production) | Chốt (GĐ2) |
 | AD-23 | `typedRoutes: true`; script `typecheck` = `next typegen && tsc --noEmit` | Liên kết nội bộ được kiểm tra kiểu; `next-env.d.ts` (bị gitignore) được sinh trước khi `tsc` chạy, kể cả trên CI | | Chốt (GĐ2) |
 | AD-24 | Tách module header bảo mật `src/config/security-headers.ts`, nạp từ `next.config.ts` với đuôi `.ts` tường minh | Node 24 nạp `next.config.ts` bằng bộ phân giải TypeScript gốc → cần đuôi tệp, chỉ cú pháp "xóa được" (`erasableSyntaxOnly`); module có unit test riêng | Viết thẳng trong `next.config.ts` (khó kiểm thử) | Chốt (GĐ2) |
+| AD-25 | Kho tri thức là **dữ liệu JSON** trong `content/` (lớp 1 `kb/`, lớp 2 `curriculum/`), kiểm bằng lược đồ zod `strictObject`; ứng dụng/Vitest import tĩnh qua bundler (`default-kb.ts`), script đọc bằng `fs` | Dữ liệu tách khỏi mã → GV/người nhập liệu sửa được, review như mã; trường lạ (kể cả trường dữ liệu cá nhân) bị từ chối | TypeScript data modules (khó cho người không lập trình); đưa ngay vào CSDL (chưa có GĐ5) | Chốt (GĐ3) |
+| AD-26 | Bộ phân tích tiếng **dựa trên danh mục**: âm đầu khớp dài nhất từ danh sách âm, phần vần phải khớp CHÍNH XÁC một trong 153 vần đã khai báo cấu tạo; không khớp → `unrecognized`/`ambiguous` kèm lý do | Ưu tiên chính xác và giải thích được hơn phủ mọi đầu vào; GV rà soát được danh mục | Thuật toán tách chuỗi theo luật chung (dễ sai âm thầm) | Chốt (GĐ3) |
+| AD-27 | Quy ước nhà trường (qu, gi, "i" dùng chung, kiểu đặt dấu) là **tham số của hồ sơ lớp**; kết quả phân tích ghi `conventionDependencies`; quy ước chưa khai báo → `unknown` | Không mã hóa quyết định sư phạm chưa được GV xác nhận thành kết luận chắc chắn (CLAUDE.md §7.6) | Chọn cứng một quy ước | Chốt (GĐ3) |
+| AD-28 | Đơn vị giải mã = âm đầu + vần + thanh; vần một nguyên âm đơn tính là âm; **không tự ghép vần** từ chữ cái; 4 kết luận `readable`/`not_yet_learned`/`unknown`/`invalid`; giải mã, từ vựng, đọc hiểu tách bạch | Khớp cách dạy lớp 1 (vần được giới thiệu như đơn vị); `unknown` không bao giờ được coi là hợp lệ | Suy luận ghép vần từ âm (lạc quan quá mức) | Chốt (GĐ3) |
+| AD-29 | `npm run content:check` chạy `scripts/content-check.ts` **trực tiếp bằng Node 24** (bỏ kiểu gốc) → thư viện dùng import tương đối có đuôi `.ts`, không alias; tắt riêng cảnh báo `MODULE_TYPELESS_PACKAGE_JSON` thay vì đổi cả dự án sang `"type": "module"` | Không thêm phụ thuộc (tsx/ts-node); không đụng cơ chế nạp module của cấu hình GĐ2. Đã kiểm chứng Turbopack (Next 16.4) đóng gói được cách import này | `tsx`; `"type": "module"` (rủi ro cho next.config/playwright config) | Chốt (GĐ3) |
+| AD-30 | Duyệt nội dung gắn với **băm nội dung**: `approved` bắt buộc `reviewedBy` (không phải AI/hệ thống), `reviewedAt`, `contentHash` = SHA-256 JSON chuẩn hóa (bỏ trường `review`); nội dung đổi → `APPROVAL_STALE`; `selectCorpusItems({ purpose: "assignment" })` chỉ nhận hồ sơ `confirmed` + mục `approved` | Hiện thực AD-08 ở tầng dữ liệu tệp trước khi có CSDL; không mục nào được "dùng như đã duyệt" khi chưa duyệt | Chỉ dựa vào trạng thái (dễ sửa nội dung sau khi duyệt) | Chốt (GĐ3) |
+| AD-31 | Lớp tiến độ: chuỗi bài **minh họa** (`seriesKind: "illustrative"`) tách khỏi bộ sách thật (`textbook`, bắt buộc `source`); hồ sơ 1A2 `unconfirmed` không có tiến độ; hồ sơ `confirmed` không được dùng chuỗi minh họa/bộ bài chưa duyệt | Không trình bày dữ liệu tự tạo như chương trình thật của lớp | Tạo sẵn thứ tự bài "giống SGK" từ trí nhớ (không kiểm chứng được) | Chốt (GĐ3) |
 
 ## 5. Cấu trúc thư mục
 
-### 5.1 Đã tạo ở GĐ2
+### 5.1 Đã tạo ở GĐ2 và GĐ3
 
 Chỉ tạo các thư mục có mã thật — không tạo sẵn module rỗng cho giai đoạn sau.
 
+**Thêm ở GĐ3** (chi tiết: [VIETNAMESE_ENGINE.md §2–3](VIETNAMESE_ENGINE.md)):
+
 ```text
 ReadMateAI/
-├── .github/workflows/ci.yml      # lint → typecheck → unit test → build
+├── content/                          # Kho tri thức (JSON, kiểm bằng zod + content:check)
+│   ├── manifest.json
+│   ├── kb/                           # letters, phonemes, tones, rimes, rules, confusions, prerequisites, topics, syllables, words, sentences
+│   └── curriculum/{series,profiles}/ # chuỗi bài minh họa; hồ sơ class-1a2 (unconfirmed), illustrative-demo
+├── scripts/content-check.ts          # npm run content:check (Node 24 chạy TypeScript trực tiếp)
+├── src/lib/vietnamese/               # characters, tone, normalize, tokenize, syllable, spelling-rules, tone-placement, diagnostics, decodability, difficulty, index
+├── src/features/knowledge/           # schema, load, default-kb, curriculum, readability, selection, prerequisites, content-validation (chỉ Node), index
+└── tests/unit/{vietnamese,knowledge}/
+```
+
+**Từ GĐ2:**
+
+```text
+ReadMateAI/
+├── .github/workflows/ci.yml      # format → lint → typecheck → content:check (GĐ3) → unit test → build
 ├── src/
 │   ├── app/
 │   │   ├── (site)/               # route group có header/footer: / · /demo · /join
@@ -169,11 +193,11 @@ ReadMateAI/
 │   │   ├── exercises/catalog.ts       # 6 dạng bài (mô tả, chưa có Player/grade)
 │   │   ├── learning-paths/catalog.ts  # 3 lộ trình ↔ 3 nhóm năng lực
 │   │   └── demo/demo-data.ts          # dữ liệu minh họa hư cấu
-│   ├── lib/                      # cn.ts, vietnamese/normalize.ts
+│   ├── lib/                      # cn.ts, vietnamese/ (GĐ2: normalize; GĐ3: toàn bộ thư viện ngôn ngữ)
 │   ├── strings/vi.ts             # toàn bộ câu chữ giao diện (NFC)
 │   ├── styles/tokens.css         # design tokens Tailwind 4 (@theme)
 │   └── types/learning.ts
-├── tests/unit/                   # Vitest: strings, normalize, security-headers, catalog, components, pages, repo-hygiene
+├── tests/unit/                   # Vitest: strings, normalize, security-headers, catalog, components, pages, repo-hygiene; GĐ3: vietnamese/, knowledge/
 ├── tests/e2e/                    # Playwright: routes, navigation, responsive, vietnamese, security-headers, privacy
 └── next.config.ts · vitest.config.mts · playwright.config.ts · eslint.config.mjs · vercel.json · .env.example
 ```
@@ -370,14 +394,16 @@ Quy tắc: không đặt secret trong biến có tiền tố `NEXT_PUBLIC_`; rep
 
 ## 10. Kho tri thức Tiếng Việt
 
+> **GĐ3 đã hiện thực lớp 1 và 2 dưới đây** — tài liệu chi tiết, giới hạn, ví dụ đầu vào/đầu ra: [VIETNAMESE_ENGINE.md](VIETNAMESE_ENGINE.md). Quyết định: AD-25 → AD-31.
+
 Kho tri thức gồm bốn lớp:
 
-1. **Thư viện ngôn ngữ xác định** `src/lib/vietnamese/` — mã thuần TypeScript, kiểm thử dày đặc:
-   - `normalize`: chuẩn hóa **NFC**, chuẩn hóa vị trí dấu thanh theo quy ước cấu hình ("hoà"/"hòa"), phát hiện văn bản dán từ bảng mã cũ (TCVN3, VNI) để cảnh báo.
-   - `syllable`: phân tích tiếng → âm đầu, âm đệm, âm chính, âm cuối, thanh; vần = âm đệm + âm chính + âm cuối. Quy ước nhà trường (ví dụ coi "qu", "gi" là âm đầu) là tham số cấu hình, cần GV xác nhận.
-   - `spelling-rules`: c/k/q; g/gh; ng/ngh (k, gh, ngh đứng trước i, e, ê); iê/ia/yê/ya, uô/ua, ươ/ưa theo có/không âm cuối; tiếng có âm cuối p, t, c, ch chỉ mang thanh sắc hoặc nặng.
-   - `decodability`: `component_units(word)` và `isDecodable(word, taughtSet)`.
-2. **Dữ liệu lõi dạng mã** `content/kb/*`, `content/curriculum/*` — chữ cái, âm (kèm cách gọi khi dạy), vần, thanh, quy tắc (dạng máy đọc được), thứ tự bài học theo bộ sách; được kiểm tra bằng lệnh `content:check` trong CI rồi nạp vào CSDL bằng script seed.
+1. **Thư viện ngôn ngữ xác định** `src/lib/vietnamese/` — mã thuần TypeScript, kiểm thử dày đặc (GĐ3 ✅):
+   - `normalize`: chuẩn hóa **NFC**, khoảng trắng; soát ký tự ẩn, dấu tổ hợp sót, chữ Kirin giả dạng; **phát hiện** (không chuyển mã) văn bản dán từ bảng mã cũ (TCVN3, VNI). *Điều chỉnh so với thiết kế GĐ1:* không tự "chuẩn hóa vị trí dấu thanh" — kiểu đặt dấu ("hoà"/"hòa") là quy ước chưa xác nhận nên chỉ được **báo cáo** (`tone-placement`).
+   - `syllable`: phân tích tiếng → âm đầu, âm đệm, âm chính, âm cuối, thanh; vần = âm đệm + âm chính + âm cuối, **phải khớp danh mục vần** (AD-26). Quy ước "qu", "gi", "i" dùng chung được ghi lại để bộ kiểm tra theo hồ sơ quyết định (AD-27).
+   - `spelling-rules` + `tone-placement` + `diagnostics`: c/k/q; g/gh; ng/ngh (k, gh, ngh đứng trước i, e, ê); iê/yê; iê/ia, uô/ua, ươ/ưa theo có/không âm cuối; tiếng có âm cuối p, t, c, ch chỉ mang thanh sắc hoặc nặng; một dấu thanh; vị trí dấu.
+   - `decodability`: `requiredUnitsOf(analysis)` (tương ứng `component_units`) và `checkDecodability(text, { taughtUnits, conventions })` (tương ứng `isDecodable`, nhưng trả 4 kết luận kèm lý do — AD-28). `difficulty`: độ khó theo cấu tạo.
+2. **Dữ liệu lõi** `content/kb/*`, `content/curriculum/*` (JSON — AD-25) — chữ cái, âm (kèm cách gọi khi dạy), vần, thanh, quy tắc (dạng máy đọc được), cặp dễ nhầm, quan hệ tiên quyết, ngân hàng tiếng/từ/câu, chuỗi bài và hồ sơ lớp; được kiểm tra bằng lệnh `content:check` trong CI (GĐ3 ✅) rồi nạp vào CSDL bằng script seed (GĐ5). Lớp nghiệp vụ `src/features/knowledge/` cung cấp API nội bộ `resolveKnowledgeState`, `checkReadability`, `selectCorpusItems`.
 3. **Bảng CSDL** `kb_units`, `kb_unit_relations`, `kb_rules`, `curriculum_*`, `media_assets` — thêm từ vựng, câu, hình, âm thanh qua giao diện có duyệt.
 4. **Truy vấn có cấu trúc** (không vector DB): "các từ đọc được ở bài N có vần *an* và có hình" là một truy vấn SQL.
 
@@ -560,7 +586,7 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 
 - Liên kết dự án Vercel với GitHub `ThaiTaka/ReadMateAI` (chưa làm — cần quyết định của chủ dự án).
 - Thiết lập: Node.js **24.x**; region Functions **`sin1`** (`vercel.json`); biến môi trường theo §8.4 cho từng môi trường; Preview không bao giờ dùng khóa của Production.
-- **CI (GitHub Actions):** `.github/workflows/ci.yml` (GĐ2) chạy `npm ci` → lint → typecheck → unit test → build trên `ubuntu-latest`, Node theo `.nvmrc`, quyền `contents: read`, `persist-credentials: false`; thêm `content:check` khi có script đó (GĐ3); E2E trên Preview khi cần. Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
+- **CI (GitHub Actions):** `.github/workflows/ci.yml` chạy `npm ci` → `format:check` (GĐ3) → lint → typecheck → `content:check` (GĐ3) → unit test → build trên `ubuntu-latest`, Node theo `.nvmrc`, quyền `contents: read`, `persist-credentials: false`; E2E trên Preview khi cần. Lần chạy đầu tiên trên GitHub: sau lần push đầu ở GĐ3 (kết quả ghi trong PROGRESS). Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
 - **Cron:** dọn người dùng ẩn danh, tính đề xuất đổi nhóm, thu hồi thiết bị không dùng, áp dụng thời hạn lưu giữ (kiểm tra giới hạn cron theo gói khi triển khai).
 - **Giám sát:** log của Vercel; cảnh báo lỗi cho khu vực GV (cân nhắc dịch vụ giám sát có lọc dữ liệu cá nhân — quyết định ở GĐ10).
 - **Rollback:** dùng tính năng promote/rollback deployment của Vercel; migration viết theo hướng tương thích ngược (thêm trước, xóa sau).
@@ -570,9 +596,9 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 
 | Tầng | Công cụ | Phạm vi | Giai đoạn bắt đầu |
 |---|---|---|---|
-| Unit | Vitest | `lib/vietnamese` (hàng trăm ca: gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa, thanh), `grade()`, `validate()`, phân hóa | GĐ2–GĐ4 |
+| Unit | Vitest | `lib/vietnamese` + `features/knowledge` (GĐ3 ✅: 524 ca mới — gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa, đủ 6 thanh, NFC/NFD, chính tả, vị trí dấu, giải mã, hồ sơ lớp, kiểm duyệt, content:check với dữ liệu gài lỗi; tổng 604), `grade()`, `validate()`, phân hóa | GĐ2–GĐ4 |
 | Component | Vitest + Testing Library | Player của 6 dạng bài | GĐ4 |
-| Nội dung | `npm run content:check` | Toàn bộ seed và nội dung mẫu | GĐ3 |
+| Nội dung | `npm run content:check` | Toàn bộ `content/`: JSON/lược đồ, ID, NFC, tham chiếu, vòng tiên quyết, chính tả, đối chiếu phân tích, duyệt + băm nội dung, dữ liệu cá nhân (lỗi chặn / cảnh báo cho GV) | GĐ3 ✅ |
 | CSDL/RLS | pgTAP (`supabase test db`) hoặc Vitest tích hợp với nhiều người dùng | Cách ly lớp, cách ly học sinh, thiết bị bị thu hồi, ẩn danh chưa liên kết | GĐ5 |
 | Vệ sinh repo | Vitest (`tests/unit/repo-hygiene.test.ts`) | Không secret/token, không email/số điện thoại trong `src`/`tests`/`public`, không URL ngoài trong `src`, mọi tệp văn bản ở dạng NFC, `.env.example` không chứa giá trị secret, `.gitignore` chặn `.env*` | GĐ2 ✅ |
 | E2E | Playwright: Pixel (Android Chrome), iPhone (WebKit), iPad, desktop | GĐ2 ✅: route, điều hướng, 360 px không tràn ngang, tiếng Việt/NFC/font, header bảo mật, quyền riêng tư (chỉ request cùng nguồn). GĐ4+: luồng HS, luồng GV, chính sách âm thanh | GĐ2 / GĐ4 |
@@ -609,6 +635,8 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 | T-06 | Chất lượng TTS tiếng Việt cho từ/câu lớp 1; giọng vùng miền | POC so sánh 2–3 nhà cung cấp, GV nghe đánh giá | GĐ6 |
 | T-07 | Định dạng ghi âm của GV và khả năng phát trên iOS | POC ghi/phát trên Android + iPhone | GĐ6 |
 | T-08 | Tự phát âm thanh trên iOS/Android | Thiết kế nút "Bắt đầu" mở khóa; E2E trên WebKit | GĐ4 |
-| T-09 | Quy ước phân tích tiếng ("qu", "gi", vị trí dấu thanh) khác nhau giữa bộ sách | Tham số hóa trong `lib/vietnamese`; GV xác nhận | GĐ3 |
+| T-09 | Quy ước phân tích tiếng ("qu", "gi", vị trí dấu thanh) khác nhau giữa bộ sách | ✅ GĐ3: tham số hóa (`conventions` của hồ sơ lớp, `conventionDependencies` của kết quả); chưa xác nhận → `unknown`. Còn chờ GV trả lời Q-02 | GĐ3 |
+| T-14 | Ký tự vô hình/dấu tổ hợp đứng riêng lọt vào mã nguồn khi soạn (đã xảy ra ở GĐ3: chuỗi thoát `\u…` bị ghi thành ký tự thật) | Đã chuyển hết về dạng thoát; test vệ sinh repo bắt văn bản không NFC; quy tắc CLAUDE.md §9.1 (GĐ3) | GĐ3+ |
+| T-15 | `content:check` phụ thuộc khả năng chạy TypeScript gốc của Node 24 (bỏ kiểu) — cú pháp TS cần biên dịch (enum, namespace…) sẽ làm script hỏng | `erasableSyntaxOnly` trong tsconfig bắt lỗi khi typecheck; CI chạy `content:check` trên Linux | GĐ3+ |
 | T-10 | Khóa `anon`/`service_role` cũ bị khai tử cuối 2026 | Dùng khóa publishable/secret ngay từ đầu | GĐ5 |
 | T-11 | Docker daemon chưa chạy; `LongPathsEnabled = 0` trên Windows | Bật Docker Desktop khi cần Supabase local; bật long paths nếu gặp lỗi đường dẫn | GĐ5 |

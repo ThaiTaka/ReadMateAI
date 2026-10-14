@@ -1,0 +1,627 @@
+{
+  "kind": "words",
+  "description": "Ngân hàng từ minh họa cho trẻ lớp 1: từ một và hai tiếng, gắn chủ đề, độ quen thuộc ước lượng và khả năng minh họa bằng hình. “Độ quen thuộc” là ước lượng chung cho lứa tuổi, không phải dữ liệu về học sinh cụ thể. Hình minh họa sẽ gắn ở giai đoạn 6 (có ghi nguồn, giấy phép).",
+  "review": {
+    "status": "pending_review",
+    "note": "Từng từ cần GV duyệt: chính tả, nghĩa, độ phù hợp với trẻ và với địa phương."
+  },
+  "provenance": {
+    "origin": "ai_assisted",
+    "author": "Claude Code (trợ lý AI) — phiên GĐ3",
+    "createdAt": "2026-10-14",
+    "note": "Từ ngữ thông dụng do dự án tự chọn; không sao chép danh sách từ của sách giáo khoa."
+  },
+  "items": [
+    {
+      "id": "word:bà",
+      "text": "bà",
+      "topics": ["topic:family"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bé",
+      "text": "bé",
+      "topics": ["topic:family"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bò",
+      "text": "bò",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bố",
+      "text": "bố",
+      "topics": ["topic:family"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Có nơi gọi là ba, cha, tía — GV điều chỉnh theo địa phương."
+    },
+    {
+      "id": "word:cá",
+      "text": "cá",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cò",
+      "text": "cò",
+      "topics": ["topic:animals"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cỏ",
+      "text": "cỏ",
+      "topics": ["topic:plants"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cô",
+      "text": "cô",
+      "topics": ["topic:people", "topic:school"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cờ",
+      "text": "cờ",
+      "topics": ["topic:home"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:đò",
+      "text": "đò",
+      "topics": ["topic:transport"],
+      "familiarity": "common",
+      "imageable": true,
+      "meaningNote": "Thuyền nhỏ chở người qua sông.",
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:lá",
+      "text": "lá",
+      "topics": ["topic:plants"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:lê",
+      "text": "lê",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "meaningNote": "Một loại quả.",
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:mẹ",
+      "text": "mẹ",
+      "topics": ["topic:family"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Có nơi gọi là má — GV điều chỉnh theo địa phương."
+    },
+    {
+      "id": "word:nơ",
+      "text": "nơ",
+      "topics": ["topic:toys"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:gà",
+      "text": "gà",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:ghế",
+      "text": "ghế",
+      "topics": ["topic:home"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:thỏ",
+      "text": "thỏ",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:nhà",
+      "text": "nhà",
+      "topics": ["topic:home", "topic:places"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:khế",
+      "text": "khế",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "meaningNote": "Loại quả có năm múi, cắt ngang thành hình ngôi sao.",
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:nghé",
+      "text": "nghé",
+      "topics": ["topic:animals"],
+      "familiarity": "less_common",
+      "imageable": true,
+      "meaningNote": "Con trâu con.",
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:nho",
+      "text": "nho",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:chó",
+      "text": "chó",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:tre",
+      "text": "tre",
+      "topics": ["topic:plants"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:vở",
+      "text": "vở",
+      "topics": ["topic:school"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:chữ",
+      "text": "chữ",
+      "topics": ["topic:school"],
+      "familiarity": "everyday",
+      "imageable": false,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:quê",
+      "text": "quê",
+      "topics": ["topic:places"],
+      "familiarity": "common",
+      "imageable": false,
+      "meaningNote": "Nơi gia đình, họ hàng sinh sống lâu đời.",
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:giỏ",
+      "text": "giỏ",
+      "topics": ["topic:home"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:xe",
+      "text": "xe",
+      "topics": ["topic:transport"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:phố",
+      "text": "phố",
+      "topics": ["topic:places"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 1,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:mía",
+      "text": "mía",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cua",
+      "text": "cua",
+      "topics": ["topic:animals"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:mưa",
+      "text": "mưa",
+      "topics": ["topic:nature"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:dừa",
+      "text": "dừa",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bàn",
+      "text": "bàn",
+      "topics": ["topic:home", "topic:school"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:sách",
+      "text": "sách",
+      "topics": ["topic:school"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:voi",
+      "text": "voi",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:tay",
+      "text": "tay",
+      "topics": ["topic:body"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:rau",
+      "text": "rau",
+      "topics": ["topic:food"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:hoa",
+      "text": "hoa",
+      "topics": ["topic:plants"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:khoẻ",
+      "text": "khoẻ",
+      "topics": ["topic:body"],
+      "familiarity": "everyday",
+      "imageable": false,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Kiểu đặt dấu khoẻ/khỏe chờ nhà trường chọn."
+    },
+    {
+      "id": "word:ngọt",
+      "text": "ngọt",
+      "topics": ["topic:food", "topic:colors"],
+      "familiarity": "everyday",
+      "imageable": false,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:xanh",
+      "text": "xanh",
+      "topics": ["topic:colors"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:thuyền",
+      "text": "thuyền",
+      "topics": ["topic:transport"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:ba-lô",
+      "text": "ba lô",
+      "topics": ["topic:school"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:lá-cờ",
+      "text": "lá cờ",
+      "topics": ["topic:home"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:đu-đủ",
+      "text": "đu đủ",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:quả-na",
+      "text": "quả na",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "meaningNote": "Có nơi gọi là mãng cầu.",
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:su-su",
+      "text": "su su",
+      "topics": ["topic:food"],
+      "familiarity": "common",
+      "imageable": true,
+      "meaningNote": "Loại quả dùng để nấu canh, xào.",
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:y-tá",
+      "text": "y tá",
+      "topics": ["topic:people"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:quả-cam",
+      "text": "quả cam",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cá-vàng",
+      "text": "cá vàng",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:xe-đạp",
+      "text": "xe đạp",
+      "topics": ["topic:transport"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bánh-mì",
+      "text": "bánh mì",
+      "topics": ["topic:food"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:con-mèo",
+      "text": "con mèo",
+      "topics": ["topic:animals"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cái-ghế",
+      "text": "cái ghế",
+      "topics": ["topic:home"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:bông-hoa",
+      "text": "bông hoa",
+      "topics": ["topic:plants"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:tàu-thuỷ",
+      "text": "tàu thuỷ",
+      "topics": ["topic:transport"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 3,
+      "review": { "status": "pending_review" },
+      "version": 1,
+      "note": "Kiểu đặt dấu thuỷ/thủy chờ nhà trường chọn."
+    },
+    {
+      "id": "word:đôi-dép",
+      "text": "đôi dép",
+      "topics": ["topic:home"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:cây-bàng",
+      "text": "cây bàng",
+      "topics": ["topic:plants", "topic:school"],
+      "familiarity": "common",
+      "imageable": true,
+      "difficulty": 2,
+      "review": { "status": "pending_review" },
+      "version": 1
+    },
+    {
+      "id": "word:quả-quýt",
+      "text": "quả quýt",
+      "topics": ["topic:plants", "topic:food"],
+      "familiarity": "everyday",
+      "imageable": true,
+      "difficulty": 3,
+      "review": { "status": "draft", "note": "Chờ quyết định cách phân tích “quýt” (qu + y)." },
+      "version": 1
+    }
+  ]
+}
