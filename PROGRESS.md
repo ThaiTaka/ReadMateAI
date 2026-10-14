@@ -9,7 +9,7 @@
 - **Điểm còn phụ thuộc giáo viên:** toàn bộ dữ liệu kho tri thức ở trạng thái **chờ duyệt** (0 mục `approved`); hồ sơ lớp 1A2 **`unconfirmed`** (chưa biết bộ sách, vị trí bài, quy ước qu/gi/kiểu dấu — Q-01, Q-02) → mọi kiểm tra theo lớp 1A2 trả về `unknown`. Danh sách "đọc được" ở 3 mốc bài minh họa đã sinh, chờ GV nhận xét.
 - **Giai đoạn kế tiếp đề xuất:** GĐ4 — bộ máy bài tập + 6 dạng bài + `/demo` → **chưa bắt đầu** (chỉ bắt đầu khi được phê duyệt).
 - **Ứng dụng:** 5 trang khung giao diện của GĐ2 (không đổi giao diện ở GĐ3). Thêm thư viện `src/lib/vietnamese/`, lớp `src/features/knowledge/`, dữ liệu `content/`, lệnh `npm run content:check`. **Chưa** có bài tập tương tác, tài khoản, CSDL, AI.
-- **Git:** xem §3.3 (commit GĐ3; push `main` lên GitHub được phép ở GĐ3 sau khi rà soát an toàn).
+- **Git/GitHub:** commit GĐ3 `5e63087` đã **push** lên `origin/main` (lần push đầu tiên của repo, 2026-10-14). GitHub Actions CI chạy lần đầu trên Linux: **xanh** (run 38596049449). Repo vẫn **PUBLIC** (không đổi chế độ). Chưa deploy Vercel, chưa tạo Supabase, chưa dùng AI.
 
 | GĐ | Tên | Trạng thái |
 |---|---|---|
@@ -27,7 +27,7 @@
 | Hệ điều hành / shell | Windows 11 Pro; PowerShell 5.1 (CurrentUser `RemoteSigned` → `npm.ps1` chạy được); Git Bash có sẵn |
 | Ổ đĩa D: | Còn trống khoảng 174 GB (GĐ1) |
 | Git | 2.54.0; `git init -b main` ở GĐ1; `user.name`/`user.email` cấu hình toàn cục; `core.autocrlf=true` (system) — `.gitattributes` đưa mọi tệp về LF (đã kiểm tra `git ls-files --eol`) |
-| Git remote | `origin` → `https://github.com/ThaiTaka/ReadMateAI.git`. Repo GitHub thuộc tài khoản đang đăng nhập `ThaiTaka` (quyền ADMIN), **PUBLIC**; trước GĐ3 **rỗng** (kiểm tra lại ngày 2026-10-14) |
+| Git remote | `origin` → `https://github.com/ThaiTaka/ReadMateAI.git`. Repo GitHub thuộc tài khoản đang đăng nhập `ThaiTaka` (quyền ADMIN), **PUBLIC**; rỗng cho tới GĐ3, **đã push `main`** ngày 2026-10-14 (nhánh mặc định `main`) |
 | Node.js / npm | Node 24.18.0 (win32 x64), npm 11.16.0 (npm báo đã có 12.2.0 — chưa nâng cấp). Node 24 chạy TypeScript gốc (bỏ kiểu) — dùng cho `content:check` |
 | pnpm / yarn / bun | Không có |
 | GitHub CLI | 2.100.0; đã đăng nhập `ThaiTaka` (https, có quyền `repo`, `workflow`) |
@@ -82,9 +82,13 @@
 - `.gitignore` chặn `.env*` (trừ `.env.example`), `node_modules`, `.next`, kết quả test, `exports/`, `*.dump`… — đã kiểm tra lại.
 - Lưu ý: siêu dữ liệu commit (tác giả) chứa **email cá nhân** cấu hình trong Git của chủ dự án → sẽ công khai khi push lên repo PUBLIC (Q-13). Không phải secret hay dữ liệu học sinh nên không chặn push, nhưng chủ dự án nên cân nhắc dùng email `noreply` của GitHub cho các commit sau.
 
-### 3.3 Git trong GĐ3
+### 3.3 Git và CI trong GĐ3
 
-- Commit GĐ3 (mã + dữ liệu + tài liệu) trên `main`, sau đó push `main` lên `origin` (lần push đầu tiên của repo). Kết quả push và GitHub Actions được ghi ở commit tài liệu kế tiếp — xem `git log`.
+- `5e63087` — *feat: Giai đoạn 3 — Vietnamese Knowledge Engine và kho tri thức* (58 tệp). Rà soát nội dung stage lần cuối: không secret, không email/số điện thoại.
+- `git push -u origin main` (2026-10-14 16:12 UTC): tạo nhánh `main` trên GitHub, nhánh cục bộ theo dõi `origin/main`.
+- **GitHub Actions — run 38596049449 (commit `5e63087`): ✅ thành công trong 58 giây** trên `ubuntu-latest`, Node 24.21.0 (theo `.nvmrc`): `npm ci` → format ✅ → lint ✅ → typecheck ✅ → content:check ✅ (0 lỗi, 33 cảnh báo — giống Windows) → unit test ✅ **604/604** → build ✅. Đây là lần đầu CI chạy trên Linux → R-15 đã được kiểm chứng.
+- Ghi chú từ GitHub: nhãn `ubuntu-latest` chuyển sang Ubuntu 26 từ 2026-10-19 (R-23).
+- Commit tài liệu kế tiếp ghi lại các kết quả này (xem `git log`; CI của commit đó cũng phải xanh).
 
 ### GĐ2 — 2026-10-12 → 2026-10-14 (tóm tắt)
 
@@ -177,14 +181,15 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | R-12 | Bản quyền nội dung SGK, hình ảnh | Trung bình | Chỉ lưu thứ tự bài/đơn vị; ngữ liệu GĐ3 viết mới; `seriesKind: "textbook"` bắt buộc `source` |
 | R-13 | GV quá tải khi duyệt nội dung (149 mục + dữ liệu tham chiếu) | Trung bình | Phiếu rà soát gom theo nhóm; duyệt dữ liệu tham chiếu cấp tệp; GĐ6 có giao diện duyệt |
 | R-14 | ESLint 9 hết hỗ trợ; 5 lỗ hổng mức cao (ReDoS `braces`) trong chuỗi `eslint-config-next` — chỉ công cụ dev | Thấp | Theo dõi bản hỗ trợ ESLint 10; không `npm audit fix --force` |
-| R-15 | CI chưa từng chạy trên Linux trước GĐ3 — khác biệt Windows/Linux (hoa thường tên tệp, binary gốc, Node chạy TypeScript) | Trung bình | Kiểm chứng ở lần push đầu (kết quả ghi ở commit tài liệu kế tiếp) |
+| R-15 | ~~CI chưa từng chạy trên Linux~~ | Đã xử lý (GĐ3) | Run 38596049449 xanh trên `ubuntu-latest`, Node 24.21.0: 604/604 test, content:check, build |
 | R-16 | CSP cho phép `'unsafe-inline'` cho script (không nonce) | Thấp ở GĐ2–3 | Xem lại nonce/SRI ở GĐ5 |
 | R-17 | `npm install` chặn script cài đặt của `unrs-resolver` (allow-scripts của npm 11) | Thấp | Lint vẫn chạy đúng |
 | R-18 | `next.config.ts` nạp bằng TypeScript gốc của Node 24 (cần đuôi `.ts`, cấm enum) | Thấp | Quy tắc CLAUDE.md §9.1 |
 | R-19 | Dữ liệu kho tri thức do trợ lý AI soạn, **chưa** được GV kiểm chứng (tên chữ, cách gọi âm, danh mục vần, ngữ liệu) | Trung bình | 0 mục `approved`; AI không được duyệt; phiếu rà soát cho GV; `selectCorpusItems` chặn giao bài |
 | R-20 | Ký tự vô hình/dấu tổ hợp lọt vào mã khi soạn (đã xảy ra ở GĐ3) | Thấp (đã xử lý) | Dạng thoát `\uXXXX`; test vệ sinh NFC; quy tắc CLAUDE.md §9.2.2 |
 | R-21 | Quy ước phân tích tạm (qu, gi, i dùng chung) có thể khác bộ sách thật | Trung bình | Là tham số; quy ước chưa xác nhận → `unknown`; chờ Q-02, Q-16 |
-| R-22 | Email cá nhân trong siêu dữ liệu commit trên repo public | Thấp | Q-13 — cân nhắc email `noreply` cho commit sau |
+| R-22 | Email cá nhân trong siêu dữ liệu commit trên repo public (đã công khai cùng lần push GĐ3) | Thấp | Q-13 — cân nhắc email `noreply` cho commit sau |
+| R-23 | GitHub chuyển `ubuntu-latest` sang Ubuntu 26 từ 2026-10-19 — có thể lộ khác biệt môi trường CI | Thấp | Theo dõi run CI sau ngày đó; nếu lỗi do ảnh, ghim tạm `ubuntu-24.04` |
 
 ## 7. Bước tiếp theo
 
@@ -202,4 +207,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 |---|---|---|---|
 | 2026-10-12 | #1 | GĐ1 | Kiểm tra môi trường; `git init -b main`; xác minh phiên bản và tài liệu; tạo 6 tài liệu + `.gitignore` + `.gitattributes`; kiểm tra mã hóa, 93 liên kết, 6 sơ đồ Mermaid, quét secret — tất cả đạt. Không commit/push/deploy. **Kết thúc GĐ1 — đã được nghiệm thu.** |
 | 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4 qua thư mục tạm; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; soát giao diện và sửa 9 lỗi hiển thị; format/lint/typecheck/80 unit/build/139 E2E đều xanh; commit `16d1413` (chủ dự án), `d1210e6`; thêm remote `origin`. **Không push, không deploy. Kết thúc GĐ2 — đã được nghiệm thu.** |
-| 2026-10-14 | #3 | GĐ3 | Cài zod 4.6.7; thư viện `src/lib/vietnamese/` (11 module); kho tri thức `content/` (29 chữ, 39 âm, 6 thanh, 153 vần, 13 quy tắc, 149 ngữ liệu — tất cả chờ GV); lớp tiến độ (chuỗi minh họa, hồ sơ 1A2 `unconfirmed`); `src/features/knowledge/`; `npm run content:check` (0 lỗi, 33 cảnh báo) + CI; 524 test mới (tổng 604) + 4 đột biến kiểm độ nhạy; E2E 139 đạt; tài liệu VIETNAMESE_ENGINE, TEACHER_REVIEW_CHECKLIST; rà soát toàn bộ lịch sử Git; commit + push `main` (kết quả CI ở commit kế tiếp). **Kết thúc GĐ3 — chờ duyệt. Không deploy, không Supabase, không AI.** |
+| 2026-10-14 | #3 | GĐ3 | Cài zod 4.6.7; thư viện `src/lib/vietnamese/` (11 module); kho tri thức `content/` (29 chữ, 39 âm, 6 thanh, 153 vần, 13 quy tắc, 149 ngữ liệu — tất cả chờ GV); lớp tiến độ (chuỗi minh họa, hồ sơ 1A2 `unconfirmed`); `src/features/knowledge/`; `npm run content:check` (0 lỗi, 33 cảnh báo) + CI; 524 test mới (tổng 604) + 4 đột biến kiểm độ nhạy; E2E 139 đạt; tài liệu VIETNAMESE_ENGINE, TEACHER_REVIEW_CHECKLIST; rà soát toàn bộ lịch sử Git; commit `5e63087` + **push `main` lần đầu**; GitHub Actions xanh trên Linux (604/604); commit tài liệu ghi kết quả CI. **Kết thúc GĐ3 — chờ duyệt. Không deploy, không Supabase, không AI, không đổi public/private.** |

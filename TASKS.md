@@ -68,7 +68,7 @@
 
 **Tiêu chí nghiệm thu**
 
-- [x] `npm run lint`, `npm run typecheck`, `npm run test:run`, `npm run build` thành công trên Windows — trên CI (Linux): kiểm chứng ở lần push đầu tiên (GĐ3, xem PROGRESS §3)
+- [x] `npm run lint`, `npm run typecheck`, `npm run test:run`, `npm run build` thành công trên Windows — và trên CI (Linux): ✅ kiểm chứng ở lần push đầu tiên (GĐ3, run 38596049449, xem PROGRESS §3.3)
 - [x] `/` và `/demo` (và cả 5 route) hiển thị đúng tiếng Việt có dấu ở chiều rộng 360 px, không cuộn ngang (E2E)
 - [x] Playwright xanh trên Chromium và WebKit (desktop + điện thoại)
 - [x] Header bảo mật có trong response của bản production (Vitest + Playwright + kiểm tra HTTP thủ công)
@@ -89,7 +89,7 @@
 - [x] 3.5 `content/kb`: 29 chữ cái (tên chữ ≠ cách gọi âm), 39 âm (11 tổ hợp chữ), 6 thanh, 153 vần, 13 quy tắc (spec máy đọc + ví dụ đúng/sai), 17 cặp dễ nhầm, 18 mục tiên quyết, 14 chủ đề — **tất cả chờ GV duyệt**
 - [x] 3.6 `content/curriculum`: lớp tiến độ tách khỏi lớp ngôn ngữ — *điều chỉnh:* chưa biết bộ sách (Q-01) nên **không** tạo `<bộ-sách>.json`; có chuỗi **minh họa** 17 bài (ghi rõ không phải SGK) + hồ sơ `class-1a2` (`unconfirmed`, chưa có tiến độ) + hồ sơ minh họa; API `resolveKnowledgeState`, `checkReadability`, `selectCorpusItems`
 - [x] 3.7 Ngữ liệu khởi đầu — *điều chỉnh theo yêu cầu GĐ3:* **149 mục** nguyên bản (58 tiếng, 60 từ, 31 câu) thay vì 300–500 từ; chưa gắn hình (GĐ6: media có nguồn/giấy phép)
-- [x] 3.8 `npm run content:check` (lỗi chặn / cảnh báo cho GV / thông tin) + bước trong CI (kèm `format:check`)
+- [x] 3.8 `npm run content:check` (lỗi chặn / cảnh báo cho GV / thông tin) + bước trong CI (kèm `format:check`) — CI trên GitHub xanh (run 38596049449)
 - [ ] 3.9 *(Tùy chọn)* trang tra cứu kho tri thức tĩnh để GV rà soát — **chưa làm** (đề xuất cho GĐ4 hoặc khi GV cần)
 
 **Tiêu chí nghiệm thu**

@@ -586,7 +586,7 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 
 - Liên kết dự án Vercel với GitHub `ThaiTaka/ReadMateAI` (chưa làm — cần quyết định của chủ dự án).
 - Thiết lập: Node.js **24.x**; region Functions **`sin1`** (`vercel.json`); biến môi trường theo §8.4 cho từng môi trường; Preview không bao giờ dùng khóa của Production.
-- **CI (GitHub Actions):** `.github/workflows/ci.yml` chạy `npm ci` → `format:check` (GĐ3) → lint → typecheck → `content:check` (GĐ3) → unit test → build trên `ubuntu-latest`, Node theo `.nvmrc`, quyền `contents: read`, `persist-credentials: false`; E2E trên Preview khi cần. Lần chạy đầu tiên trên GitHub: sau lần push đầu ở GĐ3 (kết quả ghi trong PROGRESS). Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
+- **CI (GitHub Actions):** `.github/workflows/ci.yml` chạy `npm ci` → `format:check` (GĐ3) → lint → typecheck → `content:check` (GĐ3) → unit test → build trên `ubuntu-latest`, Node theo `.nvmrc`, quyền `contents: read`, `persist-credentials: false`; E2E trên Preview khi cần. Lần chạy đầu tiên trên GitHub (GĐ3, 2026-10-14, run 38596049449): ✅ xanh trong 58 giây, Node 24.21.0, 604/604 unit test. Migration CSDL chạy thủ công có kiểm soát (`supabase db push`) — không tự động trên mọi lần push.
 - **Cron:** dọn người dùng ẩn danh, tính đề xuất đổi nhóm, thu hồi thiết bị không dùng, áp dụng thời hạn lưu giữ (kiểm tra giới hạn cron theo gói khi triển khai).
 - **Giám sát:** log của Vercel; cảnh báo lỗi cho khu vực GV (cân nhắc dịch vụ giám sát có lọc dữ liệu cá nhân — quyết định ở GĐ10).
 - **Rollback:** dùng tính năng promote/rollback deployment của Vercel; migration viết theo hướng tương thích ngược (thêm trước, xóa sau).

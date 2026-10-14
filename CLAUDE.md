@@ -32,13 +32,14 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [TASKS.md](TASKS.md) | Giai đoạn, nhiệm vụ, tiêu chí nghiệm thu |
 | [PROGRESS.md](PROGRESS.md) | Trạng thái hiện tại, quyết định, câu hỏi mở, rủi ro |
 
-## 4. Môi trường (đã kiểm tra 2026-10-12)
+## 4. Môi trường (đã kiểm tra 2026-10-12, cập nhật 2026-10-14)
 
 - Windows 11; thư mục dự án **`D:\ReadMateAI`** (không có dấu cách). Shell chính PowerShell 5.1 — **không hỗ trợ `&&`**, dùng `;` hoặc `if ($?) { … }`; Git Bash có sẵn.
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
 - **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
 - Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2).
-- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**, trên GitHub **chưa có commit nào** (chưa push). Git cục bộ nhánh `main` đã có commit; remote `origin` → `https://github.com/ThaiTaka/ReadMateAI.git` (thêm ở GĐ2, cập nhật 2026-10-14).
+- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên mỗi push/PR — lần đầu xanh. Mọi lần push sau vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
+- Node 24 chạy được TypeScript gốc (bỏ kiểu) — dùng cho `npm run content:check`. `zod` 4.6.7 là phụ thuộc trực tiếp (GĐ3).
 - `core.autocrlf=true` ở cấp hệ thống → `.gitattributes` chuẩn hóa LF.
 
 ## 5. Kiến trúc tóm tắt
