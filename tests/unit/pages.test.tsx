@@ -30,18 +30,31 @@ describe("Trang chủ /", () => {
   });
 });
 
-describe("Trang /demo", () => {
-  it("ghi rõ đây là bản demo với dữ liệu giả lập", () => {
+describe("Trang /demo (Bản chơi thử)", () => {
+  it("ghi rõ: bản chơi thử, dữ liệu minh họa chưa duyệt, không lưu, không AI, chưa có âm thanh", () => {
     render(<DemoPage />);
-    expect(screen.getByRole("note")).toHaveTextContent("dữ liệu minh họa hoàn toàn giả lập");
+    expect(screen.getAllByText("Bản chơi thử").length).toBeGreaterThan(0);
+    const note = screen.getByRole("note");
+    expect(note).toHaveTextContent("dữ liệu minh họa");
+    expect(note).toHaveTextContent("chưa được giáo viên duyệt");
+    expect(note).toHaveTextContent("không lưu kết quả, không gọi AI");
+    expect(note).toHaveTextContent("Chưa có âm thanh");
   });
 
-  it("có ba lộ trình dạng tab và sáu dạng bài dự kiến", () => {
+  it("bắt đầu bằng bước chọn một trong ba lộ trình; giới thiệu đủ sáu dạng bài", () => {
     render(<DemoPage />);
-    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Khởi động", "Vững bước", "Tăng tốc"]);
+    for (const name of ["Khởi động", "Vững bước", "Tăng tốc"]) {
+      expect(screen.getByRole("button", { name: new RegExp(name) })).toBeInTheDocument();
+    }
     for (const type of EXERCISE_TYPES) {
       expect(screen.getByRole("heading", { level: 3, name: type.name })).toBeInTheDocument();
     }
+  });
+
+  it("không có biểu mẫu gửi dữ liệu và không có ô nhập văn bản tự do", () => {
+    const { container } = render(<DemoPage />);
+    expect(container.querySelector("form")).toBeNull();
+    expect(container.querySelectorAll("textarea, input[type=text], [contenteditable='true']")).toHaveLength(0);
   });
 });
 

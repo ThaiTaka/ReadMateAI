@@ -643,7 +643,7 @@ Không lưu IP, user-agent đầy đủ hay dấu vân tay thiết bị.
 
 ## 5. Lược đồ nội dung bài tập
 
-Lược đồ chuẩn được định nghĩa bằng **zod** trong `src/features/exercises/types/<code>/schema.ts` (nguồn sự thật); JSON dưới đây là ví dụ minh họa. Quy ước: `content` = phần hiển thị cho học sinh; `answer` = đáp án và thẻ lỗi của phương án nhiễu; `audio_refs` = vai trò âm thanh → `media_assets.id`. Mọi văn bản ở dạng NFC.
+Lược đồ chuẩn được định nghĩa bằng **zod** trong `src/features/exercises/types/<code>/schema.ts` (nguồn sự thật); JSON dưới đây là ví dụ minh họa của GĐ1. *GĐ4 đã hiện thực* (thư mục kebab-case, ví dụ `types/fill-blank/schema.ts`): mỗi câu có thêm `variant`, `objective`, `difficulty`, `requiredUnits`, `source`, `audio` (khe âm thanh: lời đọc + mã tệp) bên cạnh `content`/`answer`; tranh trong `content` chỉ có `{ pictureId, iconKey }`. Cấu trúc đúng mã nguồn: [EXERCISE_ENGINE.md §3](EXERCISE_ENGINE.md#3-cấu-trúc-dữ-liệu). Quy ước: `content` = phần hiển thị cho học sinh; `answer` = đáp án và thẻ lỗi của phương án nhiễu; `audio_refs` = vai trò âm thanh → `media_assets.id`. Mọi văn bản ở dạng NFC.
 
 **Dạng 1 — `letter_sound`**
 

@@ -5,7 +5,7 @@ export const SLOGAN = "Mỗi em một nhịp đọc – Mỗi ngày một tiến
 /** Các route nền tảng của Giai đoạn 2 và tiêu đề h1 mong đợi. */
 export const ROUTES = [
   { path: "/", slug: "home", heading: SLOGAN },
-  { path: "/demo", slug: "demo", heading: "Hệ thống luyện tập của ReadMate AI" },
+  { path: "/demo", slug: "demo", heading: "Chơi thử bài luyện đọc lớp 1" },
   { path: "/teacher", slug: "teacher", heading: "Bảng điều khiển giáo viên" },
   { path: "/learn", slug: "learn", heading: "Chào con!" },
   { path: "/join", slug: "join", heading: "Liên kết thiết bị học tập" },

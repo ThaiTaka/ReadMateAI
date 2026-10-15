@@ -39,7 +39,10 @@ describe("chuỗi giao diện tiếng Việt (src/strings/vi.ts)", () => {
 
   it("các trạng thái chưa hoạt động được gọi tên trung thực", () => {
     expect(strings.status.inDevelopment).toBe("Chức năng đang phát triển");
-    expect(strings.demo.notice.text).toContain("dữ liệu minh họa hoàn toàn giả lập");
+    expect(strings.demo.notice.title).toContain("dữ liệu minh họa");
+    expect(strings.demo.notice.items.join(" ")).toContain("chưa được giáo viên duyệt");
+    expect(strings.demo.notice.items.join(" ")).toContain("Không tài khoản, không lưu kết quả, không gọi AI");
+    expect(strings.demo.notice.items.join(" ")).toContain("Chưa có âm thanh");
     expect(strings.join.notice.text).toContain("chưa nhận, chưa kiểm tra và chưa lưu");
   });
 });

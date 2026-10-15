@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEMO_DATA_IS_FICTIONAL, DEMO_SESSIONS, DEMO_SUPPORT_LEVELS } from "@/features/demo/demo-data";
+import { DEMO_DATA_IS_FICTIONAL, DEMO_SUPPORT_LEVELS } from "@/features/demo/demo-data";
+import { DEMO_PLANS } from "@/features/demo/practice-data";
 import { EXERCISE_TYPES } from "@/features/exercises/catalog";
 import { LEARNING_PATHS } from "@/features/learning-paths/catalog";
 import { isNFC } from "@/lib/vietnamese/normalize";
@@ -64,19 +65,17 @@ describe("dữ liệu demo giả lập", () => {
     expect(DEMO_DATA_IS_FICTIONAL).toBe(true);
   });
 
-  it("mỗi buổi luyện mẫu dài 10–15 phút, có bước 'Thử như ở lớp' và kết thúc bằng lời khen", () => {
+  it("buổi luyện mẫu mỗi lộ trình: ôn bài cũ → luyện tập → kết thúc bằng 'Thử như ở lớp'", () => {
     for (const id of PATH_IDS) {
-      const steps = DEMO_SESSIONS[id];
-      const minutes = steps.reduce((sum, step) => sum + step.minutes, 0);
-      expect(minutes).toBeGreaterThanOrEqual(10);
-      expect(minutes).toBeLessThanOrEqual(15);
-      expect(steps.some((step) => step.kind === "classroom_like")).toBe(true);
-      expect(steps.at(-1)?.kind).toBe("celebrate");
+      const steps = DEMO_PLANS[id].session;
+      expect(steps[0]?.kind).toBe("review");
+      expect(steps.some((step) => step.kind === "practice")).toBe(true);
+      expect(steps.at(-1)?.kind).toBe("classroom_like");
     }
   });
 
   it("không có trường thông tin cá nhân nào", () => {
-    const serialized = JSON.stringify({ DEMO_SESSIONS, DEMO_SUPPORT_LEVELS });
+    const serialized = JSON.stringify({ DEMO_PLANS, DEMO_SUPPORT_LEVELS });
     expect(serialized).not.toMatch(
       /"(full_?name|first_?name|last_?name|student_?name|birth\w*|dob|phone\w*|email|address|photo\w*)"\s*:/i,
     );

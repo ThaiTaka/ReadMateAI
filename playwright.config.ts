@@ -25,6 +25,12 @@ export default defineConfig({
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] } },
     { name: "webkit-desktop", use: { ...devices["Desktop Safari"] } },
     { name: "webkit-mobile", use: { ...devices["iPhone 13"] } },
+    // Máy tính bảng (TASKS 4.8): chỉ chạy các spec của bản chơi thử và bố cục, để không nhân đôi thời gian E2E.
+    {
+      name: "webkit-tablet",
+      use: { ...devices["iPad (gen 7)"] },
+      testMatch: /(demo-practice|responsive)\.spec\.ts/,
+    },
   ],
   webServer: {
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${PORT}`,

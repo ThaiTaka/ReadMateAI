@@ -1,8 +1,8 @@
 # ReadMate AI — Kiến trúc kỹ thuật
 
-> **Phiên bản:** 0.3 — cập nhật sau Giai đoạn 3 (Vietnamese Knowledge Engine: §3.1, AD-25 → AD-31, §5.1, §10, §19, §20, §22)
-> **Ngày cập nhật:** 2026-10-14
-> **Trạng thái:** GĐ1, GĐ2 đã được nghiệm thu; phần GĐ3 chờ người điều phối đánh giá
+> **Phiên bản:** 0.4 — cập nhật sau Giai đoạn 4 (Exercise Engine + bản chơi thử: §3.1, AD-32 → AD-39, §5.1, §6.1, §11, §20, §21, §22)
+> **Ngày cập nhật:** 2026-10-15
+> **Trạng thái:** GĐ1–GĐ3 đã được chấp nhận; phần GĐ4 chờ người điều phối đánh giá
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -88,7 +88,8 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 | Testing Library | `@testing-library/react` · `dom` · `jest-dom` | 16.3.3 · 10.4.2 · 7.0.1 | |
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
 | Kiểu Node | `@types/node` | 24.19.2 (`^24`) | Template mặc định `^20` lệch peer của Vitest 5 |
-| Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`) |
+| Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`). Từ GĐ4 chỉ dùng ở máy chủ/lúc build — không vào bundle của học sinh (AD-33) |
+| Trợ năng (E2E) | `@axe-core/playwright` (kéo theo `axe-core`) | 4.13.0 (`^4.13.0`) | GĐ4 — devDependency; `npm view @axe-core/playwright version engines peerDependencies license` ngày 2026-10-15: peer `playwright-core >= 1.0.0` (đang có 1.64), MPL-2.0 (chỉ công cụ kiểm thử, không phân phối) |
 
 ### 3.2 Đánh giá công nghệ cho các giai đoạn sau
 
@@ -150,12 +151,38 @@ Trạng thái: **Chốt** = áp dụng cho MVP · **POC** = cần thử nghiệm
 | AD-29 | `npm run content:check` chạy `scripts/content-check.ts` **trực tiếp bằng Node 24** (bỏ kiểu gốc) → thư viện dùng import tương đối có đuôi `.ts`, không alias; tắt riêng cảnh báo `MODULE_TYPELESS_PACKAGE_JSON` thay vì đổi cả dự án sang `"type": "module"` | Không thêm phụ thuộc (tsx/ts-node); không đụng cơ chế nạp module của cấu hình GĐ2. Đã kiểm chứng Turbopack (Next 16.4) đóng gói được cách import này | `tsx`; `"type": "module"` (rủi ro cho next.config/playwright config) | Chốt (GĐ3) |
 | AD-30 | Duyệt nội dung gắn với **băm nội dung**: `approved` bắt buộc `reviewedBy` (không phải AI/hệ thống), `reviewedAt`, `contentHash` = SHA-256 JSON chuẩn hóa (bỏ trường `review`); nội dung đổi → `APPROVAL_STALE`; `selectCorpusItems({ purpose: "assignment" })` chỉ nhận hồ sơ `confirmed` + mục `approved` | Hiện thực AD-08 ở tầng dữ liệu tệp trước khi có CSDL; không mục nào được "dùng như đã duyệt" khi chưa duyệt | Chỉ dựa vào trạng thái (dễ sửa nội dung sau khi duyệt) | Chốt (GĐ3) |
 | AD-31 | Lớp tiến độ: chuỗi bài **minh họa** (`seriesKind: "illustrative"`) tách khỏi bộ sách thật (`textbook`, bắt buộc `source`); hồ sơ 1A2 `unconfirmed` không có tiến độ; hồ sơ `confirmed` không được dùng chuỗi minh họa/bộ bài chưa duyệt | Không trình bày dữ liệu tự tạo như chương trình thật của lớp | Tạo sẵn thứ tự bài "giống SGK" từ trí nhớ (không kiểm chứng được) | Chốt (GĐ3) |
+| AD-32 | Câu bài tập tách `content` (hiển thị) và `answer` (đáp án, thẻ lỗi); lược đồ `strictObject`; Player chỉ nhận `{type, variant, content}`, đáp án chỉ tới giao diện qua `reveal` sau khi câu đã chấm xong | Không thể vô tình hiển thị tên tranh/đáp án; giao diện không chứa logic chấm | Player nhận cả câu (dễ lộ đáp án qua nhãn, thuộc tính) | Chốt (GĐ4) |
+| AD-33 | Mỗi dạng bài tách **`runtime.ts`** (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, không zod) khỏi **`module.ts`** (lược đồ, bộ kiểm tra, chống lộ đáp án, phiếu — máy chủ/lúc build); hai sổ đăng ký `runtime-registry.ts` / `registry.ts` | Đo thực tế: zod lọt vào bundle `/demo` làm JS tăng ≈ 43 KB gzip; sau khi tách, phần bài tập chỉ ≈ 26 KB | Một module chung (kéo zod vào client) | Chốt (GĐ4) |
+| AD-34 | Bài tập của `/demo` được **sinh và kiểm tra ở máy chủ lúc build** (trang tĩnh); trình duyệt nhận các câu đã qua kiểm tra, không nhận kho tri thức | Bundle nhỏ, không gửi dữ liệu không cần thiết, kết quả tái lập | Sinh ở client (phải gửi cả kho tri thức) | Chốt (GĐ4) |
+| AD-35 | Chính sách âm thanh **theo mục tiêu học tập** (nghe / mã hóa–chính tả / phân tích / đọc), khai báo theo vai trò × mức H3–H0 × trước/sau chấm; bộ kiểm tra chống lộ đáp án so khớp theo chuỗi tiếng với khai báo "được phép ở trường nào" của từng dạng bài | Không áp dụng máy móc một quy tắc cho mọi dạng (âm mục tiêu của bài nghe là nhiệm vụ, của bài đọc là lộ đáp án) | Một danh sách chặn chung | Chốt (GĐ4) |
+| AD-36 | Bộ sinh theo quy tắc: ứng viên **hữu hạn** từ ngữ liệu đọc được, RNG có seed (FNV-1a + mulberry32) cho từng ứng viên, phương án nhiễu ưu tiên cặp dễ nhầm của kho tri thức, **mỗi câu qua toàn bộ chuỗi kiểm tra**, thiếu dữ liệu thì trả lý do | Tái lập được; không sinh tổ hợp vô hạn; không nới quy tắc | Sinh ngẫu nhiên rồi lọc | Chốt (GĐ4) |
+| AD-37 | Cặp bài ở nhà – ở lớp = **bài sinh đôi**: cùng nhóm đơn vị trọng tâm, độ khó ước lượng chênh ≤ 1, khác mục tiêu cụ thể; hợp đồng `ExerciseTaskContract` 8 thông tin; độ khó tương đương ghi rõ là ước lượng chưa kiểm chứng | Hiện thực §11.4/§16 ở tầng dữ liệu trước khi có PDF (GĐ8) | Sinh hai bộ độc lập rồi so mục tiêu chung | Chốt (GĐ4) |
+| AD-38 | Hai chế độ nội dung: `demo` (chỉ hồ sơ minh họa, nội dung `pending_review` kèm cảnh báo, không lưu) và `production` (hồ sơ `confirmed` + mọi ngữ liệu, tranh, câu hỏi, âm thanh bắt buộc và **dữ liệu tham chiếu** đều `approved`) | Bản chơi thử dùng được ngay mà không giả vờ nội dung đã duyệt; học thật không bao giờ nới quy tắc | Một chế độ với cờ "bỏ qua kiểm duyệt" | Chốt (GĐ4) |
+| AD-39 | GĐ4 **không phát âm thanh**: nút loa là điểm tích hợp bị khóa ghi "Chưa có âm thanh"; **không dùng Web Speech API** của trình duyệt kể cả ở `/demo` | Giọng tiếng Việt của Chrome có thể là giọng trực tuyến (gửi chữ ra máy chủ bên ngoài); chất lượng chưa xác minh; yêu cầu GĐ4 cấm nút phát giả | Dùng TTS trình duyệt cho `/demo` như PRD §12.2 cho phép | Chốt (GĐ4) — xem lại ở GĐ6 |
 
 ## 5. Cấu trúc thư mục
 
 ### 5.1 Đã tạo ở GĐ2 và GĐ3
 
 Chỉ tạo các thư mục có mã thật — không tạo sẵn module rỗng cho giai đoạn sau.
+
+**Thêm ở GĐ4** (chi tiết: [EXERCISE_ENGINE.md §1](EXERCISE_ENGINE.md#1-kiến-trúc)):
+
+```text
+ReadMateAI/
+├── src/features/exercises/
+│   ├── core/                 # primitives, schemas (zod), module (giao diện), support (H3→H0), audio, leaks, feedback, checks, grading, hints, bands, content-mode, media, worksheet
+│   ├── types/<dạng>/         # schema, variants, runtime, module, generate, Player.tsx — letter-sound, build-syllable, identify-unit, fill-blank, word-picture, sentence-reading
+│   ├── generation/           # rng (seed), context, candidate, generate, pair (bài sinh đôi + hợp đồng phiếu)
+│   ├── session/              # session (reducer thuần), results (kết quả + chỉ số nghiên cứu)
+│   ├── ui/                   # session-runner, item-player, option-grid, results-panel, worksheet-preview, player-types
+│   └── items.ts · registry.ts · runtime-registry.ts · validation.ts · catalog.ts
+├── src/features/demo/        # demo-data (mô tả H3→H0), practice-fixture (22 tranh + 8 câu hỏi, pending_review), practice-data (dựng dữ liệu /demo)
+├── src/components/kid/       # choice-tile, picture-icon, tone-glyph, audio-slot, feedback-banner, progress-dots, reading-text
+├── src/lib/vietnamese/compose.ts   # ghép âm đầu + vần + thanh (khứ hồi qua bộ phân tích)
+├── src/app/(site)/demo/      # page.tsx (máy chủ, sinh dữ liệu lúc build) + demo-practice.tsx (client)
+└── tests/unit/exercises/ · tests/e2e/demo-practice.spec.ts
+```
 
 **Thêm ở GĐ3** (chi tiết: [VIETNAMESE_ENGINE.md §2–3](VIETNAMESE_ENGINE.md)):
 
@@ -255,7 +282,7 @@ Quy ước: `features/*` chứa nghiệp vụ theo miền; `lib/*` là thư vi�
 | Route | Đối tượng | Mô tả | Giai đoạn |
 |---|---|---|---|
 | `/` | Mọi người | Giới thiệu ngắn, liên kết đăng nhập GV; không có công cụ theo dõi | GĐ2 ✅ |
-| `/demo` | Mọi người | GĐ2 ✅: giới thiệu 3 lộ trình, buổi luyện mẫu, H3→H0, 6 dạng bài (dữ liệu hư cấu). GĐ4: chơi thử 6 dạng bài, không đăng nhập, không gửi dữ liệu | GĐ2 / GĐ4 |
+| `/demo` | Mọi người | GĐ2 ✅: giới thiệu. **GĐ4 ✅: bản chơi thử** — chọn lộ trình → buổi luyện mẫu hoặc 6 dạng bài (17 biến thể), mức hỗ trợ H3→H0, kết quả + xem trước phiếu ở lớp; dữ liệu minh họa chờ duyệt, không đăng nhập, không lưu, không gửi dữ liệu, chưa có âm thanh | GĐ2 / GĐ4 |
 | `/join` | Phụ huynh | GĐ2 ✅: giao diện bị khóa, không nhận mã. GĐ5: liên kết thiết bị bằng mã QR (mã nằm ở phần fragment của URL) hoặc mã dự phòng | GĐ2 / GĐ5 |
 | `/learn` | HS | GĐ2 ✅: khung giao diện (lời chào, nhiệm vụ, khu bài tập, thành tích — chưa có dữ liệu). GĐ7: chọn hồ sơ, "Bài hôm nay" | GĐ2 / GĐ7 |
 | `/learn/session/[id]` | HS | Bộ chạy phiên luyện | GĐ7 |
@@ -415,9 +442,11 @@ Kho tri thức gồm bốn lớp:
 
 ## 11. Bộ máy bài tập
 
+> **GĐ4 đã hiện thực §11.1–§11.5** — mô tả đầy đủ, đúng mã nguồn: [EXERCISE_ENGINE.md](EXERCISE_ENGINE.md). Khác phác thảo dưới đây: thư mục dùng tên kebab-case (`types/letter-sound/`); mỗi dạng tách `runtime.ts` (client + server) khỏi `module.ts` (máy chủ) — AD-33; `instruction`, `audioPolicy` nằm trong định nghĩa **biến thể** (`variants.ts`, 17 biến thể); `Paper.tsx` (react-pdf) chưa làm — thay bằng biểu diễn phiếu `worksheet()` + hợp đồng `ExerciseTaskContract` (AD-37); chuỗi kiểm tra có 9 bước, thêm `CONTENT_UNVERIFIED`, `UNIT_NOT_TAUGHT`, `CONVENTION_REQUIRED`, `ANSWER_NOT_IN_TEXT`, `DISTRACTOR_IN_TEXT`, `AUDIO_ROLE_FORBIDDEN`, `CONTENT_NOT_APPROVED`.
+
 ### 11.1 Exercise Type Module
 
-Mỗi dạng bài (6 dạng ở [PRD §9](PRD.md#9-sáu-dạng-bài-tập-mvp)) là một thư mục `src/features/exercises/types/<code>/`. Phác thảo giao diện (minh họa, sẽ hiện thực ở GĐ4):
+Mỗi dạng bài (6 dạng ở [PRD §9](PRD.md#9-sáu-dạng-bài-tập-mvp)) là một thư mục `src/features/exercises/types/<code>/`. Phác thảo giao diện ở GĐ1 (bản hiện thực: xem ghi chú trên):
 
 ```ts
 // Phác thảo — không phải mã cuối cùng
@@ -596,20 +625,20 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 
 | Tầng | Công cụ | Phạm vi | Giai đoạn bắt đầu |
 |---|---|---|---|
-| Unit | Vitest | `lib/vietnamese` + `features/knowledge` (GĐ3 ✅: 524 ca mới — gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa, đủ 6 thanh, NFC/NFD, chính tả, vị trí dấu, giải mã, hồ sơ lớp, kiểm duyệt, content:check với dữ liệu gài lỗi; tổng 604), `grade()`, `validate()`, phân hóa | GĐ2–GĐ4 |
-| Component | Vitest + Testing Library | Player của 6 dạng bài | GĐ4 |
+| Unit | Vitest | GĐ4 ✅ bộ máy bài tập: lược đồ, chấm (mọi câu sinh ra), chống lộ đáp án, chính sách âm thanh, sinh biến thể/seed/cặp nhà–lớp, chế độ demo/học thật, reducer phiên, kết quả (tổng 729). `lib/vietnamese` + `features/knowledge` (GĐ3 ✅: 524 ca mới — gi, qu, ngh, oa/oe/uy, iê/yê/ia/ya, uô/ua, ươ/ưa, đủ 6 thanh, NFC/NFD, chính tả, vị trí dấu, giải mã, hồ sơ lớp, kiểm duyệt, content:check với dữ liệu gài lỗi; tổng 604), `grade()`, `validate()`, phân hóa | GĐ2–GĐ4 |
+| Component | Vitest + Testing Library | Bộ chạy bài, bản chơi thử (GĐ4 ✅) | GĐ4 |
 | Nội dung | `npm run content:check` | Toàn bộ `content/`: JSON/lược đồ, ID, NFC, tham chiếu, vòng tiên quyết, chính tả, đối chiếu phân tích, duyệt + băm nội dung, dữ liệu cá nhân (lỗi chặn / cảnh báo cho GV) | GĐ3 ✅ |
 | CSDL/RLS | pgTAP (`supabase test db`) hoặc Vitest tích hợp với nhiều người dùng | Cách ly lớp, cách ly học sinh, thiết bị bị thu hồi, ẩn danh chưa liên kết | GĐ5 |
 | Vệ sinh repo | Vitest (`tests/unit/repo-hygiene.test.ts`) | Không secret/token, không email/số điện thoại trong `src`/`tests`/`public`, không URL ngoài trong `src`, mọi tệp văn bản ở dạng NFC, `.env.example` không chứa giá trị secret, `.gitignore` chặn `.env*` | GĐ2 ✅ |
-| E2E | Playwright: Pixel (Android Chrome), iPhone (WebKit), iPad, desktop | GĐ2 ✅: route, điều hướng, 360 px không tràn ngang, tiếng Việt/NFC/font, header bảo mật, quyền riêng tư (chỉ request cùng nguồn). GĐ4+: luồng HS, luồng GV, chính sách âm thanh | GĐ2 / GĐ4 |
-| Trợ năng | axe (Playwright) | Trang GV và HS | GĐ4 |
+| E2E | Playwright: Pixel (Android Chrome), iPhone (WebKit), iPad (GĐ4, riêng bản chơi thử + bố cục), desktop | GĐ2 ✅: route, điều hướng, 360 px không tràn ngang, tiếng Việt/NFC/font, header bảo mật, quyền riêng tư. GĐ4 ✅: ba buổi luyện mẫu, sáu dạng bài, kiểm tra/thử lại/điều hướng, hết lượt ở H3, bàn phím, không có nút nghe từ/câu ở bài đọc, nút âm thanh khóa, không request ghi/ngoài/âm thanh, không localStorage, axe, 360 px + vùng chạm 64 px | GĐ2 / GĐ4 |
+| Trợ năng | axe (`@axe-core/playwright`) | GĐ4 ✅: các màn của `/demo` không có vi phạm mức critical/serious | GĐ4 |
 | Thủ công | GV + quan sát học sinh (có đồng ý) | Khả dụng của `/demo` | GĐ4 |
 
 **Definition of Done** của mỗi nhiệm vụ: lint + typecheck + test xanh; có test cho logic mới; không secret trong mã; RLS cho bảng mới kèm test; tài liệu và `PROGRESS.md` được cập nhật.
 
 ## 21. Hiệu năng và chi phí
 
-**Ngân sách hiệu năng:** JS cho route học sinh ≤ khoảng 200 KB (gzip); mở "Bài hôm nay" ≤ 3 giây trên 4G; mỗi tệp âm thanh ngắn ≤ 50 KB; ảnh dạng SVG/WebP đã định cỡ.
+**Ngân sách hiệu năng:** JS cho route học sinh ≤ khoảng 200 KB (gzip) — *đo thực tế GĐ4:* khung Next 16 + React 19 (`/learn`) đã ≈ 192 KB; `/demo` ≈ 228 KB (phần bài tập ≈ 26 KB sau khi tách zod — AD-33); xem T-16; mở "Bài hôm nay" ≤ 3 giây trên 4G; mỗi tệp âm thanh ngắn ≤ 50 KB; ảnh dạng SVG/WebP đã định cỡ.
 
 **Chi phí** (giá kiểm tra ngày 2026-10-12, có thể thay đổi):
 
@@ -634,7 +663,8 @@ Không dùng `upgrade-insecure-requests` (Vercel đã ép HTTPS; directive này 
 | T-05 | `@react-pdf/renderer` trong Route Handler Next 16 + font Andika + dấu tiếng Việt | POC dựng 1 trang mẫu, kiểm tra trích xuất văn bản | GĐ8 (có thể sớm hơn) |
 | T-06 | Chất lượng TTS tiếng Việt cho từ/câu lớp 1; giọng vùng miền | POC so sánh 2–3 nhà cung cấp, GV nghe đánh giá | GĐ6 |
 | T-07 | Định dạng ghi âm của GV và khả năng phát trên iOS | POC ghi/phát trên Android + iPhone | GĐ6 |
-| T-08 | Tự phát âm thanh trên iOS/Android | Thiết kế nút "Bắt đầu" mở khóa; E2E trên WebKit | GĐ4 |
+| T-08 | Tự phát âm thanh trên iOS/Android | Nút "Bắt đầu" đã có ở màn hướng dẫn mỗi dạng bài (GĐ4); việc mở khóa âm thanh thật sẽ kiểm chứng khi có tệp âm thanh | GĐ6 |
+| T-16 | Ngân sách JS ≈ 200 KB gzip của route học sinh: khung Next + React đã ≈ 192 KB | Tách runtime khỏi zod (AD-33); đo bundle mỗi giai đoạn; cân nhắc tách mã theo dạng bài (dynamic import) ở GĐ7 | GĐ7 |
 | T-09 | Quy ước phân tích tiếng ("qu", "gi", vị trí dấu thanh) khác nhau giữa bộ sách | ✅ GĐ3: tham số hóa (`conventions` của hồ sơ lớp, `conventionDependencies` của kết quả); chưa xác nhận → `unknown`. Còn chờ GV trả lời Q-02 | GĐ3 |
 | T-14 | Ký tự vô hình/dấu tổ hợp đứng riêng lọt vào mã nguồn khi soạn (đã xảy ra ở GĐ3: chuỗi thoát `\u…` bị ghi thành ký tự thật) | Đã chuyển hết về dạng thoát; test vệ sinh repo bắt văn bản không NFC; quy tắc CLAUDE.md §9.1 (GĐ3) | GĐ3+ |
 | T-15 | `content:check` phụ thuộc khả năng chạy TypeScript gốc của Node 24 (bỏ kiểu) — cú pháp TS cần biên dịch (enum, namespace…) sẽ làm script hỏng | `erasableSyntaxOnly` trong tsconfig bắt lỗi khi typecheck; CI chạy `content:check` trên Linux | GĐ3+ |

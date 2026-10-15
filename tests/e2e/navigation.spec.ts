@@ -8,7 +8,7 @@ test.describe("điều hướng", () => {
     await page.goto("/");
     await mainNav.getByRole("link", { name: "Bản demo" }).click();
     await expect(page).toHaveURL(/\/demo$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Hệ thống luyện tập của ReadMate AI");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Chơi thử bài luyện đọc lớp 1");
     await expect(mainNav.getByRole("link", { name: "Bản demo" })).toHaveAttribute("aria-current", "page");
 
     await mainNav.getByRole("link", { name: "Liên kết thiết bị" }).click();
@@ -65,19 +65,14 @@ test.describe("điều hướng", () => {
     await expect(page.locator("#noi-dung-chinh")).toBeFocused();
   });
 
-  test("tab lộ trình ở /demo điều khiển được bằng bàn phím", async ({ page }) => {
+  test("chọn lộ trình ở /demo bằng bàn phím; focus chuyển tới tiêu đề bước tiếp theo", async ({ page }) => {
     await page.goto("/demo");
-    const tabs = page.getByRole("tab");
-    await expect(tabs).toHaveCount(3);
-
-    await tabs.first().focus();
-    await page.keyboard.press("ArrowRight");
-    const second = page.getByRole("tab", { name: "Vững bước" });
-    await expect(second).toHaveAttribute("aria-selected", "true");
-    await expect(second).toBeFocused();
-    await expect(page.getByRole("tabpanel")).toContainText("Phân biệt hai vần dễ nhầm");
-
-    await page.keyboard.press("End");
-    await expect(page.getByRole("tab", { name: "Tăng tốc" })).toHaveAttribute("aria-selected", "true");
+    const path = page.getByRole("button", { name: /Vững bước/ });
+    await path.focus();
+    await page.keyboard.press("Enter");
+    const heading = page.getByRole("heading", { level: 3, name: "Vững bước" });
+    await expect(heading).toBeVisible();
+    await expect(heading).toBeFocused();
+    await expect(page.getByRole("button", { name: /Bắt đầu buổi luyện/ })).toBeVisible();
   });
 });

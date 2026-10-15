@@ -3,6 +3,7 @@
  * Tài liệu: docs/VIETNAMESE_ENGINE.md.
  */
 export * from "./characters.ts";
+export * from "./compose.ts";
 export * from "./decodability.ts";
 export * from "./diagnostics.ts";
 export * from "./difficulty.ts";

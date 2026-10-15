@@ -1,6 +1,6 @@
 # TASKS — Kế hoạch phát triển ReadMate AI
 
-> **Cập nhật:** 2026-10-14 · **Giai đoạn hiện tại:** GĐ3 đã hoàn thành — chờ người điều phối đánh giá (GĐ2 đã được nghiệm thu)
+> **Cập nhật:** 2026-10-15 · **Giai đoạn hiện tại:** GĐ4 đã hoàn thành về mã nguồn và kiểm thử — chờ người điều phối đánh giá (GĐ3 đã được chấp nhận về kỹ thuật)
 > **Quy ước:** mỗi giai đoạn triển khai và kiểm thử độc lập; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**.
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa làm · Quy mô ước lượng thô: **S** (≤ 1 phiên làm việc), **M** (2–3 phiên), **L** (≥ 4 phiên).
 > **Tài liệu:** [PRD](docs/PRD.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [DATA_MODEL](docs/DATA_MODEL.md) · [PROGRESS](PROGRESS.md)
@@ -11,8 +11,8 @@
 |---|---|---|---|---|---|
 | 1 | Khởi tạo & thiết kế kiến trúc | Bộ tài liệu, Git cục bộ | — | S | ✅ Đã duyệt |
 | 2 | Nền móng kỹ thuật | Ứng dụng khung build/lint/test xanh, CI | GĐ1 | M | ✅ Đã duyệt |
-| 3 | Lõi Tiếng Việt & kho tri thức dạng mã | Thư viện phân tích tiếng + dữ liệu lõi có kiểm thử | GĐ2 | M–L | ✅ Chờ duyệt (dữ liệu chờ GV) |
-| 4 | Bộ máy bài tập + 6 dạng bài + `/demo` | Bản chơi thử chạy trên điện thoại, chưa cần CSDL | GĐ2, GĐ3 | L | ⏸ |
+| 3 | Lõi Tiếng Việt & kho tri thức dạng mã | Thư viện phân tích tiếng + dữ liệu lõi có kiểm thử | GĐ2 | M–L | ✅ Đã chấp nhận (dữ liệu chờ GV) |
+| 4 | Bộ máy bài tập + 6 dạng bài + `/demo` | Bản chơi thử chạy trên điện thoại, chưa cần CSDL | GĐ2, GĐ3 | L | ✅ Chờ duyệt (âm thanh, nội dung chờ GV) |
 | 5 | Supabase: CSDL nền, RLS, xác thực | GV đăng nhập, thẻ học, liên kết thiết bị, kiểm thử RLS | GĐ3 | L | ⏸ |
 | 6 | Soạn & kiểm duyệt nội dung + âm thanh | Thư viện bài đã duyệt có âm thanh | GĐ4, GĐ5 | L | ⏸ |
 | 7 | Giao bài, luyện tại nhà, lưu kết quả, phân hóa | Luồng đầu–cuối GV giao → HS làm → GV thấy kết quả | GĐ6 | L | ⏸ |
@@ -102,28 +102,31 @@
 
 ---
 
-## GĐ4 — Bộ máy bài tập, 6 dạng bài và bản chơi thử `/demo` (L)
+## GĐ4 — Bộ máy bài tập, 6 dạng bài và bản chơi thử `/demo` (L) ✅
 
 **Điều kiện bắt đầu:** GĐ2, GĐ3 xong · có bộ âm thanh mẫu tạm thời cho demo (ghi âm GV hoặc TTS sinh trước, ghi rõ nguồn).
+**Thực tế (2026-10-15):** GĐ3 được chấp nhận về kỹ thuật; **chưa có âm thanh mẫu nào** và GV chưa trả lời Q-01/Q-02 → làm với hồ sơ minh họa (bài MH16), không phát âm thanh (nút loa bị khóa, ghi "Chưa có âm thanh"), mọi nội dung chờ duyệt. Tài liệu: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
 
-- [ ] 4.1 Giao diện `ExerciseTypeModule` + registry: lược đồ zod, `grade()`, `validate()`, thang gợi ý, `audioPolicy`, câu lệnh chuẩn
-- [ ] 4.2 Sáu dạng bài (`letter_sound`, `build_syllable`, `identify_unit`, `fill_blank`, `word_picture`, `sentence_reading`) với Player chạm-để-chọn và ≥ 10 câu mẫu mỗi dạng
-- [ ] 4.3 Bộ chạy phiên: nút "Bắt đầu" mở khóa âm thanh, mức H3→H0, "Cô làm mẫu", gợi ý theo bậc, phản hồi, chúc mừng
-- [ ] 4.4 Dịch vụ phát âm thanh: tải trước, nút loa cố định, thực thi `audioPolicy`
-- [ ] 4.5 Bộ kiểm tra chung: NFC, đáp án duy nhất, phương án trùng, `AUDIO_LEAKS_ANSWER`, `TEXT_LEAKS_ANSWER`
-- [ ] 4.6 Bộ biểu tượng hướng dẫn SVG (có bản đen trắng cho phiếu)
-- [ ] 4.7 `/demo`: chơi đủ 6 dạng, không đăng nhập, không gửi dữ liệu
-- [ ] 4.8 Kiểm thử component + E2E (Pixel, iPhone, Desktop đã có từ GĐ2; thêm cấu hình iPad) + kiểm tra trợ năng axe
-- [ ] 4.9 Buổi thử khả dụng với GV (và học sinh nếu nhà trường, phụ huynh đồng ý — không thu dữ liệu); ghi nhận phản hồi vào PROGRESS
+- [x] 4.1 `ExerciseTypeModule` + registry: lược đồ zod, `grade()`, `validate()`, thang gợi ý, `audioPolicy`, câu lệnh chuẩn — *điều chỉnh:* tách `runtime.ts` (client + server, không zod) khỏi `module.ts` (máy chủ); `audioPolicy`/câu lệnh theo **biến thể** (`variants.ts`, 17 biến thể)
+- [x] 4.2 Sáu dạng bài với Player chạm-để-chọn — đo thực tế ở Nhóm 2 (hồ sơ minh họa, bài MH16): **15/17 biến thể sinh được ≥ 10 câu hợp lệ** (từ 13 đến 96 câu); dưới 10: điền vần có tranh (9 — ít tranh), câu hỏi đọc hiểu (8 — fixture chỉ có 8 câu hỏi). `/demo` hiện 4 câu/biến thể. *Điều chỉnh:* thêm biến thể "Tìm chữ giống chữ mẫu" trong dạng 1; dạng 6 làm "trả lời câu hỏi đọc hiểu" thay cho "Đúng/Sai" (chưa làm)
+- [x] 4.3 Bộ chạy phiên: nút "Bắt đầu" ở màn hướng dẫn mỗi dạng bài, mức H3→H0, "Cô làm mẫu" (H3), gợi ý theo bậc (tự hiện ở H3), phản hồi, thử lại, chuyển câu, kết quả — *chưa:* mở khóa âm thanh thật (chưa có âm thanh)
+- [ ] 4.4 Dịch vụ phát âm thanh — **chưa làm** (không có tệp âm thanh đã xác minh). Đã có: chính sách âm thanh theo mục tiêu, điểm tích hợp `AudioSlot` bị khóa, khe âm thanh trong dữ liệu câu (lời đọc + mã tệp), bộ sinh gắn tệp khi thư viện media có tệp khớp → chuyển GĐ6
+- [x] 4.5 Bộ kiểm tra chung (9 bước): NFC, chỉ dùng điều đã học (bộ máy GĐ3, `unknown` là lỗi), đáp án duy nhất, phương án trùng, `AUDIO_LEAKS_ANSWER`, `TEXT_LEAKS_ANSWER`, tranh/âm thanh, trạng thái duyệt, ràng buộc nhóm
+- [ ] 4.6 Bộ biểu tượng hướng dẫn SVG riêng — *chưa:* tiếp tục dùng biểu tượng lucide (SVG nét, in đen trắng vẫn rõ, dùng chung ứng dụng và bản xem trước phiếu); dấu thanh vẽ bằng SVG riêng. Chờ GV góp ý biểu tượng (4.9)
+- [x] 4.7 `/demo`: chơi đủ 6 dạng (16/17 biến thể chơi được; nghe âm – chọn chữ chỉ xem giao diện), không đăng nhập, không gửi dữ liệu, không lưu
+- [x] 4.8 Kiểm thử component + E2E (Pixel, iPhone, Desktop Chrome/Safari + **iPad** cho spec bản chơi thử và bố cục) + kiểm tra trợ năng axe
+- [ ] 4.9 Buổi thử khả dụng với GV (và học sinh nếu được đồng ý) — **chưa làm** (cần người điều phối/nhà trường sắp xếp)
+- [x] 4.10 *(Mới)* Bộ sinh biến thể theo quy tắc có seed + cặp bài ở nhà – bài ở lớp ("bài sinh đôi") + hợp đồng dữ liệu phiếu 8 thông tin + bản xem trước phiếu dạng trang web (chưa PDF)
+- [x] 4.11 *(Mới)* Hai chế độ nội dung demo / học thật; kết quả buổi luyện và chỉ số nghiên cứu (chỉ trong bộ nhớ)
 
 **Tiêu chí nghiệm thu**
 
-- [ ] Mỗi dạng bài chơi trọn vẹn (đúng, sai, gợi ý, hết lượt) ở 360×640, iPad và desktop
-- [ ] E2E chứng minh: dạng 5 và 6 không phát âm thanh chứa từ/câu cần đọc trước khi chấm; âm thanh mẫu chỉ phát sau khi chấm
-- [ ] Bộ kiểm tra chặn 100% fixture vi phạm cố ý (lộ đáp án, đáp án mơ hồ, phương án trùng)
-- [ ] Vùng chạm ≥ 64 px; axe không có lỗi mức nghiêm trọng
-- [ ] `/demo` không phát sinh request ghi dữ liệu (kiểm tra mạng bằng Playwright)
-- [ ] GV xác nhận câu lệnh và biểu tượng dễ hiểu với học sinh lớp 1
+- [x] Mỗi dạng bài chơi trọn vẹn (đúng, sai, gợi ý, hết lượt) ở 360×640, iPad và desktop — E2E (ba buổi luyện mẫu trên 5 cấu hình; sáu dạng bài trên desktop; hết lượt H3; thử lại; gợi ý trong unit/component test)
+- [x] E2E chứng minh dạng 5 và 6 không phát âm thanh chứa từ/câu cần đọc trước khi chấm — *thực tế:* GĐ4 không phát âm thanh nào; E2E chứng minh bài đọc không có nút nghe từ/câu, không có thẻ audio, không có request âm thanh; unit test chứng minh chính sách cấm khe kích thích ở mọi mức và bộ kiểm tra chặn câu mang âm thanh đọc từ (`AUDIO_ROLE_FORBIDDEN`). Phần "âm thanh mẫu chỉ phát sau khi chấm" kiểm chứng lại khi có âm thanh (GĐ6)
+- [x] Bộ kiểm tra chặn 100% fixture vi phạm cố ý trong kiểm thử (lộ đáp án chữ/âm thanh, đáp án mơ hồ, phương án trùng, chưa học, `unknown`, chưa duyệt) — 4 đột biến tạm thời trong bộ máy đều bị test bắt
+- [x] Vùng chạm ≥ 64 px (E2E ở 360 px); axe không có lỗi mức critical/serious ở các màn của `/demo`
+- [x] `/demo` không phát sinh request ghi dữ liệu (Playwright: không request khác GET, không có body, không tài nguyên ngoài, không localStorage/sessionStorage)
+- [ ] GV xác nhận câu lệnh và biểu tượng dễ hiểu với học sinh lớp 1 — **chờ GV** (4.9)
 
 ---
 

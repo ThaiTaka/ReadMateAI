@@ -28,16 +28,17 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Kiến trúc, phiên bản đã xác minh, quyết định AD-xx, bảo mật, triển khai |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Bảng, quan hệ, ma trận RLS, lưu giữ dữ liệu, kế hoạch migration |
 | [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) | Bộ máy tiếng Việt + kho tri thức (GĐ3): mô hình, dữ liệu, hàm, giới hạn, cập nhật tiến độ, thêm học liệu, kiểm duyệt |
+| [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md) | Bộ máy bài tập (GĐ4): Exercise Type Module, 6 dạng/17 biến thể, H3→H0, chống lộ đáp án, sinh biến thể, cặp nhà–lớp, chế độ demo/học thật, giới hạn |
 | [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) | Phiếu rà soát cho GV: bộ sách, quy ước, tên chữ, cách gọi âm, vần, quy tắc, ngữ liệu |
 | [TASKS.md](TASKS.md) | Giai đoạn, nhiệm vụ, tiêu chí nghiệm thu |
 | [PROGRESS.md](PROGRESS.md) | Trạng thái hiện tại, quyết định, câu hỏi mở, rủi ro |
 
-## 4. Môi trường (đã kiểm tra 2026-10-12, cập nhật 2026-10-14)
+## 4. Môi trường (đã kiểm tra 2026-10-12, cập nhật 2026-10-15)
 
 - Windows 11; thư mục dự án **`D:\ReadMateAI`** (không có dấu cách). Shell chính PowerShell 5.1 — **không hỗ trợ `&&`**, dùng `;` hoặc `if ($?) { … }`; Git Bash có sẵn.
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
 - **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
-- Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2).
+- Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2). `@axe-core/playwright` 4.13 (devDependency, GĐ4) cho kiểm tra trợ năng trong E2E.
 - Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên mỗi push/PR — lần đầu xanh. Mọi lần push sau vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
 - Node 24 chạy được TypeScript gốc (bỏ kiểu) — dùng cho `npm run content:check`. `zod` 4.6.7 là phụ thuộc trực tiếp (GĐ3).
 - `core.autocrlf=true` ở cấp hệ thống → `.gitattributes` chuẩn hóa LF.
@@ -49,7 +50,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Next 16 dùng **`src/proxy.ts`** (không phải `middleware.ts`) để làm mới phiên; xác thực lại trong từng Server Action/Route Handler; dùng `getClaims()`, không tin `getSession()` ở server.
 - GV: email/mật khẩu (không tự đăng ký). HS: người dùng ẩn danh Supabase + liên kết thiết bị bằng thẻ học QR/mã dự phòng.
 - **Student gateway**: mọi thao tác ghi của HS và nội dung phiên luyện đi qua server; HS chỉ đọc dữ liệu của mình qua RLS.
-- **Exercise Type Module**: mỗi dạng bài là một thư mục gồm lược đồ zod, `grade()`, `validate()`, gợi ý, `audioPolicy`, `Player.tsx`, `Paper.tsx`.
+- **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. `Paper.tsx` (PDF) để GĐ8. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
+- Bài tập của `/demo` sinh **ở máy chủ lúc build** từ kho tri thức (chế độ `demo`, hồ sơ minh họa); chế độ `production` chỉ nhận hồ sơ `confirmed` + nội dung `approved` — hiện chưa có nên không tạo bài nào (đúng thiết kế).
 - Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
 - Âm thanh sinh trước (TTS) hoặc ghi âm GV; PDF bằng `@react-pdf/renderer` + font Andika; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được.
 
@@ -122,6 +124,19 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 5. Thêm tệp bộ bài/hồ sơ trong `content/curriculum/` thì đăng ký vào `src/features/knowledge/default-kb.ts` (unit test báo nếu quên).
 6. Fixture kiểm thử cần chuỗi giống email/số điện thoại phải **ghép chuỗi lúc chạy** để không vi phạm test vệ sinh repo.
 
+### 9.3 Quy tắc rút ra ở GĐ4 (BẮT BUỘC)
+
+1. Câu bài tập tách `content` (hiển thị) / `answer` (đáp án): `content` **không bao giờ** chứa đáp án hay tên tranh; Player chỉ nhận `view` (`type`, `variant`, `content`); đáp án chỉ tới giao diện qua `reveal` **sau khi** câu đã chấm. Nhãn tranh cho trình đọc màn hình trước khi chấm luôn trung tính ("Hình 1…").
+2. Mã chạy ở trình duyệt (`types/*/runtime.ts`, `Player.tsx`, `ui/`, `session/`, `components/kid/`) **không** import giá trị từ `core/schemas.ts`, `types/*/schema.ts`, `types/*/module.ts`, `registry.ts`, `default-kb.ts` (chỉ `import type`); dùng `runtime-registry.ts`. Đo JS của `/demo` khi thêm phụ thuộc (GĐ4: ≈ 228 KB gzip, khung Next + React ≈ 192 KB).
+3. Mọi câu bài tập phải qua `validateExerciseItem`; `unknown` của bộ máy tiếng Việt luôn là lỗi; không thêm đường tắt bỏ qua kiểm tra hay nới quy tắc khi thiếu dữ liệu — trả về lý do (`INSUFFICIENT_CONTENT`).
+4. Âm thanh: không phát âm thanh khi chưa có tệp **đã duyệt**; không dùng Web Speech API; không tạo nút phát giả (dùng `AudioSlot` bị khóa). Chính sách âm thanh khai báo **theo mục tiêu học tập** của từng biến thể, kèm lý do; mọi khe âm thanh khai báo lời đọc để bộ kiểm tra soát.
+5. Bộ sinh và reducer là hàm thuần: không `Math.random()`/`Date.now()` (dùng RNG có seed; thời điểm truyền vào từ sự kiện giao diện).
+6. Bản chơi thử chỉ dùng hồ sơ minh họa và fixture riêng ở `src/features/demo/` (mục mới luôn `pending_review`). Test chế độ học thật dùng dữ liệu "đã duyệt" **giả lập trong bộ nhớ**, ghi rõ trong test — không sửa `content/`.
+7. E2E lấy đáp án từ chính bộ sinh (`buildDemoPracticeData`, tái lập theo seed) và thao tác qua giao diện như người dùng; khớp tên thẻ theo "bắt đầu bằng chữ của thẻ" vì sau khi chấm tên có thêm ", chưa đúng".
+8. Ký tự đặc biệt: GĐ4 lại gặp `\u0301`, `\u00a0` bị ghi thành ký tự thật, và `grep -P` trên Git Bash **không** bắt được — kiểm tra byte bằng Node (quét các tệp mới/sửa) trước khi commit.
+9. Shell: script nhiều dòng có backtick/nháy/`${}` thì ghi ra tệp (scratchpad) rồi chạy bằng Node; không nhúng template literal vào `node -e` trong chuỗi bash.
+10. Không đặt tên biến `module` (luật `@next/next/no-assign-module-variable`) — dùng `typeModule`.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
@@ -142,7 +157,7 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `next typegen && tsc --noEmit` |
 | `npm run test` · `npm run test:run` | Vitest chế độ theo dõi · chạy một lần |
-| `npm run test:e2e` | Playwright: tự build + `next start` cổng 3100; Chromium/WebKit × desktop/điện thoại (lần đầu: `npx playwright install chromium webkit`) |
+| `npm run test:e2e` | Playwright: tự build + `next start` cổng 3100; Chromium/WebKit × desktop/điện thoại + iPad (riêng bản chơi thử, bố cục); có axe (lần đầu: `npx playwright install chromium webkit`) |
 | `npm run format` · `npm run format:check` | Prettier (bỏ qua `*.md`, `package-lock.json`) |
 | `npm run content:check` | Kiểm tra kho tri thức `content/`: lỗi (thoát mã 1) / cảnh báo cần GV rà soát / thông tin |
 

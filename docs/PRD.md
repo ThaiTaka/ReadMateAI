@@ -1,8 +1,8 @@
 # ReadMate AI — Tài liệu yêu cầu sản phẩm (PRD)
 
-> **Phiên bản:** 0.1 — bản thiết kế của Giai đoạn 1 (chưa có mã nguồn ứng dụng)
-> **Ngày cập nhật:** 2026-10-12
-> **Trạng thái:** Chờ người điều phối dự án đánh giá
+> **Phiên bản:** 0.2 — bản thiết kế GĐ1, bổ sung §9.3 "Điều chỉnh khi hiện thực (GĐ4)" và ghi chú §12.2
+> **Ngày cập nhật:** 2026-10-15
+> **Trạng thái:** Thiết kế GĐ1 đã được chấp nhận; phần điều chỉnh GĐ4 chờ người điều phối đánh giá
 > **Tài liệu liên quan:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [PROGRESS.md](../PROGRESS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -315,7 +315,21 @@ Ký hiệu chính sách âm thanh *trước khi câu được chấm xong*: ✅ 
 - Gợi ý: tô sáng từ khóa → tách tiếng; với sắp xếp câu: cố định sẵn từ đầu câu (chữ viết hoa) và dấu chấm cuối câu.
 - Ràng buộc: câu ≤ 8 tiếng (Nhóm 1), ≤ 5 tiếng (Nhóm 2); chỉ dùng từ đọc được bằng kiến thức đã học, trừ từ mới được GV cho phép.
 
-## 10. Ba nhóm năng lực và phân hóa
+### 9.3 Điều chỉnh khi hiện thực (GĐ4)
+
+Sáu dạng bài và mã của chúng giữ nguyên. Bộ máy và bản chơi thử: [EXERCISE_ENGINE.md](EXERCISE_ENGINE.md).
+
+| Điểm | PRD (GĐ1) | Hiện thực GĐ4 | Lý do |
+|---|---|---|---|
+| Đối chiếu với yêu cầu GĐ4 (A–F) | — | A, B → dạng 1; C → dạng 2; D → dạng 4; E → dạng 5; F → dạng 6; dạng 3 giữ nguyên | Giữ sáu dạng đã phê duyệt |
+| Dạng 1 | (a) nhìn hình – chọn chữ, (b) nghe âm – chọn chữ | Thêm biến thể **"Tìm chữ giống chữ mẫu"** (`visual_match`) trong dạng 1 | Yêu cầu A: phân biệt chữ dễ nhầm hình dạng (b/d/p, m/n/u, o/ô/ơ…) |
+| Dạng 1 (b) | Nghe âm – chọn chữ | Có giao diện và cơ chế chọn, **chưa chấm được** | Chưa có bản ghi âm GV đã duyệt (A7) |
+| Dạng 6 | Chọn hình; Đúng/Sai; sắp xếp | Chọn hình; **trả lời câu hỏi đọc hiểu** (đáp án phải nằm nguyên văn trong câu); sắp xếp. **Đúng/Sai chưa làm** | Yêu cầu F: đọc hiểu, câu hỏi phải xác định được từ ngữ liệu |
+| Gợi ý dạng 5 | Tách tiếng → tô màu âm đầu/vần → đánh vần bằng chữ | Tách tiếng → loại bớt một tranh | Giao diện không có bộ phân tích tiếng (giữ bundle nhỏ); xem lại khi cần |
+| Số lượt | "Số lần thử tối đa cấu hình theo dạng bài" (F-HS-05) | Theo **mức hỗ trợ**: H3/H2 = 3, H1 = 2, H0 = 1 | H0 mô phỏng làm phiếu ở lớp (một lần) |
+| Ràng buộc Nhóm 3 với câu | Chưa quy định | Câu ≤ 4 tiếng (tạm) | Dạng 6 không phải dạng chủ đạo của Nhóm 3 — chọn thận trọng |
+
+
 
 Trong mã nguồn, nhóm được gọi bằng tên ngữ nghĩa để tránh nhầm thứ tự: Nhóm 1 – Đọc tốt = `extending`, Nhóm 2 – Đang phát triển = `developing`, Nhóm 3 – Cần hỗ trợ nền tảng = `foundation`. Giao diện giáo viên hiển thị đúng cách gọi "Nhóm 1/2/3" của lớp. **Học sinh không bao giờ thấy tên nhóm.**
 
@@ -368,7 +382,7 @@ Mức hỗ trợ được theo dõi **riêng cho từng học sinh × từng d�
 
 - **Ghi âm giáo viên** (ưu tiên cho âm, vần, câu lệnh chuẩn): giáo viên ghi trên trình duyệt hoặc tải tệp lên; nghe lại, duyệt rồi mới dùng. Giọng giáo viên là dữ liệu cá nhân của giáo viên → cần sự đồng ý của giáo viên.
 - **TTS sinh trước** (cho câu lệnh, từ, câu, lời khen): nhà cung cấp được chọn sau thử nghiệm (POC) ở GĐ6 — tiêu chí: phát âm đúng thanh điệu, giọng phù hợp vùng miền của lớp, chi phí, điều khoản dữ liệu.
-- **Không** dùng TTS của trình duyệt cho nội dung chính thức (chất lượng phụ thuộc thiết bị) — chỉ dùng trong `/demo` khi chưa có tệp.
+- **Không** dùng TTS của trình duyệt cho nội dung chính thức (chất lượng phụ thuộc thiết bị) — chỉ dùng trong `/demo` khi chưa có tệp. *Điều chỉnh GĐ4:* `/demo` **cũng không dùng** TTS của trình duyệt — giọng tiếng Việt của một số trình duyệt là giọng trực tuyến (gửi chữ ra máy chủ bên ngoài) và chất lượng chưa xác minh; nút loa hiển thị "Chưa có âm thanh" cho tới GĐ6 (AD-39).
 
 ### 12.3 Yêu cầu kỹ thuật
 
