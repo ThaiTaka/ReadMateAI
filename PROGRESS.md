@@ -12,7 +12,7 @@
   - Chưa có buổi thử khả dụng với GV/học sinh (TASKS 4.9).
 - **Giai đoạn kế tiếp đề xuất:** GĐ5 — Supabase: CSDL nền, RLS, xác thực → **chưa bắt đầu** (chỉ bắt đầu khi được phê duyệt).
 - **Ứng dụng:** 7 route tĩnh như GĐ2–3; `/demo` nay là **bản chơi thử tương tác** (3 buổi luyện mẫu theo lộ trình + 6 dạng bài / 17 biến thể, chọn mức H3→H0, kết quả buổi luyện, xem trước phiếu ở lớp). Bài tập sinh ở máy chủ lúc build; trình duyệt không lưu, không gửi dữ liệu. **Chưa** có tài khoản, CSDL, âm thanh, PDF, AI.
-- **Git/GitHub:** commit GĐ4 và kết quả CI — xem [§3.3](#33-git-và-ci-trong-gđ4). Repo vẫn **PUBLIC** (không đổi chế độ). **Chưa deploy Vercel**, chưa tạo Supabase, chưa dùng AI.
+- **Git/GitHub:** commit GĐ4 `5861286` đã **push** lên `origin/main`; GitHub Actions run 38709007640 **xanh** (729/729 unit, content:check, build) — chi tiết [§3.3](#33-git-và-ci-trong-gđ4). Repo vẫn **PUBLIC** (không đổi chế độ). **Chưa deploy Vercel**, chưa tạo Supabase, chưa dùng AI.
 
 | GĐ | Tên | Trạng thái |
 |---|---|---|
@@ -87,13 +87,18 @@
 ### 3.2 Rà soát trước khi commit GĐ4
 
 - Working tree chỉ gồm tệp của GĐ4 (mã, test, tài liệu, `package.json`/`package-lock.json` thêm `@axe-core/playwright`); không có `.env*`, kết quả test, script tạm (script soát tạm đặt ở thư mục scratchpad ngoài repo; các tệp `scripts/_probe-*` đã xóa).
-- Quét nội dung sẽ commit bằng mẫu khóa API/JWT/khóa riêng/gán `PASSWORD|SECRET|TOKEN|API_KEY|PEPPER=`, email, số điện thoại — kết quả ghi ở §3.3.
+- Quét nội dung đã stage bằng mẫu khóa API (Anthropic/OpenAI/Supabase/GitHub/AWS/Google), JWT, khóa riêng, gán `PASSWORD|SECRET|TOKEN|API_KEY|PEPPER=`, email, số điện thoại — kết quả ở §3.3.
 - Không có dữ liệu học sinh: dữ liệu bản chơi thử là hư cấu, tranh là biểu tượng lucide (ISC), không ảnh thật, không âm thanh.
 - Tác giả commit: từ GĐ4 dùng email `noreply` của GitHub (cấu hình **cục bộ** của repo, không sửa cấu hình toàn cục, không viết lại commit cũ).
 
 ### 3.3 Git và CI trong GĐ4
 
-*(Cập nhật sau khi push — xem commit tài liệu kế tiếp.)*
+- `5861286` — *feat: Giai đoạn 4 — Exercise Engine, sáu dạng bài và bản chơi thử /demo* (107 tệp: 88 mới, 19 sửa). Tác giả: email `noreply` của GitHub (đã đối chiếu ID tài khoản `ThaiTaka` bằng `gh api user`).
+- Rà soát nội dung đã stage: không tệp nhạy cảm (`.env*`, khóa, bản xuất CSDL, âm thanh, ảnh, kết quả test); mẫu secret chỉ trúng các tên `tokenIds`/`tokens` (token của câu — dương tính giả); không email, không số điện thoại; `test.skip` mới chỉ là 2 bỏ qua có điều kiện đã nêu ở §3.1. 107 tệp đều NFC, LF, không ký tự ẩn/dấu tổ hợp rời (quét byte bằng Node).
+- `git push origin main` (2026-10-15 08:54 UTC): `3035e5b..5861286`, fast-forward, không viết lại lịch sử. Repo vẫn **PUBLIC**.
+- **GitHub Actions — run 38709007640 (commit `5861286`): ✅ thành công trong 71 giây**, ảnh `ubuntu-24.04`, Node 24.21.0 (theo `.nvmrc`): `npm ci` → format ✅ → lint ✅ → typecheck ✅ → content:check ✅ (0 lỗi, 33 cảnh báo — giống Windows) → unit test ✅ **729/729** (24 tệp) → build ✅ (`/demo` tĩnh). CI không chạy E2E (E2E chạy cục bộ, §3.1).
+- Commit tài liệu kế tiếp ghi lại các kết quả này (xem `git log`; CI của commit đó cũng phải xanh).
+- **Không deploy Vercel** (đúng yêu cầu GĐ4).
 
 ### GĐ3 — 2026-10-14 (tóm tắt)
 
@@ -235,4 +240,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-12 | #1 | GĐ1 | Kiểm tra môi trường; `git init -b main`; xác minh phiên bản và tài liệu; tạo 6 tài liệu + `.gitignore` + `.gitattributes`; kiểm tra mã hóa, 93 liên kết, 6 sơ đồ Mermaid, quét secret — tất cả đạt. Không commit/push/deploy. **Kết thúc GĐ1 — đã được nghiệm thu.** |
 | 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; format/lint/typecheck/80 unit/build/139 E2E đều xanh; commit `16d1413` (chủ dự án), `d1210e6`; thêm remote `origin`. **Kết thúc GĐ2 — đã được nghiệm thu.** |
 | 2026-10-14 | #3 | GĐ3 | Thư viện `src/lib/vietnamese/`; kho tri thức `content/` (tất cả chờ GV); lớp tiến độ; `src/features/knowledge/`; `npm run content:check` + CI; 604 unit test; commit `5e63087` + **push `main` lần đầu**; CI xanh trên Linux; commit tài liệu `3035e5b`. **Kết thúc GĐ3 — đã được chấp nhận về kỹ thuật.** |
-| 2026-10-14 → 2026-10-15 | #4 | GĐ4 | Ghép tiếng `compose.ts`; lõi bộ máy bài tập; 6 dạng / 17 biến thể; bộ kiểm tra 9 bước + chống lộ đáp án theo mục tiêu; bộ sinh có seed + cặp nhà – lớp + hợp đồng phiếu; phiên luyện + kết quả trong bộ nhớ; `/demo` tương tác (3 buổi mẫu, H3→H0, không âm thanh, không lưu); 729/729 unit, 199 E2E đạt (thêm iPad, axe), content:check 0 lỗi; 4 đột biến kiểm độ nhạy; tài liệu EXERCISE_ENGINE + cập nhật 7 tài liệu; commit/push/CI — xem §3.3. **Kết thúc GĐ4 — chờ duyệt. Không deploy Vercel, không Supabase, không AI, không đổi public/private.** |
+| 2026-10-14 → 2026-10-15 | #4 | GĐ4 | Ghép tiếng `compose.ts`; lõi bộ máy bài tập; 6 dạng / 17 biến thể; bộ kiểm tra 9 bước + chống lộ đáp án theo mục tiêu; bộ sinh có seed + cặp nhà – lớp + hợp đồng phiếu; phiên luyện + kết quả trong bộ nhớ; `/demo` tương tác (3 buổi mẫu, H3→H0, không âm thanh, không lưu); 729/729 unit, 199 E2E đạt (thêm iPad, axe), content:check 0 lỗi; 4 đột biến kiểm độ nhạy; tài liệu EXERCISE_ENGINE + cập nhật 7 tài liệu; commit `5861286` (email `noreply`) + push; GitHub Actions run 38709007640 xanh (729/729); commit tài liệu ghi kết quả CI. **Kết thúc GĐ4 — chờ duyệt. Không deploy Vercel, không Supabase, không AI, không đổi public/private.** |
