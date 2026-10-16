@@ -2,9 +2,11 @@
 
 > **Mỗi em một nhịp đọc – Mỗi ngày một tiến bộ**
 
-ReadMate AI là nền tảng hỗ trợ học sinh lớp 1 luyện Tiếng Việt — nhận diện chữ, âm, vần, đánh vần, đọc trơn và phát triển vốn từ. Triết lý cốt lõi: **học có hướng dẫn ở nhà → tự thực hiện ở lớp**. Ở nhà, các em làm quen từng dạng bài với lời đọc yêu cầu, hình ảnh và gợi ý; mức hỗ trợ giảm dần; ở lớp, các em tự làm phiếu tương đương mà ít cần giáo viên hướng dẫn riêng.
+ReadMate AI là **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** cho học sinh lớp 1 — nhận diện chữ, âm, vần, đánh vần, đọc trơn và phát triển vốn từ. Học sinh luyện ở nhà với lời đọc yêu cầu, hình ảnh và gợi ý; mỗi câu đúng được điểm thưởng để khám phá bản đồ và mở các mini-game phiêu lưu (câu hỏi trong game vẫn là câu hỏi Tiếng Việt). Giáo viên quản lý và duyệt nội dung, theo dõi kết quả, vinh danh TOP 3 và tổ chức các mùa thi đua.
 
-**Trạng thái hiện tại: Giai đoạn 4 — bộ máy bài tập và bản chơi thử `/demo`.** Đã có thư viện phân tích tiếng Việt, kho tri thức có kiểm thử, **bộ máy bài tập sáu dạng** (sinh bài theo quy tắc, kiểm tra chống lộ đáp án, mức hỗ trợ H3→H0, cặp bài ở nhà – phiếu ở lớp) và trang **chơi thử** dùng dữ liệu minh họa. **Chưa** có âm thanh, tài khoản, cơ sở dữ liệu, lưu kết quả hay AI; toàn bộ nội dung **đang chờ giáo viên duyệt**. Xem lộ trình ở [TASKS.md](TASKS.md) và tiến độ ở [PROGRESS.md](PROGRESS.md).
+> **Định hướng mới từ Giai đoạn R01 (2026-10-16)** — điểm thưởng, bản đồ, mini-game, bảng xếp hạng, vinh danh và mùa thi đua hiện là **PLANNED (chưa có mã)**. Thiết kế: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) · lộ trình: [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · tiến độ: [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md). Các mô tả "tự thực hiện ở lớp", "phiếu tương đương", "Thử như ở lớp" bên dưới thuộc định hướng cũ — mã vẫn chạy và sẽ được gỡ khỏi giao diện ở R02.
+
+**Trạng thái mã nguồn: hết Giai đoạn 4 — bộ máy bài tập và bản chơi thử `/demo`** (công việc tái cấu trúc ở nhánh `feature/home-learning-redesign`). Đã có thư viện phân tích tiếng Việt, kho tri thức có kiểm thử, **bộ máy bài tập sáu dạng** (sinh bài theo quy tắc, kiểm tra chống lộ đáp án, mức hỗ trợ H3→H0, cặp bài ở nhà – phiếu ở lớp) và trang **chơi thử** dùng dữ liệu minh họa. **Chưa** có âm thanh, tài khoản, cơ sở dữ liệu, lưu kết quả hay AI; toàn bộ nội dung **đang chờ giáo viên duyệt**. Xem lộ trình ở [TASKS.md](TASKS.md) và tiến độ ở [PROGRESS.md](PROGRESS.md).
 
 ## Yêu cầu
 
@@ -124,9 +126,9 @@ Bản chơi thử dùng dữ liệu minh họa **chưa được giáo viên duy�
 - Header bảo mật: CSP, `X-Content-Type-Options`, `Referrer-Policy` (riêng `/join` là `no-referrer`), `Permissions-Policy` tắt camera/microphone/định vị, `X-Frame-Options`; không có `X-Powered-By`.
 - Font tự host lúc build (trình duyệt không gửi yêu cầu tới Google); không có script hay tài nguyên bên thứ ba.
 
-## Chức năng chưa phát triển
+## Chức năng chưa phát triển (lộ trình R02 → R11)
 
-Âm thanh (GĐ6), giao diện duyệt nội dung cho giáo viên (GĐ6), Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị (GĐ5), giao bài và lưu kết quả (GĐ7), phiếu PDF (GĐ8), dashboard có dữ liệu (GĐ9), triển khai production (GĐ10), AI hỗ trợ giáo viên tạo bài (GĐ11).
+Giao diện mới và Game World (R02), Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh (R03), điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
 
 ## Triển khai
 
@@ -134,12 +136,14 @@ Bản chơi thử dùng dữ liệu minh họa **chưa được giáo viên duy�
 
 ## Tài liệu dự án
 
-- [docs/PRD.md](docs/PRD.md) — yêu cầu sản phẩm
+- **Tái thiết kế (R01, PLANNED):** [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) — định hướng mới · [docs/GAMIFICATION_SPEC.md](docs/GAMIFICATION_SPEC.md) — điểm, mở khóa, mùa · [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) — game · [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) — bảng xếp hạng, vinh danh · [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) — kiến trúc, dữ liệu · [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) — quyền riêng tư · [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)
+- Báo cáo PDF (định hướng cũ, lập 2026-10-16): [docs/BaoCao_ReadMateAI.pdf](docs/BaoCao_ReadMateAI.pdf) · [docs/LuongHoatDong_ReadMateAI.pdf](docs/LuongHoatDong_ReadMateAI.pdf)
+- [docs/PRD.md](docs/PRD.md) — yêu cầu sản phẩm (một phần đã được thay thế, xem đầu tệp)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — kiến trúc kỹ thuật
 - [docs/DATA_MODEL.md](docs/DATA_MODEL.md) — mô hình dữ liệu dự kiến
 - [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md) — bộ máy bài tập và bản chơi thử
 - [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) — bộ máy tiếng Việt và kho tri thức · [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) — phiếu rà soát cho giáo viên
-- [TASKS.md](TASKS.md) — kế hoạch theo giai đoạn · [PROGRESS.md](PROGRESS.md) — tiến độ
+- [TASKS.md](TASKS.md) — kế hoạch GĐ1–GĐ4 (lịch sử) · [PROGRESS.md](PROGRESS.md) — lịch sử tiến độ GĐ1–GĐ4
 - [CLAUDE.md](CLAUDE.md) — quy tắc phát triển bắt buộc · [AGENTS.md](AGENTS.md) — ghi chú của Next.js cho trợ lý lập trình
 
 ## Bảo vệ dữ liệu trẻ em

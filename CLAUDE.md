@@ -4,20 +4,22 @@ Tệp này được Claude Code nạp tự động ở mỗi phiên. Các quy t�
 
 ## 1. Dự án
 
-ReadMate AI là website giúp học sinh lớp 1 (lớp 1A2) luyện Tiếng Việt — chữ, âm, vần, đánh vần, đọc trơn, vốn từ — **tại nhà** với âm thanh, hình ảnh, gợi ý và phản hồi, để **tự thực hiện** bài tương tự trên phiếu **tại lớp**. Ba nhóm năng lực linh hoạt: Nhóm 1 – Đọc tốt (`extending`), Nhóm 2 – Đang phát triển (`developing`), Nhóm 3 – Cần hỗ trợ nền tảng (`foundation`).
+**Định hướng chính thức từ R01 (2026-10-16):** ReadMate AI là **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** cho học sinh lớp 1 (lớp 1A2) — chữ, âm, vần, đánh vần, đọc trơn, vốn từ — với âm thanh, hình ảnh, gợi ý và phản hồi. Học sinh dùng website **ở nhà**; giáo viên quản lý nội dung, theo dõi kết quả, vinh danh và tổ chức các mùa thi đua. **Không** thiết kế cho học sinh dùng website trên lớp, không còn quy trình chuyển sang phiếu giấy ở lớp. Ba nhóm năng lực linh hoạt (chỉ GV/phụ huynh thấy): Nhóm 1 – Đọc tốt (`extending`), Nhóm 2 – Đang phát triển (`developing`), Nhóm 3 – Cần hỗ trợ nền tảng (`foundation`). Chi tiết: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md).
 
-**Triết lý: HỌC CÓ HƯỚNG DẪN Ở NHÀ → TỰ THỰC HIỆN Ở LỚP.**
+**Triết lý: TỰ LUYỆN CÓ HƯỚNG DẪN TẠI NHÀ — KHÍCH LỆ BẰNG PHIÊU LƯU VÀ THI ĐUA LÀNH MẠNH.** (Triết lý cũ "học có hướng dẫn ở nhà → tự thực hiện ở lớp" của GĐ1–GĐ4 đã được thay thế; mã liên quan đánh dấu ngừng dùng, AD-51.)
+
+Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa) hiện là **PLANNED** — chưa có mã.
 
 Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổi → an toàn và quyền riêng tư được ưu tiên hơn tốc độ phát triển.
 
 ## 2. Quy trình làm việc theo giai đoạn (BẮT BUỘC)
 
-1. **Đầu phiên:** đọc `PROGRESS.md` → `TASKS.md` → tài liệu liên quan trong `docs/`.
+1. **Đầu phiên:** đọc `REDESIGN_PROGRESS.md` → `REDESIGN_TASKS.md` (lộ trình R01–R11, thay thế GĐ5+ của `TASKS.md`) → `PROGRESS.md` (lịch sử GĐ1–GĐ4, câu hỏi mở Q-xx, rủi ro R-xx) → tài liệu liên quan trong `docs/`. Bản clone mới của repo **không** có `user.email` cục bộ: kiểm tra `git config --local user.email` là email `noreply` của GitHub trước khi commit.
 2. Chỉ làm **đúng giai đoạn/nhiệm vụ được giao** trong yêu cầu hiện tại. **Không tự chuyển sang giai đoạn tiếp theo.**
 3. **Không** push GitHub, deploy Vercel, tạo/cấu hình dịch vụ bên ngoài (Supabase, TTS, AI, tên miền…) hay commit, trừ khi yêu cầu của phiên cho phép rõ ràng.
 4. Không xóa/ghi đè tệp chưa đọc; không ghi đè git remote đã có.
 5. Trước khi cài/nâng thư viện: kiểm tra phiên bản bằng `npm view <pkg> version engines peerDependencies` và tài liệu chính thức; cập nhật [ARCHITECTURE §3](docs/ARCHITECTURE.md#3-ngăn-xếp-công-nghệ-đã-xác-minh). Không chọn phiên bản theo trí nhớ.
-6. **Cuối phiên:** cập nhật `PROGRESS.md` (việc đã làm, quyết định, rủi ro, bước tiếp theo, nhật ký phiên) và đánh dấu `TASKS.md`.
+6. **Cuối phiên:** cập nhật `REDESIGN_PROGRESS.md` (việc đã làm, quyết định, rủi ro, bước tiếp theo, nhật ký phiên) và đánh dấu `REDESIGN_TASKS.md`; ghi một dòng nhật ký vào `PROGRESS.md`.
 7. Báo cáo cuối phiên **bằng tiếng Việt**, theo mẫu người điều phối yêu cầu; chỉ báo cáo việc thực sự đã làm và kết quả kiểm tra thật; **không hiển thị secret**. Dừng sau báo cáo.
 
 ## 3. Tài liệu nguồn
@@ -30,8 +32,15 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md) | Bộ máy tiếng Việt + kho tri thức (GĐ3): mô hình, dữ liệu, hàm, giới hạn, cập nhật tiến độ, thêm học liệu, kiểm duyệt |
 | [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md) | Bộ máy bài tập (GĐ4): Exercise Type Module, 6 dạng/17 biến thể, H3→H0, chống lộ đáp án, sinh biến thể, cặp nhà–lớp, chế độ demo/học thật, giới hạn |
 | [docs/TEACHER_REVIEW_CHECKLIST.md](docs/TEACHER_REVIEW_CHECKLIST.md) | Phiếu rà soát cho GV: bộ sách, quy ước, tên chữ, cách gọi âm, vần, quy tắc, ngữ liệu |
-| [TASKS.md](TASKS.md) | Giai đoạn, nhiệm vụ, tiêu chí nghiệm thu |
-| [PROGRESS.md](PROGRESS.md) | Trạng thái hiện tại, quyết định, câu hỏi mở, rủi ro |
+| [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) | **R01** — định hướng mới, giữ/đổi/loại, kiểm kê mã cũ ngừng dùng, quyết định PD-xx (PLANNED) |
+| [docs/GAMIFICATION_SPEC.md](docs/GAMIFICATION_SPEC.md) | **R01** — nguồn duy nhất của hằng số điểm (+10/−5, sàn 0, mốc 30, ngưỡng game), lượt hợp lệ, chống trùng, mùa (PLANNED) |
+| [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) | **R01** — Game World, Mê cung kho báu, 7 chạm trán × 3 HP × 3 câu, quái vật, 3 game khác, chọn công nghệ (PLANNED) |
+| [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) | **R01** — bảng xếp hạng thanh ngang, đồng hạng, avatar, vinh danh TOP 3, reset hai bước (PLANNED) |
+| [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) | **R01** — phân hệ, schema Supabase mới, API, giao dịch, RLS, AD-40 → AD-53 (PLANNED) |
+| [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) | **R01** — kiểm kê dữ liệu, đồng ý hai phạm vi, điều kiện bật bảng xếp hạng, mô hình mối đe dọa (PLANNED) |
+| [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
+| [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
+| [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
 
 ## 4. Môi trường (đã kiểm tra 2026-10-12, cập nhật 2026-10-15)
 
@@ -39,7 +48,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
 - **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
 - Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2). `@axe-core/playwright` 4.13 (devDependency, GĐ4) cho kiểm tra trợ năng trong E2E.
-- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên mỗi push/PR — lần đầu xanh. Mọi lần push sau vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
+- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên push vào `main` và trên pull request (**không** chạy khi push nhánh tính năng — R02.9 dự kiến bổ sung). Từ R01 (2026-10-16) công việc tái cấu trúc nằm trên nhánh **`feature/home-learning-redesign`**; không merge vào `main` khi chưa được phép. Mọi lần push vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
+- Ngày 2026-10-16 thư mục dự án là **bản clone mới** từ GitHub (cấu hình git cục bộ đã được đặt lại — xem §2.1).
 - Node 24 chạy được TypeScript gốc (bỏ kiểu) — dùng cho `npm run content:check`. `zod` 4.6.7 là phụ thuộc trực tiếp (GĐ3).
 - `core.autocrlf=true` ở cấp hệ thống → `.gitattributes` chuẩn hóa LF.
 
@@ -50,17 +60,18 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Next 16 dùng **`src/proxy.ts`** (không phải `middleware.ts`) để làm mới phiên; xác thực lại trong từng Server Action/Route Handler; dùng `getClaims()`, không tin `getSession()` ở server.
 - GV: email/mật khẩu (không tự đăng ký). HS: người dùng ẩn danh Supabase + liên kết thiết bị bằng thẻ học QR/mã dự phòng.
 - **Student gateway**: mọi thao tác ghi của HS và nội dung phiên luyện đi qua server; HS chỉ đọc dữ liệu của mình qua RLS.
-- **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. `Paper.tsx` (PDF) để GĐ8. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
+- **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. Phần phiếu (`worksheet()`, bản phiếu trong `variants.ts`, `core/worksheet.ts`, `generation/pair.ts`, `ui/worksheet-preview.tsx`) và `Paper.tsx` **ngừng dùng** từ R01 (AD-51 — giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11). Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
+- **PLANNED (R02–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
 - Bài tập của `/demo` sinh **ở máy chủ lúc build** từ kho tri thức (chế độ `demo`, hồ sơ minh họa); chế độ `production` chỉ nhận hồ sơ `confirmed` + nội dung `approved` — hiện chưa có nên không tạo bài nào (đúng thiết kế).
 - Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
-- Âm thanh sinh trước (TTS) hoặc ghi âm GV; PDF bằng `@react-pdf/renderer` + font Andika; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được.
+- Âm thanh sinh trước (TTS) hoặc ghi âm GV; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được. (PDF phiếu học tập bằng `@react-pdf/renderer` — bỏ khỏi lộ trình ở R01.)
 
 ## 6. BẮT BUỘC — Bảo vệ trẻ em và dữ liệu
 
 1. Không thu thập họ tên đầy đủ, ngày sinh, giới tính, ảnh thật, địa chỉ, số điện thoại, thông tin phụ huynh, giọng nói, vị trí của học sinh. Chỉ biệt danh, số thứ tự, ảnh đại diện có sẵn.
 2. **RLS bật cho mọi bảng** trong `public`; mỗi bảng mới phải có policy và kiểm thử RLS trong cùng thay đổi.
 3. Học sinh không có quyền ghi trực tiếp vào CSDL; server suy ra `student_id` từ phiên, **không bao giờ** tin `student_id`/`class_id` do client gửi.
-4. Học sinh không bao giờ thấy nhóm năng lực, dữ liệu của bạn khác, bảng xếp hạng.
+4. Học sinh không bao giờ thấy nhóm năng lực, lộ trình, mức hỗ trợ hay dữ liệu học tập của bạn khác (câu trả lời, lỗi, tỉ lệ đúng, mức thành thạo). **Ngoại lệ có điều kiện duy nhất** (người điều phối quyết định 2026-10-16, R01): **bảng xếp hạng điểm thưởng trong phạm vi lớp** — chỉ hiển thị thứ hạng, tên hiển thị đã được GV duyệt, avatar có sẵn và điểm thưởng; chỉ gồm học sinh có đồng ý `learning_data` **và** `leaderboard_display`; bật theo từng lớp, **mặc định tắt** cho tới khi có đồng ý và rà soát pháp lý (Luật 91/2025 Điều 24); không bao giờ công khai ra ngoài lớp hay Internet; ngôn ngữ không gây xấu hổ. Chi tiết: [LEADERBOARD_SPEC](docs/LEADERBOARD_SPEC.md), [PRIVACY_AND_SECURITY §5](docs/PRIVACY_AND_SECURITY.md#5-bảng-xếp-hạng-điều-kiện-bật-và-kiểm-soát-hiển-thị).
 5. Chỉ ghi dữ liệu học tập khi học sinh đã có ghi nhận đồng ý (`data_collection_enabled`).
 6. **Không ghi âm trẻ**; `Permissions-Policy` tắt microphone/camera/geolocation ở khu vực học sinh (ngoại lệ duy nhất: `/teacher/audio` cho GV).
 7. Không analytics, quảng cáo, script bên thứ ba, liên kết ra ngoài hay ô nhập văn bản tự do ở khu vực học sinh.
@@ -78,9 +89,9 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 5. Quy tắc chính tả: k, gh, ngh đứng trước i, e, ê; c, g, ng trước các âm còn lại; q luôn đi với u; iê/yê, uô, ươ khi có âm cuối — ia/ya, ua, ưa khi không có; tiếng có âm cuối p, t, c, ch chỉ mang thanh sắc hoặc nặng.
 6. Quy ước nhà trường (cách gọi tên âm, phân tích "qu"/"gi", vị trí dấu thanh, bộ sách) là **tham số cấu hình**, phải được GV xác nhận — không tự quyết định.
 7. Âm/vần đơn lẻ dùng bản ghi âm giáo viên; TTS chỉ cho câu lệnh, từ, câu, lời khen.
-8. Một dạng bài = một khuôn: cùng biểu tượng, câu lệnh, bố cục trên app và trên phiếu.
+8. Một dạng bài = một khuôn: cùng biểu tượng, câu lệnh, bố cục ở mọi nơi dạng bài xuất hiện trong ứng dụng — buổi luyện **và** câu hỏi trong game (từ R01 không còn phiếu giấy).
 9. Không sao chép bài đọc/hình ảnh từ SGK; chỉ lưu thứ tự bài và đơn vị kiến thức. Mọi hình/âm thanh phải ghi nguồn và giấy phép.
-10. Từ ngữ, hình ảnh phù hợp trẻ em và bối cảnh Việt Nam; phản hồi tích cực, không phạt, không đếm ngược thời gian.
+10. Từ ngữ, hình ảnh phù hợp trẻ em và bối cảnh Việt Nam; lời nói, âm thanh, hình ảnh phản hồi luôn tích cực, không phạt, không đếm ngược thời gian, không gây sợ hãi. **Ngoại lệ có chủ đích duy nhất** (người điều phối quyết định 2026-10-16, R01): quy tắc điểm thưởng **−5 khi sai một lượt hợp lệ** (sàn 0) — chỉ là thay đổi con số, hiển thị trung tính; không âm thanh/hiệu ứng/lời nói mang tính phạt, không màu đỏ nhấp nháy, không gọi điểm thấp là "thua/kém/cuối bảng"; không trừ ở câu làm mẫu, câu chỉ xem, câu không tính điểm. Chi tiết: [GAMIFICATION_SPEC §10](docs/GAMIFICATION_SPEC.md#10-trình-bày-điểm-cho-trẻ).
 
 ## 8. BẮT BUỘC — AI
 
@@ -137,6 +148,17 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 9. Shell: script nhiều dòng có backtick/nháy/`${}` thì ghi ra tệp (scratchpad) rồi chạy bằng Node; không nhúng template literal vào `node -e` trong chuỗi bash.
 10. Không đặt tên biến `module` (luật `@next/next/no-assign-module-variable`) — dùng `typeModule`.
 
+### 9.4 Quy tắc gamification và game (BẮT BUỘC từ khi hiện thực — R04+)
+
+1. Hằng số điểm/mở khóa chỉ ở **một nơi** (`src/features/gamification/rules.ts`), khớp [GAMIFICATION_SPEC §1](docs/GAMIFICATION_SPEC.md#1-hằng-số-chính-thức); đổi hằng số cần quyết định của người điều phối và tăng `SCORING_RULES_VERSION`.
+2. Điểm, HP, mở khóa, thứ hạng **chỉ tính và lưu ở server**; mọi trường `is_correct`/`points`/`balance`/`student_id`/`class_id` từ client bị bỏ qua. Chế độ có điểm **không** gửi đáp án xuống client trước khi câu đóng.
+3. Mọi lượt trả lời có `client_attempt_id`; ghi điểm trong **một** hàm CSDL có khóa dòng; sổ cái `point_events` chỉ ghi thêm.
+4. Không nguồn điểm vô hạn: mỗi nội dung câu tính điểm một lần mỗi mùa; mỗi màn game một lượt tính điểm mỗi mùa; không bao giờ có cuộc chạm trán thứ 8 hay câu thay thế.
+5. Không tiêu điểm, không mua bán, không phần thưởng may rủi, không chuỗi ngày gây áp lực.
+6. Reset mùa chỉ GV `owner`, xác nhận hai bước, một giao dịch; **không** chạm dữ liệu học tập hay lớp khác.
+7. Hoạt cảnh tôn trọng giảm chuyển động; không nhấp nháy > 3 lần/giây; asset game chỉ khi có giấy phép ghi trong repo.
+8. Dữ liệu minh họa của game/bảng xếp hạng là **hư cấu**, nằm ở `src/features/demo/`, không lưu.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
@@ -144,8 +166,8 @@ Một nhiệm vụ chỉ "xong" khi:
 - [ ] `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run content:check`, `npm run test:run` và `npm run build` đều xanh; thay đổi giao diện, route hay header thì chạy thêm `npm run test:e2e`.
 - [ ] Logic mới có test; bảng mới có policy RLS + test cách ly.
 - [ ] Không có secret, dữ liệu thật hay `.env` trong thay đổi.
-- [ ] Tiêu chí nghiệm thu tương ứng trong `TASKS.md` được kiểm tra thật (không suy đoán).
-- [ ] `PROGRESS.md` và tài liệu liên quan đã cập nhật.
+- [ ] Tiêu chí nghiệm thu tương ứng trong `REDESIGN_TASKS.md` được kiểm tra thật (không suy đoán).
+- [ ] `REDESIGN_PROGRESS.md` và tài liệu liên quan đã cập nhật.
 
 ## 11. Lệnh thường dùng
 
@@ -161,7 +183,7 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run format` · `npm run format:check` | Prettier (bỏ qua `*.md`, `package-lock.json`) |
 | `npm run content:check` | Kiểm tra kho tri thức `content/`: lỗi (thoát mã 1) / cảnh báo cần GV rà soát / thông tin |
 
-Dự kiến thêm: `npx supabase …` (GĐ5). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
+Dự kiến thêm: `npx supabase …` (R03). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 
 ## 12. Thuật ngữ
 
@@ -176,11 +198,19 @@ Dự kiến thêm: `npx supabase …` (GĐ5). Trong PowerShell nhớ đặt `$en
 | từ / câu / đoạn | `word` / `sentence` / `passage` | |
 | đọc được bằng kiến thức đã học | decodable / `decodability` | |
 | nhóm năng lực | `band` | `foundation` (Nhóm 3), `developing` (Nhóm 2), `extending` (Nhóm 1) |
-| mức hỗ trợ H3→H0 | `support_level` 3→0 | H0 = tự lực, "Thử như ở lớp" |
+| mức hỗ trợ H3→H0 | `support_level` 3→0 | H0 = tự lực; tên hiển thị "Thử như ở lớp" đổi thành "Tự làm" ở R02 (chờ GV góp ý) |
 | dạng bài | `exercise_type` | `letter_sound`, `build_syllable`, `identify_unit`, `fill_blank`, `word_picture`, `sentence_reading` |
 | bài giao / biến thể | `assignment` / `assignment_variant` | |
 | lượt trả lời | `item_attempt` | |
 | mức thành thạo | `mastery` | |
 | kiến thức cần ôn | `review_item` | Hộp Leitner 1–5 |
-| phiếu học tập | `worksheet` | |
+| phiếu học tập | `worksheet` | Ngừng dùng từ R01 (AD-51) |
 | thẻ học | `student_login_code` | QR + mã dự phòng |
+| điểm thưởng / điểm hiện tại / điểm tích lũy mùa | reward points / `balance` / `earned_total` | PLANNED (R04) — [GAMIFICATION_SPEC §2](docs/GAMIFICATION_SPEC.md#2-định-nghĩa) |
+| sổ cái điểm | `point_events` | Chỉ ghi thêm |
+| câu phát hành | `question_instance` | Câu server phát cho một ngữ cảnh, giữ lượt và trạng thái |
+| mùa thi đua | `season` | Theo lớp; reset = đóng mùa + mở mùa mới |
+| lượt chơi / cuộc chạm trán | `game_run` / `game_encounter` | Mỗi màn ≤ 7 chạm trán, mỗi chạm trán 3 câu, quái vật 3 HP |
+| thẻ bản đồ | `map_tile` | Mở theo mốc 30 điểm tích lũy |
+| vinh danh | `honor_snapshot` | Ảnh chụp bất biến TOP 3 |
+| tên hiển thị trên bảng | `leaderboard_alias` | GV duyệt |

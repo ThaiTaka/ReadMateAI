@@ -1,8 +1,8 @@
 # ReadMate AI — Tài liệu yêu cầu sản phẩm (PRD)
 
-> **Phiên bản:** 0.2 — bản thiết kế GĐ1, bổ sung §9.3 "Điều chỉnh khi hiện thực (GĐ4)" và ghi chú §12.2
-> **Ngày cập nhật:** 2026-10-15
-> **Trạng thái:** Thiết kế GĐ1 đã được chấp nhận; phần điều chỉnh GĐ4 chờ người điều phối đánh giá
+> **Phiên bản:** 0.3 — thêm "Thay đổi định hướng (R01)" và ghi chú tại chỗ các phần bị thay thế
+> **Ngày cập nhật:** 2026-10-16
+> **Trạng thái:** ⚠️ **Một phần đã được thay thế** bởi [PRODUCT_REDESIGN.md](PRODUCT_REDESIGN.md) (R01, định hướng mới). Đọc mục [Thay đổi định hướng (R01)](#thay-đổi-định-hướng-r01) trước. Các phần không bị nêu tên vẫn còn hiệu lực (6 dạng bài, chính sách âm thanh, mức hỗ trợ, kiểm duyệt, quyền riêng tư).
 > **Tài liệu liên quan:** [ARCHITECTURE.md](ARCHITECTURE.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [PROGRESS.md](../PROGRESS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -29,7 +29,25 @@
 
 ---
 
+## Thay đổi định hướng (R01)
+
+Ngày 2026-10-16 người điều phối đổi định hướng: **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học**; học sinh chỉ dùng ở nhà; GV quản lý nội dung, theo dõi kết quả, vinh danh và tổ chức mùa thi đua. Mọi chức năng mới là **PLANNED**.
+
+| Phần của PRD này | Tình trạng | Thay bằng |
+|---|---|---|
+| §1 triết lý "học có hướng dẫn ở nhà → tự thực hiện ở lớp", vòng lặp GV in phiếu | **Thay thế** | [PRODUCT_REDESIGN §1, §3](PRODUCT_REDESIGN.md#1-tuyên-bố-định-hướng) |
+| §3.1 G2 (bản phiếu giấy tương đương), §3.2 "Không xếp hạng, không bảng thi đua" | **Thay thế** (đã ghi chú tại chỗ) | Bảng xếp hạng trong lớp có điều kiện — [LEADERBOARD_SPEC](LEADERBOARD_SPEC.md) |
+| §5 P1 ("Thử như ở lớp"), P2 (khuôn trên phiếu), P7 (không phạt, không xếp hạng) | **Sửa** (đã ghi chú tại chỗ) | [GAMIFICATION_SPEC §10](GAMIFICATION_SPEC.md#10-trình-bày-điểm-cho-trẻ), CLAUDE.md §6.4, §7.10 |
+| §6.2 bước 7, §6.3 bước 5–6 (in phiếu, ghi nhận tại lớp) | **Bỏ** | Buổi luyện + điểm + game ([GAME_DESIGN](GAME_DESIGN.md)) |
+| §8.5 phiếu học tập, F-GV-09 ghi nhận tự lực tại lớp, F-DB-04 "sẵn sàng tự làm ở lớp" | **Bỏ khỏi lộ trình** | — |
+| §11 tên H0 "Thử như ở lớp" | **Đổi tên** ("Tự làm", chờ GV) | [PRODUCT_REDESIGN §4.2](PRODUCT_REDESIGN.md#42-thay-đổi) |
+| §13 phiếu học tập tương đương | **Bỏ khỏi lộ trình** | — |
+| §14 "Không có xếp hạng học sinh" (dashboard GV) | **Giữ cho dashboard học tập**; bảng điểm thưởng là tính năng riêng | [LEADERBOARD_SPEC](LEADERBOARD_SPEC.md) |
+| §18 chỉ số chính (tự làm phiếu tại lớp) | **Thay thế** | [PRODUCT_REDESIGN §8](PRODUCT_REDESIGN.md#8-chỉ-số-thành-công-đề-xuất) |
+
 ## 1. Tóm tắt sản phẩm
+
+> ⚠️ *R01:* triết lý và vòng lặp dưới đây là **định hướng cũ** — xem [Thay đổi định hướng (R01)](#thay-đổi-định-hướng-r01).
 
 **ReadMate AI** là website giúp học sinh lớp 1 luyện Tiếng Việt — nhận diện chữ, âm, vần, đánh vần, đọc trơn, phát triển vốn từ — **tại nhà**, với âm thanh đọc yêu cầu, hình ảnh trực quan, hướng dẫn từng bước, gợi ý theo bậc và phản hồi đúng/sai. Khi đã quen dạng bài, học sinh **tự thực hiện** các bài tương tự (khác nội dung) trên vở bài tập hoặc phiếu học tập **tại lớp**.
 
@@ -68,7 +86,7 @@ Sản phẩm xuất phát từ thực tế lớp **1A2**. Lớp có ba nhóm h�
 | Mã | Mục tiêu |
 |---|---|
 | G1 | Học sinh cả ba nhóm có bài luyện phù hợp năng lực, làm tại nhà trên điện thoại, máy tính bảng, máy tính trong 10–15 phút/buổi |
-| G2 | Sáu dạng bài cơ bản, mỗi dạng có bản tương tác và bản phiếu giấy tương đương |
+| G2 | Sáu dạng bài cơ bản, mỗi dạng có bản tương tác ~~và bản phiếu giấy tương đương~~ (*R01:* bỏ bản phiếu) |
 | G3 | Âm thanh đọc yêu cầu, hướng dẫn và nghe mẫu — **không làm lộ đáp án** của bài kiểm tra kỹ năng đọc |
 | G4 | Hỗ trợ giảm dần (H3 → H0) để học sinh chuyển sang tự lực |
 | G5 | 100% nội dung được giáo viên duyệt trước khi học sinh nhìn thấy |
@@ -80,7 +98,7 @@ Sản phẩm xuất phát từ thực tế lớp **1A2**. Lớp có ba nhóm h�
 - Không có chatbot hay AI tạo sinh tương tác trực tiếp với học sinh — **kể cả sau MVP**.
 - Không ghi âm, không nhận dạng giọng nói của trẻ (MVP); mọi tính năng giọng nói về sau phải có đồng ý riêng và đánh giá tác động.
 - Không huấn luyện mô hình ngôn ngữ.
-- Không xếp hạng, không bảng thi đua công khai, không quảng cáo, không mua bán trong ứng dụng.
+- ~~Không xếp hạng, không bảng thi đua công khai~~ → *R01:* có bảng xếp hạng điểm thưởng **trong phạm vi lớp**, có điều kiện, mặc định tắt ([LEADERBOARD_SPEC](LEADERBOARD_SPEC.md)); vẫn không có bảng công khai ra ngoài lớp. Không quảng cáo, không mua bán trong ứng dụng (giữ nguyên).
 - Không có tài khoản phụ huynh, không nhắn tin trong MVP.
 - Không dạy tập viết chữ tay (phiếu có thể có dòng kẻ để viết).
 - Không sao chép nội dung sách giáo khoa; chỉ tham chiếu **thứ tự bài học**.
@@ -99,13 +117,13 @@ Sản phẩm xuất phát từ thực tế lớp **1A2**. Lớp có ba nhóm h�
 
 | Mã | Nguyên tắc | Hệ quả cho sản phẩm |
 |---|---|---|
-| P1 | **Học có hướng dẫn ở nhà → tự làm ở lớp** (chuyển giao dần trách nhiệm: *Cô làm mẫu → Con làm có gợi ý → Con tự làm*) | Mỗi dạng bài có bước làm mẫu, gợi ý theo bậc và chế độ "Thử như ở lớp" |
+| P1 | ~~Học có hướng dẫn ở nhà → tự làm ở lớp~~ *R01:* **Tự luyện có hướng dẫn tại nhà** (giữ chuyển giao dần trách nhiệm: *Cô làm mẫu → Con làm có gợi ý → Con tự làm*) | Mỗi dạng bài có bước làm mẫu, gợi ý theo bậc và mức tự làm H0 (tên cũ "Thử như ở lớp") |
 | P2 | **Một dạng bài = một khuôn cố định**: cùng biểu tượng, cùng câu lệnh ngắn, cùng bố cục trên màn hình và trên phiếu | Thư viện biểu tượng hướng dẫn dùng chung cho app và PDF (bản đen trắng) |
 | P3 | **Âm thanh không làm lộ đáp án** | Chính sách âm thanh theo từng dạng bài + bộ kiểm tra tự động (§12) |
 | P4 | **Chỉ dùng âm, vần, thanh đã học** theo vị trí bài học của lớp (trừ khi GV cho phép, ví dụ Nhóm 1) | Bộ kiểm tra "đọc được bằng kiến thức đã học" (decodability) |
 | P5 | **Bước nhỏ, lặp lại có khoảng cách** cho Nhóm 3 | Hàng đợi ôn tập (Leitner), câu "bắc cầu" khi sai liên tiếp |
 | P6 | **Không gắn nhãn** — học sinh không bao giờ thấy tên nhóm; nhóm linh hoạt do giáo viên quyết định | Nhóm chỉ hiển thị cho GV; hệ thống chỉ *đề xuất* đổi nhóm |
-| P7 | Phản hồi tích cực, không phạt, không áp lực thời gian, không so sánh | Không đồng hồ đếm ngược, không bảng xếp hạng |
+| P7 | Phản hồi tích cực, không phạt, không áp lực thời gian, không so sánh | Không đồng hồ đếm ngược, không bảng xếp hạng. *R01 sửa:* lời nói/âm thanh/hình ảnh vẫn tích cực; ngoại lệ có chủ đích là điểm thưởng −5 trình bày trung tính và bảng xếp hạng trong lớp có điều kiện ([GAMIFICATION_SPEC §10](GAMIFICATION_SPEC.md#10-trình-bày-điểm-cho-trẻ), [LEADERBOARD_SPEC §5](LEADERBOARD_SPEC.md#5-ngôn-ngữ-và-trình-bày-không-gây-xấu-hổ)) |
 | P8 | Ít chữ, nhiều hình; vùng chạm lớn; một nhiệm vụ trên một màn hình | Vùng chạm ≥ 64 px; ưu tiên **chạm để chọn** thay vì kéo–thả |
 | P9 | Nhất quán với cách dạy ở lớp: cách gọi tên âm, cách đánh vần, giọng của cô | Ưu tiên bản ghi âm giáo viên; xưng hô cấu hình được (cô/thầy – con/em) |
 | P10 | Giáo viên quyết định cuối cùng (human-in-the-loop) | Mọi nội dung và mọi thay đổi nhóm đều cần GV xác nhận |
@@ -329,7 +347,7 @@ Sáu dạng bài và mã của chúng giữ nguyên. Bộ máy và bản chơi t
 | Số lượt | "Số lần thử tối đa cấu hình theo dạng bài" (F-HS-05) | Theo **mức hỗ trợ**: H3/H2 = 3, H1 = 2, H0 = 1 | H0 mô phỏng làm phiếu ở lớp (một lần) |
 | Ràng buộc Nhóm 3 với câu | Chưa quy định | Câu ≤ 4 tiếng (tạm) | Dạng 6 không phải dạng chủ đạo của Nhóm 3 — chọn thận trọng |
 
-
+## 10. Ba nhóm năng lực và phân hóa
 
 Trong mã nguồn, nhóm được gọi bằng tên ngữ nghĩa để tránh nhầm thứ tự: Nhóm 1 – Đọc tốt = `extending`, Nhóm 2 – Đang phát triển = `developing`, Nhóm 3 – Cần hỗ trợ nền tảng = `foundation`. Giao diện giáo viên hiển thị đúng cách gọi "Nhóm 1/2/3" của lớp. **Học sinh không bao giờ thấy tên nhóm.**
 
@@ -391,6 +409,8 @@ Mức hỗ trợ được theo dõi **riêng cho từng học sinh × từng d�
 - Xưng hô cấu hình theo lớp: "cô/thầy" – "con/em".
 
 ## 13. Phiếu học tập tương đương
+
+> ⚠️ *R01:* phần này **bỏ khỏi lộ trình** (AD-51) — giữ để tra cứu.
 
 **Định nghĩa "tương đương":** cùng dạng bài, cùng biểu tượng và câu lệnh, cùng mục tiêu kiến thức (hoặc cùng nhóm đơn vị), cùng độ khó (± 1 bậc), **khác nội dung cụ thể** (không trùng câu nào với bài ở nhà).
 

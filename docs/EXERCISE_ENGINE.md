@@ -6,6 +6,8 @@
 
 Tài liệu này mô tả đúng những gì đã chạy được ở GĐ4. Phần dự kiến cho giai đoạn sau được ghi rõ "chưa làm".
 
+> ⚠️ **R01 (2026-10-16):** bộ máy này **giữ nguyên** và trở thành nguồn câu hỏi cho cả buổi luyện lẫn mini-game ([REDESIGN_ARCHITECTURE §3](REDESIGN_ARCHITECTURE.md#3-cơ-chế-liên-kết-giữa-các-phân-hệ)). **Ngừng dùng** (giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11 — AD-51): cặp bài ở nhà – ở lớp, hợp đồng phiếu `ExerciseTaskContract`, `worksheet()`, xem trước phiếu, bước `classroom_like`; mức H0 đổi tên hiển thị từ "Thử như ở lớp" thành "Tự làm". Chế độ có điểm sẽ chấm ở server (AD-41).
+
 ## Mục lục
 
 1. [Kiến trúc](#1-kiến-trúc)

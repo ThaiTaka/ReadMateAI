@@ -4,6 +4,7 @@
 > **Ngày cập nhật:** 2026-10-14
 > **CSDL:** PostgreSQL trên Supabase (schema `public` cho nghiệp vụ, `private` cho hàm trợ giúp RLS)
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [TASKS.md](../TASKS.md)
+> ⚠️ **R01 (2026-10-16):** thiết kế này vẫn là nền; phần **thêm/đổi** cho định hướng mới (mùa, điểm thưởng, sổ cái, câu phát hành, game, vinh danh, đồng ý hai phạm vi, alias, avatar hình người) ở [REDESIGN_ARCHITECTURE §5](REDESIGN_ARCHITECTURE.md#5-mô-hình-dữ-liệu-dự-kiến) (PLANNED). Bảng phiếu/quan sát tại lớp (§4.H) và `practice_sessions.mode = 'classroom_like'` **không tạo** (AD-51). Kế hoạch migration theo giai đoạn: [REDESIGN_ARCHITECTURE §12](REDESIGN_ARCHITECTURE.md#12-kế-hoạch-migration-theo-giai-đoạn-r) thay cho §12 bên dưới.
 
 ## Mục lục
 

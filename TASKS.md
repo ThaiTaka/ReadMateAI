@@ -1,5 +1,7 @@
 # TASKS — Kế hoạch phát triển ReadMate AI
 
+> ⚠️ **Thay thế một phần từ R01 (2026-10-16):** định hướng sản phẩm đã đổi ([docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md)). GĐ1–GĐ4 dưới đây là **lịch sử đã hoàn thành**. Các giai đoạn **GĐ5 → GĐ12 không còn là lộ trình hiện hành** — lộ trình mới R01 → R11 ở [REDESIGN_TASKS.md](REDESIGN_TASKS.md) (có bảng đối chiếu GĐ cũ → R mới). GĐ8 (phiếu PDF, tự lực tại lớp) đã **bỏ khỏi lộ trình**. Nội dung GĐ5+ giữ lại để tra cứu.
+
 > **Cập nhật:** 2026-10-15 · **Giai đoạn hiện tại:** GĐ4 đã hoàn thành về mã nguồn và kiểm thử — chờ người điều phối đánh giá (GĐ3 đã được chấp nhận về kỹ thuật)
 > **Quy ước:** mỗi giai đoạn triển khai và kiểm thử độc lập; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**.
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa làm · Quy mô ước lượng thô: **S** (≤ 1 phiên làm việc), **M** (2–3 phiên), **L** (≥ 4 phiên).

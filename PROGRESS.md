@@ -1,9 +1,19 @@
 # PROGRESS — Tiến độ dự án ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-15 — Phiên Claude Code #4 (Giai đoạn 4)
-> Tệp này là "bộ nhớ" giữa các phiên: đọc đầu tiên khi bắt đầu phiên mới; cập nhật trước khi kết thúc phiên.
+> **Cập nhật lần cuối:** 2026-10-16 — Phiên R01 (tái thiết kế)
+> **Từ R01, tiến độ hiện tại nằm ở [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)** và lộ trình ở [REDESIGN_TASKS.md](REDESIGN_TASKS.md). Tệp này giữ lịch sử GĐ1–GĐ4, các quyết định D-xx, câu hỏi mở Q-xx và rủi ro R-xx (vẫn còn hiệu lực trừ chỗ ghi chú).
 
-## 1. Trạng thái hiện tại
+## 0. Thay đổi định hướng (R01, 2026-10-16)
+
+Người điều phối đổi định hướng sản phẩm thành **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** ([docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md)). Hệ quả với tệp này:
+
+- Lộ trình GĐ5 → GĐ12 ở §7 và TASKS.md được **thay thế** bởi R02 → R11 (bảng đối chiếu ở cuối REDESIGN_TASKS). GĐ8 (phiếu PDF, tự lực tại lớp) **bỏ khỏi lộ trình**.
+- D-013 (PDF), D-043 (cặp nhà – lớp) → **ngừng dùng** (AD-51). D-045 giữ cơ chế, nhãn H0 "Thử như ở lớp" đổi ở R02.
+- Quy tắc "không bảng xếp hạng" (PRD P7, CLAUDE.md §6.4) và "không phạt" (§7.10) có **ngoại lệ có điều kiện** do người điều phối quyết định (RD-01, RD-02 trong REDESIGN_PROGRESS).
+- Công việc "Prompt 05 / GĐ5" (âm thanh + Vercel) được báo là bị gián đoạn **không tìm thấy** ở thư mục này hay trên GitHub (REDESIGN_PROGRESS §2).
+- Q-06 (máy in), Q-20 (lượt "như ở lớp") không còn cần thiết; R-06 (trẻ tự thao tác) càng quan trọng hơn với game.
+
+## 1. Trạng thái hiện tại (đến hết GĐ4 — xem REDESIGN_PROGRESS cho trạng thái mới)
 
 - **Giai đoạn hiện tại:** GĐ4 — Interactive Learning Engine (bộ máy bài tập, 6 dạng bài, bản chơi thử `/demo`) → **HOÀN THÀNH về mã nguồn và kiểm thử; chờ người điều phối đánh giá.** GĐ1, GĐ2 đã nghiệm thu; GĐ3 đã được chấp nhận về kỹ thuật.
 - **Điểm còn phụ thuộc giáo viên / bên ngoài:**
@@ -224,6 +234,8 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 
 ## 7. Bước tiếp theo
 
+> **Đã thay thế ở R01:** bước tiếp theo hiện hành ở [REDESIGN_PROGRESS §6](REDESIGN_PROGRESS.md#6-bước-tiếp-theo). Nội dung dưới đây giữ để tra cứu; phần Supabase chuyển sang R03.
+
 **Đề xuất GĐ5 — Supabase: CSDL nền, RLS và xác thực** (chi tiết: [TASKS.md](TASKS.md#gđ5--supabase-csdl-nền-rls-và-xác-thực-l)): migrations + RLS + kiểm thử cách ly, đăng nhập GV, thẻ học QR cho HS (POC trước), seed kho tri thức từ `content/`, ghi nhận đồng ý. Bộ máy GĐ4 nối vào qua student gateway ở GĐ7 (sinh bài theo phiên, ghi `item_attempt` ở máy chủ) — **không** đưa đáp án hay kho tri thức xuống trình duyệt.
 
 Điều kiện trước khi bắt đầu:
@@ -241,3 +253,5 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; format/lint/typecheck/80 unit/build/139 E2E đều xanh; commit `16d1413` (chủ dự án), `d1210e6`; thêm remote `origin`. **Kết thúc GĐ2 — đã được nghiệm thu.** |
 | 2026-10-14 | #3 | GĐ3 | Thư viện `src/lib/vietnamese/`; kho tri thức `content/` (tất cả chờ GV); lớp tiến độ; `src/features/knowledge/`; `npm run content:check` + CI; 604 unit test; commit `5e63087` + **push `main` lần đầu**; CI xanh trên Linux; commit tài liệu `3035e5b`. **Kết thúc GĐ3 — đã được chấp nhận về kỹ thuật.** |
 | 2026-10-14 → 2026-10-15 | #4 | GĐ4 | Ghép tiếng `compose.ts`; lõi bộ máy bài tập; 6 dạng / 17 biến thể; bộ kiểm tra 9 bước + chống lộ đáp án theo mục tiêu; bộ sinh có seed + cặp nhà – lớp + hợp đồng phiếu; phiên luyện + kết quả trong bộ nhớ; `/demo` tương tác (3 buổi mẫu, H3→H0, không âm thanh, không lưu); 729/729 unit, 199 E2E đạt (thêm iPad, axe), content:check 0 lỗi; 4 đột biến kiểm độ nhạy; tài liệu EXERCISE_ENGINE + cập nhật 7 tài liệu; commit `5861286` (email `noreply`) + push; GitHub Actions run 38709007640 xanh (729/729); commit tài liệu ghi kết quả CI. **Kết thúc GĐ4 — chờ duyệt. Không deploy Vercel, không Supabase, không AI, không đổi public/private.** |
+| 2026-10-16 | — | (ngoài giai đoạn) | Thư mục được clone lại từ GitHub; một phiên Claude tạo 2 báo cáo PDF (`docs/BaoCao_ReadMateAI.pdf`, `docs/LuongHoatDong_ReadMateAI.pdf`), chưa commit |
+| 2026-10-16 | R01 | R01 | Đổi định hướng sản phẩm; nhánh `feature/home-learning-redesign`; checkpoint 2 PDF; 8 tài liệu thiết kế mới (PLANNED); cập nhật CLAUDE.md, PRD, ARCHITECTURE, README, TASKS, tệp này. Chi tiết: [REDESIGN_PROGRESS §7](REDESIGN_PROGRESS.md#7-nhật-ký-phiên) |
