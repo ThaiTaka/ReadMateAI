@@ -89,3 +89,11 @@ export function canRevealTile(input: {
   if (!frontierTiles(input.revealed).includes(input.tileKey)) return { ok: false, code: "NOT_ADJACENT" };
   return { ok: true };
 }
+
+export type MapGridCell = { key: MapTileKey | "station"; row: number; col: number };
+
+/** Mọi ô của lưới (kể cả Trạm luyện tập) theo thứ tự hàng rồi cột — để giao diện dựng lưới 3 × 3. */
+export const MAP_GRID: readonly MapGridCell[] = [
+  ...MAP_TILE_KEYS.map((key) => ({ key, ...MAP_LAYOUT[key] })),
+  { key: "station" as const, ...MAP_START_CELL },
+].sort((a, b) => a.row - b.row || a.col - b.col);

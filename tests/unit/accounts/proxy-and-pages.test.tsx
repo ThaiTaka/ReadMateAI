@@ -11,8 +11,17 @@ vitest.mock("next/navigation", () => ({
 }));
 
 describe("proxy (Next 16) — chuyển hướng thô khu vực giáo viên", () => {
-  it("chạy cho /teacher, /learn, /join, /login; không chạy cho trang công khai và tệp tĩnh", () => {
-    for (const url of ["/teacher", "/teacher/classes/x", "/learn", "/learn/me", "/join", "/login"]) {
+  it("chạy cho /teacher, /learn, /join, /login, /api/student; không chạy cho trang công khai và tệp tĩnh", () => {
+    for (const url of [
+      "/teacher",
+      "/teacher/classes/x",
+      "/learn",
+      "/learn/me",
+      "/join",
+      "/login",
+      "/api/student/home",
+      "/api/student/question-instances/x/attempts",
+    ]) {
       expect(unstable_doesMiddlewareMatch({ config, url })).toBe(true);
     }
     for (const url of ["/", "/demo", "/_next/static/chunk.js"])

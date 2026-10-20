@@ -25,6 +25,20 @@ export const ERROR_CODES = [
   "LESSON_NOT_IN_SERIES",
   "CODE_INVALID",
   "TEACHER_SESSION_ACTIVE",
+  // R04 — buổi luyện có điểm, lượt trả lời, thẻ bản đồ (migration 20261021090100).
+  "NOT_FOUND",
+  "CONSENT_REQUIRED",
+  "CURRICULUM_UNCONFIRMED",
+  "NO_BAND",
+  "SEASON_CLOSED",
+  "INSUFFICIENT_CONTENT",
+  "CONTENT_NOT_ELIGIBLE",
+  "QUESTION_CLOSED",
+  "NO_ATTEMPTS_LEFT",
+  "DUPLICATE_RESPONSE",
+  "IDEMPOTENCY_CONFLICT",
+  "NO_TILE_AVAILABLE",
+  "NOT_ADJACENT",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
