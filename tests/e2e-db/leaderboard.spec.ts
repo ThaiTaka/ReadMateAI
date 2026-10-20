@@ -234,6 +234,7 @@ test.describe("R05 — bảng xếp hạng lớp", () => {
     test.slow();
     test.setTimeout(420_000);
     const project = testInfo.project.name;
+    const isNarrow = (testInfo.project.use.viewport?.width ?? 1280) < 600;
     const cls = await freshClass("BXH");
     const may = await newMember(cls, "Mây", { avatar: "may" });
     const bong = await newMember(cls, "Bống", { avatar: "bong" });
@@ -301,6 +302,18 @@ test.describe("R05 — bảng xếp hạng lớp", () => {
     await noHorizontalScroll(teacher);
     await axeClean(teacher);
     await shot(teacher, "teacher-leaderboard", project);
+
+    // Vùng cuộn ngang của bảng số: có nhãn, nhận focus bằng bàn phím (vòng focus nhìn thấy) và cuộn được bằng phím mũi tên.
+    const scroller = teacher.getByRole("group", { name: /Bảng chi tiết từng học sinh/u });
+    await expect(scroller).toHaveAttribute("tabindex", "0");
+    if (isNarrow) {
+      await scroller.focus();
+      await expect(scroller).toBeFocused();
+      expect(await scroller.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+      await teacher.keyboard.press("ArrowRight");
+      await expect.poll(() => scroller.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+      await noHorizontalScroll(teacher); // chỉ vùng bảng cuộn, không phải cả trang
+    }
 
     // Học sinh Mây: bảng thật — hạng 1,1,3,4; bạn ẩn không có; hàng của Mây nổi bật.
     await page.goto("/learn/leaderboard");

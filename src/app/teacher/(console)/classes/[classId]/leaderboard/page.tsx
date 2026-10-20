@@ -129,8 +129,8 @@ async function Content({ params }: Pick<PageProps<"/teacher/classes/[classId]/le
             </BoardPanel>
             {/* Vùng cuộn ngang trên điện thoại phải focus được bằng bàn phím (axe: scrollable-region-focusable). */}
             <div
-              role="region"
-              aria-label={t.internalTitle}
+              role="group"
+              aria-label={t.tableScroll}
               tabIndex={0}
               className="mt-6 overflow-x-auto rounded-3xl border border-line bg-surface"
             >

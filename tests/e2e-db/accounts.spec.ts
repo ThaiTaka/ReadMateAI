@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { createClient } from "@supabase/supabase-js";
 import { devices, expect, test, type Browser, type Page } from "@playwright/test";
@@ -111,7 +111,8 @@ test.describe("thẻ học → thiết bị → thu hồi", () => {
   }, testInfo) => {
     test.slow();
     await resetRateLimits();
-    const name = `Hạt ${randomUUID().slice(0, 4).replace(/[0-9]/gu, "x")}`;
+    // 8 chữ cái ngẫu nhiên (26^8): 4 ký tự cũ (≈2.400 khả năng) đụng tên học sinh của các lần chạy trước → chọn nhầm hồ sơ cũ.
+    const name = `Hạt ${[...randomBytes(8)].map((byte) => String.fromCharCode(97 + (byte % 26))).join("")}`;
     await login(page, TEACHER_A);
     await page.goto(`/teacher/classes/${CLASS_A}/students`);
     await page.getByLabel("Biệt danh", { exact: true }).fill(name);
@@ -175,6 +176,8 @@ test.describe("thẻ học → thiết bị → thu hồi", () => {
 
     // GV thu hồi cả hai thiết bị → tải lại là mất quyền ngay.
     await page.reload();
+    // Chờ trang hydrate xong: bấm nút Server Action trước khi hydrate trên máy chậm/điện thoại bị bỏ qua (flaky ở chromium-mobile).
+    await page.waitForLoadState("networkidle");
     for (let index = 0; index < 2; index += 1) {
       await page.getByRole("button", { name: "Thu hồi thiết bị" }).first().click();
       await expect(page.getByRole("button", { name: "Thu hồi thiết bị" })).toHaveCount(1 - index);

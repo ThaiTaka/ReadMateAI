@@ -200,7 +200,7 @@ Quy ước giữ như [DATA_MODEL §2](DATA_MODEL.md#2-quy-ước-chung): `snake
 | `class_staff` | Thêm `can_honor boolean default false` cho `co_teacher` (owner luôn có quyền); reset mùa chỉ `owner` | R03 |
 | `students` | Thêm `leaderboard_alias text null` (1–20 ký tự, NFC, unique trong lớp khi khác null), `leaderboard_alias_approved_by uuid`, `leaderboard_alias_approved_at timestamptz`, `preferences jsonb default '{}'` (giảm chuyển động, âm lượng — không dữ liệu cá nhân). `avatar_key` trỏ tới bộ avatar mới (hình người) | R03 / R05 |
 | `guardian_consents` | Thêm `scope text check in ('learning_data','leaderboard_display') not null`; unique bản ghi còn hiệu lực theo (`student_id`, `scope`). `students.data_collection_enabled` suy ra từ `learning_data` | R03 |
-| `avatar_options` (mới) | `key` PK, `kind` (`human`/`animal`), `asset_path`, `license_ref`, `status` (`draft`/`approved`), `sort_order` — seed từ `src/features/avatars/catalog.ts`; `students.avatar_key` FK | R05 |
+| ~~`avatar_options`~~ | **Hoãn (RD-R05-02):** danh mục avatar có phiên bản nằm trong mã (`src/features/avatars/catalog.ts`), CSDL chỉ lưu `students.avatar_key` (kiểm định dạng) | R05 |
 
 ### 5.2 Điểm thưởng và mùa
 
@@ -518,7 +518,6 @@ Mở rộng ma trận [DATA_MODEL §7](DATA_MODEL.md#7-ma-trận-phân-quyền-r
 | `map_tile_reveals`, `game_unlocks`, `game_runs`, `game_encounters` | R | R (lớp mình) | R (của mình) | — |
 | `honor_snapshots` | R | R; C qua server | — (qua gateway nếu lớp bật) | — |
 | `season_resets` | R | R (lớp mình) | — | — |
-| `avatar_options` | CRUD | R | R (`approved`) | — |
 | `guardian_consents` | R | CRUD (lớp mình) | — | — |
 
 Bảo đảm then chốt bổ sung (kiểm thử RLS bắt buộc ở R03–R06):
@@ -549,6 +548,8 @@ Trạng thái: **PLANNED** (chốt hướng ở R01, hiện thực và kiểm ch
 | AD-51 | Luồng "ở lớp" (cặp bài nhà–lớp, hợp đồng phiếu, xem trước phiếu, `classroom_like`, PDF) **ngừng khỏi luồng chính**: giữ mã, gỡ khỏi giao diện học sinh ở R02, xóa mã có kiểm soát ở R11 | Không xóa module đang chạy và có test; loại bỏ an toàn ([PRODUCT_REDESIGN §5](PRODUCT_REDESIGN.md#5-kiểm-kê-mã-cũ-và-phương-án-loại-bỏ-an-toàn)) | Xóa ngay (mất test, rủi ro hồi quy) | R02, R11 |
 | AD-52 | Cờ theo lớp `leaderboard_enabled`, `honors_enabled` **mặc định false**; chỉ bật khi đủ điều kiện đồng ý | Ngoại lệ có điều kiện của CLAUDE.md §6.4; Luật 91/2025 Điều 24 | Bật mặc định | R03, R05 |
 | AD-53 | Mở khóa gắn với mùa; **không tiêu điểm**; thẻ bản đồ theo điểm tích lũy, game theo điểm hiện tại | Đúng quy tắc chính thức; không có cơ chế mua game | Điểm làm tiền tệ | R04 |
+| AD-55 (RD-R05-01) | Cờ cấp hệ thống của bảng xếp hạng/vinh danh là hàng trong `private.feature_flags` (mặc định `false`, không vai trò ứng dụng nào đọc/ghi được, không hàm `public` nào ghi), được kiểm tra **mỗi lần đọc** và bởi trigger `classes_guard`; đổi cờ = migration/quản trị CSDL. Không dùng biến môi trường | CSDL ép được, một nguồn sự thật | Kiểm thử cờ cần thao tác local có chủ đích (`setLocalLeaderboardApproval`, phải trả về tắt; pgTAP bắt rò) |
+| AD-56 (RD-R05-02) | Avatar là danh mục phiên bản hóa trong mã; không bảng `avatar_options` ở R05 | Không migration thừa; asset còn `pending_review` | Đổi danh mục cần phát hành mã; bảng danh mục khi có quy trình duyệt asset (R10–R11) |
 | AD-54 | Chặn tự đăng ký bằng **Auth Hook `before_user_created`** (từ chối mọi đăng ký không ẩn danh); giữ signup + email provider bật | Đã kiểm chứng: tắt signup chặn cả người dùng ẩn danh; tắt email signup tắt cả đăng nhập email | Tắt signup trong cấu hình (làm hỏng thiết bị học sinh hoặc đăng nhập GV) | R03 ✅ |
 | AD-55 | **Không có client Supabase ở trình duyệt**: mọi lời gọi qua máy chủ; cookie phiên httpOnly | CSP `connect-src 'self'` giữ nguyên; token không đọc được bằng JS; bundle không chứa URL/khóa | `createBrowserClient` (cần mở CSP, cookie đọc được bằng JS) | R03 ✅ |
 | AD-56 | Bảng chỉ có policy **SELECT**; mọi thao tác ghi qua hàm `teacher_*` (JWT GV, tự kiểm tra quyền, ghi audit cùng giao dịch) hoặc `gateway_*` (chỉ service_role) | Một chỗ kiểm soát quyền + nhật ký nguyên tử; không ghi tắt được qua PostgREST | Policy INSERT/UPDATE theo lớp (audit dễ bị bỏ qua, khó bảo đảm nguyên tử) | R03 ✅ |

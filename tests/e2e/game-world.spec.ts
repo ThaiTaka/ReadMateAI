@@ -162,7 +162,10 @@ test.describe("trợ năng (axe) các trang thiết kế lại", () => {
   test("/learn với bảng thông tin đang mở và /demo phần xem trước Game World", async ({ page }) => {
     await page.goto("/learn");
     await page.getByRole("button", { name: "Xem chi tiết: Đảo dấu thanh" }).click();
-    await expect(page.getByRole("dialog", { name: "Đảo dấu thanh" })).toBeVisible();
+    const dialog = page.getByRole("dialog", { name: "Đảo dấu thanh" });
+    await expect(dialog).toBeVisible();
+    // Hộp thoại có hoạt cảnh mở 0,5 s (open:animate-pop-in): axe đo tương phản giữa chừng (độ mờ) sẽ báo sai → chờ hoạt cảnh xong.
+    await dialog.evaluate((element) => Promise.all(element.getAnimations().map((animation) => animation.finished)));
     expect(await seriousViolations(page)).toEqual([]);
     await page.goto("/demo#xem-truoc-game-world");
     await page.getByRole("button", { name: /Giảm chuyển động/ }).click();

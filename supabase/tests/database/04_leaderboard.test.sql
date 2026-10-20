@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(10);
+select plan(13);
 
 -- Hàm gateway của bảng xếp hạng chỉ service_role gọi được: thiết bị học sinh/GV không gọi thẳng.
 select ok(not has_function_privilege('authenticated', 'public.gateway_class_leaderboard(uuid, uuid)', 'EXECUTE'),
@@ -52,6 +52,22 @@ select is(
    where n.nspname in ('public', 'private') and p.proname ~ 'leaderboard'
      and (not p.prosecdef or not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) cfg where cfg like 'search_path=%'))),
   0, 'mọi hàm leaderboard là security definer có search_path cố định');
+
+-- Cờ hệ thống: không vai trò ứng dụng nào đọc/ghi được; không hàm public nào ghi vào cờ.
+select ok(
+  not has_table_privilege('anon', 'private.feature_flags', 'SELECT')
+  and not has_table_privilege('authenticated', 'private.feature_flags', 'SELECT')
+  and not has_table_privilege('authenticated', 'private.feature_flags', 'UPDATE')
+  and not has_table_privilege('authenticated', 'private.feature_flags', 'INSERT'),
+  'anon/authenticated không đọc hay ghi được private.feature_flags');
+select is(
+  (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.prosrc ~* 'feature_flags' and p.prosrc ~* '(update|insert|delete)[[:space:]]+(into[[:space:]]+)?private.feature_flags'),
+  0, 'không có hàm public nào ghi vào private.feature_flags (chỉ migration đổi cờ)');
+select is(
+  (select count(*)::int from pg_trigger t join pg_class c on c.oid = t.tgrelid
+   where c.relname = 'classes' and not t.tgisinternal and t.tgname = 'classes_guard'),
+  1, 'trigger guard_class còn gắn trên classes (chặn bật bảng khi cờ hệ thống tắt)');
 
 select * from finish();
 rollback;

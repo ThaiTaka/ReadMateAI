@@ -920,6 +920,7 @@ export const vi = {
       internalNote:
         "Xếp theo điểm hiện tại, gồm cả học sinh chưa hiện trên bảng của lớp. Không dùng để chiếu cho học sinh — hãy dùng chế độ trình chiếu.",
       studentsCount: "{count} học sinh",
+      tableScroll: "Bảng chi tiết từng học sinh (dùng phím mũi tên để cuộn ngang)",
       columns: {
         rank: "Hạng",
         student: "Học sinh",

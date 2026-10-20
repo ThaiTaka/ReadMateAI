@@ -86,7 +86,7 @@ Mọi quy tắc BẮT BUỘC ở CLAUDE.md §6 tiếp tục áp dụng. Tóm t�
 
 Lớp chỉ bật được `leaderboard_enabled` / `honors_enabled` khi **tất cả** điều kiện sau đúng (server kiểm tra khi GV bật):
 
-1. Đã có rà soát pháp lý/chấp thuận bằng văn bản của nhà trường cho tính năng (cờ cấu hình cấp hệ thống `LEADERBOARD_FEATURE_APPROVED`, mặc định tắt — R11).
+1. Đã có rà soát pháp lý/chấp thuận bằng văn bản của nhà trường cho tính năng (cờ cấp hệ thống `leaderboard_feature_approved` trong `private.feature_flags`, mặc định tắt, chỉ đổi bằng migration của quản trị CSDL — RD-R05-01).
 2. Thông báo xử lý dữ liệu gửi phụ huynh đã nêu rõ bảng xếp hạng (phiên bản thông báo ghi trong `guardian_consents`).
 3. GV đã duyệt alias của các học sinh sẽ hiển thị.
 

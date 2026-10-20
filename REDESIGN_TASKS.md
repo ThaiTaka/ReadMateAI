@@ -182,7 +182,7 @@ Nhiệm vụ:
 **Phụ thuộc:** R04.
 
 - [ ] 5.1 `ranking.ts` (`rankScores`, đồng hạng 1-2-2-4) + unit test
-- [ ] 5.2 Bộ avatar hình người có giấy phép (`src/features/avatars/catalog.ts`, bảng `avatar_options`), chọn avatar ở `/learn/me`
+- [ ] 5.2 Bộ avatar hình người có giấy phép (`src/features/avatars/catalog.ts` — danh mục trong mã, **không** bảng `avatar_options`, RD-R05-02), chọn avatar ở `/learn/me`
 - [ ] 5.3 `GET /api/student/leaderboard` (DTO không định danh, lọc điều kiện hiển thị, `private, no-store`)
 - [ ] 5.4 Giao diện bảng thanh ngang (`/learn/leaderboard`, `/teacher/classes/[id]/leaderboard`), chế độ TOP 10 + mình / toàn lớp, trình chiếu cho GV
 - [ ] 5.5 Bật/tắt bảng theo lớp với kiểm tra điều kiện ([PRIVACY_AND_SECURITY §5](docs/PRIVACY_AND_SECURITY.md#5-bảng-xếp-hạng-điều-kiện-bật-và-kiểm-soát-hiển-thị))

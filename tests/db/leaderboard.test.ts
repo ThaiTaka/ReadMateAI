@@ -510,3 +510,34 @@ describe("dữ liệu trình chiếu của GV", () => {
     expect(parsed?.ranked.some((student) => !student.eligible)).toBe(true);
   });
 });
+
+describe("cờ hệ thống leaderboard_feature_approved chỉ đổi bằng quản trị CSDL", () => {
+  it("GV, thiết bị học sinh và khách không đọc/ghi được cờ qua API (schema private không lộ ra)", async () => {
+    const device = await member(world.teacherA.client, classC);
+    for (const client of [world.teacherA.client, device.device.client, world.unlinkedDevice.client]) {
+      const read = await client
+        .schema("private" as never)
+        .from("feature_flags" as never)
+        .select("*");
+      expect(read.error).not.toBeNull();
+      const write = await client
+        .schema("private" as never)
+        .from("feature_flags" as never)
+        .update({ enabled: true } as never)
+        .eq("key", "leaderboard_feature_approved");
+      expect(write.error).not.toBeNull();
+    }
+    const flag = await admin.rpc("teacher_set_leaderboard_settings", {
+      p_class_id: classC,
+      p_enabled: true,
+      p_student_view: "full",
+    });
+    expect(flag.error?.message).toBe("FORBIDDEN"); // service_role không phải GV → không có đường bật
+  });
+
+  it("cờ hệ thống đang TẮT khi kiểm thử khởi động (mặc định an toàn của migration)", async () => {
+    setLocalLeaderboardApproval(false);
+    const device = await member(world.teacherA.client, classC);
+    expect(await boardFor(device)).toEqual({ status: "disabled" });
+  });
+});
