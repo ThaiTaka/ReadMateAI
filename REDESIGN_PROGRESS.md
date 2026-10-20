@@ -1,21 +1,22 @@
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-20 — Phiên Claude Code R03
+> **Cập nhật lần cuối:** 2026-10-20 — Phiên Claude Code R04
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn:** R03 — Supabase, tài khoản, phân quyền, dữ liệu nền → **hoàn thành trên Supabase LOCAL; chờ người điều phối đánh giá.** Không tự chuyển sang R04.
-- **Nhánh làm việc:** `feature/home-learning-redesign` — commit R03 đã push, GitHub Actions xanh (cả job `database`) — xem §4.3. `main` **không đổi**, không merge.
-- **Mã nguồn:** R03 thêm CSDL Supabase (3 migration, 16 bảng, RLS), đăng nhập GV, thẻ học + liên kết thiết bị, quản lý lớp/học sinh/đồng ý, `/learn/me`. Điểm/bản đồ/xếp hạng vẫn là **dữ liệu minh họa hư cấu** (R04+). Bộ máy tiếng Việt và bài tập giữ nguyên.
-- **Dịch vụ:** Supabase **local (Docker)** chạy và kiểm thử thật; **Supabase Cloud chưa tạo** (cần xác nhận tài khoản, tổ chức, region Singapore, chi phí). Vercel chưa liên kết; không AI, không TTS. CI có job `database` chạy Supabase local trên runner (không secret).
+- **Giai đoạn:** R04 — Scoring Engine, chấm bài ở máy chủ, điểm thưởng, mở khóa bản đồ → **hoàn thành trên Supabase LOCAL; chờ người điều phối đánh giá.** Không tự chuyển sang R05.
+- **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
+- **Mã nguồn:** R04 thêm 2 migration (11 bảng mới — 27 bảng), hàm ghi điểm một giao dịch, Question Instance Service, 6 API `/api/student/**`, `/learn/me` với điểm thật + bản đồ khám phá + bốn khu vực, `/learn/me/practice` (buổi luyện có điểm). Điểm thật **chỉ chạy với nội dung fixture kiểm thử hư cấu** trên Supabase local (kho thật 0 mục đã duyệt). `/learn` và `/demo` vẫn là bản minh họa.
+- **Dịch vụ:** Supabase **local (Docker)**; **Supabase Cloud chưa tạo**. Vercel chưa liên kết; không AI, không TTS.
 
 | R | Trạng thái |
 |---|---|
 | R01 | ✅ Đã chấp nhận (2026-10-20) |
 | R02 | ✅ Đã chấp nhận (2026-10-20) |
-| R03 | ✅ Hoàn thành (local) — chờ duyệt |
-| R04–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
+| R03 | ✅ Đã chấp nhận (2026-10-20) |
+| R04 | ✅ Hoàn thành (local) — chờ duyệt |
+| R05–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
 
@@ -162,7 +163,69 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | E2E `privacy.spec` /join | không cách nào gửi mã | gửi qua POST, mã không vào URL/bộ nhớ trình duyệt; fragment QR bị xóa khỏi thanh địa chỉ |
 | E2E `demo-practice` không gửi dữ liệu | cho phép prefetch GET các trang | thêm `/login` (prefetch `/teacher` bị chuyển hướng, chỉ tham số `reason`/`next`) |
 
-## 5. Nhật ký quyết định (lộ trình R)
+## 5. Việc đã làm trong R04
+
+### 5.1 Trạng thái khi bắt đầu R04 (kiểm tra thật, 2026-10-20)
+
+| Hạng mục | Kết quả |
+|---|---|
+| Git | `feature/home-learning-redesign` @ `693be3e` = origin, working tree sạch; `user.email` cục bộ = noreply ✅ |
+| Nhánh Audio WIP | `local/gd5-audio-wip` @ `b5bf2de` còn nguyên — **không đụng tới**, không push, không merge |
+| Supabase local | Docker đang chạy (`supabase_db_readmate-ai` healthy); container `dye-lms-*` của dự án khác không đụng tới |
+| Baseline | `test:run` 819/819, `test:db` 78/78 (chạy lại trên lược đồ mới trước khi viết test R04) |
+
+### 5.2 Công việc (3 checkpoint)
+
+1. **Scoring Engine thuần** (`7777f02`): `apply.ts` (+10/−5, sàn 0 tại từng sự kiện, sổ cái, tính lại, phát hiện sổ cái bị sửa), `score-types.ts`, `score-validation.ts`, `tilesAllowed(earned, cap)`, `game-world/map.ts` (lưới 3 × 3, kề theo cạnh); vân tay nội dung `fingerprint.ts`; khóa câu trả lời `response-key.ts`.
+2. **Migration** `20261021090000_r04_scoring` + `…090100_r04_functions`: `exercises`, `exercise_versions`, `exercise_items`, `content_reviews`, `practice_sessions`, `question_instances`, `item_attempts`, `season_scores`, `point_events`, `map_tile_reveals`, `game_unlocks`; `private.scoring_rules`, `private.test_environment`; `private.record_graded_attempt` + `gateway_record_attempt`, `gateway_start_practice_session`, `gateway_practice_candidates`, `gateway_reveal_map_tile`, `gateway_scoring_rules`; `guard_class`/`teacher_withdraw_consent` thay thế ([R04_DATABASE_MIGRATIONS](docs/R04_DATABASE_MIGRATIONS.md)).
+3. **Fixture kiểm thử** (chỉ local): `scripts/fixtures/scoring-items.ts` (21 câu visual_match dựng tay), `scripts/lib/scoring-fixtures.ts` (quy trình gửi duyệt → GV hư cấu duyệt qua đúng trigger), `scripts/lib/test-fixtures.ts`; `db:seed` thêm lớp "Thử Điểm" + 3 học sinh hư cấu.
+4. **Máy chủ + API** (`8058243`): `server/question-instances/service.ts`, `server/scoring/home.ts`, `server/student-gateway/{context,http,api-schemas}.ts`, 6 Route Handler; `proxy.ts` chạy cho `/api/student/*`; 13 mã lỗi mới + câu chữ.
+5. **Giao diện** (`5e9bf79`): `/learn/me` (điểm hiện tại/tích lũy, mùa, buổi luyện hoặc lý do, bản đồ khám phá, bốn khu vực "Đủ điểm/Đã khám phá/Mini-game đang phát triển"), `/learn/me/practice` (`ScoredPractice`, `ViewPlayer` dùng Player GĐ4 chỉ với `view`), `MapExplorer`, hoạt cảnh `fog-clear`, `WorldMapCard` chế độ dữ liệu thật, thanh điều hướng đáy theo khu vực.
+6. **Kiểm thử mới**: unit 81 (`gamification/scoring`, `map`, `exercises/fingerprint`, `scoring/{planner,question-service,ui-safety}`), pgTAP 16 (`03_scoring`), tích hợp CSDL 28 (`tests/db/scoring.test.ts`), E2E có CSDL 4 kịch bản × 3 thiết bị (`tests/e2e-db/scoring.spec.ts`), bộ đo hiệu năng `perf.spec.ts` (`PERF=1`).
+7. **Tài liệu**: tạo `docs/SCORING_ENGINE.md`, `docs/QUESTION_INSTANCE_SERVICE.md`, `docs/MAP_UNLOCK_ENGINE.md`, `docs/R04_DATABASE_MIGRATIONS.md`; cập nhật CLAUDE.md, README, TASKS, PROGRESS, REDESIGN_TASKS, REDESIGN_ARCHITECTURE, DATA_MODEL, GAMIFICATION_SPEC, tệp này.
+
+### 5.3 Kết quả kiểm tra cuối R04 (chạy thật 2026-10-20)
+
+| Lệnh | Kết quả |
+|---|---|
+| `npm run format:check` · `lint` · `typecheck` | ✅ · ✅ 0 lỗi · ✅ |
+| `npm run content:check` | ✅ 0 lỗi, 52 cảnh báo (như R03) |
+| `npm run test:run` | ✅ 37 tệp, **900/900** (819 cũ + 81 mới) |
+| `npm run build` | ✅ 18 route (6 API động, `/learn/me` và `/learn/me/practice` Partial Prerender) |
+| `npm run check:bundle` | ✅ 51 tệp tĩnh, không khóa/giá trị secret |
+| `npm run test:e2e` | ✅ **262 đạt, 0 lỗi, 56 bỏ qua theo thiết kế** (5 cấu hình) |
+| `supabase db reset` → `npm run db:lint` | ✅ 0 vấn đề |
+| `npm run db:test` (pgTAP) | ✅ 3 tệp, **52/52** |
+| `npm run db:seed` ×2 | ✅ không lỗi, không trùng |
+| `npm run test:db` | ✅ 4 tệp, **106/106** |
+| `npm run test:e2e:db` | ✅ **40 đạt, 0 lỗi, 17 bỏ qua theo thiết kế** (đo bố cục chỉ chromium-desktop; đo hiệu năng chỉ khi `PERF=1`); kịch bản R04 chạy lặp 2 lần × 3 thiết bị đều đạt |
+| Hiệu năng (`PERF=1`) | 216 request chấm bài: median **90 ms**, p95 **104 ms**, p99 107 ms, max 108 ms (local, cùng máy) |
+| GitHub Actions | ✅ Run [39400938083](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39400938083) (checkpoint `5e9bf79`): `verify` + `database` success |
+
+### 5.4 Sự cố gặp và cách xử lý
+
+| Sự cố | Xử lý |
+|---|---|
+| `request.url` của Route Handler dùng `localhost` trong khi trình duyệt gửi Origin `127.0.0.1` → mọi POST bị chặn khác nguồn | So Origin với header `Host`/`x-forwarded-host`; unit test |
+| Next 16 giữ trang trước (ẩn) khi điều hướng phía client → selector văn bản E2E trùng | Giới hạn selector trong vùng (`#ban-do`) |
+| WebKit so khớp tên truy cập bỏ dấu ("a" ~ "â") → E2E chọn nhầm | E2E chọn phương án theo vị trí + kiểm `toHaveText` |
+| `useSearchParams` trong thanh điều hướng → Suspense thay DOM lúc hydrate, WebKit đo vùng chạm 0 px | Chỉ dùng `usePathname` |
+| Test R02 "Game World không gửi request" chặn `MapExplorer` | Chuyển phần có xác thực sang `features/scored-practice/ui/` + test riêng: chỉ gọi `/api/student/*` |
+| Luật lint `set-state-in-effect` | Gọi API trong effect bằng `.then` (setState trong callback), không tắt luật |
+| Hậu tố ngẫu nhiên ngắn → trùng biệt danh khi lặp E2E | 6 chữ cái ngẫu nhiên |
+| Lệnh `node -e` có backtick trong Git Bash bị cắt | Dùng Write/Edit (CLAUDE.md §9.3.9) |
+| Axe `/demo` vượt 30 s khi cả bộ E2E chạy song song | `test.slow()` (không đổi khẳng định) |
+| Sau khi Docker Desktop khởi động lại, `supabase db reset` để container `kong` **không có ánh xạ cổng** 54321 → seed/test:db `ECONNREFUSED` | `npm run db:stop` rồi `npm run db:start`; kiểm `docker port supabase_kong_readmate-ai` trước khi chạy test (lỗi môi trường, không phải mã) |
+| Fixture ghi `reviewed_at` = 2026-10-21 (ngày trong tên migration, ở tương lai so với ngày làm) | Đổi thành 2026-10-20; không ràng buộc CSDL nào phụ thuộc, đã chạy lại seed ×2 + test:db + test:e2e:db |
+
+### 5.5 Test cũ được cập nhật (không xóa test nào)
+
+| Test | Thay đổi |
+|---|---|
+| `tests/unit/accounts/proxy-and-pages.test.tsx` | Thêm `/api/student/*` vào danh sách đường dẫn proxy phải chạy |
+| `tests/e2e/demo-practice.spec.ts` (axe) | `test.slow()` — chỉ tăng thời gian chờ |
+
+## 6. Nhật ký quyết định (lộ trình R)
 
 | Mã | Quyết định | Trạng thái | Chi tiết |
 |---|---|---|---|
@@ -189,8 +252,16 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | RD-21 | Rút `learning_data` → thu hồi ngay mọi thiết bị + thẻ; xóa dữ liệu học tập nối vào khi có bảng (R04) | Đề xuất (theo DATA_MODEL §10) | PRIVACY §4 |
 | RD-22 | Biệt danh tối đa 2 tiếng (chặn nhập họ tên đầy đủ), không trùng trong lớp | Đề xuất (R03) — chờ GV góp ý | `features/students/names.ts` |
 | RD-23 | Thông báo xử lý dữ liệu: chỉ bản nháp `nhap-2026-10` (dữ liệu giả) cho tới khi nhà trường duyệt | Chờ nhà trường (Q-05, RQ-P1–P3) | PRIVACY §12 |
+| RD-24 | Chống tính điểm trùng theo **vân tay nội dung** (bất biến theo seed/thứ tự phương án), không theo mã câu | Chốt (R04, có kiểm thử) | SCORING_ENGINE §7 |
+| RD-25 | Hằng số điểm có bản sao trong `private.scoring_rules` theo phiên bản; kiểm thử đối chiếu với `rules.ts` | Chốt (R04) | SCORING_ENGINE §1 |
+| RD-26 | Dữ liệu "đã duyệt" để kiểm thử chỉ là **fixture** (`origin`/`series_kind = test_fixture`) trên Supabase local; `private.test_environment` mặc định tắt | Chốt (R04) | R04_DATABASE_MIGRATIONS §7 |
+| RD-27 | Mức hỗ trợ mặc định của buổi luyện có điểm theo nhóm: Nhóm 3 → H3, Nhóm 2 → H2, Nhóm 1 → H1 (cho tới khi có `student_type_support` — R10) | Đề xuất — chờ GV | QUESTION_INSTANCE_SERVICE §5 |
+| RD-28 | Chế độ có điểm: gợi ý chỉ sau lượt sai (H3 tự hiện, H2/H1 bấm); chưa "Cô làm mẫu", chưa gợi ý trước lượt đầu | Đề xuất — chờ GV | QUESTION_INSTANCE_SERVICE §4 |
+| RD-29 | Bản đồ mùa đầu 3 × 3: Trạm luyện tập ở giữa + 8 thẻ (8 cảnh đã vẽ), kề theo cạnh (GAME_DESIGN gợi ý 24 thẻ) | Đề xuất | MAP_UNLOCK_ENGINE §1 |
+| RD-30 | Buổi luyện 8 câu; thiếu câu mới thì thêm câu đã tính điểm làm "luyện thêm" | Đề xuất | QUESTION_INSTANCE_SERVICE §5 |
+| RD-31 | RQ-G1 áp dụng mặc định: thẻ bản đồ theo `earned_total` (tổng điểm được cộng); game theo `balance` | Áp dụng mặc định — vẫn chờ xác nhận RQ-G1 | GAMIFICATION_SPEC §2 |
 
-## 6. Rủi ro mới (bổ sung PROGRESS §6)
+## 7. Rủi ro mới (bổ sung PROGRESS §6)
 
 | Mã | Rủi ro | Mức | Giảm thiểu |
 |---|---|---|---|
@@ -212,15 +283,23 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | RR-16 | Người dùng ẩn danh mồ côi / thiết bị thu hồi tích tụ | Thấp | Cron dọn dẹp (R11) |
 | RR-17 | Chưa thử trên điện thoại thật (chỉ giả lập Playwright) | Trung bình | Thử Android + iPhone thật khi có Cloud dev / Preview |
 | RR-18 | Công cụ ghi tệp giải mã chuỗi thoát Unicode (lặp lại lỗi GĐ3/GĐ4) | Trung bình | CLAUDE.md §9.6: dựng `\` bằng `String.fromCharCode(92)`, quét byte trước commit |
+| RR-19 | Điểm thật chỉ kiểm chứng với fixture; học liệu thật 0 mục đã duyệt, hồ sơ 1A2 chưa xác nhận → học sinh thật chưa có bài có điểm | Cao | Ưu tiên R10 (giao diện duyệt) + GV trả lời Q-01/Q-02 |
+| RR-20 | Hiệu năng chỉ đo trên máy local (p95 104 ms); Vercel `sin1` ↔ Supabase Singapore và 4G chưa đo | Trung bình | Đo lại khi có Cloud dev (R11) bằng `perf.spec.ts` |
+| RR-21 | Rút đồng ý chỉ hủy buổi dở + thu hồi thiết bị; **xóa** dữ liệu học tập/điểm đã lưu chưa hiện thực (cần xác nhận pháp lý thời hạn lưu giữ) | Trung bình | Quy trình xóa có kiểm soát (DATA_MODEL §10) — R10/R11 |
+| RR-22 | Không giới hạn số câu tính điểm mỗi ngày (RQ-G5) — trẻ có thể dùng màn hình lâu | Thấp | Tham số `dailyScorableQuestionCap` khi GV yêu cầu |
+| RR-23 | Script fixture bật `private.test_environment` bằng `supabase db query --local`; nếu ai đó áp dụng tay lên CSDL khác, fixture có thể ghi được | Thấp | Cờ mặc định tắt trong migration; script chỉ `--local`; danh mục triển khai Cloud kiểm cờ = false (R04_DATABASE_MIGRATIONS §8) |
+| RR-24 | Thanh điều hướng đáy ở `/learn/me` không giữ `?student=` — thiết bị nhiều hồ sơ phải chọn lại hồ sơ | Thấp | Chấp nhận ở R04; cân nhắc lưu hồ sơ đang chọn ở cookie httpOnly |
 
-## 7. Bước tiếp theo
+## 8. Bước tiếp theo
 
-**Đề xuất R04 — Scoring Engine, câu phát hành ở server, điểm thưởng, mở khóa bản đồ** ([REDESIGN_TASKS R04](REDESIGN_TASKS.md#r04--scoring-engine-điểm-thưởng-mở-khóa-bản-đồ-l)), dựng trên `getStudentLearningContext`, mùa 1 và student gateway của R03. Điều kiện trước: người điều phối duyệt R03; quyết định có tạo Supabase Cloud *dev* (Singapore) không; GV/nhà trường trả lời Q-01/Q-02 (bộ sách, tiến độ — không có thì học thật không có câu nào), duyệt kho câu (R10 song song), mẫu thông báo/phiếu đồng ý (Q-05). Vẫn chờ RQ-06 (nhánh âm thanh), RQ-M1/RQ-02.
+**Đề xuất R05 — Leaderboard kiểu FIFA, avatar hình người, xếp hạng trong lớp** ([REDESIGN_TASKS R05](REDESIGN_TASKS.md#r05--leaderboard-kiểu-fifa-avatar-ranking-m)), dựng trên `season_scores` (chỉ mục `season_id, balance desc`, `balance_updated_at`) của R04. Điều kiện trước: người điều phối duyệt R04; rà soát pháp lý cờ `leaderboard_feature_approved` (Luật 91/2025 Điều 24); bộ avatar hình người có giấy phép (RQ-M1). Song song: R10 (giao diện duyệt học liệu, âm thanh) để có nội dung thật; quyết định tạo Supabase Cloud *dev*. Vẫn chờ RQ-06 (nhánh âm thanh), RQ-G1/G2/G5, RD-27/RD-28 (GV góp ý mức hỗ trợ và gợi ý).
 
-## 8. Nhật ký phiên
+## 9. Nhật ký phiên
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
 | 2026-10-16 | R01 | R01 | Kiểm tra trạng thái (clone mới, không có công việc GĐ5); baseline xanh; nhánh `feature/home-learning-redesign` + checkpoint 2 PDF; hỏi 2 mâu thuẫn quy tắc BẮT BUỘC; 8 tài liệu mới + cập nhật 8 tài liệu; kiểm tra liên kết, NFC, secret; bộ kiểm tra xanh; commit + push nhánh. **Không** merge `main`, không deploy, không Supabase |
 | 2026-10-20 | R02 | R02 | Kiểm tra trạng thái: thư mục ở `main` với công việc GĐ5 âm thanh chưa commit → cất vào nhánh cục bộ `local/gd5-audio-wip` (không push); chuyển sang `feature/home-learning-redesign`; baseline 729/729. Design system + 17 thành phần phiêu lưu; 22 asset SVG tự vẽ + `licenses.json` + kiểm tra trong `content:check`; trang chủ, `/learn` (Student Dashboard + Game World), `/demo` (xem trước Game World, H0 "Tự làm", bỏ phiếu), `/teacher` (menu 9 mục); CI `feature/**`; 781/781 unit, 254 E2E đạt (0 lỗi); đo khung hình và tối ưu vẽ; JS `/learn` 201 KB, `/demo` 227 KB gzip; tài liệu DESIGN_SYSTEM, ASSET_MANIFEST + cập nhật 8 tài liệu. Commit `8b178be` + push nhánh; GitHub Actions run 39357778681 xanh. **Không** merge `main`, không deploy, không Supabase |
 | 2026-10-20 | R03 | R03 | Kiểm tra trạng thái (sạch; Audio WIP nguyên vẹn); bật Docker; Supabase CLI 2.121 local; 3 migration (16 bảng, RLS mọi bảng, hàm `teacher_*`/`gateway_*`, Auth Hook chặn tự đăng ký); proxy + DAL; `/login`, `/join`, `/learn/me`, `/teacher/classes/**`; đồng bộ kho tri thức + seed giả chạy lặp lại được; pgTAP 36, tích hợp CSDL 78, unit 819, E2E 262, E2E có CSDL 30; CI job `database` xanh; 4 tài liệu mới + cập nhật 10 tài liệu. Commit + push nhánh. **Không** tạo Supabase Cloud, không deploy, không merge `main` |
+| 2026-10-20 | R04 | R04 | Kiểm tra trạng thái (sạch; Audio WIP nguyên vẹn; baseline 819 + 78). Scoring Engine thuần + vân tay nội dung; 2 migration (11 bảng, hàm ghi điểm một giao dịch, RLS chỉ SELECT, môi trường kiểm thử); fixture hư cấu chỉ local; Question Instance Service + 6 API; `/learn/me` điểm thật + bản đồ 3×3 + bốn khu vực, `/learn/me/practice`; unit 900, pgTAP 52, tích hợp 106, E2E 262 + 40 (CSDL); p95 chấm bài 104 ms (local); 4 tài liệu mới + cập nhật 9 tài liệu; 3 checkpoint + tài liệu push, CI xanh. **Không** tạo Supabase Cloud, không deploy, không merge `main`, không đụng nhánh Audio WIP |
+| 2026-10-20 | R04 (tiếp, sau khi hết hạn mức) | R04 | Đọc lại tiến độ: 3 checkpoint đã push (CI run 39400938083 xanh), tài liệu R04 + sửa ngày fixture chưa commit. Khởi động lại Docker/Supabase local (sự cố `kong` mất ánh xạ cổng — §5.4). Chạy lại thật: format/lint/typecheck ✅, content:check 0 lỗi/52 cảnh báo, unit 900/900, build 18 route, check:bundle sạch, db:lint 0, pgTAP 52/52, seed ×2, test:db 106/106, test:e2e:db 40 đạt/17 bỏ qua; quét byte + secret 9 tệp sạch. Commit tài liệu + push nhánh. Không bắt đầu R05 |

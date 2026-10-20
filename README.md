@@ -5,7 +5,9 @@
 
 ReadMate AI là **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** cho học sinh lớp 1 — nhận diện chữ, âm, vần, đánh vần, đọc trơn và phát triển vốn từ. Học sinh luyện ở nhà với lời đọc yêu cầu, hình ảnh và gợi ý; mỗi câu đúng được điểm thưởng để khám phá bản đồ và mở các mini-game phiêu lưu (câu hỏi trong game vẫn là câu hỏi Tiếng Việt). Giáo viên quản lý và duyệt nội dung, theo dõi kết quả, vinh danh TOP 3 và tổ chức các mùa thi đua.
 
-> **Trạng thái: Giai đoạn R02 — giao diện mới "Modern 2D Educational Adventure"** (nhánh `feature/home-learning-redesign`). Trang chủ, trang học sinh `/learn` (Student Adventure Dashboard + Game World), phần xem trước Game World ở `/demo` và khu giáo viên đã thiết kế lại; nhân vật, avatar, quái vật và bốn bản đồ là **SVG tự vẽ — bản phác thảo chờ giáo viên duyệt**. Điểm, bản đồ, bảng xếp hạng **chỉ là dữ liệu minh họa hư cấu** (không lưu, không gửi); điểm thật, tài khoản, mini-game chơi được thuộc R03–R09. Thiết kế: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) · [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) · [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) · lộ trình [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · tiến độ [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md).
+> **Trạng thái (2026-10-20): Giai đoạn R04 — Scoring Engine, chấm bài ở máy chủ, điểm thưởng và mở khóa bản đồ hoàn thành trên Supabase LOCAL** (chờ người điều phối đánh giá). Điểm thật chỉ chạy với **nội dung fixture kiểm thử hư cấu** trên máy dev — học liệu thật chưa được duyệt. Xem mục [Điểm thưởng…](#điểm-thưởng-buổi-luyện-có-điểm-bản-đồ-khám-phá-giai-đoạn-r04--supabase-local).
+>
+> **Lịch sử R02 — giao diện mới "Modern 2D Educational Adventure"** (nhánh `feature/home-learning-redesign`). Trang chủ, trang học sinh `/learn` (Student Adventure Dashboard + Game World), phần xem trước Game World ở `/demo` và khu giáo viên đã thiết kế lại; nhân vật, avatar, quái vật và bốn bản đồ là **SVG tự vẽ — bản phác thảo chờ giáo viên duyệt**. Điểm, bản đồ, bảng xếp hạng **chỉ là dữ liệu minh họa hư cấu** (không lưu, không gửi); điểm thật, tài khoản, mini-game chơi được thuộc R03–R09. Thiết kế: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) · [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) · [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) · lộ trình [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · tiến độ [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md).
 
 Đã có từ GĐ3–GĐ4 và vẫn giữ nguyên: thư viện phân tích tiếng Việt, kho tri thức có kiểm thử, **bộ máy bài tập sáu dạng / 17 biến thể** (sinh bài theo quy tắc, chống lộ đáp án, mức hỗ trợ H3 → H0 — H0 nay gọi là **"Tự làm"**) và bản chơi thử tương tác `/demo`. **Chưa** có âm thanh, tài khoản, cơ sở dữ liệu, lưu kết quả hay AI; toàn bộ nội dung **đang chờ giáo viên duyệt**.
 
@@ -120,6 +122,14 @@ docs/                       # PRD, kiến trúc, mô hình dữ liệu, bộ má
 
 Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không có âm thanh**, không tài khoản, không lưu, không gửi dữ liệu đi đâu. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md), [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
+## Điểm thưởng, buổi luyện có điểm, bản đồ khám phá (Giai đoạn R04 — Supabase local)
+
+1. `npm run db:start`, `npm run db:env`, `npm run db:seed` (cài thêm **nội dung fixture kiểm thử hư cấu** và lớp "Thử Điểm" có tiến độ đã xác nhận trên chuỗi bài kiểm thử — chỉ trên Supabase local), rồi `npm run dev`.
+2. GV `co.mai` → lớp **Thử Điểm** → Học sinh → thêm học sinh, ghi nhận đồng ý *Dữ liệu học tập* (giả), chọn lộ trình, **Cấp thẻ học mới** → mở liên kết/mã dự phòng ở trình duyệt khác.
+3. `/learn/me`: điểm hiện tại + điểm tích lũy, **Luyện Tiếng Việt** → `/learn/me/practice`: chọn đáp án → **Kiểm tra** → máy chủ chấm: đúng **+10**, sai **−5** (sàn 0, hiển thị trung tính); tải lại giữ nguyên câu và điểm.
+4. Mỗi 30 điểm tích lũy: một lượt **khám phá ô bản đồ** (chạm ô sương mù kề vùng đã mở). Đủ 50/120/200/300 **điểm hiện tại**: khu vực game "Đủ điểm" — mini-game **đang phát triển** (chưa chơi được).
+5. Học liệu thật **chưa có mục nào được GV duyệt** và hồ sơ lớp 1A2 chưa xác nhận → lớp thật luôn nhận "chưa có bài luyện" (đúng thiết kế). Tài liệu: [docs/SCORING_ENGINE.md](docs/SCORING_ENGINE.md) · [docs/QUESTION_INSTANCE_SERVICE.md](docs/QUESTION_INSTANCE_SERVICE.md) · [docs/MAP_UNLOCK_ENGINE.md](docs/MAP_UNLOCK_ENGINE.md) · [docs/R04_DATABASE_MIGRATIONS.md](docs/R04_DATABASE_MIGRATIONS.md).
+
 ## Tài khoản, lớp học, thẻ học (Giai đoạn R03 — Supabase local)
 
 1. `npm run db:start`, `npm run db:env`, `npm run db:seed`, rồi `npm run dev`.
@@ -154,7 +164,7 @@ Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không c�
 
 ## Chức năng chưa phát triển (lộ trình R02 → R11)
 
-Đã có ở R03 (Supabase local): cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh. Chưa có: dự án Supabase Cloud, CAPTCHA `/join`, quên mật khẩu GV; điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
+Đã có ở R03–R04 (Supabase local): cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh; điểm thưởng chấm ở máy chủ, sổ cái điểm, mở khóa bản đồ, điều kiện mini-game (R04). Chưa có: dự án Supabase Cloud, CAPTCHA `/join`, quên mật khẩu GV; bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
 
 ## Triển khai
 

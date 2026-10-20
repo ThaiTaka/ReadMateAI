@@ -1,6 +1,6 @@
 # REDESIGN_TASKS — Lộ trình tái cấu trúc ReadMate AI (R01 → R11)
 
-> **Cập nhật:** 2026-10-20 · **Giai đoạn hiện tại:** R03 — hoàn thành trên Supabase LOCAL, chờ người điều phối đánh giá (R01, R02 đã được chấp nhận). Dự án Supabase Cloud chưa tạo (cần xác nhận).
+> **Cập nhật:** 2026-10-20 · **Giai đoạn hiện tại:** R04 — hoàn thành trên Supabase LOCAL, chờ người điều phối đánh giá (R01–R03 đã được chấp nhận). Dự án Supabase Cloud chưa tạo (cần xác nhận).
 > **Quy ước:** mỗi giai đoạn giao bằng prompt riêng; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**. Mọi giai đoạn kết thúc bằng: kiểm tra đầy đủ (CLAUDE.md §10) → quét secret → commit → push nhánh `feature/home-learning-redesign` → xác minh trên GitHub (CLAUDE.md §2, theo yêu cầu R01 §12).
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa · Quy mô: **S** ≤ 1 phiên · **M** 2–3 phiên · **L** ≥ 4 phiên.
 > **Tài liệu:** [PRODUCT_REDESIGN](docs/PRODUCT_REDESIGN.md) · [GAMIFICATION_SPEC](docs/GAMIFICATION_SPEC.md) · [GAME_DESIGN](docs/GAME_DESIGN.md) · [LEADERBOARD_SPEC](docs/LEADERBOARD_SPEC.md) · [REDESIGN_ARCHITECTURE](docs/REDESIGN_ARCHITECTURE.md) · [PRIVACY_AND_SECURITY](docs/PRIVACY_AND_SECURITY.md) · [REDESIGN_PROGRESS](REDESIGN_PROGRESS.md)
@@ -12,8 +12,8 @@
 |---|---|---|---|---|
 | R01 | Kiểm tra dự án, bảo toàn công việc, thiết kế lại kiến trúc | — | S | ✅ Đã chấp nhận |
 | R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ✅ Đã chấp nhận |
-| R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ✅ Chờ duyệt (local; Cloud chờ xác nhận) |
-| R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ⏸ |
+| R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ✅ Đã chấp nhận (local; Cloud chờ xác nhận) |
+| R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ⏸ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ⏸ |
 | R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ⏸ |
@@ -138,32 +138,42 @@ Nhiệm vụ:
 
 ---
 
-## R04 — Scoring Engine, điểm thưởng, mở khóa bản đồ (L)
+## R04 — Scoring Engine, điểm thưởng, mở khóa bản đồ (L) ✅
 
 **Phụ thuộc:** R03 (CSDL, gateway), R02 (giao diện điểm/bản đồ).
 
 Nhiệm vụ:
 
-- [ ] 4.1 `src/features/gamification/`: `rules.ts` (hằng số [GAMIFICATION_SPEC §1](docs/GAMIFICATION_SPEC.md#1-hằng-số-chính-thức), `SCORING_RULES_VERSION`), `apply.ts`, `unlocks.ts` (`tilesAllowed`, `canEnterGame`) — hàm thuần + unit test
-- [ ] 4.2 Migrations R04: bảng nội dung có phiên bản (`exercises`, `exercise_versions`, `exercise_items`, `content_reviews`), `practice_sessions`, `item_attempts` (cột mới), `question_instances`, `season_scores`, `point_events`, `map_tile_reveals`, `game_unlocks` + RLS + trigger chỉ phiên bản `approved`
-- [ ] 4.3 Hàm CSDL `private.record_graded_attempt` (khóa, lượt hợp lệ, sổ cái, sàn 0, chống trùng)
-- [ ] 4.4 Question Instance Service: lập buổi luyện (câu cố định theo ngữ cảnh), `view` không đáp án, chấm ở server bằng `runtime.ts`, `reveal` sau khi đóng
-- [ ] 4.5 API: `/api/student/home`, `practice-sessions`, `question-instances/{id}`, `.../attempts`, `map-tiles`
-- [ ] 4.6 Giao diện: ô điểm thật, "+10"/"−5" trung tính, khám phá thẻ bản đồ, khóa game theo ngưỡng, "Câu luyện thêm — không tính điểm"
-- [ ] 4.7 Đồng ý: chưa có `learning_data` → chơi thử không lưu
+- [x] 4.1 `src/features/gamification/`: `rules.ts` (hằng số [GAMIFICATION_SPEC §1](docs/GAMIFICATION_SPEC.md#1-hằng-số-chính-thức), `SCORING_RULES_VERSION`), `apply.ts`, `unlocks.ts` (`tilesAllowed`, `canEnterGame`) — hàm thuần + unit test
+- [x] 4.2 Migrations R04: bảng nội dung có phiên bản (`exercises`, `exercise_versions`, `exercise_items`, `content_reviews`), `practice_sessions`, `item_attempts` (cột mới), `question_instances`, `season_scores`, `point_events`, `map_tile_reveals`, `game_unlocks` + RLS + trigger chỉ phiên bản `approved`
+- [x] 4.3 Hàm CSDL `private.record_graded_attempt` (khóa, lượt hợp lệ, sổ cái, sàn 0, chống trùng)
+- [x] 4.4 Question Instance Service: lập buổi luyện (câu cố định theo ngữ cảnh), `view` không đáp án, chấm ở server bằng `runtime.ts`, `reveal` sau khi đóng
+- [x] 4.5 API: `/api/student/home`, `practice-sessions`, `question-instances/{id}`, `.../attempts`, `map-tiles`
+- [x] 4.6 Giao diện: ô điểm thật, "+10"/"−5" trung tính, khám phá thẻ bản đồ, khóa game theo ngưỡng, "Câu luyện thêm — không tính điểm"
+- [x] 4.7 Đồng ý: chưa có `learning_data` → chơi thử không lưu
 
 **Tệp/module dự kiến:** `src/features/gamification/*`, `src/server/{question-instances,scoring}/*`, `src/app/api/student/**`, `src/app/learn/**`, `supabase/migrations/*`, `supabase/tests/*`.
 
 **Tiêu chí nghiệm thu**
 
-- [ ] Toàn bộ 11 kiểm thử của [GAMIFICATION_SPEC §13](docs/GAMIFICATION_SPEC.md#13-kiểm-thử-bắt-buộc-khi-hiện-thực) xanh
-- [ ] Payload câu trước khi đóng không chứa đáp án; trường `is_correct`/`points`/`student_id` từ client không có tác dụng
-- [ ] Gửi lại/song song không nhân điểm; tải lại không đổi câu
-- [ ] Phản hồi chấm p95 ≤ 400 ms (đo trên môi trường dev, ghi lại)
-- [ ] Không câu chưa duyệt nào được phát (kiểm thử với dữ liệu "đã duyệt" giả lập trong bộ nhớ)
+- [x] Kiểm thử của [GAMIFICATION_SPEC §13](docs/GAMIFICATION_SPEC.md#13-kiểm-thử-bắt-buộc-khi-hiện-thực) xanh: mục 1–9 và 11 đầy đủ; mục 10 (reset) **mô phỏng** trạng thái CSDL sau reset (`SEASON_CLOSED`, buổi dở bị hủy, mùa mới tính điểm lại) — hàm reset thật thuộc R06
+- [x] Payload câu trước khi đóng không chứa đáp án (unit 10 biến thể + E2E soát phản hồi API và HTML); `is_correct`/`points`/`balance`/`student_id`/`class_id` từ client → 400, không tạo điểm
+- [x] Gửi lại/song song không nhân điểm; tải lại không đổi câu (tích hợp + E2E)
+- [x] Phản hồi chấm đo thật: p95 **104 ms**, median 90 ms (216 request, `next start` + Supabase local cùng máy — chưa đo trên Cloud/4G)
+- [x] Không câu chưa duyệt/chưa học nào được phát; dữ liệu "đã duyệt" chỉ là **fixture trong CSDL kiểm thử local** (gắn `test_fixture`, môi trường production từ chối)
 
 **Kiểm thử bắt buộc:** bộ đầy đủ + RLS + tích hợp CSDL + test:e2e.
 **Đầu ra:** luồng luyện → điểm → mở thẻ bản đồ chạy đầu–cuối trên CSDL dev.
+
+**Kết quả R04 (2026-10-20)** — chi tiết ở [REDESIGN_PROGRESS §5](REDESIGN_PROGRESS.md#5-việc-đã-làm-trong-r04):
+
+- 4.1: `apply.ts`, `score-types.ts`, `score-validation.ts`, `unlocks.ts` (chặn trên số thẻ), `game-world/map.ts` — [docs/SCORING_ENGINE.md](docs/SCORING_ENGINE.md).
+- 4.2–4.3: 2 migration, 11 bảng mới (27 bảng `public`), `private.record_graded_attempt` + 4 hàm `gateway_*` mới — [docs/R04_DATABASE_MIGRATIONS.md](docs/R04_DATABASE_MIGRATIONS.md). `item_attempts` tạo mới (R03 chưa có bảng này).
+- 4.4–4.5: Question Instance Service + 6 Route Handler `/api/student/**` — [docs/QUESTION_INSTANCE_SERVICE.md](docs/QUESTION_INSTANCE_SERVICE.md).
+- 4.6: `/learn/me` (điểm thật, bản đồ 3 × 3, bốn khu vực "Mini-game đang phát triển"), `/learn/me/practice` — [docs/MAP_UNLOCK_ENGINE.md](docs/MAP_UNLOCK_ENGINE.md).
+- 4.7: chưa có đồng ý `learning_data` → không lập buổi, không ghi điểm; dẫn tới chơi thử không lưu.
+- Kiểm thử: unit 900 (819 + 81) · pgTAP 52 (36 + 16) · tích hợp CSDL 106 (78 + 28) · E2E 262 · E2E có CSDL 40 (30 + 10) · CI xanh.
+- Chưa làm (ghi rõ): giao diện GV xem điểm (R05), reset mùa thật (R06), giới hạn câu tính điểm/ngày, gợi ý trước lượt đầu và "Cô làm mẫu" ở chế độ có điểm, âm thanh (R10), học liệu thật đã duyệt (R10).
 
 ---
 

@@ -38,7 +38,7 @@ export async function installScoringFixtures(admin: SupabaseClient, reviewerId: 
           source: "Dữ liệu kiểm thử tự động của dự án; chỉ tồn tại trên Supabase local",
           review_status: "approved",
           reviewed_by: FIXTURE_TAG,
-          reviewed_at: "2026-10-21",
+          reviewed_at: "2026-10-20",
           content_hash: createHash("sha256").update(FIXTURE_SERIES_KEY).digest("hex"),
           release_id: release.id,
         },
