@@ -224,6 +224,55 @@ export type Database = {
         };
         Relationships: [];
       };
+      content_reviews: {
+        Row: {
+          action: string;
+          checklist: NonNullable<Json>;
+          comment: string | null;
+          content_hash: string;
+          created_at: string;
+          exercise_version_id: string;
+          id: string;
+          reviewer_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          action: string;
+          checklist?: NonNullable<Json>;
+          comment?: string | null;
+          content_hash: string;
+          created_at?: string;
+          exercise_version_id: string;
+          id?: string;
+          reviewer_id: string;
+        };
+        Update: {
+          action?: string;
+          checklist?: NonNullable<Json>;
+          comment?: string | null;
+          content_hash?: string;
+          created_at?: string;
+          exercise_version_id?: string;
+          id?: string;
+          reviewer_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "content_reviews_exercise_version_id_fkey";
+            columns: ["exercise_version_id"];
+            isOneToOne: false;
+            referencedRelation: "exercise_versions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "content_reviews_reviewer_id_fkey";
+            columns: ["reviewer_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       curriculum_lessons: {
         Row: {
           code: string;
@@ -317,6 +366,248 @@ export type Database = {
           },
         ];
       };
+      exercise_items: {
+        Row: {
+          answer: NonNullable<Json>;
+          audio: NonNullable<Json>;
+          content: NonNullable<Json>;
+          content_fingerprint: string;
+          difficulty: number;
+          exercise_version_id: string;
+          id: string;
+          item_key: string;
+          item_schema_version: number;
+          objective: NonNullable<Json>;
+          position: number;
+          required_units: string[];
+          type_code: string;
+          variant: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          answer: NonNullable<Json>;
+          audio?: NonNullable<Json>;
+          content: NonNullable<Json>;
+          content_fingerprint: string;
+          difficulty: number;
+          exercise_version_id: string;
+          id?: string;
+          item_key: string;
+          item_schema_version?: number;
+          objective: NonNullable<Json>;
+          position: number;
+          required_units?: string[];
+          type_code: string;
+          variant: string;
+        };
+        Update: {
+          answer?: NonNullable<Json>;
+          audio?: NonNullable<Json>;
+          content?: NonNullable<Json>;
+          content_fingerprint?: string;
+          difficulty?: number;
+          exercise_version_id?: string;
+          id?: string;
+          item_key?: string;
+          item_schema_version?: number;
+          objective?: NonNullable<Json>;
+          position?: number;
+          required_units?: string[];
+          type_code?: string;
+          variant?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "exercise_items_exercise_version_id_fkey";
+            columns: ["exercise_version_id"];
+            isOneToOne: false;
+            referencedRelation: "exercise_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      exercise_versions: {
+        Row: {
+          content_hash: string | null;
+          created_at: string;
+          created_by: string | null;
+          decided_at: string | null;
+          decided_by: string | null;
+          exercise_id: string;
+          id: string;
+          lesson_ordinal: number;
+          schema_version: number;
+          series_id: string;
+          source: NonNullable<Json>;
+          status: string;
+          submitted_at: string | null;
+          validation_report: NonNullable<Json>;
+          version_no: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          content_hash?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          exercise_id: string;
+          id?: string;
+          lesson_ordinal: number;
+          schema_version?: number;
+          series_id: string;
+          source?: NonNullable<Json>;
+          status?: string;
+          submitted_at?: string | null;
+          validation_report?: NonNullable<Json>;
+          version_no: number;
+        };
+        Update: {
+          content_hash?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          exercise_id?: string;
+          id?: string;
+          lesson_ordinal?: number;
+          schema_version?: number;
+          series_id?: string;
+          source?: NonNullable<Json>;
+          status?: string;
+          submitted_at?: string | null;
+          validation_report?: NonNullable<Json>;
+          version_no?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "exercise_versions_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercise_versions_decided_by_fkey";
+            columns: ["decided_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercise_versions_exercise_id_fkey";
+            columns: ["exercise_id"];
+            isOneToOne: false;
+            referencedRelation: "exercises";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercise_versions_series_id_fkey";
+            columns: ["series_id"];
+            isOneToOne: false;
+            referencedRelation: "curriculum_series";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      exercises: {
+        Row: {
+          archived_at: string | null;
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          key: string;
+          origin: string;
+          owner_school_id: string | null;
+          target_bands: string[];
+          title: string;
+          type_code: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          key: string;
+          origin: string;
+          owner_school_id?: string | null;
+          target_bands?: string[];
+          title: string;
+          type_code: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          key?: string;
+          origin?: string;
+          owner_school_id?: string | null;
+          target_bands?: string[];
+          title?: string;
+          type_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "exercises_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercises_owner_school_id_fkey";
+            columns: ["owner_school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_unlocks: {
+        Row: {
+          balance_at_unlock: number;
+          class_id: string;
+          first_reached_at: string;
+          game_key: string;
+          season_id: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          balance_at_unlock: number;
+          class_id: string;
+          first_reached_at?: string;
+          game_key: string;
+          season_id: string;
+          student_id: string;
+        };
+        Update: {
+          balance_at_unlock?: number;
+          class_id?: string;
+          first_reached_at?: string;
+          game_key?: string;
+          season_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_unlocks_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "game_unlocks_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       guardian_consents: {
         Row: {
           class_id: string;
@@ -385,6 +676,99 @@ export type Database = {
           },
         ];
       };
+      item_attempts: {
+        Row: {
+          attempt_no: number;
+          class_id: string;
+          client_attempt_id: string;
+          error_tags: string[];
+          exercise_item_id: string;
+          grader_version: string;
+          id: string;
+          is_correct: boolean;
+          marks: NonNullable<Json>;
+          question_instance_id: string;
+          received_at: string;
+          request_hash: string;
+          response: NonNullable<Json>;
+          response_key: string;
+          scorable: boolean;
+          season_id: string;
+          student_id: string;
+          support_level: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempt_no: number;
+          class_id: string;
+          client_attempt_id: string;
+          error_tags?: string[];
+          exercise_item_id: string;
+          grader_version: string;
+          id?: string;
+          is_correct: boolean;
+          marks?: NonNullable<Json>;
+          question_instance_id: string;
+          received_at?: string;
+          request_hash: string;
+          response: NonNullable<Json>;
+          response_key: string;
+          scorable: boolean;
+          season_id: string;
+          student_id: string;
+          support_level: number;
+        };
+        Update: {
+          attempt_no?: number;
+          class_id?: string;
+          client_attempt_id?: string;
+          error_tags?: string[];
+          exercise_item_id?: string;
+          grader_version?: string;
+          id?: string;
+          is_correct?: boolean;
+          marks?: NonNullable<Json>;
+          question_instance_id?: string;
+          received_at?: string;
+          request_hash?: string;
+          response?: NonNullable<Json>;
+          response_key?: string;
+          scorable?: boolean;
+          season_id?: string;
+          student_id?: string;
+          support_level?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "item_attempts_exercise_item_id_fkey";
+            columns: ["exercise_item_id"];
+            isOneToOne: false;
+            referencedRelation: "exercise_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "item_attempts_question_instance_id_fkey";
+            columns: ["question_instance_id"];
+            isOneToOne: false;
+            referencedRelation: "question_instances";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "item_attempts_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "item_attempts_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       kb_units: {
         Row: {
           content_hash: string | null;
@@ -433,6 +817,316 @@ export type Database = {
           },
         ];
       };
+      map_tile_reveals: {
+        Row: {
+          class_id: string;
+          earned_total_at_reveal: number;
+          map_key: string;
+          ordinal: number;
+          revealed_at: string;
+          season_id: string;
+          student_id: string;
+          tile_key: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          earned_total_at_reveal: number;
+          map_key: string;
+          ordinal: number;
+          revealed_at?: string;
+          season_id: string;
+          student_id: string;
+          tile_key: string;
+        };
+        Update: {
+          class_id?: string;
+          earned_total_at_reveal?: number;
+          map_key?: string;
+          ordinal?: number;
+          revealed_at?: string;
+          season_id?: string;
+          student_id?: string;
+          tile_key?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "map_tile_reveals_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "map_tile_reveals_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
+      point_events: {
+        Row: {
+          applied_delta: number;
+          attempt_no: number;
+          balance_after: number;
+          balance_before: number;
+          class_id: string;
+          created_at: string;
+          earned_total_after: number;
+          id: string;
+          idempotency_key: string;
+          item_attempt_id: string;
+          nominal_delta: number;
+          outcome: string;
+          question_instance_id: string;
+          rules_version: string;
+          season_id: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          applied_delta: number;
+          attempt_no: number;
+          balance_after: number;
+          balance_before: number;
+          class_id: string;
+          created_at?: string;
+          earned_total_after: number;
+          id?: string;
+          idempotency_key: string;
+          item_attempt_id: string;
+          nominal_delta: number;
+          outcome: string;
+          question_instance_id: string;
+          rules_version: string;
+          season_id: string;
+          student_id: string;
+        };
+        Update: {
+          applied_delta?: number;
+          attempt_no?: number;
+          balance_after?: number;
+          balance_before?: number;
+          class_id?: string;
+          created_at?: string;
+          earned_total_after?: number;
+          id?: string;
+          idempotency_key?: string;
+          item_attempt_id?: string;
+          nominal_delta?: number;
+          outcome?: string;
+          question_instance_id?: string;
+          rules_version?: string;
+          season_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "point_events_item_attempt_id_fkey";
+            columns: ["item_attempt_id"];
+            isOneToOne: true;
+            referencedRelation: "item_attempts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "point_events_question_instance_id_fkey";
+            columns: ["question_instance_id"];
+            isOneToOne: false;
+            referencedRelation: "question_instances";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "point_events_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "point_events_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
+      practice_sessions: {
+        Row: {
+          class_id: string;
+          device_id: string | null;
+          ended_at: string | null;
+          id: string;
+          mode: string;
+          plan: NonNullable<Json>;
+          planner_version: string;
+          question_count: number;
+          season_id: string;
+          started_at: string;
+          status: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          device_id?: string | null;
+          ended_at?: string | null;
+          id?: string;
+          mode?: string;
+          plan?: NonNullable<Json>;
+          planner_version: string;
+          question_count: number;
+          season_id: string;
+          started_at?: string;
+          status?: string;
+          student_id: string;
+        };
+        Update: {
+          class_id?: string;
+          device_id?: string | null;
+          ended_at?: string | null;
+          id?: string;
+          mode?: string;
+          plan?: NonNullable<Json>;
+          planner_version?: string;
+          question_count?: number;
+          season_id?: string;
+          started_at?: string;
+          status?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practice_sessions_device_id_fkey";
+            columns: ["device_id"];
+            isOneToOne: false;
+            referencedRelation: "student_devices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_sessions_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "practice_sessions_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
+      question_instances: {
+        Row: {
+          attempts_used: number;
+          class_id: string;
+          closed_at: string | null;
+          content_fingerprint: string;
+          context_kind: string;
+          exercise_item_id: string;
+          exercise_version_id: string;
+          id: string;
+          max_attempts: number;
+          not_scorable_reason: string | null;
+          opened_at: string;
+          position: number;
+          practice_session_id: string | null;
+          rewarded: boolean;
+          scorable: boolean;
+          season_id: string;
+          status: string;
+          student_id: string;
+          support_level: number;
+          view: NonNullable<Json>;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempts_used?: number;
+          class_id: string;
+          closed_at?: string | null;
+          content_fingerprint: string;
+          context_kind?: string;
+          exercise_item_id: string;
+          exercise_version_id: string;
+          id?: string;
+          max_attempts: number;
+          not_scorable_reason?: string | null;
+          opened_at?: string;
+          position: number;
+          practice_session_id?: string | null;
+          rewarded?: boolean;
+          scorable: boolean;
+          season_id: string;
+          status?: string;
+          student_id: string;
+          support_level: number;
+          view: NonNullable<Json>;
+        };
+        Update: {
+          attempts_used?: number;
+          class_id?: string;
+          closed_at?: string | null;
+          content_fingerprint?: string;
+          context_kind?: string;
+          exercise_item_id?: string;
+          exercise_version_id?: string;
+          id?: string;
+          max_attempts?: number;
+          not_scorable_reason?: string | null;
+          opened_at?: string;
+          position?: number;
+          practice_session_id?: string | null;
+          rewarded?: boolean;
+          scorable?: boolean;
+          season_id?: string;
+          status?: string;
+          student_id?: string;
+          support_level?: number;
+          view?: NonNullable<Json>;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "question_instances_exercise_item_id_fkey";
+            columns: ["exercise_item_id"];
+            isOneToOne: false;
+            referencedRelation: "exercise_items";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_instances_exercise_version_id_fkey";
+            columns: ["exercise_version_id"];
+            isOneToOne: false;
+            referencedRelation: "exercise_versions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_instances_practice_session_id_fkey";
+            columns: ["practice_session_id"];
+            isOneToOne: false;
+            referencedRelation: "practice_sessions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_instances_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "question_instances_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       rate_limit_buckets: {
         Row: {
           count: number;
@@ -473,6 +1167,58 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      season_scores: {
+        Row: {
+          balance: number;
+          balance_updated_at: string | null;
+          class_id: string;
+          created_at: string;
+          deducted_total: number;
+          earned_total: number;
+          season_id: string;
+          student_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          balance?: number;
+          balance_updated_at?: string | null;
+          class_id: string;
+          created_at?: string;
+          deducted_total?: number;
+          earned_total?: number;
+          season_id: string;
+          student_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          balance?: number;
+          balance_updated_at?: string | null;
+          class_id?: string;
+          created_at?: string;
+          deducted_total?: number;
+          earned_total?: number;
+          season_id?: string;
+          student_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "season_scores_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "season_scores_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
       };
       seasons: {
         Row: {
@@ -853,6 +1599,22 @@ export type Database = {
         Args: { p_key_hash: string; p_limit: number; p_window_seconds: number };
         Returns: boolean;
       };
+      gateway_practice_candidates: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
+      gateway_record_attempt: {
+        Args: {
+          p_auth_user_id: string;
+          p_client_attempt_id: string;
+          p_error_tags: string[];
+          p_grader_version: string;
+          p_is_correct: boolean;
+          p_marks: Json;
+          p_question_instance_id: string;
+          p_request_hash: string;
+          p_response: Json;
+          p_response_key: string;
+        };
+        Returns: Json;
+      };
       gateway_redeem_login_code: {
         Args: { p_auth_user_id: string; p_code_hmac: string; p_kind: string };
         Returns: {
@@ -860,6 +1622,23 @@ export type Database = {
           outcome: string;
           student_id: string;
         }[];
+      };
+      gateway_reveal_map_tile: {
+        Args: {
+          p_adjacent_to_start: boolean;
+          p_auth_user_id: string;
+          p_map_key: string;
+          p_neighbors: string[];
+          p_student_id: string;
+          p_tile_count: number;
+          p_tile_key: string;
+        };
+        Returns: Json;
+      };
+      gateway_scoring_rules: { Args: { p_version: string }; Returns: Json };
+      gateway_start_practice_session: {
+        Args: { p_auth_user_id: string; p_items: Json; p_planner_version: string; p_student_id: string };
+        Returns: Json;
       };
       gateway_touch_device: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: undefined };
       gateway_update_student_preferences: {

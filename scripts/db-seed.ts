@@ -8,10 +8,14 @@
  * Gồm: 1 trường · 2 GV (mỗi GV chủ nhiệm 1 lớp) · 2 lớp × 3 học sinh · mùa 1 của mỗi lớp (trigger) · đồng ý ở các
  * trạng thái khác nhau · lộ trình (có em chưa xếp) · tên hiển thị (đã duyệt / chờ duyệt) · thiết bị (đang liên kết,
  * đã thu hồi, chưa có) · lớp 1 dùng chuỗi bài MINH HỌA ở trạng thái chưa xác nhận.
+ * R04: bật môi trường kiểm thử LOCAL + nội dung fixture hư cấu (scripts/fixtures/scoring-items.ts) và lớp thứ ba
+ * "Lớp Thử Điểm" có tiến độ đã xác nhận trên CHUỖI BÀI KIỂM THỬ (không phải sách thật) để thử luồng tính điểm.
  * Mật khẩu GV: SEED_TEACHER_PASSWORD trong .env.local (npm run db:env sinh ngẫu nhiên) — không in ra màn hình.
  */
 import { generateLoginCode, hmacLoginCode, isUsablePepper, toPgBytea } from "../src/features/login-codes/codes.ts";
 import { syncContent } from "./lib/content-sync.ts";
+import { installScoringFixtures } from "./lib/scoring-fixtures.ts";
+import { enableLocalTestFixtures } from "./lib/test-fixtures.ts";
 import { adminClient, publicClient, scriptEnv } from "./lib/local-supabase.ts";
 
 const env = scriptEnv();
@@ -29,6 +33,7 @@ const ID = {
   school: "5eed0000-0000-4000-8000-000000000001",
   classA: "5eed0000-0000-4000-8000-0000000000a1",
   classB: "5eed0000-0000-4000-8000-0000000000b1",
+  classC: "5eed0000-0000-4000-8000-0000000000c1",
 } as const;
 
 type SeedTeacher = { key: "a" | "b"; email: string; displayName: string };
@@ -39,7 +44,7 @@ const TEACHERS: SeedTeacher[] = [
 
 type SeedStudent = {
   id: string;
-  classKey: "a" | "b";
+  classKey: "a" | "b" | "c";
   number: number;
   name: string;
   avatar: string;
@@ -115,6 +120,40 @@ const STUDENTS: SeedStudent[] = [
     name: "Cốm",
     avatar: "may",
     band: null,
+    alias: null,
+    consents: [],
+    device: "none",
+  },
+  // Lớp Thử Điểm (R04): học sinh hư cấu để thử luồng tính điểm trên nội dung fixture.
+  {
+    id: "5eed0000-0000-4000-8000-00000000c001",
+    classKey: "c",
+    number: 1,
+    name: "Mít",
+    avatar: "bin",
+    band: "developing",
+    alias: null,
+    consents: [{ scope: "learning_data", withdrawn: false }],
+    device: "none",
+  },
+  {
+    id: "5eed0000-0000-4000-8000-00000000c002",
+    classKey: "c",
+    number: 2,
+    name: "Khoai",
+    avatar: "ti",
+    band: "foundation",
+    alias: null,
+    consents: [{ scope: "learning_data", withdrawn: false }],
+    device: "none",
+  },
+  {
+    id: "5eed0000-0000-4000-8000-00000000c003",
+    classKey: "c",
+    number: 3,
+    name: "Đậu",
+    avatar: "na",
+    band: "developing",
     alias: null,
     consents: [],
     device: "none",
@@ -200,11 +239,36 @@ for (const cls of CLASSES) {
   );
 }
 
-const classIdOf = (key: "a" | "b") => (key === "a" ? ID.classA : ID.classB);
+// R04: nội dung fixture + Lớp Thử Điểm (do GV A chủ nhiệm), tiến độ ĐÃ XÁC NHẬN ở bài 2 của chuỗi bài kiểm thử.
+enableLocalTestFixtures();
+const fixtures = await installScoringFixtures(admin, teacherIds.a);
+must(
+  await admin.from("classes").upsert({
+    id: ID.classC,
+    school_id: ID.school,
+    name: "Lớp Thử Điểm",
+    school_year: "2026-2027",
+    created_by: teacherIds.a,
+    curriculum_series_id: fixtures.seriesId,
+    current_lesson_id: fixtures.lessonIds[2],
+    curriculum_status: "confirmed",
+    curriculum_confirmed_by: teacherIds.a,
+    curriculum_confirmed_at: new Date().toISOString(),
+  }),
+  "class C",
+);
+must(
+  await admin
+    .from("class_staff")
+    .upsert({ class_id: ID.classC, staff_id: teacherIds.a, role: "owner", added_by: teacherIds.a }),
+  "class_staff C",
+);
+
+const classIdOf = (key: "a" | "b" | "c") => (key === "a" ? ID.classA : key === "b" ? ID.classB : ID.classC);
 
 for (const student of STUDENTS) {
   const classId = classIdOf(student.classKey);
-  const teacherId = teacherIds[student.classKey];
+  const teacherId = teacherIds[student.classKey === "b" ? "b" : "a"];
   must(
     await admin.from("students").upsert({
       id: student.id,
@@ -310,6 +374,6 @@ for (const student of STUDENTS) {
 
 console.log(
   `Đã nạp dữ liệu giả: 1 trường · ${TEACHERS.length} GV (${TEACHERS.map((t) => t.email).join(", ")}) · ` +
-    `${CLASSES.length} lớp · ${STUDENTS.length} học sinh · kho tri thức ${content.datasetVersion}. ` +
+    `${CLASSES.length + 1} lớp (gồm Lớp Thử Điểm trên nội dung fixture) · ${STUDENTS.length} học sinh · kho tri thức ${content.datasetVersion}. ` +
     "Mật khẩu GV = SEED_TEACHER_PASSWORD trong .env.local.",
 );

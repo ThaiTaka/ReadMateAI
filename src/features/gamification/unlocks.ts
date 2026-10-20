@@ -5,10 +5,13 @@ import { BALANCE_FLOOR, GAME_KEYS, GAME_MIN_BALANCE, MAP_TILE_STEP, type GameKey
  * Không đọc thời gian, không ngẫu nhiên, không lưu gì.
  */
 
-/** Số mốc bản đồ được phép khám phá từ điểm tích lũy trong mùa (chỉ tăng, không trừ phần bị trừ). */
-export function tilesAllowed(earnedTotal: number): number {
+/**
+ * Số mốc bản đồ được phép khám phá từ điểm tích lũy trong mùa (chỉ tăng, không trừ phần bị trừ).
+ * `cap` = tổng số thẻ thật của bản đồ (GAMIFICATION_SPEC §6: `min(số thẻ, floor(earned / 30))`) — không có thẻ vô hạn.
+ */
+export function tilesAllowed(earnedTotal: number, cap: number = Number.POSITIVE_INFINITY): number {
   if (!Number.isFinite(earnedTotal) || earnedTotal <= 0) return 0;
-  return Math.floor(earnedTotal / MAP_TILE_STEP);
+  return Math.max(0, Math.min(Math.floor(cap), Math.floor(earnedTotal / MAP_TILE_STEP)));
 }
 
 export type MilestoneProgress = {
