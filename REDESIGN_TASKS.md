@@ -14,7 +14,7 @@
 | R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ✅ Đã chấp nhận |
 | R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ✅ Đã chấp nhận (local; Cloud chờ xác nhận) |
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
-| R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ⏸ |
+| R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ⏸ |
 | R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ⏸ |
 | R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | ⏸ |
@@ -181,17 +181,31 @@ Nhiệm vụ:
 
 **Phụ thuộc:** R04.
 
-- [ ] 5.1 `ranking.ts` (`rankScores`, đồng hạng 1-2-2-4) + unit test
-- [ ] 5.2 Bộ avatar hình người có giấy phép (`src/features/avatars/catalog.ts` — danh mục trong mã, **không** bảng `avatar_options`, RD-R05-02), chọn avatar ở `/learn/me`
-- [ ] 5.3 `GET /api/student/leaderboard` (DTO không định danh, lọc điều kiện hiển thị, `private, no-store`)
-- [ ] 5.4 Giao diện bảng thanh ngang (`/learn/leaderboard`, `/teacher/classes/[id]/leaderboard`), chế độ TOP 10 + mình / toàn lớp, trình chiếu cho GV
-- [ ] 5.5 Bật/tắt bảng theo lớp với kiểm tra điều kiện ([PRIVACY_AND_SECURITY §5](docs/PRIVACY_AND_SECURITY.md#5-bảng-xếp-hạng-điều-kiện-bật-và-kiểm-soát-hiển-thị))
+- [x] 5.1 `ranking.ts` (`rankScores`, đồng hạng 1-2-2-4) + unit test
+- [x] 5.2 Bộ avatar hình người có giấy phép (`src/features/avatars/catalog.ts` — danh mục trong mã, **không** bảng `avatar_options`, RD-R05-02), chọn avatar ở `/learn/me`
+- [x] 5.3 `GET /api/student/leaderboard` (DTO không định danh, lọc điều kiện hiển thị, `private, no-store`)
+- [x] 5.4 Giao diện bảng thanh ngang (`/learn/leaderboard`, `/teacher/classes/[id]/leaderboard`), chế độ TOP 10 + mình / toàn lớp, trình chiếu cho GV
+- [x] 5.5 Bật/tắt bảng theo lớp với kiểm tra điều kiện ([PRIVACY_AND_SECURITY §5](docs/PRIVACY_AND_SECURITY.md#5-bảng-xếp-hạng-điều-kiện-bật-và-kiểm-soát-hiển-thị))
 
 **Tệp/module dự kiến:** `src/features/gamification/ranking.ts`, `src/features/avatars/*`, `src/server/leaderboard/*`, `src/app/learn/leaderboard/**`, `src/app/teacher/classes/[classId]/leaderboard/**`, migration `avatar_options`.
 
 **Tiêu chí nghiệm thu:** 8 kiểm thử của [LEADERBOARD_SPEC §11](docs/LEADERBOARD_SPEC.md#11-kiểm-thử-bắt-buộc) xanh; thiết bị lớp A không lấy được bảng lớp B; DTO không có `student_id`; 360 px không cuộn ngang; câu chữ không gây xấu hổ (unit test soát từ cấm).
 **Kiểm thử bắt buộc:** bộ đầy đủ + RLS + test:e2e.
 **Đầu ra:** bảng xếp hạng trong lớp (mặc định tắt), avatar.
+
+**Nghiệm thu R05 (2026-10-21) — dựa trên GitHub Actions, đúng commit `83b34a7`** (không chạy lại bộ nặng ở máy cục bộ vì thiếu RAM):
+
+| Hạng mục | Kết quả | Nơi chạy |
+|---|---|---|
+| Format, lint, typecheck, content check, build | ✅ PASS | CI [run 39514016955](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016955) |
+| Unit | ✅ 952/952 (40 tệp) | CI |
+| Bundle không chứa secret | ✅ 55 tệp, 0 giá trị secret | CI |
+| db:lint, pgTAP | ✅ pgTAP 65/65 | CI |
+| Seed hai lần + tích hợp CSDL (RLS) | ✅ 129/129 (5 tệp) | CI |
+| E2E thông thường (5 project) | ✅ chromium-desktop 69 · chromium-mobile 54 · webkit-desktop 61 · webkit-mobile 54 · webkit-tablet 24 đạt; 0 lỗi; bỏ qua có điều kiện theo kích thước màn hình | E2E [run 39514016837](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016837) |
+| E2E có CSDL (4 project) | ✅ chromium-desktop 22 · chromium-mobile 15 · webkit-mobile 15 · webkit-ipad 4 đạt; 0 lỗi | E2E |
+
+Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy ở mọi project tương ứng.
 
 ---
 

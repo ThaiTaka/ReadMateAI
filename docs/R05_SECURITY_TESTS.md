@@ -92,6 +92,10 @@ Danh mục có khóa ổn định trong mã (`AVATAR_KEYS`, 16 mẫu); Server Ac
 
 (Chi tiết toàn bộ lượt chạy cuối: xem [REDESIGN_PROGRESS §6](../REDESIGN_PROGRESS.md).)
 
+## 10b. Xác nhận trên GitHub Actions (2026-10-21)
+
+Các kiểm thử bảo mật ở trên (cách ly lớp, cờ hệ thống tắt, DTO không định danh, đồng ý, thu hồi thiết bị, GV lớp khác) nằm trong tích hợp CSDL **129/129**, pgTAP **65/65**, unit **952/952**, E2E database 4 project và quét bundle — tất cả PASS trên commit `83b34a7` ([CI](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016955), [E2E](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016837)). Mã sản phẩm của R05 không đổi sau `628bf64`; chỉ sửa test (xem REDESIGN_PROGRESS §5b).
+
 ## 11. Rủi ro còn lại
 
 - **Chưa có chấp thuận pháp lý/nhà trường** (Luật 91/2025 Điều 24, RQ-01, RQ-P1–P3) ⇒ cờ hệ thống giữ tắt; chưa dùng với trẻ thật.

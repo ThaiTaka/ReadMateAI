@@ -1,11 +1,12 @@
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-20 — Phiên Claude Code R04
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R05 (nghiệm thu bằng GitHub Actions)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn:** R04 — Scoring Engine, chấm bài ở máy chủ, điểm thưởng, mở khóa bản đồ → **hoàn thành trên Supabase LOCAL; chờ người điều phối đánh giá.** Không tự chuyển sang R05.
+- **Giai đoạn:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
+- (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
 - **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
 - **Mã nguồn:** R04 thêm 2 migration (11 bảng mới — 27 bảng), hàm ghi điểm một giao dịch, Question Instance Service, 6 API `/api/student/**`, `/learn/me` với điểm thật + bản đồ khám phá + bốn khu vực, `/learn/me/practice` (buổi luyện có điểm). Điểm thật **chỉ chạy với nội dung fixture kiểm thử hư cấu** trên Supabase local (kho thật 0 mục đã duyệt). `/learn` và `/demo` vẫn là bản minh họa.
 - **Dịch vụ:** Supabase **local (Docker)**; **Supabase Cloud chưa tạo**. Vercel chưa liên kết; không AI, không TTS.
@@ -15,8 +16,9 @@
 | R01 | ✅ Đã chấp nhận (2026-10-20) |
 | R02 | ✅ Đã chấp nhận (2026-10-20) |
 | R03 | ✅ Đã chấp nhận (2026-10-20) |
-| R04 | ✅ Hoàn thành (local) — chờ duyệt |
-| R05–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
+| R04 | ✅ Hoàn thành (local) |
+| R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
+| R06–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
 
@@ -225,6 +227,30 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | `tests/unit/accounts/proxy-and-pages.test.tsx` | Thêm `/api/student/*` vào danh sách đường dẫn proxy phải chạy |
 | `tests/e2e/demo-practice.spec.ts` (axe) | `test.slow()` — chỉ tăng thời gian chờ |
 
+## 5b. Nghiệm thu R05 (2026-10-21)
+
+**Nghiệm thu R05 (2026-10-21) — dựa trên GitHub Actions, đúng commit `83b34a7`** (không chạy lại bộ nặng ở máy cục bộ vì thiếu RAM):
+
+| Hạng mục | Kết quả | Nơi chạy |
+|---|---|---|
+| Format, lint, typecheck, content check, build | ✅ PASS | CI [run 39514016955](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016955) |
+| Unit | ✅ 952/952 (40 tệp) | CI |
+| Bundle không chứa secret | ✅ 55 tệp, 0 giá trị secret | CI |
+| db:lint, pgTAP | ✅ pgTAP 65/65 | CI |
+| Seed hai lần + tích hợp CSDL (RLS) | ✅ 129/129 (5 tệp) | CI |
+| E2E thông thường (5 project) | ✅ chromium-desktop 69 · chromium-mobile 54 · webkit-desktop 61 · webkit-mobile 54 · webkit-tablet 24 đạt; 0 lỗi; bỏ qua có điều kiện theo kích thước màn hình | E2E [run 39514016837](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39514016837) |
+| E2E có CSDL (4 project) | ✅ chromium-desktop 22 · chromium-mobile 15 · webkit-mobile 15 · webkit-ipad 4 đạt; 0 lỗi | E2E |
+
+Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy ở mọi project tương ứng.
+
+**Lỗi tìm ra khi chuyển E2E lên CI và cách xử lý (đều là lỗi của test, không phải của mã sản phẩm):**
+
+1. *E2E database webkit-mobile hết 90 giây* ở kịch bản điểm R04 (`scoring.spec.ts`): ảnh chụp trạng thái cho thấy test đã tới trang chủ với 55 điểm (gần cuối) — kịch bản dài ~20 bước chờ máy chủ + 3 lần axe, `test.slow()` (×3) không đủ trên runner WebKit. Đặt giới hạn rõ `test.setTimeout(180_000)` cho đúng test này (`ab72d12`). Lượt cuối: webkit-mobile database 15 đạt trong 6,6 phút, test không còn hết giờ.
+2. *Hai test CSDL `scoring.test.ts` chập chờn* (số dư 50 thay vì 60; thiếu dấu mở khóa ở mốc 50): nguyên nhân là fixture có **một bản sao nội dung** trong 17 mục và test lấy `slice(0, n)` theo thứ tự UUID ngẫu nhiên; bản sao cùng fingerprint trong cùng mùa **đúng thiết kế** không tính điểm. Mã hàm CSDL không đổi (quy tắc "một nội dung một lần mỗi mùa" vẫn do test "cùng nội dung, khác mã câu" bảo vệ). Thêm `distinctItemIds` chọn mục khác fingerprint (`83b34a7`). CI chạy lại trên `83b34a7`: 129/129.
+3. Hai sửa cuối từ `628bf64` (nhãn avatar "Bạn tóc bồng", vùng cuộn bảng GV `role="group"` + nhãn `tableScroll`) đã đạt trong E2E database (accounts/leaderboard, axe sạch) ở cả 4 project.
+
+**Chiến lược chống thiếu RAM:** xem [docs/E2E_CI_STRATEGY.md](docs/E2E_CI_STRATEGY.md). Hạn chế: kết quả này là của CI Linux; chưa thử trên thiết bị thật.
+
 ## 6. Nhật ký quyết định (lộ trình R)
 
 | Mã | Quyết định | Trạng thái | Chi tiết |
@@ -303,3 +329,4 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | 2026-10-20 | R03 | R03 | Kiểm tra trạng thái (sạch; Audio WIP nguyên vẹn); bật Docker; Supabase CLI 2.121 local; 3 migration (16 bảng, RLS mọi bảng, hàm `teacher_*`/`gateway_*`, Auth Hook chặn tự đăng ký); proxy + DAL; `/login`, `/join`, `/learn/me`, `/teacher/classes/**`; đồng bộ kho tri thức + seed giả chạy lặp lại được; pgTAP 36, tích hợp CSDL 78, unit 819, E2E 262, E2E có CSDL 30; CI job `database` xanh; 4 tài liệu mới + cập nhật 10 tài liệu. Commit + push nhánh. **Không** tạo Supabase Cloud, không deploy, không merge `main` |
 | 2026-10-20 | R04 | R04 | Kiểm tra trạng thái (sạch; Audio WIP nguyên vẹn; baseline 819 + 78). Scoring Engine thuần + vân tay nội dung; 2 migration (11 bảng, hàm ghi điểm một giao dịch, RLS chỉ SELECT, môi trường kiểm thử); fixture hư cấu chỉ local; Question Instance Service + 6 API; `/learn/me` điểm thật + bản đồ 3×3 + bốn khu vực, `/learn/me/practice`; unit 900, pgTAP 52, tích hợp 106, E2E 262 + 40 (CSDL); p95 chấm bài 104 ms (local); 4 tài liệu mới + cập nhật 9 tài liệu; 3 checkpoint + tài liệu push, CI xanh. **Không** tạo Supabase Cloud, không deploy, không merge `main`, không đụng nhánh Audio WIP |
 | 2026-10-20 | R04 (tiếp, sau khi hết hạn mức) | R04 | Đọc lại tiến độ: 3 checkpoint đã push (CI run 39400938083 xanh), tài liệu R04 + sửa ngày fixture chưa commit. Khởi động lại Docker/Supabase local (sự cố `kong` mất ánh xạ cổng — §5.4). Chạy lại thật: format/lint/typecheck ✅, content:check 0 lỗi/52 cảnh báo, unit 900/900, build 18 route, check:bundle sạch, db:lint 0, pgTAP 52/52, seed ×2, test:db 106/106, test:e2e:db 40 đạt/17 bỏ qua; quét byte + secret 9 tệp sạch. Commit tài liệu `40c961e` + push nhánh; CI run 39434099659 xanh (`verify` + `database`). Không bắt đầu R05 |
+| 2026-10-21 | R05 (nghiệm thu) | R05 | Chuyển kiểm thử nặng lên GitHub Actions (workflow E2E, 9 job, 1 worker); sửa 2 điểm chập chờn của test (hết giờ WebKit, fixture trùng fingerprint); CI + E2E xanh trên `83b34a7`; cập nhật tài liệu. Không bắt đầu R06 |

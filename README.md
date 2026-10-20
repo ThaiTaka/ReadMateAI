@@ -65,6 +65,7 @@ rồi mở `http://<địa-chỉ-IP-máy-tính>:3000` trên điện thoại (Win
 | `npm run check:bundle` | Sau `build`: quét `.next/static` không chứa khóa secret hay giá trị secret của môi trường |
 | `npm run db:lint` · `npm run db:test` | (cần Supabase local) Lint bảo mật CSDL · pgTAP: RLS mọi bảng, quyền, ràng buộc |
 | `npm run test:db` | (cần Supabase local) Kiểm thử tích hợp RLS, thẻ học, xác thực bằng JWT thật |
+| (CI) workflow `E2E` | Mỗi project Playwright một job, `--workers=1`, Supabase local trên runner — xem [docs/E2E_CI_STRATEGY.md](docs/E2E_CI_STRATEGY.md) |
 | `npm run test:e2e:db` | (cần Supabase local + `db:env` + `db:seed`) Playwright luồng GV → thẻ học → thiết bị Android/iPhone → thu hồi |
 | `npm run db:reset` · `db:sync-content` · `db:types` | Dựng lại CSDL từ migration · đồng bộ `content/` vào CSDL · sinh lại kiểu TypeScript |
 
@@ -164,7 +165,7 @@ Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không c�
 
 ## Chức năng chưa phát triển (lộ trình R02 → R11)
 
-Đã có ở R03–R04 (Supabase local): cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh; điểm thưởng chấm ở máy chủ, sổ cái điểm, mở khóa bản đồ, điều kiện mini-game (R04). Chưa có: dự án Supabase Cloud, CAPTCHA `/join`, quên mật khẩu GV; bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
+Đã có ở R03–R05 (Supabase local): bảng xếp hạng lớp theo điểm (mặc định tắt) và 16 avatar (R05); cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh; điểm thưởng chấm ở máy chủ, sổ cái điểm, mở khóa bản đồ, điều kiện mini-game (R04). Chưa có: dự án Supabase Cloud, CAPTCHA `/join`, quên mật khẩu GV; vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
 
 ## Triển khai
 

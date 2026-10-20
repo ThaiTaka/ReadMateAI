@@ -297,3 +297,5 @@
 - Nhiều lớp/nhiều trường, đồng chủ nhiệm
 - Đọc đoạn văn và dạng bài mới
 - Tính năng giọng nói — chỉ khi có đồng ý riêng và đánh giá tác động; ưu tiên xử lý trên thiết bị
+
+> Cập nhật 2026-10-21: lộ trình từ GĐ5 do [REDESIGN_TASKS.md](REDESIGN_TASKS.md) thay thế; R05 (bảng xếp hạng, avatar) đã nghiệm thu bằng GitHub Actions — xem [REDESIGN_PROGRESS §5b](REDESIGN_PROGRESS.md).
