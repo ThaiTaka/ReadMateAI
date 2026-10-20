@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -6,6 +7,8 @@ import { defineConfig } from "vitest/config";
  * Chạy: npm run test:db
  */
 export default defineConfig({
+  // Mã dùng chung với ứng dụng (vd. ranking, DTO) có thể dùng alias "@/" như trong Next.js.
+  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   test: {
     environment: "node",
     include: ["tests/db/**/*.test.ts"],

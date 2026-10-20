@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-20",
+  "updatedAt": "2026-10-22",
   "note": "Danh mục nguồn và giấy phép của mọi hình ảnh, nhân vật, phông chữ dùng trong ReadMate AI (CLAUDE.md §7.9, §9.4.7). Asset do dự án tự tạo luôn bắt đầu ở pending_review; KHÔNG tự đặt approved — chỉ giáo viên duyệt (cần reviewedBy, reviewedAt). Kiểm tra bằng npm run content:check. Xem docs/ASSET_MANIFEST.md.",
   "assets": [
     {
@@ -145,6 +145,204 @@
         "reviewedBy": null,
         "reviewedAt": null,
         "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.sao",
+      "name": "Avatar Bạn tóc dựng",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:sao"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.nang",
+      "name": "Avatar Bạn tóc đuôi ngựa",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:nang"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.bien",
+      "name": "Avatar Bạn hai búi bông",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:bien"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.gio",
+      "name": "Avatar Bạn tóc dài",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:gio"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.lua",
+      "name": "Avatar Bạn tóc úp",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:lua"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.tre",
+      "name": "Avatar Bạn búi đỉnh đầu",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:tre"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.xoai",
+      "name": "Avatar Bạn tết tóc",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:xoai"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.sen",
+      "name": "Avatar Bạn mũ len",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:sen"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.cam",
+      "name": "Avatar Bạn kính vuông",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:cam"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.dua",
+      "name": "Avatar Bạn mũ lưỡi trai đỏ",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:dua"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
+      }
+    },
+    {
+      "id": "art.avatar.oi",
+      "name": "Avatar Bạn tóc xoăn nhỏ",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:oi"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn/me, bảng xếp hạng, /demo)",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1, RQ-L3)."
       }
     },
     {

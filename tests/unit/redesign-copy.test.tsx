@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import HomePage from "@/app/(site)/page";
 import DemoPage from "@/app/(site)/demo/page";
 import LearnPage from "@/app/learn/page";
-import TeacherPage from "@/app/teacher/page";
+import TeacherPage from "@/app/teacher/(console)/page";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TeacherSidebar } from "@/components/layout/teacher-sidebar";
 import { SUPPORT_POLICIES } from "@/features/exercises/core/support";

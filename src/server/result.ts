@@ -39,6 +39,9 @@ export const ERROR_CODES = [
   "IDEMPOTENCY_CONFLICT",
   "NO_TILE_AVAILABLE",
   "NOT_ADJACENT",
+  // R05 — bảng xếp hạng (migration 20261022090000).
+  "LEADERBOARD_NOT_APPROVED",
+  "LEADERBOARD_DISABLED",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

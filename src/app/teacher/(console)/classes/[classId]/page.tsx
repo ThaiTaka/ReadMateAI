@@ -160,18 +160,26 @@ async function ClassOverview({ params }: Pick<PageProps<"/teacher/classes/[class
           {t.settings.title}
         </h2>
         <Card className="mt-4 space-y-3 p-5 sm:p-6">
-          {[
-            [t.settings.leaderboard, cls.leaderboardEnabled],
-            [t.settings.honors, cls.honorsEnabled],
-          ].map(([label, enabled]) => (
-            <p key={String(label)} className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-semibold text-ink">{label}</span>
-              <Badge tone="neutral" icon={<Lock className="size-3.5" />}>
-                {enabled ? vi.status.inDevelopment : t.settings.off}
-              </Badge>
-            </p>
-          ))}
+          <p className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-semibold text-ink">{t.settings.leaderboard}</span>
+            <Badge
+              tone={cls.leaderboardEnabled ? "brand" : "neutral"}
+              icon={cls.leaderboardEnabled ? undefined : <Lock className="size-3.5" />}
+            >
+              {cls.leaderboardEnabled ? vi.leaderboard.teacher.status.on : t.settings.off}
+            </Badge>
+          </p>
+          <p className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-semibold text-ink">{t.settings.honors}</span>
+            <Badge tone="neutral" icon={<Lock className="size-3.5" />}>
+              {cls.honorsEnabled ? vi.status.inDevelopment : t.settings.off}
+            </Badge>
+          </p>
           <p className="text-sm text-ink-soft">{t.settings.lockedNote}</p>
+          <ButtonLink href={`/teacher/classes/${cls.id}/leaderboard` as Route} variant="outline">
+            <Trophy aria-hidden="true" className="size-5" />
+            {t.settings.open}
+          </ButtonLink>
         </Card>
       </section>
 

@@ -4,7 +4,7 @@ import HomePage from "@/app/(site)/page";
 import DemoPage from "@/app/(site)/demo/page";
 import JoinPage from "@/app/(site)/join/page";
 import LearnPage from "@/app/learn/page";
-import TeacherPage from "@/app/teacher/page";
+import TeacherPage from "@/app/teacher/(console)/page";
 import { TeacherSidebar } from "@/components/layout/teacher-sidebar";
 import { EXERCISE_TYPES } from "@/features/exercises/catalog";
 import { GAME_WORLDS } from "@/features/game-world/catalog";

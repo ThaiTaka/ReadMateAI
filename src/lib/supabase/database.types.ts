@@ -1595,6 +1595,7 @@ export type Database = {
     };
     Functions: {
       gateway_check_login_code: { Args: { p_code_hmac: string; p_kind: string }; Returns: string };
+      gateway_class_leaderboard: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
       gateway_consume_rate_limit: {
         Args: { p_key_hash: string; p_limit: number; p_window_seconds: number };
         Returns: boolean;
@@ -1663,6 +1664,8 @@ export type Database = {
         };
         Returns: string;
       };
+      teacher_leaderboard_display: { Args: { p_class_id: string }; Returns: Json };
+      teacher_leaderboard_overview: { Args: { p_class_id: string }; Returns: Json };
       teacher_record_consent: {
         Args: {
           p_attested: boolean;
@@ -1682,6 +1685,10 @@ export type Database = {
         Returns: undefined;
       };
       teacher_set_leaderboard_alias: { Args: { p_alias: string; p_student_id: string }; Returns: undefined };
+      teacher_set_leaderboard_settings: {
+        Args: { p_class_id: string; p_enabled: boolean; p_student_view: string };
+        Returns: undefined;
+      };
       teacher_set_student_status: { Args: { p_status: string; p_student_id: string }; Returns: undefined };
       teacher_update_student: {
         Args: { p_avatar_key: string; p_display_name: string; p_student_id: string; p_student_number: number };

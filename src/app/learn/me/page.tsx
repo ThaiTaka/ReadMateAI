@@ -2,7 +2,7 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { after } from "next/server";
 import { Suspense, type ReactNode } from "react";
-import { BookOpenCheck, LogOut, Map as MapIcon, School, Smartphone, Sparkles } from "lucide-react";
+import { BookOpenCheck, LogOut, Map as MapIcon, School, Smartphone, Sparkles, Trophy } from "lucide-react";
 import { AdventureLink } from "@/components/adventure/adventure-button";
 import { AvatarFrame } from "@/components/adventure/avatar-frame";
 import { GameWorldHeader } from "@/components/adventure/game-world-header";
@@ -281,6 +281,25 @@ function StudentDashboard({ home, studentId, query }: { home: StudentHomeDto; st
           <MapIcon aria-hidden="true" className="size-5" />
           {t.worldLink}
         </Link>
+      </section>
+
+      <section id="bang-diem" aria-labelledby="bang-diem-title" className="scroll-mt-6">
+        <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-start gap-4">
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-sun-100 text-sun-700">
+              <Trophy aria-hidden="true" className="size-7" />
+            </span>
+            <div>
+              <h2 id="bang-diem-title" className="text-2xl font-extrabold text-ink">
+                {vi.leaderboard.student.link.title}
+              </h2>
+              <p className="mt-1 text-ink-soft">{vi.leaderboard.student.link.text}</p>
+            </div>
+          </div>
+          <AdventureLink href={`/learn/leaderboard${query}` as Route} tone="plain" className="self-start">
+            {vi.leaderboard.student.link.cta}
+          </AdventureLink>
+        </Card>
       </section>
     </>
   );

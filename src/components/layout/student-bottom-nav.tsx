@@ -21,6 +21,7 @@ const LINKED_ITEMS: readonly NavItem[] = [
   { href: "/learn/me#ban-do", label: vi.learn.bottomNav.map, Icon: MapIcon },
   { href: "/learn/me/practice", label: vi.learn.bottomNav.practice, Icon: BookOpenCheck },
   { href: "/learn/me#tro-choi", label: vi.learn.bottomNav.games, Icon: Gamepad2 },
+  { href: "/learn/leaderboard", label: vi.learn.bottomNav.leaderboard, Icon: Trophy },
 ];
 
 /**
@@ -29,14 +30,14 @@ const LINKED_ITEMS: readonly NavItem[] = [
  */
 export function StudentBottomNav() {
   const pathname = usePathname();
-  const linked = pathname === "/learn/me" || pathname.startsWith("/learn/me/");
+  const linked = pathname === "/learn/me" || pathname.startsWith("/learn/me/") || pathname === "/learn/leaderboard";
   const items = linked ? LINKED_ITEMS : DEMO_ITEMS;
   return (
     <nav
       aria-label={vi.a11y.studentNav}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-lift md:hidden"
     >
-      <ul className="mx-auto grid max-w-xl grid-cols-3">
+      <ul className={`mx-auto grid max-w-xl ${items.length === 4 ? "grid-cols-4" : "grid-cols-3"}`}>
         {items.map(({ href, label, Icon }) => (
           <li key={label}>
             <a

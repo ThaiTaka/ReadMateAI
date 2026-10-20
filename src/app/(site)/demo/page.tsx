@@ -3,11 +3,11 @@ import { ArrowRight, ChevronRight, Map as MapIcon } from "lucide-react";
 import { AdventureLink } from "@/components/adventure/adventure-button";
 import { AvatarFrame } from "@/components/adventure/avatar-frame";
 import { GameWorldHeader } from "@/components/adventure/game-world-header";
-import { LeaderboardPreview } from "@/components/adventure/leaderboard-preview";
 import { MotionScope, MotionToggle } from "@/components/adventure/motion";
 import { PreviewRibbon } from "@/components/adventure/preview-ribbon";
 import { ScoreBadge } from "@/components/adventure/score-badge";
 import { WorldMapCard } from "@/components/adventure/world-map-card";
+import { DemoLeaderboard } from "@/components/leaderboard/demo-leaderboard";
 import { INSTRUCTION_ICONS, PATH_VISUALS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -117,7 +117,7 @@ export default function DemoPage() {
                   {w.leaderboardTitle}
                 </h3>
                 <p className="mt-1 text-sm text-ink-soft">{w.leaderboardNote}</p>
-                <LeaderboardPreview entries={DEMO_LEADERBOARD} className="mt-4" />
+                <DemoLeaderboard entries={DEMO_LEADERBOARD} className="mt-4" />
               </section>
             </div>
             <section aria-labelledby="demo-maps-title" className="flex flex-col gap-4">

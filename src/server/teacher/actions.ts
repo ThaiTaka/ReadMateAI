@@ -352,3 +352,30 @@ export async function withdrawConsent(studentId: string, _prev: ActionState, for
     }),
   );
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// Bảng xếp hạng (R05)
+// ---------------------------------------------------------------------------------------------------------------
+
+/**
+ * Bật/tắt bảng điểm của lớp và chọn kiểu hiển thị cho học sinh. Trình duyệt KHÔNG ghi trực tiếp vào `classes`:
+ * hàm CSDL `teacher_set_leaderboard_settings` (chỉ GV chủ nhiệm) tự kiểm tra quyền, trigger chặn bật khi cờ hệ thống
+ * `leaderboard_feature_approved` chưa được chấp thuận (LEADERBOARD_NOT_APPROVED) và ghi nhật ký cùng giao dịch.
+ */
+export async function saveLeaderboardSettings(
+  classId: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = z
+    .strictObject({ classId: uuid, enabled: z.boolean(), view: z.enum(["top10_and_me", "full"]) })
+    .safeParse({ classId, enabled: field(formData, "enabled") === "on", view: field(formData, "view") });
+  if (!parsed.success) return failed("INVALID_INPUT");
+  return run((session) =>
+    session.supabase.rpc("teacher_set_leaderboard_settings", {
+      p_class_id: parsed.data.classId,
+      p_enabled: parsed.data.enabled,
+      p_student_view: parsed.data.view,
+    }),
+  );
+}
