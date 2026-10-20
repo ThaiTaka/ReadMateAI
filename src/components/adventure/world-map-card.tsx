@@ -18,6 +18,13 @@ type WorldMapCardProps = {
   /** Bản thu gọn (lưới nhỏ ở /demo): bỏ mô tả dài. */
   compact?: boolean;
   as?: "article" | "li";
+  /**
+   * Dữ liệu THẬT của học sinh đã liên kết (R04): thay chip "Bản xem trước" bằng "Mini-game đang phát triển" và nút
+   * khóa tương ứng. Trò chơi vẫn chưa chơi được — không dẫn tới route game nào.
+   */
+  live?: boolean;
+  /** Lần đầu điểm hiện tại đạt ngưỡng trong mùa đã được ghi (dấu "Đã khám phá" — không phải quyền vào chơi). */
+  discovered?: boolean;
 };
 
 function StatusChip({ eligible }: { eligible: boolean }) {
@@ -39,12 +46,24 @@ function StatusChip({ eligible }: { eligible: boolean }) {
  * nút "Xem chi tiết" mở bảng thông tin thật. Nút "Vào chơi" luôn BỊ KHÓA và ghi "Sắp có" — chưa có game nào
  * để vào (R07–R09), không dẫn tới trang không tồn tại.
  */
-export function WorldMapCard({ game, state, idPrefix = "game", compact = false, as = "article" }: WorldMapCardProps) {
+export function WorldMapCard({
+  game,
+  state,
+  idPrefix = "game",
+  compact = false,
+  as = "article",
+  live = false,
+  discovered = false,
+}: WorldMapCardProps) {
   const t = vi.gameWorld;
   const Scene = GAME_SCENES[game.key];
   const titleId = `${idPrefix}-${game.key}-title`;
   const Card = state.eligible ? GameCard : LockedGameCard;
-  const progressText = state.eligible ? t.statusEligibleNote : t.needMore.replace("{n}", String(state.missing));
+  const progressText = state.eligible
+    ? live
+      ? t.inDevelopmentNote
+      : t.statusEligibleNote
+    : t.needMore.replace("{n}", String(state.missing));
 
   return (
     <Card
@@ -58,8 +77,14 @@ export function WorldMapCard({ game, state, idPrefix = "game", compact = false, 
       status={
         <>
           <StatusChip eligible={state.eligible} />
+          {discovered ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-sun-100 px-3 py-1 text-xs font-extrabold text-sun-900">
+              <Sparkles aria-hidden="true" className="size-3.5" />
+              {t.discovered}
+            </span>
+          ) : null}
           <span className="inline-flex items-center rounded-full bg-deep-800/80 px-3 py-1 text-xs font-bold text-white">
-            {t.preview}
+            {live ? t.inDevelopment : t.preview}
           </span>
         </>
       }
@@ -127,7 +152,7 @@ export function WorldMapCard({ game, state, idPrefix = "game", compact = false, 
             <div className="flex flex-col gap-2 rounded-2xl border-2 border-dashed border-line-strong p-4">
               <AdventureButton tone="sun" disabled className="w-full">
                 <Sparkles aria-hidden="true" className="size-6" />
-                {t.playSoon}
+                {live ? t.inDevelopment : t.playSoon}
               </AdventureButton>
               <p className="text-sm text-ink-soft">{t.playNote.replace("{phase}", game.plannedPhase)}</p>
             </div>

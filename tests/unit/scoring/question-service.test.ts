@@ -14,7 +14,7 @@ import {
   mapTileRequestSchema,
   practiceSessionRequestSchema,
 } from "@/server/student-gateway/api-schemas";
-import { statusFor } from "@/server/student-gateway/http";
+import { readJson, statusFor } from "@/server/student-gateway/http";
 import { demoItems } from "../exercises/helpers";
 
 type Row = Parameters<typeof toPublicQuestion>[0];
@@ -190,5 +190,28 @@ describe("fixture kiểm thử R04 (hư cấu, chỉ local)", () => {
         expect(visualMatchAnswer(item.content)).toBe(item.answer.optionId);
       }
     }
+  });
+});
+
+describe("readJson: chỉ JSON cùng nguồn, thân nhỏ, lược đồ chặt", () => {
+  const request = (headers: Record<string, string>, body = '{"tileKey":"lotus_pond"}') =>
+    new Request("http://localhost:3000/api/student/map-tiles", { method: "POST", headers, body });
+  const json = { "content-type": "application/json", host: "127.0.0.1:3200" };
+
+  it("nhận request cùng nguồn (so Origin với Host, không với request.url)", async () => {
+    expect((await readJson(request({ ...json, origin: "http://127.0.0.1:3200" }), mapTileRequestSchema)).ok).toBe(true);
+    expect((await readJson(request({ ...json, "sec-fetch-site": "same-origin" }), mapTileRequestSchema)).ok).toBe(true);
+  });
+
+  it("từ chối khác nguồn, không phải JSON, JSON hỏng, thân quá lớn", async () => {
+    expect(await readJson(request({ ...json, origin: "https://ke-gian.example" }), mapTileRequestSchema)).toEqual({
+      ok: false,
+      code: "FORBIDDEN",
+    });
+    expect((await readJson(request({ ...json, "sec-fetch-site": "cross-site" }), mapTileRequestSchema)).ok).toBe(false);
+    expect((await readJson(request({ ...json, "content-type": "text/plain" }), mapTileRequestSchema)).ok).toBe(false);
+    expect((await readJson(request(json, "{không phải json"), mapTileRequestSchema)).ok).toBe(false);
+    const big = JSON.stringify({ tileKey: "lotus_pond", pad: "x".repeat(9000) });
+    expect((await readJson(request(json, big), mapTileRequestSchema)).ok).toBe(false);
   });
 });

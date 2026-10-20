@@ -603,14 +603,12 @@ describe("đồng ý và dữ liệu kiểm thử", () => {
     try {
       expect(((await candidates(device, studentId)).data as { items: unknown[] }).items).toEqual([]);
       expect(errorMessage(await startSession(device, studentId, planItems(ids)))).toBe("CONTENT_NOT_ELIGIBLE");
-      const inserted = await admin
-        .from("exercises")
-        .insert({
-          key: `fixture:r04:cam-${randomUUID().slice(0, 6)}`,
-          type_code: "letter_sound",
-          title: "x",
-          origin: "test_fixture",
-        });
+      const inserted = await admin.from("exercises").insert({
+        key: `fixture:r04:cam-${randomUUID().slice(0, 6)}`,
+        type_code: "letter_sound",
+        title: "x",
+        origin: "test_fixture",
+      });
       expect(errorMessage(inserted)).toBe("TEST_FIXTURES_NOT_ALLOWED");
     } finally {
       setTestFixturesAllowed(true);

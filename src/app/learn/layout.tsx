@@ -9,8 +9,8 @@ import { vi } from "@/strings/vi";
 
 /**
  * Khung khu vực học sinh — ưu tiên điện thoại, mở rộng thành bảng điều khiển trên máy tính bảng/máy tính.
- * Không script bên thứ ba, không liên kết ra ngoài, không ô nhập văn bản tự do (CLAUDE.md §6). Chưa có tài khoản
- * và chưa lưu thông tin học sinh: trang dùng dữ liệu minh họa hư cấu (R02).
+ * Không script bên thứ ba, không liên kết ra ngoài, không ô nhập văn bản tự do (CLAUDE.md §6). /learn là bản minh
+ * họa hư cấu (R02); /learn/me… là khu vực có xác thực của thiết bị đã liên kết (R03–R04).
  */
 export default function LearnLayout({ children }: LayoutProps<"/learn">) {
   return (

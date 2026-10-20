@@ -1,25 +1,44 @@
-import { BookOpenCheck, Map as MapIcon, Trophy } from "lucide-react";
+"use client";
+
+import { BookOpenCheck, Gamepad2, Map as MapIcon, Trophy } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { vi } from "@/strings/vi";
 
-const ITEMS = [
+type NavItem = { href: string; label: string; Icon: typeof MapIcon };
+
+/** Bản minh họa (/learn): lối tắt trong trang + bản chơi thử. */
+const DEMO_ITEMS: readonly NavItem[] = [
   { href: "#game-world", label: vi.learn.bottomNav.map, Icon: MapIcon },
   { href: "/demo#luyen-tap", label: vi.learn.bottomNav.practice, Icon: BookOpenCheck },
   { href: "#thanh-tich", label: vi.learn.bottomNav.achievements, Icon: Trophy },
-] as const;
+];
+
+/**
+ * Trang có xác thực (/learn/me…): bản đồ, buổi luyện có điểm, khu vực trò chơi. Không đọc tham số URL (useSearchParams
+ * buộc bọc Suspense và thay DOM lúc hydrate); thiết bị có nhiều hồ sơ sẽ được hỏi chọn hồ sơ khi mở liên kết.
+ */
+const LINKED_ITEMS: readonly NavItem[] = [
+  { href: "/learn/me#ban-do", label: vi.learn.bottomNav.map, Icon: MapIcon },
+  { href: "/learn/me/practice", label: vi.learn.bottomNav.practice, Icon: BookOpenCheck },
+  { href: "/learn/me#tro-choi", label: vi.learn.bottomNav.games, Icon: Gamepad2 },
+];
 
 /**
  * Điều hướng đáy màn hình cho học sinh trên điện thoại: 3 mục lớn, mỗi mục cao ≥ 64px (PRD §5, P8).
  * Từ máy tính bảng trở lên các lối đi này đã nằm sẵn trong trang nên thanh được ẩn.
  */
 export function StudentBottomNav() {
+  const pathname = usePathname();
+  const linked = pathname === "/learn/me" || pathname.startsWith("/learn/me/");
+  const items = linked ? LINKED_ITEMS : DEMO_ITEMS;
   return (
     <nav
       aria-label={vi.a11y.studentNav}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] shadow-lift md:hidden"
     >
       <ul className="mx-auto grid max-w-xl grid-cols-3">
-        {ITEMS.map(({ href, label, Icon }) => (
-          <li key={href}>
+        {items.map(({ href, label, Icon }) => (
+          <li key={label}>
             <a
               href={href}
               className="flex min-h-touch-kid flex-col items-center justify-center gap-1 rounded-2xl text-sm font-bold text-ink-soft hover:bg-surface-muted hover:text-ink"

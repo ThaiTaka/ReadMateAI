@@ -246,7 +246,7 @@ must(
   await admin.from("classes").upsert({
     id: ID.classC,
     school_id: ID.school,
-    name: "Lớp Thử Điểm",
+    name: "Thử Điểm",
     school_year: "2026-2027",
     created_by: teacherIds.a,
     curriculum_series_id: fixtures.seriesId,
@@ -374,6 +374,6 @@ for (const student of STUDENTS) {
 
 console.log(
   `Đã nạp dữ liệu giả: 1 trường · ${TEACHERS.length} GV (${TEACHERS.map((t) => t.email).join(", ")}) · ` +
-    `${CLASSES.length + 1} lớp (gồm Lớp Thử Điểm trên nội dung fixture) · ${STUDENTS.length} học sinh · kho tri thức ${content.datasetVersion}. ` +
+    `${CLASSES.length + 1} lớp (gồm lớp \"Thử Điểm\" trên nội dung fixture) · ${STUDENTS.length} học sinh · kho tri thức ${content.datasetVersion}. ` +
     "Mật khẩu GV = SEED_TEACHER_PASSWORD trong .env.local.",
 );

@@ -359,6 +359,8 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
   });
 
   test("trợ năng (axe): không có lỗi mức nghiêm trọng ở các màn của bản chơi thử", async ({ page }) => {
+    // Bốn lượt quét axe trên trang /demo nặng: khi cả bộ E2E chạy song song có thể vượt 30 s (R04 — chỉ tăng thời gian chờ).
+    test.slow();
     const serious = async () => {
       const results = await new AxeBuilder({ page }).analyze();
       return results.violations
