@@ -1024,6 +1024,9 @@ export const vi = {
     LEADERBOARD_NOT_APPROVED:
       "Chưa bật được bảng xếp hạng: chức năng này chưa được nhà trường chấp thuận ở cấp hệ thống.",
     LEADERBOARD_DISABLED: "Bảng xếp hạng của lớp đang tắt.",
+    HONORS_NOT_APPROVED: "Chưa bật được vinh danh: chức năng này chưa được nhà trường chấp thuận ở cấp hệ thống.",
+    HONORS_DISABLED: "Vinh danh của lớp đang tắt.",
+    NO_HONOREES: "Chưa có bạn nào đủ điều kiện được vinh danh (cần có điểm lớn hơn 0 và đã được đồng ý hiển thị).",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 

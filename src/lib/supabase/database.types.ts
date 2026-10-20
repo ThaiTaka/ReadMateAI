@@ -676,6 +676,98 @@ export type Database = {
           },
         ];
       };
+      honor_snapshot_entries: {
+        Row: {
+          alias: string;
+          avatar_key: string;
+          class_id: string;
+          points: number;
+          position: number;
+          rank: number;
+          snapshot_id: string;
+          student_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          alias: string;
+          avatar_key: string;
+          class_id: string;
+          points: number;
+          position: number;
+          rank: number;
+          snapshot_id: string;
+          student_id: string;
+        };
+        Update: {
+          alias?: string;
+          avatar_key?: string;
+          class_id?: string;
+          points?: number;
+          position?: number;
+          rank?: number;
+          snapshot_id?: string;
+          student_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "honor_snapshot_entries_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "honor_snapshots";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "honor_snapshot_entries_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
+      honor_snapshots: {
+        Row: {
+          class_id: string;
+          created_at: string;
+          created_by: string;
+          id: string;
+          season_id: string;
+          season_no: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          season_id: string;
+          season_no: number;
+        };
+        Update: {
+          class_id?: string;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          season_id?: string;
+          season_no?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "honor_snapshots_class_id_fkey";
+            columns: ["class_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "honor_snapshots_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       item_attempts: {
         Row: {
           attempt_no: number;
@@ -1650,10 +1742,12 @@ export type Database = {
       teacher_assign_band: { Args: { p_band: string; p_reason: string; p_student_id: string }; Returns: undefined };
       teacher_confirm_class_curriculum: { Args: { p_class_id: string }; Returns: undefined };
       teacher_create_class: { Args: { p_name: string; p_school_year: string }; Returns: string };
+      teacher_create_honor_snapshot: { Args: { p_class_id: string }; Returns: string };
       teacher_create_student: {
         Args: { p_avatar_key: string; p_class_id: string; p_display_name: string; p_student_number: number };
         Returns: string;
       };
+      teacher_get_honor_snapshot: { Args: { p_snapshot_id: string }; Returns: Json };
       teacher_issue_login_code: {
         Args: {
           p_backup_code_hmac: string;
@@ -1666,6 +1760,7 @@ export type Database = {
       };
       teacher_leaderboard_display: { Args: { p_class_id: string }; Returns: Json };
       teacher_leaderboard_overview: { Args: { p_class_id: string }; Returns: Json };
+      teacher_list_honor_snapshots: { Args: { p_class_id: string }; Returns: Json };
       teacher_record_consent: {
         Args: {
           p_attested: boolean;
@@ -1684,6 +1779,7 @@ export type Database = {
         Args: { p_class_id: string; p_lesson_id: string; p_series_id: string };
         Returns: undefined;
       };
+      teacher_set_honors_enabled: { Args: { p_class_id: string; p_enabled: boolean }; Returns: undefined };
       teacher_set_leaderboard_alias: { Args: { p_alias: string; p_student_id: string }; Returns: undefined };
       teacher_set_leaderboard_settings: {
         Args: { p_class_id: string; p_enabled: boolean; p_student_view: string };

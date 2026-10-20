@@ -213,8 +213,8 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **Phụ thuộc:** R05.
 
-- [ ] 6.1 Migrations: `honor_snapshots`, `season_resets`, cột `final_rank`; hàm `private.reset_class_season` ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
-- [ ] 6.2 Server Actions `createHonorSnapshot`, `resetSeason` (xác thực → quyền → zod → nghiệp vụ)
+- [~] 6.1 Migrations: `honor_snapshots` (+ `honor_snapshot_entries`) **xong ở R06.1** (`20261023090000_r06_honors.sql`); `season_resets`, cột `final_rank`, hàm `private.reset_class_season` còn lại cho R06.3 ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
+- [~] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason` còn lại cho R06.3
 - [ ] 6.3 Màn vinh danh TOP 3 → 2 → 1, hào quang TOP 1, Bỏ qua, Xem lại, giảm chuyển động, đồng hạng
 - [ ] 6.4 Màn reset hai bước (gõ tên lớp)
 - [ ] 6.5 `GET /api/student/honors/latest` (nếu lớp bật)

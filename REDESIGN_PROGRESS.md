@@ -1,11 +1,12 @@
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R05 (nghiệm thu bằng GitHub Actions)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.1 (backend vinh danh TOP 3)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
+- **Giai đoạn hiện tại: R06.1 — backend vinh danh TOP 3 (chưa có giao diện/hoạt cảnh/reset; R06.2–R06.3 chưa làm).** Chi tiết §5c.
+- **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
 - (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
 - **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
 - **Mã nguồn:** R04 thêm 2 migration (11 bảng mới — 27 bảng), hàm ghi điểm một giao dịch, Question Instance Service, 6 API `/api/student/**`, `/learn/me` với điểm thật + bản đồ khám phá + bốn khu vực, `/learn/me/practice` (buổi luyện có điểm). Điểm thật **chỉ chạy với nội dung fixture kiểm thử hư cấu** trên Supabase local (kho thật 0 mục đã duyệt). `/learn` và `/demo` vẫn là bản minh họa.
@@ -251,6 +252,25 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **Chiến lược chống thiếu RAM:** xem [docs/E2E_CI_STRATEGY.md](docs/E2E_CI_STRATEGY.md). Hạn chế: kết quả này là của CI Linux; chưa thử trên thiết bị thật.
 
+## 5c. R06.1 — Backend vinh danh TOP 3 (2026-10-21)
+
+**Migration** `20261023090000_r06_honors.sql` (không sửa migration cũ):
+- `honor_snapshots` (lớp, mùa, số mùa, UUID người tạo, thời điểm) và `honor_snapshot_entries` (hạng 1–3, vị trí, tên hiển thị đã duyệt lúc chụp, avatar, điểm > 0; giữ `student_id` NỘI BỘ để lọc theo quyền hiện tại). Cả hai **bất biến** (trigger `block_direct_change`, kể cả với service_role); xóa hồ sơ học sinh/lớp xóa theo dây chuyền.
+- RLS bật; `honor_snapshots` GV lớp đọc được; `honor_snapshot_entries` **không cấp SELECT** cho authenticated (policy từ chối) — chỉ đọc qua hàm đã lọc.
+- Hàm: `teacher_create_honor_snapshot(class)` (một giao dịch, khóa dòng lớp, ghi audit `honors.snapshot_create`, rỗng → `NO_HONOREES` và hủy cả giao dịch), `teacher_get_honor_snapshot` / `teacher_list_honor_snapshots` (đọc từ ảnh chụp đã lưu, **không tính lại hạng**, lọc lại mỗi lần đọc), `teacher_set_honors_enabled` (chỉ chủ nhiệm). Nội bộ: `private.require_honor_staff` (owner hoặc co_teacher có `can_honor`), `private.honor_entry_visible`.
+
+**Quy tắc:** nguồn là `private.leaderboard_rows` (cùng bộ lọc với bảng xếp hạng: học sinh hoạt động + đồng ý `learning_data` + `leaderboard_display` + tên hiển thị đã duyệt); `rank()` = 1 + số người điểm cao hơn (đúng Ranking Engine R05, đồng hạng 1,1,3 → không có hạng 2); chỉ hạng ≤ 3 và điểm > 0. Hạng tính ở CSDL vì GV có thể gọi RPC trực tiếp; `selectHonorees()` (TS) là bản đối chiếu, kiểm thử tích hợp so sánh hai bên. Không đổi điểm/mùa; không reset.
+
+**Cờ và quyền:** tạo ảnh chụp cần cờ hệ thống `honors_feature_approved` (mặc định TẮT, không bật ngoài `setLocalHonorsApproval` trong kiểm thử local) **và** `classes.honors_enabled` (bật chỉ khi cờ hệ thống bật — trigger sẵn có). Đọc/liệt kê cũng yêu cầu cờ hệ thống. Không URL công khai, không API học sinh (thuộc R06.2+).
+
+**Riêng tư khi đọc:** hàng bị ẩn khi học sinh không còn hoạt động, mất một trong hai đồng ý, hoặc tên hiển thị hiện tại khác/chưa duyệt lại so với lúc chụp. Không báo lý do, không đếm số bị ẩn; bản gốc giữ nguyên, cấp lại đồng ý thì hiện lại. DTO (`src/features/honors/honors.ts`): chỉ `rank, alias, avatarKey, points` + `playbackOrder` (TOP 3 → 2 → 1, bỏ bậc trống), không `student_id/class_id`/nhóm.
+
+**Mã:** `src/features/honors/honors.ts` (thuần + zod), `src/server/teacher/honors.ts` (Server Actions `createHonorSnapshot({classId})`, `setHonorsEnabled`), `src/server/teacher/honor-queries.ts`, mã lỗi `HONORS_NOT_APPROVED/HONORS_DISABLED/NO_HONOREES`.
+
+**Kiểm thử (local, chỉ phần mới/ảnh hưởng):** pgTAP 81/81 (mới 16), tích hợp `tests/db/honors.test.ts` 19/19 (JWT thật, điểm thật qua gateway), unit 967/967 (mới 15), db:lint sạch, format/lint/typecheck sạch. Kết quả CI của commit: xem nhật ký phiên bên dưới.
+
+**Giới hạn:** chưa chống bấm đúp (hai lần bấm tạo hai ảnh chụp — chấp nhận ở R06.1, có thể thêm khóa ý định ở R06.2); `co_teacher` chưa có giao diện cấp `can_honor` (cột đã có, kiểm thử cấp qua máy chủ); chưa có API học sinh xem ảnh chụp gần nhất.
+
 ## 6. Nhật ký quyết định (lộ trình R)
 
 | Mã | Quyết định | Trạng thái | Chi tiết |
@@ -330,3 +350,4 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 | 2026-10-20 | R04 | R04 | Kiểm tra trạng thái (sạch; Audio WIP nguyên vẹn; baseline 819 + 78). Scoring Engine thuần + vân tay nội dung; 2 migration (11 bảng, hàm ghi điểm một giao dịch, RLS chỉ SELECT, môi trường kiểm thử); fixture hư cấu chỉ local; Question Instance Service + 6 API; `/learn/me` điểm thật + bản đồ 3×3 + bốn khu vực, `/learn/me/practice`; unit 900, pgTAP 52, tích hợp 106, E2E 262 + 40 (CSDL); p95 chấm bài 104 ms (local); 4 tài liệu mới + cập nhật 9 tài liệu; 3 checkpoint + tài liệu push, CI xanh. **Không** tạo Supabase Cloud, không deploy, không merge `main`, không đụng nhánh Audio WIP |
 | 2026-10-20 | R04 (tiếp, sau khi hết hạn mức) | R04 | Đọc lại tiến độ: 3 checkpoint đã push (CI run 39400938083 xanh), tài liệu R04 + sửa ngày fixture chưa commit. Khởi động lại Docker/Supabase local (sự cố `kong` mất ánh xạ cổng — §5.4). Chạy lại thật: format/lint/typecheck ✅, content:check 0 lỗi/52 cảnh báo, unit 900/900, build 18 route, check:bundle sạch, db:lint 0, pgTAP 52/52, seed ×2, test:db 106/106, test:e2e:db 40 đạt/17 bỏ qua; quét byte + secret 9 tệp sạch. Commit tài liệu `40c961e` + push nhánh; CI run 39434099659 xanh (`verify` + `database`). Không bắt đầu R05 |
 | 2026-10-21 | R05 (nghiệm thu) | R05 | Chuyển kiểm thử nặng lên GitHub Actions (workflow E2E, 9 job, 1 worker); sửa 2 điểm chập chờn của test (hết giờ WebKit, fixture trùng fingerprint); CI + E2E xanh trên `83b34a7`; cập nhật tài liệu. Không bắt đầu R06 |
+| 2026-10-21 | R06.1 | R06 | Backend vinh danh TOP 3: migration `20261023090000`, ảnh chụp bất biến, quyền owner/co_teacher+can_honor, cờ hệ thống tắt, đọc lọc theo quyền hiện tại; pgTAP 81, tích hợp 19 (mới), unit 967. Không làm giao diện/hoạt cảnh/reset |

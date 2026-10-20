@@ -42,6 +42,10 @@ export const ERROR_CODES = [
   // R05 — bảng xếp hạng (migration 20261022090000).
   "LEADERBOARD_NOT_APPROVED",
   "LEADERBOARD_DISABLED",
+  // R06.1 — vinh danh TOP 3 (migration 20261023090000).
+  "HONORS_NOT_APPROVED",
+  "HONORS_DISABLED",
+  "NO_HONOREES",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

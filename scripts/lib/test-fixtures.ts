@@ -24,3 +24,15 @@ export function setLocalLeaderboardApproval(approved: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/**
+ * Giả lập "cờ hệ thống vinh danh TOP 3 đã được chấp thuận" CHỈ trên Supabase LOCAL để kiểm thử R06.1.
+ * Production không bao giờ chạy hàm này: cờ `honors_feature_approved` chỉ đổi bằng migration sau khi nhà trường chấp
+ * thuận. Mặc định (migration R03) là TẮT; kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalHonorsApproval(approved: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.feature_flags set enabled = ${approved ? "true" : "false"}, updated_at = now() where key = 'honors_feature_approved'"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}
