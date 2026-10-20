@@ -6,7 +6,7 @@
 ## 1. Trạng thái hiện tại
 
 - **Giai đoạn:** R02 — giao diện mới, trang học sinh, Game World (dữ liệu minh họa) → **hoàn thành; chờ người điều phối đánh giá.** Không tự chuyển sang R03.
-- **Nhánh làm việc:** `feature/home-learning-redesign`. `main` **không đổi**, không merge.
+- **Nhánh làm việc:** `feature/home-learning-redesign` — commit R02 `8b178be` đã push; CI run 39357778681 xanh. `main` **không đổi**, không merge.
 - **Mã nguồn:** giao diện đã theo định hướng mới (trang chủ, `/learn`, `/demo`, `/teacher`); bộ máy tiếng Việt và bộ máy bài tập GĐ3–GĐ4 giữ nguyên (chỉ đổi nhãn H0 và bố cục H1/H0). Điểm/bản đồ/xếp hạng là **dữ liệu minh họa hư cấu**, không lưu.
 - **Dịch vụ:** Vercel **chưa liên kết**; Supabase **chưa tạo**; không AI, không TTS. CI GitHub Actions nay chạy cả trên push `feature/**`.
 
@@ -73,6 +73,7 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | `npm run test:run` | ✅ 29 tệp, **781/781** (729 cũ + 52 mới; 9 test cũ được cập nhật nội dung) |
 | `npm run build` | ✅ 7 route tĩnh |
 | `npm run test:e2e` | ✅ **254 đạt, 0 lỗi, 56 bỏ qua theo thiết kế** (test chỉ dành cho desktop/điện thoại; bố cục 6 cỡ chỉ chạy ở 2 cấu hình desktop) — 5 cấu hình: Chromium/WebKit × desktop/điện thoại + iPad |
+| GitHub Actions | ✅ Run [39357778681](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39357778681) — sự kiện `push` trên `feature/home-learning-redesign` (lần đầu workflow chạy cho nhánh tính năng), commit `8b178be`: format, lint, typecheck, content:check (0 lỗi), unit 29 tệp, build — **success** |
 | JS (gzip, bản production) | `/` 199,5 KB · `/learn` **201,0 KB** · `/demo` **227,3 KB** (GĐ4: ≈ 228 KB) · `/teacher` 189,4 KB. Khung Next + React ≈ 189 KB; ngân sách route học sinh ≈ 200 KB → `/learn` vượt ≈ 1 KB, `/demo` vượt như GĐ4 (R-26). Hình SVG là Server Component nên không vào JS; HTML `/learn` 48 KB gzip |
 
 ### 3.2 Test cũ được cập nhật vì định hướng thay đổi chính thức (không xóa test nào)
@@ -138,4 +139,4 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
 | 2026-10-16 | R01 | R01 | Kiểm tra trạng thái (clone mới, không có công việc GĐ5); baseline xanh; nhánh `feature/home-learning-redesign` + checkpoint 2 PDF; hỏi 2 mâu thuẫn quy tắc BẮT BUỘC; 8 tài liệu mới + cập nhật 8 tài liệu; kiểm tra liên kết, NFC, secret; bộ kiểm tra xanh; commit + push nhánh. **Không** merge `main`, không deploy, không Supabase |
-| 2026-10-20 | R02 | R02 | Kiểm tra trạng thái: thư mục ở `main` với công việc GĐ5 âm thanh chưa commit → cất vào nhánh cục bộ `local/gd5-audio-wip` (không push); chuyển sang `feature/home-learning-redesign`; baseline 729/729. Design system + 17 thành phần phiêu lưu; 22 asset SVG tự vẽ + `licenses.json` + kiểm tra trong `content:check`; trang chủ, `/learn` (Student Dashboard + Game World), `/demo` (xem trước Game World, H0 "Tự làm", bỏ phiếu), `/teacher` (menu 9 mục); CI `feature/**`; 781/781 unit, 254 E2E đạt (0 lỗi); đo khung hình và tối ưu vẽ; JS `/learn` 201 KB, `/demo` 227 KB gzip; tài liệu DESIGN_SYSTEM, ASSET_MANIFEST + cập nhật 8 tài liệu. Commit + push nhánh (xem §1). **Không** merge `main`, không deploy, không Supabase |
+| 2026-10-20 | R02 | R02 | Kiểm tra trạng thái: thư mục ở `main` với công việc GĐ5 âm thanh chưa commit → cất vào nhánh cục bộ `local/gd5-audio-wip` (không push); chuyển sang `feature/home-learning-redesign`; baseline 729/729. Design system + 17 thành phần phiêu lưu; 22 asset SVG tự vẽ + `licenses.json` + kiểm tra trong `content:check`; trang chủ, `/learn` (Student Dashboard + Game World), `/demo` (xem trước Game World, H0 "Tự làm", bỏ phiếu), `/teacher` (menu 9 mục); CI `feature/**`; 781/781 unit, 254 E2E đạt (0 lỗi); đo khung hình và tối ưu vẽ; JS `/learn` 201 KB, `/demo` 227 KB gzip; tài liệu DESIGN_SYSTEM, ASSET_MANIFEST + cập nhật 8 tài liệu. Commit `8b178be` + push nhánh; GitHub Actions run 39357778681 xanh. **Không** merge `main`, không deploy, không Supabase |
