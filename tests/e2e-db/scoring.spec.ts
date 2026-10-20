@@ -164,7 +164,8 @@ test.describe("R04 — luyện có điểm, bản đồ, điều kiện mini-gam
   test("thẻ học → luyện → +10 / −5 → tải lại giữ nguyên → mốc 30 → mở thẻ → 50 điểm → Mê cung đủ điều kiện", async ({
     page,
   }, testInfo) => {
-    test.slow();
+    // Kịch bản dài (~20 bước chờ máy chủ, 3 lần axe) — WebKit trên runner CI cần hơn mức x3 mặc định của test.slow().
+    test.setTimeout(180_000);
     const student = await freshStudent("Điểm");
     await link(page, student.backup);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(`Trang của ${student.name}`);
