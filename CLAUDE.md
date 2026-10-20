@@ -8,7 +8,7 @@ Tệp này được Claude Code nạp tự động ở mỗi phiên. Các quy t�
 
 **Triết lý: TỰ LUYỆN CÓ HƯỚNG DẪN TẠI NHÀ — KHÍCH LỆ BẰNG PHIÊU LƯU VÀ THI ĐUA LÀNH MẠNH.** (Triết lý cũ "học có hướng dẫn ở nhà → tự thực hiện ở lớp" của GĐ1–GĐ4 đã được thay thế; mã liên quan đánh dấu ngừng dùng, AD-51.)
 
-Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa): **R02 đã có giao diện với dữ liệu minh họa hư cấu** (trang chủ mới, `/learn` = Student Adventure Dashboard + Game World, xem trước ở `/demo`, sidebar GV); tính/lưu điểm thật, tài khoản, game chơi được vẫn **PLANNED** (R03–R09).
+Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa): **R02 đã có giao diện với dữ liệu minh họa hư cấu** (trang chủ mới, `/learn` = Student Adventure Dashboard + Game World, xem trước ở `/demo`, sidebar GV); **R03 đã có (Supabase LOCAL)**: CSDL + RLS, đăng nhập GV, thẻ học + liên kết thiết bị, quản lý lớp/học sinh/đồng ý hai phạm vi, mùa 1 của mỗi lớp. Tính/lưu điểm thật, game chơi được, bảng xếp hạng thật vẫn **PLANNED** (R04–R09). Chưa có dự án Supabase Cloud.
 
 Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổi → an toàn và quyền riêng tư được ưu tiên hơn tốc độ phát triển.
 
@@ -40,6 +40,10 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) | **R01** — kiểm kê dữ liệu, đồng ý hai phạm vi, điều kiện bật bảng xếp hạng, mô hình mối đe dọa (PLANNED) |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | **R02** — token màu/chuyển động, thành phần `src/components/adventure`, quy tắc giảm chuyển động, giới hạn |
 | [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) | **R02** — danh mục asset + quy tắc giấy phép; dữ liệu máy đọc `content/media/licenses.json` |
+| [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) | **R03** — đăng nhập GV, phiên, ba lớp kiểm tra quyền, giới hạn |
+| [docs/STUDENT_ACCESS.md](docs/STUDENT_ACCESS.md) | **R03** — thẻ học (QR fragment + mã dự phòng, HMAC), liên kết/thu hồi thiết bị, đánh giá Anonymous Auth |
+| [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) | **R03** — ma trận RLS đã kiểm thử, bất biến CSDL, quy trình thêm bảng |
+| [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | **R03** — Supabase local, `config.toml`, biến môi trường, danh mục Cloud (chưa tạo), sự cố |
 | [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
 | [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
 | [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
@@ -48,7 +52,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 
 - Windows 11; thư mục dự án **`D:\ReadMateAI`** (không có dấu cách). Shell chính PowerShell 5.1 — **không hỗ trợ `&&`**, dùng `;` hoặc `if ($?) { … }`; Git Bash có sẵn.
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
-- **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
+- Supabase CLI 2.121.0 là **devDependency** (`npx supabase …`, các script `npm run db:*`). Docker Desktop 29.5.3 đã cài; daemon phải chạy cho Supabase local (R03 khởi động bằng Docker Desktop). Máy còn container của dự án khác (`dye-lms-*`) — không đụng tới. Vercel CLI **chưa cài**.
 - Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2). `@axe-core/playwright` 4.13 (devDependency, GĐ4) cho kiểm tra trợ năng trong E2E.
 - Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên push vào `main`, push vào nhánh `feature/**` (từ R02) và trên pull request; quyền `contents: read`, không dùng secret. Từ R01 (2026-10-16) công việc tái cấu trúc nằm trên nhánh **`feature/home-learning-redesign`**; không merge vào `main` khi chưa được phép. Mọi lần push vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
 - Ngày 2026-10-16 thư mục dự án là **bản clone mới** từ GitHub (cấu hình git cục bộ đã được đặt lại — xem §2.1).
@@ -64,7 +68,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - **Student gateway**: mọi thao tác ghi của HS và nội dung phiên luyện đi qua server; HS chỉ đọc dữ liệu của mình qua RLS.
 - **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. Phần phiếu (`worksheet()`, bản phiếu trong `variants.ts`, `core/worksheet.ts`, `generation/pair.ts`, `ui/worksheet-preview.tsx`) và `Paper.tsx` **ngừng dùng** từ R01 (AD-51 — giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11). Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
 - **R02 (đã có, dữ liệu minh họa):** design system phiêu lưu `src/components/adventure/` (client chỉ `adventure-dialog`, `motion`), asset SVG tự vẽ `src/components/art/` (Server Components, chờ GV duyệt), hằng số điểm `src/features/gamification/rules.ts` + hàm thuần `unlocks.ts`, danh mục `features/game-world`, `features/avatars`, dữ liệu hư cấu `features/demo/adventure-data.ts`, giấy phép `content/media/licenses.json` (kiểm trong `content:check`). Chi tiết: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
-- **PLANNED (R03–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
+- **R03 (đã có, Supabase local):** 3 migration `supabase/migrations/20261020090*` — RLS mọi bảng, **chỉ policy SELECT**, ghi qua hàm `teacher_*` (JWT GV, tự kiểm tra quyền, audit cùng giao dịch) và `gateway_*` (chỉ service_role); Auth Hook chặn tự đăng ký; **không có client Supabase ở trình duyệt** (cookie httpOnly). Mã: `src/proxy.ts`, `src/lib/supabase/`, `src/server/{auth,teacher,student-gateway}/`, `src/features/{students,login-codes,consent}/`. Chi tiết: [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md), [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md).
+- **PLANNED (R04–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
 - Bài tập của `/demo` sinh **ở máy chủ lúc build** từ kho tri thức (chế độ `demo`, hồ sơ minh họa); chế độ `production` chỉ nhận hồ sơ `confirmed` + nội dung `approved` — hiện chưa có nên không tạo bài nào (đúng thiết kế).
 - Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
 - Âm thanh sinh trước (TTS) hoặc ghi âm GV; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được. (PDF phiếu học tập bằng `@react-pdf/renderer` — bỏ khỏi lộ trình ở R01.)
@@ -172,6 +177,19 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 6. Không còn chữ "ở lớp/tại lớp/trên lớp/phiếu" trong giao diện (trừ nhánh ngừng dùng `vi.practice.worksheet`) — `tests/unit/redesign-copy.test.tsx`.
 7. Bash tool trên Windows: script dài có dấu nháy/backtick ghi bằng công cụ Write vào scratchpad rồi chạy `node tệp.cjs` (heredoc trong lệnh đôi khi bị cắt); sau khi Turbopack dev chạy lâu mà tệp bị thay bằng script, khởi động lại `next dev` nếu thấy giá trị cũ.
 
+### 9.6 Quy tắc rút ra ở R03 (BẮT BUỘC)
+
+1. **Không tắt signup trong cấu hình Auth**: tắt toàn cục chặn người dùng ẩn danh (thiết bị học sinh); tắt `[auth.email] enable_signup` tắt cả **đăng nhập** email. Chặn tự đăng ký bằng Auth Hook `private.hook_before_user_created` (AD-54).
+2. Bảng mới: RLS + **chỉ policy SELECT**; ghi qua hàm `teacher_*`/`gateway_*` có `security definer` + `set search_path = ''`; `revoke` từ `public, anon, authenticated` rồi GRANT tối thiểu; pgTAP `01_schema_security` kiểm theo catalog — không nới test. Mỗi bảng mới kèm kiểm thử tích hợp ma trận quyền (`tests/db`).
+3. Thao tác học sinh: Server Action suy `auth_user_id` từ `getClaims()`, `studentId` chỉ là khóa tra cứu phải thuộc danh sách RLS trả về, rồi gọi `gateway_*` bằng `createSupabaseAdminClient()` (chỉ trong `src/server/student-gateway/`).
+4. DAL đọc phiên phải `await connection()` trước `getClaims()` (supabase-js dùng `Date.now()`; Partial Prefetching dựng trước phần có cookie). Phần đọc phiên luôn trong `<Suspense>`; tham số `params` await bên trong Suspense.
+5. Cookie phiên: dùng `AUTH_COOKIE_OPTIONS` (`cookie-options.ts`, không `server-only` vì proxy dùng); Safari bỏ cookie `Secure` trên http localhost — đừng "sửa" bằng cách tắt Secure ở production.
+6. **Công cụ ghi tệp giải mã chuỗi thoát `\uXXXX` thành ký tự thật** (kể cả trong `.sql`, `.md`): khi cần ký tự thoát, dựng `\` bằng `String.fromCharCode(92)` trong script, rồi quét byte (ký tự điều khiển, U+00AD, U+200B–U+200F, U+2028–U+202E, U+2060–U+2064, U+FEFF, dấu tổ hợp) trước commit. Trong SQL kiểm thử dùng `chr(…)`.
+7. Không chạy `db:seed`/script ghi lên CSDL không phải local (script tự từ chối); E2E/kiểm thử CSDL chỉ trên Supabase local; xóa bộ đếm `rate_limit_buckets` chỉ ở local.
+8. `notFound()` trong phần stream trả HTTP 200 → kiểm thử theo nội dung. `next/experimental/testing/server` bản 16.4.0 xuất `unstable_doesMiddlewareMatch` (tài liệu ghi tên mới).
+9. Next.js có vùng `role="alert"` riêng (route announcer) → E2E lọc `alert` theo nội dung.
+10. Bash tool: heredoc dài có backtick/`$` dễ bị cắt hoặc `$$` bị `String.replace` đổi thành `$` — dùng Edit/Write cho văn bản dài.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
@@ -196,7 +214,12 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run format` · `npm run format:check` | Prettier (bỏ qua `*.md`, `package-lock.json`) |
 | `npm run content:check` | Kiểm tra kho tri thức `content/`: lỗi (thoát mã 1) / cảnh báo cần GV rà soát / thông tin |
 
-Dự kiến thêm: `npx supabase …` (R03). Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
+| `npm run check:bundle` | Sau build: bundle trình duyệt không chứa secret |
+| `npm run db:start` · `db:stop` · `db:reset` | Supabase local (Docker) · dừng · dựng lại CSDL từ migration |
+| `npm run db:env` · `db:seed` · `db:sync-content` · `db:types` | `.env.local` từ Supabase local · dữ liệu giả · đồng bộ `content/` · sinh kiểu TS |
+| `npm run db:lint` · `db:test` · `test:db` · `test:e2e:db` | Lint CSDL · pgTAP · tích hợp RLS (JWT thật) · E2E có CSDL (cần `db:env` + `db:seed`) |
+
+Thay đổi CSDL/route/xác thực: chạy thêm `db:lint`, `db:test`, `test:db`, `test:e2e:db`. Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 
 ## 12. Thuật ngữ
 

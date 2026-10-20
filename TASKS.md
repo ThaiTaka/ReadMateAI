@@ -134,6 +134,8 @@
 
 ## GĐ5 — Supabase: CSDL nền, RLS và xác thực (L)
 
+> ✅ **Đã thực hiện dưới tên R03 (2026-10-20)** trên Supabase local — xem [REDESIGN_TASKS R03](REDESIGN_TASKS.md#r03--supabase-tài-khoản-phân-quyền-dữ-liệu-l-) và [REDESIGN_PROGRESS §4](REDESIGN_PROGRESS.md#4-việc-đã-làm-trong-r03). Danh sách dưới đây giữ để tra cứu (không đánh dấu lại); phần chưa làm (Turnstile, cron dọn dẹp, Supabase Cloud) ghi ở REDESIGN_TASKS.
+
 **Điều kiện bắt đầu:** chủ dự án cho phép tạo dự án Supabase *dev* (region Singapore) · Docker Desktop đang chạy (cho Supabase local) · quyết định dùng Turnstile cho `/join` ở production.
 
 - [ ] 5.1 Supabase CLI qua `npx supabase`; `supabase init`; cấu hình local

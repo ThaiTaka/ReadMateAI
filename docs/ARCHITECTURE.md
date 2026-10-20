@@ -89,6 +89,9 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
 | Kiểu Node | `@types/node` | 24.19.2 (`^24`) | Template mặc định `^20` lệch peer của Vitest 5 |
 | Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`). Từ GĐ4 chỉ dùng ở máy chủ/lúc build — không vào bundle của học sinh (AD-33) |
+| Supabase (R03) | `@supabase/supabase-js` · `@supabase/ssr` · `server-only` | 2.118.0 · 0.12.7 · 0.0.1 (ghim chính xác) | `npm view` ngày 2026-10-20: supabase-js `engines.node >=22`, peer `@opentelemetry/api` tùy chọn; ssr peer `@supabase/supabase-js ^2.114.0`. Không có client trình duyệt (AD-55) — [SUPABASE_SETUP.md](SUPABASE_SETUP.md) |
+| Supabase CLI (R03) | `supabase` (devDependency) | 2.121.0 (ghim) | chạy bằng `npx supabase`; Postgres local 17 |
+| QR thẻ học (R03) | `qrcode-generator` | 2.0.4 (ghim) | MIT, không phụ thuộc; chỉ chạy ở máy chủ (ma trận QR → SVG) |
 | Trợ năng (E2E) | `@axe-core/playwright` (kéo theo `axe-core`) | 4.13.0 (`^4.13.0`) | GĐ4 — devDependency; `npm view @axe-core/playwright version engines peerDependencies license` ngày 2026-10-15: peer `playwright-core >= 1.0.0` (đang có 1.64), MPL-2.0 (chỉ công cụ kiểm thử, không phân phối) |
 
 ### 3.2 Đánh giá công nghệ cho các giai đoạn sau

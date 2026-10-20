@@ -13,6 +13,7 @@ ReadMate AI là **nền tảng tự luyện Tiếng Việt tại nhà kết hợ
 
 - Node.js **24.x** (xem `.nvmrc`) và npm 11.
 - Để chạy kiểm thử E2E: trình duyệt của Playwright (Chromium, WebKit).
+- Để dùng tài khoản/CSDL (R03): **Docker Desktop** đang chạy (Supabase local) — chi tiết [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
 
 ## Cài đặt
 
@@ -21,7 +22,15 @@ npm ci
 npx playwright install chromium webkit   # chỉ cần cho kiểm thử E2E
 ```
 
-Ứng dụng chưa cần biến môi trường nào. Tệp `.env.example` liệt kê các biến dự kiến cho các giai đoạn sau — sao chép thành `.env.local` khi cần và **không bao giờ commit** tệp chứa giá trị thật.
+Không có `.env.local`: trang công khai và `/demo` vẫn chạy; đăng nhập GV và `/join` báo "chưa cấu hình máy chủ dữ liệu". Có Supabase local:
+
+```bash
+npm run db:start   # Supabase local (Docker), áp dụng mọi migration
+npm run db:env     # tạo .env.local từ Supabase LOCAL (không in khóa) — KHÔNG commit
+npm run db:seed    # dữ liệu GIẢ: 2 GV, 2 lớp × 3 học sinh (chạy lặp lại được)
+```
+
+Tệp `.env.example` liệt kê mọi biến; **không bao giờ commit** tệp chứa giá trị thật.
 
 ## Chạy trên máy
 
@@ -51,6 +60,11 @@ rồi mở `http://<địa-chỉ-IP-máy-tính>:3000` trên điện thoại (Win
 | `npm run test:e2e` | Playwright: tự build production, chạy `next start` ở cổng 3100, kiểm thử trên Chromium và WebKit (desktop + điện thoại) và iPad (riêng bản chơi thử, bố cục); có kiểm tra trợ năng bằng axe |
 | `npm run format` / `npm run format:check` | Prettier |
 | `npm run content:check` | Kiểm tra kho tri thức `content/`: JSON/lược đồ, ID, NFC, tham chiếu, chính tả, kiểm duyệt, dữ liệu cá nhân. Lỗi → thoát mã 1; cảnh báo = việc cần giáo viên rà soát |
+| `npm run check:bundle` | Sau `build`: quét `.next/static` không chứa khóa secret hay giá trị secret của môi trường |
+| `npm run db:lint` · `npm run db:test` | (cần Supabase local) Lint bảo mật CSDL · pgTAP: RLS mọi bảng, quyền, ràng buộc |
+| `npm run test:db` | (cần Supabase local) Kiểm thử tích hợp RLS, thẻ học, xác thực bằng JWT thật |
+| `npm run test:e2e:db` | (cần Supabase local + `db:env` + `db:seed`) Playwright luồng GV → thẻ học → thiết bị Android/iPhone → thu hồi |
+| `npm run db:reset` · `db:sync-content` · `db:types` | Dựng lại CSDL từ migration · đồng bộ `content/` vào CSDL · sinh lại kiểu TypeScript |
 
 Kết quả E2E (ảnh chụp từng trang, báo cáo HTML) nằm trong `test-results/` và `playwright-report/` — đã được bỏ qua trong Git.
 
@@ -106,6 +120,14 @@ docs/                       # PRD, kiến trúc, mô hình dữ liệu, bộ má
 
 Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không có âm thanh**, không tài khoản, không lưu, không gửi dữ liệu đi đâu. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md), [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
+## Tài khoản, lớp học, thẻ học (Giai đoạn R03 — Supabase local)
+
+1. `npm run db:start`, `npm run db:env`, `npm run db:seed`, rồi `npm run dev`.
+2. **Giáo viên** `/login`: tài khoản giả `co.mai` hoặc `thay.binh` @ `readmate.test`, mật khẩu = `SEED_TEACHER_PASSWORD` trong `.env.local`. Không có tự đăng ký.
+3. `/teacher/classes` → lớp (đổi tên, tiến độ chương trình "Chưa xác nhận", bảng xếp hạng **tắt và bị khóa**, nhật ký) → **Học sinh** → thêm biệt danh + avatar → mở hồ sơ: lộ trình, tên hiển thị + duyệt, **đồng ý hai phạm vi** (dữ liệu giả), **Cấp thẻ học mới** (QR + mã dự phòng hiện một lần), thiết bị + thu hồi.
+4. **Phụ huynh** mở liên kết QR (hoặc `/join` + mã dự phòng) ở trình duyệt khác/điện thoại → `/learn/me` (trang của con: avatar, giảm chuyển động). GV thu hồi thiết bị → tải lại là mất quyền.
+5. Toàn bộ là **dữ liệu giả trên máy**. Chưa có dự án Supabase Cloud, chưa deploy, chưa dùng cho học sinh thật. Tài liệu: [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) · [docs/STUDENT_ACCESS.md](docs/STUDENT_ACCESS.md) · [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) · [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
+
 ## Bộ máy bài tập (Giai đoạn 4)
 
 - `src/features/exercises/`: mỗi dạng bài là một module (`schema`, `variants`, `runtime`, `module`, `generate`, `Player`) — 6 dạng, 17 biến thể; chuỗi kiểm tra 9 bước dùng bộ máy tiếng Việt; chính sách âm thanh theo mục tiêu học tập; bộ chạy phiên là reducer thuần; kết quả buổi luyện chỉ trong bộ nhớ.
@@ -123,16 +145,16 @@ Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không c�
 
 - Trang chủ `/`: GĐ2 giới thiệu theo định hướng cũ — **R02 đã viết lại** theo định hướng tự luyện tại nhà + phiêu lưu.
 - `/demo`: GĐ2 là trang giới thiệu; từ GĐ4 là **bản chơi thử tương tác** (xem mục trên).
-- `/teacher`: khung bảng điều khiển giáo viên (điều hướng, các khu vực dự kiến) — **chưa có đăng nhập, chưa có dữ liệu**.
+- `/teacher`: khung bảng điều khiển giáo viên — **từ R03 cần đăng nhập**; lớp/học sinh hoạt động ở `/teacher/classes`.
 - `/learn`: GĐ2 là khung góc học tập — **R02 thành Student Adventure Dashboard** (dữ liệu minh họa, không lưu).
-- `/join`: giao diện chuẩn bị cho liên kết thiết bị bằng thẻ học — **biểu mẫu bị khóa, không nhận hay lưu mã nào**.
+- `/join`: GĐ2 là giao diện chuẩn bị — **từ R03 nhận mã thẻ học thật** (QR hoặc mã dự phòng).
 - Design system (màu, typography, khoảng cách, nút, thẻ, badge, thông báo, trạng thái trống/đang tải, tab, điều hướng), hỗ trợ bàn phím và trình đọc màn hình cơ bản.
 - Header bảo mật: CSP, `X-Content-Type-Options`, `Referrer-Policy` (riêng `/join` là `no-referrer`), `Permissions-Policy` tắt camera/microphone/định vị, `X-Frame-Options`; không có `X-Powered-By`.
 - Font tự host lúc build (trình duyệt không gửi yêu cầu tới Google); không có script hay tài nguyên bên thứ ba.
 
 ## Chức năng chưa phát triển (lộ trình R02 → R11)
 
-Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh (R03), điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
+Đã có ở R03 (Supabase local): cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh. Chưa có: dự án Supabase Cloud, CAPTCHA `/join`, quên mật khẩu GV; điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
 
 ## Triển khai
 
@@ -140,6 +162,7 @@ Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiế
 
 ## Tài liệu dự án
 
+- **Tài khoản và dữ liệu R03:** [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) · [docs/STUDENT_ACCESS.md](docs/STUDENT_ACCESS.md) · [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) · [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)
 - **Giao diện R02:** [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — hệ thống thiết kế · [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) — asset và giấy phép
 - **Tái thiết kế (R01, phần lớn PLANNED):** [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) — định hướng mới · [docs/GAMIFICATION_SPEC.md](docs/GAMIFICATION_SPEC.md) — điểm, mở khóa, mùa · [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) — game · [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) — bảng xếp hạng, vinh danh · [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) — kiến trúc, dữ liệu · [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) — quyền riêng tư · [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)
 - Báo cáo PDF (định hướng cũ, lập 2026-10-16): [docs/BaoCao_ReadMateAI.pdf](docs/BaoCao_ReadMateAI.pdf) · [docs/LuongHoatDong_ReadMateAI.pdf](docs/LuongHoatDong_ReadMateAI.pdf)
@@ -153,7 +176,7 @@ Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiế
 
 ## Bảo vệ dữ liệu trẻ em
 
-Dự án không thu thập dữ liệu học sinh ở giai đoạn này; bản chơi thử chỉ giữ kết quả trong bộ nhớ của trang (không lưu, không gửi đi, không dùng localStorage). Kho tri thức chỉ chứa ngữ liệu minh họa và tên nhân vật hư cấu; `npm run content:check` chặn chuỗi giống email/số điện thoại/số định danh và các trường dữ liệu cá nhân. Repository đang **công khai**: không commit secret, dữ liệu thật hay bản xuất cơ sở dữ liệu. Các quy tắc chi tiết nằm ở [CLAUDE.md](CLAUDE.md) §6.
+Dự án chưa thu thập dữ liệu học sinh thật: R03 chỉ chạy với Supabase local và dữ liệu hư cấu; hồ sơ học sinh chỉ gồm biệt danh, số thứ tự, avatar có sẵn; RLS bật cho mọi bảng ([docs/RLS_SECURITY.md](docs/RLS_SECURITY.md)). Bản chơi thử chỉ giữ kết quả trong bộ nhớ của trang (không lưu, không gửi đi, không dùng localStorage). Kho tri thức chỉ chứa ngữ liệu minh họa và tên nhân vật hư cấu; `npm run content:check` chặn chuỗi giống email/số điện thoại/số định danh và các trường dữ liệu cá nhân. Repository đang **công khai**: không commit secret, dữ liệu thật hay bản xuất cơ sở dữ liệu. Các quy tắc chi tiết nằm ở [CLAUDE.md](CLAUDE.md) §6.
 
 ## Giấy phép
 

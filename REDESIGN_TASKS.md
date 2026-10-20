@@ -1,6 +1,6 @@
 # REDESIGN_TASKS — Lộ trình tái cấu trúc ReadMate AI (R01 → R11)
 
-> **Cập nhật:** 2026-10-20 · **Giai đoạn hiện tại:** R02 — hoàn thành, chờ người điều phối đánh giá (R01 đã được chấp nhận).
+> **Cập nhật:** 2026-10-20 · **Giai đoạn hiện tại:** R03 — hoàn thành trên Supabase LOCAL, chờ người điều phối đánh giá (R01, R02 đã được chấp nhận). Dự án Supabase Cloud chưa tạo (cần xác nhận).
 > **Quy ước:** mỗi giai đoạn giao bằng prompt riêng; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**. Mọi giai đoạn kết thúc bằng: kiểm tra đầy đủ (CLAUDE.md §10) → quét secret → commit → push nhánh `feature/home-learning-redesign` → xác minh trên GitHub (CLAUDE.md §2, theo yêu cầu R01 §12).
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa · Quy mô: **S** ≤ 1 phiên · **M** 2–3 phiên · **L** ≥ 4 phiên.
 > **Tài liệu:** [PRODUCT_REDESIGN](docs/PRODUCT_REDESIGN.md) · [GAMIFICATION_SPEC](docs/GAMIFICATION_SPEC.md) · [GAME_DESIGN](docs/GAME_DESIGN.md) · [LEADERBOARD_SPEC](docs/LEADERBOARD_SPEC.md) · [REDESIGN_ARCHITECTURE](docs/REDESIGN_ARCHITECTURE.md) · [PRIVACY_AND_SECURITY](docs/PRIVACY_AND_SECURITY.md) · [REDESIGN_PROGRESS](REDESIGN_PROGRESS.md)
@@ -11,8 +11,8 @@
 | R | Tên | Phụ thuộc | Quy mô | Trạng thái |
 |---|---|---|---|---|
 | R01 | Kiểm tra dự án, bảo toàn công việc, thiết kế lại kiến trúc | — | S | ✅ Đã chấp nhận |
-| R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ✅ Chờ duyệt |
-| R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ⏸ |
+| R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ✅ Đã chấp nhận |
+| R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ✅ Chờ duyệt (local; Cloud chờ xác nhận) |
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ⏸ |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ⏸ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ⏸ |
@@ -57,7 +57,7 @@ Ngoài ra: dọn mã luồng cũ chia hai bước — gỡ khỏi giao diện �
 
 ---
 
-## R02 — Giao diện mới, trang học sinh, Game World (L) ✅
+## R02 — Giao diện mới, trang học sinh, Game World (L) ✅ Đã chấp nhận
 
 **Phụ thuộc:** R01 được duyệt. **Không** CSDL, **không** tài khoản: mọi dữ liệu là minh họa hư cấu, không lưu.
 
@@ -99,34 +99,42 @@ Nhiệm vụ:
 
 ---
 
-## R03 — Supabase, tài khoản, phân quyền, dữ liệu (L)
+## R03 — Supabase, tài khoản, phân quyền, dữ liệu (L) ✅
 
 **Phụ thuộc:** R01. **Điều kiện trước:** người điều phối cho phép tạo dự án Supabase *dev* (Singapore) và dùng `npx supabase`; Docker daemon chạy (Supabase local, R-11); hướng trả lời Q-05 (bên kiểm soát dữ liệu).
 
 Nhiệm vụ:
 
-- [ ] 3.1 Kiểm tra phiên bản `@supabase/supabase-js`, `@supabase/ssr`, CLI bằng `npm view` → cập nhật ARCHITECTURE §3; `supabase init`
-- [ ] 3.2 **POC trước**: đăng nhập ẩn danh + liên kết thiết bị bằng thẻ học + `proxy.ts` (`getClaims()`) + Turnstile (T-03)
-- [ ] 3.3 Migrations nền ([REDESIGN_ARCHITECTURE §12](docs/REDESIGN_ARCHITECTURE.md#12-kế-hoạch-migration-theo-giai-đoạn-r), hàng R03): bảng DATA_MODEL GĐ5 + cột mới (cờ bảng xếp hạng/vinh danh, `guardian_consents.scope`, `leaderboard_alias`, `preferences`) + `seasons` (mùa đầu tạo cùng lớp); schema `private` + hàm trợ giúp; RLS mọi bảng
-- [ ] 3.4 Ba client Supabase (`browser.ts`, `server.ts`, `admin.ts` có `server-only`); sinh kiểu TypeScript
-- [ ] 3.5 Đăng nhập GV (email/mật khẩu, tắt tự đăng ký); script tạo GV/admin dữ liệu giả
-- [ ] 3.6 Thẻ học: tạo mã (HMAC + pepper), `/join`, liên kết, thu hồi; giới hạn tần suất
-- [ ] 3.7 Màn GV: lớp, học sinh (biệt danh, số thứ tự, avatar), thẻ học, thiết bị, ghi nhận đồng ý **hai phạm vi**, duyệt alias, nhóm, vị trí bài học
-- [ ] 3.8 Seed kho tri thức từ `content/` (chạy lặp lại không lỗi); `audit_logs`
-- [ ] 3.9 Kiểm thử RLS tự động: ≥ 2 lớp × 2 GV × 3 HS, thiết bị thu hồi, ẩn danh chưa liên kết; CI quét bundle không chứa khóa secret
+- [x] 3.1 Kiểm tra phiên bản `@supabase/supabase-js`, `@supabase/ssr`, CLI bằng `npm view` → cập nhật ARCHITECTURE §3; `supabase init`
+- [x] 3.2 **POC trước**: đăng nhập ẩn danh + liên kết thiết bị bằng thẻ học + `proxy.ts` (`getClaims()`) — **Turnstile chưa làm** (cần dịch vụ Cloudflare + dự án Cloud; ghi ở STUDENT_ACCESS §5)
+- [x] 3.3 Migrations nền ([REDESIGN_ARCHITECTURE §12](docs/REDESIGN_ARCHITECTURE.md#12-kế-hoạch-migration-theo-giai-đoạn-r), hàng R03): bảng DATA_MODEL GĐ5 + cột mới (cờ bảng xếp hạng/vinh danh, `guardian_consents.scope`, `leaderboard_alias`, `preferences`) + `seasons` (mùa đầu tạo cùng lớp); schema `private` + hàm trợ giúp; RLS mọi bảng
+- [x] 3.4 Client Supabase `server.ts`, `admin.ts` (`server-only`), `proxy.ts`; **không tạo `browser.ts`** — không mã trình duyệt nào cần (AD-55); sinh kiểu `database.types.ts`
+- [x] 3.5 Đăng nhập GV (email/mật khẩu, tắt tự đăng ký); script tạo GV/admin dữ liệu giả
+- [x] 3.6 Thẻ học: tạo mã (HMAC + pepper), `/join`, liên kết, thu hồi; giới hạn tần suất
+- [x] 3.7 Màn GV: lớp, học sinh (biệt danh, số thứ tự, avatar), thẻ học, thiết bị, ghi nhận đồng ý **hai phạm vi**, duyệt alias, nhóm, vị trí bài học
+- [x] 3.8 Seed kho tri thức từ `content/` (chạy lặp lại không lỗi); `audit_logs`
+- [x] 3.9 Kiểm thử RLS tự động: ≥ 2 lớp × 2 GV × 3 HS, thiết bị thu hồi, ẩn danh chưa liên kết; CI quét bundle không chứa khóa secret
 
 **Tệp/module dự kiến:** `supabase/{config.toml,migrations,tests}/`, `src/lib/supabase/*`, `src/proxy.ts`, `src/server/student-gateway/`, `src/app/join/**`, `src/app/teacher/classes/**`, `scripts/seed-*.ts`, `.env.example`.
 
 **Tiêu chí nghiệm thu**
 
-- [ ] Migration áp dụng sạch trên CSDL mới; seed lặp lại không lỗi
-- [ ] Kiểm thử RLS chứng minh bảo đảm then chốt của DATA_MODEL §7 và REDESIGN_ARCHITECTURE §8 cho mọi bảng R03
-- [ ] Quét QR → vào `/learn` trên Android Chrome và iPhone Safari; thu hồi có hiệu lực ở request kế tiếp
-- [ ] Mã thẻ không lưu dạng gốc; không khóa secret trong bundle; không dùng khóa `anon`/`service_role` cũ
-- [ ] Chỉ dữ liệu giả trong dev; không `.env` trong commit
+- [x] Migration áp dụng sạch trên CSDL mới; seed lặp lại không lỗi (máy dev + CI)
+- [x] Kiểm thử RLS chứng minh bảo đảm then chốt của DATA_MODEL §7 và REDESIGN_ARCHITECTURE §8 cho mọi bảng R03
+- [x] Quét QR → vào `/learn/me` trên Android Chrome và iPhone Safari (**giả lập Playwright** Pixel 7 / iPhone 13 — chưa thử máy thật); thu hồi có hiệu lực ở request kế tiếp
+- [x] Mã thẻ không lưu dạng gốc; không khóa secret trong bundle; không dùng khóa `anon`/`service_role` cũ
+- [x] Chỉ dữ liệu giả trong dev; không `.env` trong commit
 
 **Kiểm thử bắt buộc:** bộ đầy đủ + RLS + test:e2e (route mới).
 **Đầu ra:** CSDL dev có RLS, đăng nhập GV, liên kết thiết bị, quản lý đồng ý.
+
+**Kết quả R03 (2026-10-20)** — chi tiết ở [REDESIGN_PROGRESS §4](REDESIGN_PROGRESS.md#4-việc-đã-làm-trong-r03):
+
+- 3 migration (`supabase/migrations/20261020090*`): 16 bảng, RLS mọi bảng, chỉ policy SELECT; ghi qua 15 hàm `teacher_*` và 5 hàm `gateway_*`; Auth Hook chặn tự đăng ký (AD-54).
+- Supabase local (Docker) — **chưa có dự án Cloud** (cần xác nhận tài khoản/tổ chức/region/chi phí).
+- Giao diện: `/login`, `/join` (QR fragment + mã dự phòng), `/learn/me` (avatar, giảm chuyển động, âm thanh), `/teacher/classes`, `/teacher/classes/[id]` (đổi tên, tiến độ chương trình — chưa xác nhận, cờ bảng xếp hạng khóa, nhật ký), `/teacher/classes/[id]/students`, `…/students/[id]` (hồ sơ, trạng thái, lộ trình, alias + duyệt, đồng ý hai phạm vi, thẻ học + QR, thiết bị).
+- Kiểm thử: pgTAP 36 · tích hợp CSDL 78 · unit 819 (781 cũ + 38 mới) · E2E 262 · E2E có CSDL 30 · CI job `database`.
+- Chưa làm trong R03 (ghi rõ): Turnstile; dự án Cloud; cron dọn người dùng ẩn danh/thiết bị thu hồi; quên mật khẩu/MFA GV; giao diện quản trị cấp tài khoản GV, thêm GV cùng dạy; quy trình xóa dữ liệu học sinh; thông báo xử lý dữ liệu đã duyệt.
 
 ---
 

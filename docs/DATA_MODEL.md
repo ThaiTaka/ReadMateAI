@@ -6,6 +6,15 @@
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [TASKS.md](../TASKS.md)
 > ⚠️ **R01 (2026-10-16):** thiết kế này vẫn là nền; phần **thêm/đổi** cho định hướng mới (mùa, điểm thưởng, sổ cái, câu phát hành, game, vinh danh, đồng ý hai phạm vi, alias, avatar hình người) ở [REDESIGN_ARCHITECTURE §5](REDESIGN_ARCHITECTURE.md#5-mô-hình-dữ-liệu-dự-kiến) (PLANNED). Bảng phiếu/quan sát tại lớp (§4.H) và `practice_sessions.mode = 'classroom_like'` **không tạo** (AD-51). Kế hoạch migration theo giai đoạn: [REDESIGN_ARCHITECTURE §12](REDESIGN_ARCHITECTURE.md#12-kế-hoạch-migration-theo-giai-đoạn-r) thay cho §12 bên dưới.
 
+> ✅ **R03 (2026-10-20) — đã tạo migration cho phần danh tính/lớp/học sinh** (`supabase/migrations/20261020090*`, Supabase local, kiểm thử pgTAP + tích hợp). Lệch có chủ đích so với đặc tả dưới đây:
+> - Ghi **chỉ qua hàm** `teacher_*`/`gateway_*`; không có policy INSERT/UPDATE/DELETE (thay cột "C/U/D" của ma trận §7) — [RLS_SECURITY.md](RLS_SECURITY.md).
+> - `students`: thêm `leaderboard_alias` (+ người/ngày duyệt), `motion_preference`, `sound_preference` (cột có ràng buộc thay cho `preferences jsonb`), `status` có thêm `paused`; **không** có `data_collection_enabled` — suy ra từ `guardian_consents` (`private.consent_active`) để không lệch trạng thái.
+> - `student_login_codes`: thêm `max_devices`, `devices_linked`, `revoke_reason`; `expires_at` bắt buộc. `student_devices`: thêm `revoked_by`, `revoke_reason`; unique liên kết **còn hiệu lực** (liên kết lại sau thu hồi = dòng mới).
+> - `guardian_consents`: thêm `scope`, `withdrawn_by`; bất biến (chỉ `granted → withdrawn`).
+> - `classes`: `status` thay vì chỉ `archived_at`; `curriculum_series_id` **có thể null** (lớp 1A2 chưa xác nhận bộ sách); thêm `curriculum_status`, người/ngày xác nhận, `language_conventions`, cờ bảng xếp hạng/vinh danh.
+> - Kho tri thức: `kb_units`, `curriculum_series`, `curriculum_lessons` dùng **đúng trạng thái của `content/`** (`draft`, `pending_review`, `approved`, `rejected`, + `retired`) thay vì `in_review`; thêm `content_releases` (phiên bản đồng bộ theo băm). Chưa tạo `kb_unit_relations`, `kb_rules`, `kb_unit_media`, `media_assets`, `exercise_types`, `class_lesson_progress`, `band_suggestions` (chưa cần ở R03).
+> - Mới: `seasons` (REDESIGN_ARCHITECTURE §5.2), `rate_limit_buckets` dùng khóa HMAC.
+
 ## Mục lục
 
 1. [Nguyên tắc](#1-nguyên-tắc)

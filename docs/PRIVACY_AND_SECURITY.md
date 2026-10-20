@@ -4,6 +4,8 @@
 > Không phải tư vấn pháp lý — mọi nhận định pháp lý cần nhà trường/chuyên gia xác nhận trước khi thu dữ liệu thật.
 > **Tài liệu liên quan:** [CLAUDE.md §6](../CLAUDE.md#6-bắt-buộc--bảo-vệ-trẻ-em-và-dữ-liệu) · [PRD §17](PRD.md#17-quyền-riêng-tư-và-an-toàn-trẻ-em) · [DATA_MODEL §10](DATA_MODEL.md#10-bảo-vệ-dữ-liệu-lưu-giữ-và-xóa) · [REDESIGN_ARCHITECTURE §8](REDESIGN_ARCHITECTURE.md#8-phân-quyền-và-rls) · [LEADERBOARD_SPEC.md](LEADERBOARD_SPEC.md)
 
+> ✅ **R03 (2026-10-20) đã hiện thực trên Supabase local:** đồng ý hai phạm vi (`guardian_consents.scope`, ghi nhận cần GV xác nhận đã nhận phiếu hợp lệ, bất biến, rút `learning_data` → thu hồi ngay mọi thiết bị và thẻ học); cờ `leaderboard_enabled`/`honors_enabled` mặc định tắt và **bị CSDL chặn bật** khi cờ hệ thống chưa được chấp thuận; thẻ học HMAC + pepper, giới hạn tần suất `/join` và đăng nhập (khóa HMAC, không lưu IP thô); cookie phiên httpOnly; không client Supabase ở trình duyệt; nhật ký kiểm toán chỉ ghi thêm, không chứa biệt danh/mã. **Chưa**: Turnstile, cron lưu giữ/xóa, quy trình xóa dữ liệu học sinh, thông báo xử lý dữ liệu đã duyệt (mẫu hiện tại là bản nháp `nhap-2026-10`, chỉ dùng với dữ liệu giả). Chi tiết: [AUTHENTICATION.md](AUTHENTICATION.md), [STUDENT_ACCESS.md](STUDENT_ACCESS.md), [RLS_SECURITY.md](RLS_SECURITY.md).
+
 ## Mục lục
 
 1. [Nguyên tắc giữ nguyên](#1-nguyên-tắc-giữ-nguyên)

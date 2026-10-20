@@ -1,6 +1,6 @@
 # ReadMate AI — Kiến trúc tái thiết kế (học tại nhà + phiêu lưu + thi đua lớp)
 
-> **Trạng thái: PLANNED** — thiết kế của Giai đoạn R01 (2026-10-16). **Chưa có migration, bảng hay API nào** của tài liệu này; R02 (2026-10-20) đã hiện thực phần giao diện với dữ liệu minh họa ([§4.1](#41-đã-hiện-thực-ở-r02-2026-10-20--chỉ-giao-diện-dữ-liệu-minh-họa)). Chưa tạo dự án Supabase, chưa liên kết Vercel.
+> **Trạng thái:** thiết kế R01 (2026-10-16). R02 hiện thực giao diện với dữ liệu minh họa ([§4.1](#41-đã-hiện-thực-ở-r02-2026-10-20--chỉ-giao-diện-dữ-liệu-minh-họa)). **R03 (2026-10-20) hiện thực Identity & Access trên Supabase LOCAL** ([§4.2](#42-đã-hiện-thực-ở-r03-2026-10-20--supabase-local)): migration, RLS, đăng nhập GV, thẻ học + thiết bị, quản lý lớp, đồng ý hai phạm vi, mùa 1. Phần điểm thưởng, câu phát hành, game, bảng xếp hạng vẫn **PLANNED** (R04+). Chưa có dự án Supabase Cloud, chưa liên kết Vercel.
 > Tài liệu này **bổ sung** [ARCHITECTURE.md](ARCHITECTURE.md) (v0.4): giữ nguyên AD-01 → AD-39 trừ chỗ ghi rõ "thay thế"; quyết định mới đánh số tiếp **AD-40 → AD-53** ([§9](#9-quyết-định-kiến-trúc-mới-ad-40--ad-53)). Mô hình dữ liệu GĐ1 ([DATA_MODEL.md](DATA_MODEL.md)) vẫn là nền; mục [§5](#5-mô-hình-dữ-liệu-dự-kiến) chỉ mô tả phần **thêm/đổi**.
 > **Tài liệu liên quan:** [PRODUCT_REDESIGN.md](PRODUCT_REDESIGN.md) · [GAMIFICATION_SPEC.md](GAMIFICATION_SPEC.md) · [GAME_DESIGN.md](GAME_DESIGN.md) · [LEADERBOARD_SPEC.md](LEADERBOARD_SPEC.md) · [PRIVACY_AND_SECURITY.md](PRIVACY_AND_SECURITY.md) · [REDESIGN_TASKS.md](../REDESIGN_TASKS.md)
 
@@ -90,7 +90,7 @@ flowchart TB
 | Vietnamese Engine + Kho tri thức | Phân tích tiếng, chính tả, "đọc được bằng kiến thức đã học", dữ liệu ngôn ngữ | ✅ Có (GĐ3) — giữ |
 | Exercise Engine | 6 dạng/17 biến thể, sinh câu có seed, chuỗi kiểm tra 9 bước, `grade()`, gợi ý, chính sách âm thanh, H3→H0 | ✅ Có (GĐ4) — giữ; bỏ cặp nhà–lớp khỏi luồng chính (AD-51) |
 | Kiểm duyệt học liệu | Trạng thái duyệt, băm nội dung (AD-30), chế độ `demo`/`production` (AD-38) | ✅ Có ở tầng tệp; giao diện duyệt: R10 |
-| Identity & Access | GV, HS (ẩn danh + thẻ học), lớp, đồng ý theo phạm vi | PLANNED — R03 |
+| Identity & Access | GV, HS (ẩn danh + thẻ học), lớp, đồng ý theo phạm vi | ✅ R03 (Supabase local — §4.2) |
 | Question Instance Service | Phát câu cho một ngữ cảnh, giữ lượt, chấm ở server, `reveal` | PLANNED — R04 |
 | Scoring Engine | +10/−5, sàn 0, sổ cái, chống trùng, mở thẻ bản đồ, điều kiện vào game | PLANNED — R04 |
 | Season Service | Mùa của lớp, reset trong giao dịch, thứ hạng cuối | PLANNED — R06 |
@@ -163,6 +163,29 @@ content/media/licenses.json          # giấy phép mọi asset
 - `rules.ts`/`unlocks.ts` được tạo sớm (kế hoạch ban đầu: R04) để giao diện R02 không chép con số; `apply.ts` (ghi điểm) vẫn thuộc R04 và chạy ở server.
 - AD-50 (giảm chuyển động): R02 hiện thực phần `prefers-reduced-motion` + công tắc trong trang (React state của phiên, **không** localStorage); lưu ở `students.preferences` từ R03.
 - Không route game nào được tạo (`/learn/games/*` chưa tồn tại); nút "Vào chơi" luôn khóa.
+
+### 4.2 Đã hiện thực ở R03 (2026-10-20) — Supabase local
+
+```text
+supabase/
+├── config.toml                      # auto_expose_new_tables=false, ẩn danh bật, hook before_user_created
+├── migrations/20261020090000_r03_foundation.sql   # bảng, helper RLS, trigger bất biến, policy SELECT, GRANT
+├── migrations/20261020090100_r03_functions.sql    # teacher_* (JWT GV), gateway_* (service_role)
+├── migrations/20261020090200_r03_signup_guard.sql # Auth Hook chặn tự đăng ký
+└── tests/database/*.test.sql        # pgTAP
+src/
+├── proxy.ts                         # làm mới phiên (getClaims), chuyển hướng thô /teacher → /login
+├── lib/supabase/                    # env.ts, cookie-options.ts, server.ts, admin.ts (server-only), proxy.ts, database.types.ts
+├── server/auth/                     # DAL GV (teacher.ts), Server Actions đăng nhập/đăng xuất
+├── server/teacher/                  # queries.ts (RLS), actions.ts (gọi teacher_*), qr.ts
+├── server/student-gateway/          # session.ts (phiên thiết bị), actions.ts (/join, cài đặt), learning-profile.ts (điểm nối R04)
+├── features/{students,login-codes,consent}/   # hàm thuần: biệt danh, mã thẻ/HMAC, trạng thái đồng ý
+└── app/(site)/login · (site)/join · learn/me · teacher/classes/**
+scripts/db-env.ts · db-seed.ts · db-sync-content.ts · check-bundle-secrets.ts · lib/
+tests/db/ (tích hợp, JWT thật) · tests/e2e-db/ (Playwright + CSDL)
+```
+
+Bảng đã tạo: `schools`, `staff_profiles`, `classes` (+ cờ bảng xếp hạng/vinh danh, tiến độ chương trình), `class_staff`, `students` (+ alias, cài đặt trợ năng), `student_band_assignments`, `student_login_codes`, `student_devices`, `guardian_consents` (+ `scope`), `seasons`, `audit_logs`, `rate_limit_buckets`, `content_releases`, `curriculum_series`, `curriculum_lessons`, `kb_units`. Không tạo ở R03 (theo yêu cầu R03 "không triển khai toàn bộ bảng cũ"): `kb_unit_relations`, `kb_rules`, `kb_unit_media`, `media_assets`, `exercise_types`, `class_lesson_progress` (lịch sử tiến độ ghi qua `audit_logs` `curriculum.set`), `band_suggestions`. Chi tiết và lệch so với thiết kế: [DATA_MODEL — ghi chú R03](DATA_MODEL.md), [RLS_SECURITY.md](RLS_SECURITY.md).
 
 ## 5. Mô hình dữ liệu dự kiến
 
@@ -526,6 +549,10 @@ Trạng thái: **PLANNED** (chốt hướng ở R01, hiện thực và kiểm ch
 | AD-51 | Luồng "ở lớp" (cặp bài nhà–lớp, hợp đồng phiếu, xem trước phiếu, `classroom_like`, PDF) **ngừng khỏi luồng chính**: giữ mã, gỡ khỏi giao diện học sinh ở R02, xóa mã có kiểm soát ở R11 | Không xóa module đang chạy và có test; loại bỏ an toàn ([PRODUCT_REDESIGN §5](PRODUCT_REDESIGN.md#5-kiểm-kê-mã-cũ-và-phương-án-loại-bỏ-an-toàn)) | Xóa ngay (mất test, rủi ro hồi quy) | R02, R11 |
 | AD-52 | Cờ theo lớp `leaderboard_enabled`, `honors_enabled` **mặc định false**; chỉ bật khi đủ điều kiện đồng ý | Ngoại lệ có điều kiện của CLAUDE.md §6.4; Luật 91/2025 Điều 24 | Bật mặc định | R03, R05 |
 | AD-53 | Mở khóa gắn với mùa; **không tiêu điểm**; thẻ bản đồ theo điểm tích lũy, game theo điểm hiện tại | Đúng quy tắc chính thức; không có cơ chế mua game | Điểm làm tiền tệ | R04 |
+| AD-54 | Chặn tự đăng ký bằng **Auth Hook `before_user_created`** (từ chối mọi đăng ký không ẩn danh); giữ signup + email provider bật | Đã kiểm chứng: tắt signup chặn cả người dùng ẩn danh; tắt email signup tắt cả đăng nhập email | Tắt signup trong cấu hình (làm hỏng thiết bị học sinh hoặc đăng nhập GV) | R03 ✅ |
+| AD-55 | **Không có client Supabase ở trình duyệt**: mọi lời gọi qua máy chủ; cookie phiên httpOnly | CSP `connect-src 'self'` giữ nguyên; token không đọc được bằng JS; bundle không chứa URL/khóa | `createBrowserClient` (cần mở CSP, cookie đọc được bằng JS) | R03 ✅ |
+| AD-56 | Bảng chỉ có policy **SELECT**; mọi thao tác ghi qua hàm `teacher_*` (JWT GV, tự kiểm tra quyền, ghi audit cùng giao dịch) hoặc `gateway_*` (chỉ service_role) | Một chỗ kiểm soát quyền + nhật ký nguyên tử; không ghi tắt được qua PostgREST | Policy INSERT/UPDATE theo lớp (audit dễ bị bỏ qua, khó bảo đảm nguyên tử) | R03 ✅ |
+| AD-57 | Thẻ học: QR 32 byte trong fragment + mã dự phòng 8 ký tự Crockford; HMAC có tách miền; tối đa 1–5 thiết bị/thẻ, hạn 1 giờ–90 ngày; cấp lại thu hồi thẻ cũ | Phụ huynh có nhiều máy; mã sai/hết hạn trả một lỗi chung | Mã dùng một lần (bất tiện khi hai phụ huynh) | R03 ✅ |
 
 ## 10. Hiệu năng và kích thước bundle
 
