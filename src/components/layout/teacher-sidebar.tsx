@@ -39,7 +39,7 @@ const ITEMS: readonly TeacherNavItem[] = [
   { label: s.students, Icon: Users, href: "/teacher/classes" },
   { label: s.bank, Icon: Library, href: "/teacher#ngan-hang-bai-tap", comingSoon: true },
   { label: s.review, Icon: ClipboardCheck, href: "/teacher#duyet-hoc-lieu", comingSoon: true },
-  { label: s.scoreboard, Icon: Trophy, href: "/teacher#bang-diem", comingSoon: true },
+  { label: s.scoreboard, Icon: Trophy, href: "/teacher/classes" },
   { label: s.honors, Icon: Crown, href: "/teacher#vinh-danh", comingSoon: true },
   { label: s.seasons, Icon: CalendarRange, href: "/teacher#mua-thi-dua", comingSoon: true },
   { label: s.settings, Icon: Settings, href: "/teacher#cai-dat", comingSoon: true },

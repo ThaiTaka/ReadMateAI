@@ -65,6 +65,10 @@ Thành phần giữ từ GĐ2 (`Button`, `Badge`, `Card`, `Notice`, `SectionHead
 
 **Ranh giới server/client:** chỉ `AdventureDialog`, `MotionScope/MotionToggle` là client component; ảnh SVG và nội dung bảng thông tin truyền vào qua `children` từ Server Component → không vào bundle JS.
 
+### Bảng xếp hạng (R05) — `src/components/leaderboard/`
+
+`LeaderboardBoard`/`LeaderboardRowView`/`BoardPanel` (hàng: hạng · avatar · tên · thanh · điểm), `ScoreBar` (thanh điểm có hoạt cảnh ≤ 500 ms, dừng khi giảm chuyển động), `DemoLeaderboard` (bản chơi thử). Chi tiết: [LEADERBOARD_UI.md](LEADERBOARD_UI.md).
+
 ## 5. Kiểu chữ
 
 - Giao diện: Be Vietnam Pro 400/600/700/800 (`font-sans`). Chữ cần đọc trong bài: Andika (`font-reading`), cả trong cảnh SVG có chữ cái (Rừng chữ, Lâu đài).

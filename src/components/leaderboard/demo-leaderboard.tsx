@@ -206,7 +206,7 @@ export function DemoLeaderboard({ entries, className }: DemoLeaderboardProps) {
           </select>
         </div>
       </fieldset>
-      <p role="status" aria-live="polite" className="sr-only">
+      <p aria-live="polite" className="sr-only">
         {announcement}
       </p>
     </div>

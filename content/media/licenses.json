@@ -329,7 +329,7 @@
     },
     {
       "id": "art.avatar.oi",
-      "name": "Avatar Bạn tóc xoăn nhỏ",
+      "name": "Avatar Bạn tóc bồng",
       "kind": "avatar",
       "paths": ["src/components/art/avatars.tsx#KidAvatar:oi"],
       "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R05, theo chỉ đạo của người điều phối)",

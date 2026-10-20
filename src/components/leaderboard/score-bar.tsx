@@ -36,8 +36,9 @@ export function ScoreBar({ points, maxPoints, size = "md", className }: ScoreBar
     >
       <span
         data-width={target}
-        className="block h-full rounded-full bg-linear-to-r from-jade-300 via-jade-400 to-sun-300 shadow-[0_0_12px_rgb(95_214_192/0.5)] transition-[width] duration-500 ease-out"
-        style={{ width: `${shown}%` }}
+        className="block h-full rounded-full bg-linear-to-r bg-no-repeat from-jade-300 via-jade-400 to-sun-300 shadow-[0_0_12px_rgb(95_214_192/0.5)] transition-[width,background-size] duration-500 ease-out"
+        // Dải màu căn theo CẢ đường nền (không theo độ dài thanh) → mọi hàng cùng một màu ở cùng một vị trí.
+        style={{ width: `${shown}%`, backgroundSize: `${shown > 0 ? 10000 / shown : 100}% 100%` }}
       />
     </span>
   );

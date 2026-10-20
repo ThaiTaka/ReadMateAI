@@ -8,7 +8,7 @@ Tệp này được Claude Code nạp tự động ở mỗi phiên. Các quy t�
 
 **Triết lý: TỰ LUYỆN CÓ HƯỚNG DẪN TẠI NHÀ — KHÍCH LỆ BẰNG PHIÊU LƯU VÀ THI ĐUA LÀNH MẠNH.** (Triết lý cũ "học có hướng dẫn ở nhà → tự thực hiện ở lớp" của GĐ1–GĐ4 đã được thay thế; mã liên quan đánh dấu ngừng dùng, AD-51.)
 
-Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa): **R02 đã có giao diện với dữ liệu minh họa hư cấu** (trang chủ mới, `/learn` = Student Adventure Dashboard + Game World, xem trước ở `/demo`, sidebar GV); **R03 đã có (Supabase LOCAL)**: CSDL + RLS, đăng nhập GV, thẻ học + liên kết thiết bị, quản lý lớp/học sinh/đồng ý hai phạm vi, mùa 1 của mỗi lớp. Tính/lưu điểm thật, game chơi được, bảng xếp hạng thật vẫn **PLANNED** (R04–R09). Chưa có dự án Supabase Cloud.
+Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa): **R02 đã có giao diện với dữ liệu minh họa hư cấu** (trang chủ mới, `/learn` = Student Adventure Dashboard + Game World, xem trước ở `/demo`, sidebar GV); **R03 đã có (Supabase LOCAL)**: CSDL + RLS, đăng nhập GV, thẻ học + liên kết thiết bị, quản lý lớp/học sinh/đồng ý hai phạm vi, mùa 1 của mỗi lớp. **R04 đã có**: điểm thật chấm ở server (+10/−5, sàn 0), sổ cái, bản đồ, điều kiện mini-game. **R05 đã có (Supabase LOCAL)**: Ranking Engine, `GET /api/student/leaderboard`, bảng thanh ngang cho học sinh/GV/trình chiếu, 16 avatar, bật/tắt bảng theo lớp (cờ hệ thống **tắt**). Game chơi được, vinh danh, reset mùa vẫn **PLANNED** (R06–R09). Chưa có dự án Supabase Cloud.
 
 Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổi → an toàn và quyền riêng tư được ưu tiên hơn tốc độ phát triển.
 
@@ -69,7 +69,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. Phần phiếu (`worksheet()`, bản phiếu trong `variants.ts`, `core/worksheet.ts`, `generation/pair.ts`, `ui/worksheet-preview.tsx`) và `Paper.tsx` **ngừng dùng** từ R01 (AD-51 — giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11). Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
 - **R02 (đã có, dữ liệu minh họa):** design system phiêu lưu `src/components/adventure/` (client chỉ `adventure-dialog`, `motion`), asset SVG tự vẽ `src/components/art/` (Server Components, chờ GV duyệt), hằng số điểm `src/features/gamification/rules.ts` + hàm thuần `unlocks.ts`, danh mục `features/game-world`, `features/avatars`, dữ liệu hư cấu `features/demo/adventure-data.ts`, giấy phép `content/media/licenses.json` (kiểm trong `content:check`). Chi tiết: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 - **R03 (đã có, Supabase local):** 3 migration `supabase/migrations/20261020090*` — RLS mọi bảng, **chỉ policy SELECT**, ghi qua hàm `teacher_*` (JWT GV, tự kiểm tra quyền, audit cùng giao dịch) và `gateway_*` (chỉ service_role); Auth Hook chặn tự đăng ký; **không có client Supabase ở trình duyệt** (cookie httpOnly). Mã: `src/proxy.ts`, `src/lib/supabase/`, `src/server/{auth,teacher,student-gateway}/`, `src/features/{students,login-codes,consent}/`. Chi tiết: [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md), [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md).
-- **PLANNED (R04–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
+- **PLANNED (R04–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
 - Bài tập của `/demo` sinh **ở máy chủ lúc build** từ kho tri thức (chế độ `demo`, hồ sơ minh họa); chế độ `production` chỉ nhận hồ sơ `confirmed` + nội dung `approved` — hiện chưa có nên không tạo bài nào (đúng thiết kế).
 - Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
 - Âm thanh sinh trước (TTS) hoặc ghi âm GV; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được. (PDF phiếu học tập bằng `@react-pdf/renderer` — bỏ khỏi lộ trình ở R01.)
@@ -155,6 +155,15 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 8. Ký tự đặc biệt: GĐ4 lại gặp `\u0301`, `\u00a0` bị ghi thành ký tự thật, và `grep -P` trên Git Bash **không** bắt được — kiểm tra byte bằng Node (quét các tệp mới/sửa) trước khi commit.
 9. Shell: script nhiều dòng có backtick/nháy/`${}` thì ghi ra tệp (scratchpad) rồi chạy bằng Node; không nhúng template literal vào `node -e` trong chuỗi bash.
 10. Không đặt tên biến `module` (luật `@next/next/no-assign-module-variable`) — dùng `typeModule`.
+
+### 9.7 Quy tắc rút ra ở R05 (BẮT BUỘC)
+
+1. Xếp hạng chỉ ở `src/features/gamification/ranking.ts` (hàm thuần; hạng = 1 + số người điểm cao hơn; hạng theo `balance`, không theo `earned_total`). **Ai được lên bảng chỉ quyết định ở CSDL** (`private.leaderboard_rows`); không lọc lại ở giao diện.
+2. DTO bảng xếp hạng chỉ gồm `rowKey, rank, alias, avatarKey, points, isMe` (+ thông tin mùa); mọi hàng đi qua `features/leaderboard/build.ts` (zod). Không `student_id/class_id`, không nhóm, không thời điểm đạt điểm, không số học sinh bị ẩn.
+3. Bật bảng chỉ qua `teacher_set_leaderboard_settings` (chủ nhiệm); cờ hệ thống `leaderboard_feature_approved` trong CSDL mặc định tắt, **không bao giờ tự bật ngoài kiểm thử local** (`setLocalLeaderboardApproval`, phải trả về tắt; pgTAP kiểm).
+4. Huy hiệu TOP 3 chỉ cho hạng 1–3 có điểm > 0; mọi thanh cùng màu; chuỗi giao diện bảng không có từ cấm của LEADERBOARD_SPEC §5 (unit test quét).
+5. Khung trình chiếu GV nằm ở route group `src/app/teacher/(present)` (không thanh bên); phần còn lại của khu GV ở `(console)`. Next 16 giữ trang trước ẩn khi điều hướng client → E2E đếm hàng bằng `filter({ visible: true })`, đọc HTML máy chủ bằng `page.request.get`.
+6. Phần tử `role="status"` mới trên `/demo` làm hỏng `getByRole('status').last()` của E2E bản chơi thử — dùng `aria-live` thuần.
 
 ### 9.4 Quy tắc gamification và game (BẮT BUỘC từ khi hiện thực — R04+)
 
@@ -242,7 +251,7 @@ Thay đổi CSDL/route/xác thực: chạy thêm `db:lint`, `db:test`, `test:db`
 | kiến thức cần ôn | `review_item` | Hộp Leitner 1–5 |
 | phiếu học tập | `worksheet` | Ngừng dùng từ R01 (AD-51) |
 | thẻ học | `student_login_code` | QR + mã dự phòng |
-| điểm thưởng / điểm hiện tại / điểm tích lũy mùa | reward points / `balance` / `earned_total` | PLANNED (R04) — [GAMIFICATION_SPEC §2](docs/GAMIFICATION_SPEC.md#2-định-nghĩa) |
+| điểm thưởng / điểm hiện tại / điểm tích lũy mùa | reward points / `balance` / `earned_total` | R04 — [GAMIFICATION_SPEC §2](docs/GAMIFICATION_SPEC.md#2-định-nghĩa) |
 | sổ cái điểm | `point_events` | Chỉ ghi thêm |
 | câu phát hành | `question_instance` | Câu server phát cho một ngữ cảnh, giữ lượt và trạng thái |
 | mùa thi đua | `season` | Theo lớp; reset = đóng mùa + mở mùa mới |

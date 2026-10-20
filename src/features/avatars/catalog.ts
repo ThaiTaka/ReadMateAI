@@ -62,5 +62,5 @@ export const AVATAR_OPTIONS: readonly AvatarOption[] = [
   option("sen", "Bạn mũ len", "Đội mũ len hồng, áo hồng nhạt"),
   option("cam", "Bạn kính vuông", "Kính vuông, tóc rẽ ngôi, áo cam đất"),
   option("dua", "Bạn mũ lưỡi trai đỏ", "Mũ lưỡi trai đỏ, áo xanh dừa"),
-  option("oi", "Bạn tóc xoăn nhỏ", "Tóc xoăn bồng, băng đô cam, áo xanh ổi"),
+  option("oi", "Bạn tóc bồng", "Tóc xoăn bồng, băng đô cam, áo xanh ổi"),
 ];

@@ -17,6 +17,7 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report/db" }]],
   globalSetup: "./tests/e2e-db/global-setup.ts",
+  globalTeardown: "./tests/e2e-db/global-teardown.ts",
   use: {
     baseURL: BASE_URL,
     locale: "vi-VN",
@@ -27,6 +28,8 @@ export default defineConfig({
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] } },
     { name: "webkit-mobile", use: { ...devices["iPhone 13"] } },
+    // R05: máy tính bảng — chỉ chạy bảng xếp hạng (bố cục).
+    { name: "webkit-ipad", use: { ...devices["iPad (gen 7)"] }, testMatch: /leaderboard.spec.ts/u },
   ],
   webServer: {
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${PORT}`,

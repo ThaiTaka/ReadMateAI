@@ -22,7 +22,7 @@ Tất cả do dự án tự vẽ bằng mã SVG trong phiên Claude Code R02 (20
 | `art.character.hero-kid` | Bạn nhỏ thám hiểm — nhân vật học sinh phiêu lưu | `src/components/art/characters.tsx` (`HeroKid`) | Trang chủ, khu duyệt học liệu |
 | `art.character.guide-owl` | Cú Bông — nhân vật hướng dẫn | `characters.tsx` (`GuideOwl`) | Trang chủ, `/learn`, khu duyệt |
 | `art.character.friendly-monster` | Bé Mây Bông — quái vật thân thiện (không răng, không móng vuốt) | `characters.tsx` (`FriendlyMonster`) | Bảng chi tiết trò chơi, khu duyệt |
-| `art.avatar.may` · `bong` · `na` · `ti` · `bin` | 5 avatar hình người (tóc búi, tóc xoăn, tóc ngắn, đội mũ, đeo kính) | `src/components/art/avatars.tsx` (`KidAvatar`) — danh mục `src/features/avatars/catalog.ts` | `/learn`, `/demo`, bảng xếp hạng minh họa |
+| `art.avatar.may` · `bong` · `na` · `ti` · `bin` · `sao` · `nang` · `bien` · `gio` · `lua` · `tre` · `xoai` · `sen` · `cam` · `dua` · `oi` | 16 avatar hình người (5 mẫu R02 + 11 mẫu R05; xem [AVATAR_SYSTEM.md](AVATAR_SYSTEM.md)) | `src/components/art/avatars.tsx` (`KidAvatar`) — danh mục `src/features/avatars/catalog.ts` | `/learn`, `/demo`, bảng xếp hạng minh họa |
 | `art.icon.treasure-chest` | Rương kho báu | `src/components/art/treasure.tsx` (`TreasureChest`) | Khu duyệt; đích của Mê cung |
 | `art.icon.honor-podium` | Bục vinh danh ba bậc | `treasure.tsx` (`HonorPodium`) | Giới thiệu vinh danh (khu GV) |
 | `art.scene.treasure-maze` | Cảnh Mê cung kho báu | `src/components/art/scenes.tsx` (`MazeScene`) | Thẻ trò chơi |

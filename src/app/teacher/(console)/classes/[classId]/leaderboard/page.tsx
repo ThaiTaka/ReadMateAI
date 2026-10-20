@@ -127,7 +127,13 @@ async function Content({ params }: Pick<PageProps<"/teacher/classes/[classId]/le
             <BoardPanel className="mt-4">
               <LeaderboardBoard rows={rows} maxPoints={maxPointsOf(rows)} />
             </BoardPanel>
-            <div className="mt-6 overflow-x-auto rounded-3xl border border-line bg-surface">
+            {/* Vùng cuộn ngang trên điện thoại phải focus được bằng bàn phím (axe: scrollable-region-focusable). */}
+            <div
+              role="region"
+              aria-label={t.internalTitle}
+              tabIndex={0}
+              className="mt-6 overflow-x-auto rounded-3xl border border-line bg-surface"
+            >
               <table className="w-full min-w-[34rem] text-left text-sm">
                 <caption className="sr-only">{t.internalTitle}</caption>
                 <thead className="bg-surface-muted text-ink-soft">

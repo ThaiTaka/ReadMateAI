@@ -37,14 +37,15 @@ const RANK_CHIP: Record<number, string> = {
   3: "bg-[#f0b48c] text-ink ring-[#ffe2cf]",
 };
 
-function RankBadge({ rank, size }: { rank: number; size: "md" | "xl" }) {
+/** Huy hiệu hạng vàng/bạc/đồng chỉ dành cho hạng 1–3 CÓ điểm: cả lớp cùng 0 điểm thì không ai được "vương miện". */
+function RankBadge({ rank, size, earned }: { rank: number; size: "md" | "xl"; earned: boolean }) {
   return (
     <span
       aria-hidden="true"
       className={cn(
         "flex shrink-0 items-center justify-center rounded-full font-extrabold tabular-nums ring-2",
         size === "xl" ? "size-14 text-3xl sm:size-16" : "size-9 text-lg sm:size-11 sm:text-xl",
-        RANK_CHIP[rank] ?? "bg-white/15 text-white ring-white/20",
+        (earned ? RANK_CHIP[rank] : undefined) ?? "bg-white/15 text-white ring-white/20",
       )}
     >
       {rank}
@@ -52,8 +53,8 @@ function RankBadge({ rank, size }: { rank: number; size: "md" | "xl" }) {
   );
 }
 
-function TopMark({ rank, size }: { rank: number; size: "md" | "xl" }) {
-  if (rank > 3) return null;
+function TopMark({ rank, size, earned }: { rank: number; size: "md" | "xl"; earned: boolean }) {
+  if (rank > 3 || !earned) return null;
   const Icon = rank === 1 ? Crown : Medal;
   return (
     <span
@@ -89,13 +90,13 @@ export function LeaderboardRowView({ row, maxPoints, size = "md" }: LeaderboardR
       )}
     >
       <span className="sr-only">{rowLabel(row)}</span>
-      <RankBadge rank={row.rank} size={size} />
+      <RankBadge rank={row.rank} size={size} earned={row.points > 0} />
       <AvatarFrame
         avatar={safeAvatarKey(row.avatarKey)}
         size={xl ? "lg" : "sm"}
         ring={row.isMe ? "sun" : "jade"}
-        badge={<TopMark rank={row.rank} size={size} />}
-        className={cn(row.rank === 1 && "animate-bob")}
+        badge={<TopMark rank={row.rank} size={size} earned={row.points > 0} />}
+        className={cn(row.rank === 1 && row.points > 0 && "animate-bob")}
       />
       <div aria-hidden="true" className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
         <span

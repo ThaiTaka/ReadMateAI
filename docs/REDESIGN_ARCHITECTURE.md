@@ -94,7 +94,7 @@ flowchart TB
 | Question Instance Service | Phát câu cho một ngữ cảnh, giữ lượt, chấm ở server, `reveal` | PLANNED — R04 |
 | Scoring Engine | +10/−5, sàn 0, sổ cái, chống trùng, mở thẻ bản đồ, điều kiện vào game | PLANNED — R04 |
 | Season Service | Mùa của lớp, reset trong giao dịch, thứ hạng cuối | PLANNED — R06 |
-| Leaderboard Service | Xếp hạng đồng hạng, DTO không định danh, điều kiện hiển thị | PLANNED — R05 |
+| Leaderboard Service | Xếp hạng đồng hạng, DTO không định danh, điều kiện hiển thị | **ĐÃ CÓ (R05, local)** — [RANKING_ENGINE](RANKING_ENGINE.md), [LEADERBOARD_API](LEADERBOARD_API.md) |
 | Honors | Ảnh chụp bất biến, hoạt cảnh TOP 3 → 1 | PLANNED — R06 |
 | Game Engine + Game Session Service | Lõi game thuần TS, kết xuất React/SVG, lượt chơi, 7 chạm trán, kho báu, lưu tiến độ | PLANNED — R07–R09 |
 | Audio Engine | Tệp âm thanh đã duyệt, phát theo chính sách | PLANNED — R10 (chưa có âm thanh nào) |
@@ -579,7 +579,7 @@ Trạng thái: **PLANNED** (chốt hướng ở R01, hiện thực và kiểm ch
 |---|---|---|
 | R03 | Nền DATA_MODEL GĐ5 (`schools`, `staff_profiles`, `classes`, `class_staff`, `students`, `student_login_codes`, `student_devices`, `guardian_consents` có `scope`, `student_band_assignments`, `curriculum_*`, `kb_*`, `media_assets`, `exercise_types`, `audit_logs`, `rate_limit_buckets`) + cột mới §5.1 + `seasons` (mùa đầu tạo cùng lớp) | Schema `private`, hàm trợ giúp, RLS + kiểm thử, seed kho tri thức |
 | R04 | `exercises`, `exercise_versions`, `exercise_items`, `content_reviews` (cần để phát câu đã duyệt), `practice_sessions`, `item_attempts` (cột mới), `question_instances`, `season_scores`, `point_events`, `map_tile_reveals`, `game_unlocks`; hàm `private.record_graded_attempt` | Kiểm thử chống trùng/song song, RLS |
-| R05 | `avatar_options`; cột alias đã duyệt | RLS, kiểm thử DTO |
+| R05 | **Không bảng mới**; 1 migration `20261022090000_r05_leaderboard` (4 hàm: `private.leaderboard_rows`, `gateway_class_leaderboard`, `teacher_set_leaderboard_settings`, `teacher_leaderboard_overview/display`). Cột alias đã duyệt có từ R03; `avatar_options` **hoãn** (danh mục avatar nằm trong mã, RD-34) | RLS/quyền hàm, pgTAP `04_leaderboard`, kiểm thử tích hợp + DTO |
 | R06 | `honor_snapshots`, `season_resets`, hàm `private.reset_class_season`, cột `final_rank` | Kiểm thử nguyên tử, cô lập lớp |
 | R07–R08 | `game_runs`, `game_encounters`, cột `run_id` của `question_instances` | Trigger chặn chạm trán thứ 8; kiểm thử |
 | R10 | Bảng âm thanh/duyệt bổ sung nếu cần (`background_jobs` cho TTS) | |

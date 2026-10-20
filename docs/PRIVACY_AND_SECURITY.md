@@ -82,6 +82,8 @@ Mọi quy tắc BẮT BUỘC ở CLAUDE.md §6 tiếp tục áp dụng. Tóm t�
 
 ## 5. Bảng xếp hạng: điều kiện bật và kiểm soát hiển thị
 
+> **R05 đã hiện thực các kiểm soát kỹ thuật dưới đây trên Supabase LOCAL** (cờ hệ thống trong CSDL mặc định tắt + trigger chặn bật; lọc học sinh đủ điều kiện ở một hàm CSDL; DTO không định danh; `no-store`/`noindex`; cách ly lớp). **Điều kiện pháp lý/nhà trường (chấp thuận bằng văn bản, thông báo xử lý dữ liệu, rà soát Luật 91/2025 Điều 24) vẫn CHƯA được xác nhận** nên cờ hệ thống giữ TẮT. Xem [LEADERBOARD_API §3](LEADERBOARD_API.md), [R05_SECURITY_TESTS.md](R05_SECURITY_TESTS.md).
+
 Lớp chỉ bật được `leaderboard_enabled` / `honors_enabled` khi **tất cả** điều kiện sau đúng (server kiểm tra khi GV bật):
 
 1. Đã có rà soát pháp lý/chấp thuận bằng văn bản của nhà trường cho tính năng (cờ cấu hình cấp hệ thống `LEADERBOARD_FEATURE_APPROVED`, mặc định tắt — R11).

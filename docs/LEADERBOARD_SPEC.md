@@ -1,6 +1,7 @@
 # ReadMate AI — Bảng xếp hạng, vinh danh và reset mùa
 
-> **Trạng thái: PLANNED** — thiết kế của Giai đoạn R01 (2026-10-16). **Chưa hiện thực.** Dự kiến: R05 (bảng xếp hạng, avatar), R06 (vinh danh TOP 3, reset mùa).
+> **Trạng thái:** §1–§7 và §10–§11 (bảng xếp hạng, thanh điểm, avatar, DTO, kiểm thử) **ĐÃ HIỆN THỰC ở R05** (Supabase LOCAL, 2026-10-22) — xem [RANKING_ENGINE.md](RANKING_ENGINE.md), [LEADERBOARD_API.md](LEADERBOARD_API.md), [LEADERBOARD_UI.md](LEADERBOARD_UI.md), [AVATAR_SYSTEM.md](AVATAR_SYSTEM.md), [R05_SECURITY_TESTS.md](R05_SECURITY_TESTS.md). §8 (vinh danh TOP 3) và §9 (reset mùa) vẫn **PLANNED — R06**.
+> **Quyết định hiện thực R05:** hạng = 1 + số người điểm cao hơn; TOP 10 + con = mọi hàng hạng ≤ 10 (không cắt nhóm đồng hạng, trần 30 hàng); chip vàng/bạc/đồng và huy hiệu chỉ cho hạng 1–3 **có điểm > 0**; cờ hệ thống nằm trong CSDL (`private.feature_flags`), không phải biến môi trường; avatar nằm trong mã (16 mẫu), không có bảng `avatar_options`.
 > **Điều kiện bật (BẮT BUỘC):** bảng xếp hạng là ngoại lệ có điều kiện của CLAUDE.md §6.4 (quyết định của người điều phối, 2026-10-16) — chỉ trong phạm vi lớp, chỉ học sinh có đồng ý hiển thị, **mặc định tắt** theo từng lớp. Chi tiết: [PRIVACY_AND_SECURITY §5](PRIVACY_AND_SECURITY.md#5-bảng-xếp-hạng-điều-kiện-bật-và-kiểm-soát-hiển-thị).
 > **Tài liệu liên quan:** [GAMIFICATION_SPEC.md](GAMIFICATION_SPEC.md) · [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md) · [PRODUCT_REDESIGN.md](PRODUCT_REDESIGN.md)
 
