@@ -295,15 +295,19 @@ export const vi = {
   teacher: {
     meta: {
       title: "Khu vực giáo viên",
-      description: "Khung giao diện bảng điều khiển dành cho giáo viên — chức năng đang phát triển.",
+      description: "Bảng điều khiển dành cho giáo viên đã đăng nhập: lớp học, học sinh, thẻ học, đồng ý của phụ huynh.",
     },
     areaLabel: "Khu vực giáo viên",
     title: "Bảng điều khiển giáo viên",
-    subtitle: "Khung giao diện — chưa có đăng nhập và chưa có dữ liệu thật.",
+    subtitle: "Lớp học, học sinh, thẻ học và đồng ý của phụ huynh đã hoạt động; các mục khác đang phát triển.",
+    welcome: "Xin chào, {name}",
+    signOut: "Đăng xuất",
+    signingOut: "Đang đăng xuất…",
     notice: {
-      title: "Chức năng đang phát triển",
-      text: "Khu vực này sẽ chỉ dành cho giáo viên đã đăng nhập (dự kiến R03). Hiện trang chưa được bảo vệ bằng tài khoản, mọi số liệu đều trống và các nút thao tác chưa hoạt động.",
+      title: "Chỉ giáo viên đã đăng nhập mới vào được khu vực này",
+      text: "Quản lý lớp, hồ sơ học sinh, thẻ học, thiết bị và ghi nhận đồng ý đã hoạt động với cơ sở dữ liệu thật (môi trường phát triển chỉ chứa dữ liệu giả). Bảng điểm, vinh danh, mùa thi đua và duyệt học liệu vẫn là chức năng đang phát triển — các số liệu dưới đây còn trống.",
     },
+    openClasses: "Mở danh sách lớp",
     sidebar: {
       overview: "Tổng quan",
       classes: "Lớp học",
@@ -325,9 +329,9 @@ export const vi = {
     classes: {
       title: "Quản lý lớp",
       description: "Tạo lớp, thêm học sinh bằng biệt danh, in thẻ học và ghi nhận đồng ý của phụ huynh.",
-      emptyTitle: "Chưa có lớp học nào",
-      emptyText: "Chức năng tạo lớp và quản lý học sinh sẽ có khi hoàn thiện đăng nhập giáo viên (dự kiến R03).",
-      action: "Tạo lớp mới",
+      emptyTitle: "Lớp học và học sinh",
+      emptyText: "Tạo lớp, thêm học sinh, cấp thẻ học và ghi nhận đồng ý ở trang Lớp học.",
+      action: "Mở danh sách lớp",
     },
     students: {
       title: "Học sinh và tiến bộ",
@@ -436,31 +440,39 @@ export const vi = {
   join: {
     meta: {
       title: "Liên kết thiết bị",
-      description: "Chuẩn bị chức năng liên kết thiết bị học tập bằng thẻ học — sẽ hoàn thiện ở giai đoạn sau.",
+      description:
+        "Liên kết điện thoại hoặc máy tính bảng ở nhà với hồ sơ học tập của con bằng thẻ học do giáo viên phát.",
     },
     eyebrow: "Dành cho phụ huynh",
     title: "Liên kết thiết bị học tập",
     intro:
-      "Phụ huynh sẽ dùng thẻ học do giáo viên phát để liên kết điện thoại hoặc máy tính bảng với hồ sơ học tập của con — không cần email hay mật khẩu.",
-    notice: {
-      title: "Chức năng sẽ hoàn thiện ở giai đoạn sau",
-      text: "Liên kết thiết bị đang được phát triển. Hiện trang này chưa nhận, chưa kiểm tra và chưa lưu bất kỳ mã nào.",
-    },
-    stepsTitle: "Cách liên kết (dự kiến)",
+      "Dùng thẻ học do giáo viên phát để liên kết điện thoại hoặc máy tính bảng ở nhà với hồ sơ của con — không cần email hay mật khẩu.",
+    stepsTitle: "Cách liên kết",
     steps: [
-      { title: "Nhận thẻ học", text: "Giáo viên phát thẻ học có mã QR cho từng em." },
-      { title: "Quét mã QR", text: "Dùng camera điện thoại quét mã trên thẻ để mở ReadMate AI." },
+      { title: "Nhận thẻ học", text: "Giáo viên phát thẻ học có mã QR và mã dự phòng cho từng em." },
+      { title: "Quét mã QR", text: "Dùng camera điện thoại quét mã trên thẻ — trang này sẽ tự kiểm tra mã." },
       {
-        title: "Bắt đầu luyện tập",
-        text: "Thiết bị được liên kết với hồ sơ của con, chỉ gồm biệt danh và ảnh đại diện.",
+        title: "Vào trang của con",
+        text: "Thiết bị được liên kết với hồ sơ của con, chỉ gồm biệt danh và ảnh đại diện có sẵn.",
       },
     ],
     form: {
       legend: "Nhập mã dự phòng",
       label: "Mã dự phòng trên thẻ học",
-      hint: "Mã gồm 8 ký tự, in bên dưới mã QR trên thẻ học.",
+      hint: "Mã gồm 8 ký tự (chữ in hoa và số), in bên dưới mã QR, ví dụ dạng ABCD-1234.",
       submit: "Liên kết thiết bị",
-      disabledNote: "Chưa hoạt động trong bản xem trước — ô nhập đang bị khóa.",
+      submitting: "Đang kiểm tra mã…",
+      qrChecking: "Đang kiểm tra mã trên thẻ học…",
+      qrFailed: "Mã QR trên thẻ không dùng được. Con thử nhập mã dự phòng bên dưới nhé.",
+      notConfigured: "Máy chủ dữ liệu chưa được cấu hình nên chưa liên kết được thiết bị.",
+    },
+    help: {
+      title: "Cần giúp đỡ?",
+      items: [
+        "Kiểm tra lại từng ký tự của mã dự phòng (không phân biệt chữ hoa, chữ thường).",
+        "Thẻ học có hạn dùng. Nếu thẻ đã hết hạn hoặc bị mất, bố mẹ nhắn giáo viên để được cấp thẻ mới.",
+        "Mỗi thẻ chỉ liên kết được một số thiết bị nhất định — khi đổi điện thoại, nhờ giáo viên cấp thẻ mới.",
+      ],
     },
     privacy: {
       title: "Dữ liệu của con được bảo vệ thế nào?",
@@ -468,15 +480,333 @@ export const vi = {
         "Chỉ dùng biệt danh và ảnh đại diện có sẵn; không hỏi họ tên đầy đủ, ngày sinh hay số điện thoại.",
         "Không ghi âm giọng nói và không dùng camera trong khu vực học tập.",
         "Chỉ lưu kết quả học tập sau khi phụ huynh đã đồng ý.",
-        "Phụ huynh có thể đề nghị giáo viên xóa dữ liệu của con.",
+        "Phụ huynh có thể đề nghị giáo viên gỡ liên kết thiết bị hoặc xóa dữ liệu của con.",
       ],
     },
   },
 
-  /**
-   * Bộ chạy bài luyện (khu vực trẻ thao tác). Câu gợi ý và phản hồi được bộ kiểm tra chống lộ đáp án
-   * soát cùng với từng câu bài tập — không được chứa đáp án.
-   */
+  auth: {
+    meta: {
+      title: "Đăng nhập giáo viên",
+      description: "Đăng nhập dành cho giáo viên ReadMate AI. Tài khoản do quản trị viên cấp — không tự đăng ký.",
+    },
+    eyebrow: "Dành cho giáo viên",
+    title: "Đăng nhập giáo viên",
+    intro:
+      "Tài khoản giáo viên do quản trị viên của trường cấp. Học sinh không cần đăng nhập — phụ huynh dùng thẻ học.",
+    email: "Email",
+    password: "Mật khẩu",
+    submit: "Đăng nhập",
+    submitting: "Đang đăng nhập…",
+    studentLink: "Phụ huynh có thẻ học? Liên kết thiết bị",
+    noSignup: "Không có chức năng tự đăng ký. Quên mật khẩu: liên hệ quản trị viên của trường.",
+    reasons: {
+      required: "Vui lòng đăng nhập để vào khu vực giáo viên.",
+      expired: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+      signed_out: "Đã đăng xuất.",
+      not_staff: "Tài khoản này không phải tài khoản giáo viên đang hoạt động.",
+      student_device:
+        "Trình duyệt này đang dùng cho thiết bị học sinh. Đăng nhập giáo viên sẽ thay phiên của thiết bị.",
+      not_configured: "Máy chủ dữ liệu chưa được cấu hình nên chưa đăng nhập được.",
+    },
+  },
+
+  classesPage: {
+    meta: { title: "Lớp học", description: "Danh sách lớp giáo viên phụ trách." },
+    title: "Lớp học của tôi",
+    intro: "Chỉ hiện các lớp cô/thầy phụ trách. Mỗi lớp có một mùa thi đua đang diễn ra (tạo cùng lớp).",
+    empty: { title: "Chưa có lớp nào", text: "Tạo lớp đầu tiên ở biểu mẫu bên dưới." },
+    roleOwner: "Chủ nhiệm",
+    roleCoTeacher: "Giáo viên cùng dạy",
+    students: "{count} học sinh",
+    season: "Mùa {no}",
+    archived: "Đã lưu trữ",
+    open: "Xem lớp",
+    create: {
+      title: "Tạo lớp mới",
+      name: "Tên lớp",
+      nameHint: "Ví dụ: 1A1. Chỉ chữ, số, dấu gạch nối.",
+      schoolYear: "Năm học",
+      schoolYearHint: "Dạng 2026-2027.",
+      submit: "Tạo lớp",
+      submitting: "Đang tạo…",
+    },
+  },
+
+  classPage: {
+    back: "Danh sách lớp",
+    overview: "Thông tin lớp",
+    studentsLink: "Học sinh của lớp",
+    rename: { label: "Đổi tên lớp", submit: "Lưu tên", ownerOnly: "Chỉ giáo viên chủ nhiệm đổi được tên lớp." },
+    facts: {
+      schoolYear: "Năm học",
+      status: "Trạng thái",
+      students: "Số học sinh",
+      season: "Mùa thi đua",
+      seasonValue: "Mùa {no} — đang diễn ra (quy tắc điểm {rules})",
+      noSeason: "Chưa có mùa đang diễn ra",
+      active: "Đang hoạt động",
+    },
+    settings: {
+      title: "Bảng xếp hạng và vinh danh",
+      leaderboard: "Bảng xếp hạng trong lớp",
+      honors: "Vinh danh TOP 3",
+      off: "Đang tắt",
+      lockedNote:
+        "Mặc định tắt. Chỉ bật được khi nhà trường đã chấp thuận bằng văn bản, phụ huynh đã đồng ý hiển thị và tên hiển thị đã được duyệt — chức năng bảng xếp hạng thuộc giai đoạn sau.",
+    },
+    curriculum: {
+      title: "Tiến độ chương trình của lớp",
+      intro:
+        "Chọn bộ bài và bài lớp đang học. Bộ máy bài tập chỉ phát bài học thật khi tiến độ đã được giáo viên xác nhận với bộ sách thật đã duyệt.",
+      series: "Bộ bài",
+      noSeries: "— Chưa chọn —",
+      lesson: "Bài lớp đang học",
+      noLesson: "— Chưa chọn —",
+      save: "Lưu tiến độ (chưa xác nhận)",
+      unconfirmed: "Chưa xác nhận",
+      confirmed: "Đã xác nhận",
+      pendingNote:
+        "Tiến độ đang chờ xác nhận: chưa biết bộ sách, vị trí bài và quy ước phân tích qu/gi, dấu thanh của lớp. Chưa phát bài học thật cho học sinh.",
+      illustrativeNote:
+        "Chuỗi bài minh họa của dự án không phải chương trình thật của lớp — chỉ dùng để thử, không bao giờ xác nhận được.",
+      confirm: "Xác nhận tiến độ",
+      confirmBlocked: "Chưa xác nhận được: cần bộ sách thật (có nguồn) đã được giáo viên duyệt trong kho tri thức.",
+      noSeriesSynced: "Chưa có bộ bài nào trong cơ sở dữ liệu — quản trị viên chạy npm run db:sync-content.",
+      kindIllustrative: "Minh họa",
+      kindTextbook: "Bộ sách",
+      kindCustom: "GV tự soạn",
+      units: "Đơn vị giới thiệu ở bài này",
+    },
+    audit: {
+      title: "Nhật ký thao tác gần đây",
+      intro: "Chỉ giáo viên chủ nhiệm xem được. Nhật ký không chứa biệt danh hay mã thẻ học.",
+      empty: "Chưa có thao tác nào.",
+      actors: { staff: "Giáo viên", student_device: "Thiết bị học sinh", system: "Hệ thống" },
+    },
+  },
+
+  studentsPage: {
+    title: "Học sinh lớp {name}",
+    intro:
+      "Chỉ dùng biệt danh và số thứ tự — không nhập họ tên đầy đủ, ngày sinh hay thông tin liên hệ. Mỗi em tự chọn lộ trình theo quyết định của giáo viên, không gán sẵn.",
+    empty: { title: "Lớp chưa có học sinh", text: "Thêm hồ sơ đầu tiên ở biểu mẫu bên dưới." },
+    columns: {
+      number: "STT",
+      name: "Biệt danh",
+      band: "Lộ trình",
+      consent: "Đồng ý",
+      access: "Truy cập",
+      status: "Trạng thái",
+    },
+    devices: "{count} thiết bị",
+    noDevice: "Chưa liên kết",
+    codeActive: "Có thẻ học",
+    noCode: "Chưa có thẻ",
+    open: "Quản lý",
+    create: {
+      title: "Thêm học sinh",
+      displayName: "Biệt danh",
+      displayNameHint: "Tên gọi ngắn (tối đa 2 tiếng, 30 ký tự), ví dụ Bống, Su Su. Không nhập họ tên đầy đủ.",
+      studentNumber: "Số thứ tự (không bắt buộc)",
+      avatar: "Avatar",
+      submit: "Thêm học sinh",
+      submitting: "Đang thêm…",
+    },
+  },
+
+  studentPage: {
+    back: "Danh sách học sinh",
+    profile: {
+      title: "Hồ sơ",
+      displayName: "Biệt danh",
+      studentNumber: "Số thứ tự",
+      avatar: "Avatar",
+      save: "Lưu hồ sơ",
+    },
+    status: {
+      title: "Trạng thái hồ sơ",
+      active: "Đang hoạt động",
+      paused: "Tạm ngưng",
+      archived: "Đã lưu trữ",
+      help: "Tạm ngưng: thiết bị mất quyền vào ngay, mở lại được. Lưu trữ: thu hồi mọi thiết bị và thẻ học.",
+      save: "Cập nhật trạng thái",
+    },
+    band: {
+      title: "Lộ trình học (chỉ giáo viên thấy)",
+      none: "Chưa xếp lộ trình",
+      reason: "Ghi chú lý do (không bắt buộc, không ghi thông tin cá nhân)",
+      save: "Lưu lộ trình",
+      hiddenNote: "Học sinh và phụ huynh không bao giờ thấy nhóm năng lực trong ứng dụng.",
+    },
+    alias: {
+      title: "Tên hiển thị trên bảng xếp hạng",
+      intro:
+        "Tên ngắn (tối đa 2 tiếng, 20 ký tự) — chỉ hiện với các bạn cùng lớp khi lớp bật bảng xếp hạng, học sinh có đồng ý hiển thị và tên đã được duyệt.",
+      label: "Tên hiển thị",
+      save: "Lưu tên hiển thị",
+      approve: "Duyệt tên này",
+      none: "Chưa đặt",
+      pending: "Chờ duyệt — chưa công khai",
+      approved: "Đã duyệt",
+      clearHint: "Để trống rồi lưu để xóa tên hiển thị.",
+    },
+    loginCode: {
+      title: "Thẻ học",
+      intro:
+        "Cấp thẻ mới sẽ thu hồi thẻ cũ. Mã chỉ hiện MỘT LẦN ngay sau khi cấp — hệ thống không lưu mã gốc nên không xem lại được.",
+      validDays: "Hạn dùng (ngày)",
+      maxDevices: "Số thiết bị tối đa",
+      issue: "Cấp thẻ học mới",
+      issuing: "Đang cấp…",
+      issuedTitle: "Thẻ học mới — in hoặc ghi lại ngay",
+      issuedNote: "Đóng trang này là không xem lại được mã. Hãy in thẻ hoặc chép mã dự phòng.",
+      print: "In thẻ học",
+      backup: "Mã dự phòng",
+      link: "Liên kết quét QR",
+      expires: "Hết hạn",
+      qrLabel: "Mã QR liên kết thiết bị của {name}",
+      history: "Lịch sử thẻ học",
+      none: "Chưa cấp thẻ học nào.",
+      active: "Còn hiệu lực",
+      expired: "Đã hết hạn",
+      revoked: "Đã thu hồi",
+      usage: "Đã liên kết {used}/{max} thiết bị",
+      revoke: "Thu hồi thẻ",
+      reasons: {
+        reissued: "cấp thẻ mới",
+        teacher: "giáo viên thu hồi",
+        consent_withdrawn: "rút đồng ý",
+        student_inactive: "hồ sơ lưu trữ",
+      },
+    },
+    devices: {
+      title: "Thiết bị đã liên kết",
+      intro: "Không lưu tên máy, địa chỉ IP hay vị trí. Thu hồi có hiệu lực ngay ở lần tải trang kế tiếp của thiết bị.",
+      none: "Chưa có thiết bị nào.",
+      linked: "Liên kết lúc",
+      lastSeen: "Dùng gần nhất",
+      never: "Chưa dùng",
+      active: "Đang liên kết",
+      revoked: "Đã thu hồi",
+      revoke: "Thu hồi thiết bị",
+      label: "Thiết bị {n}",
+    },
+  },
+
+  consent: {
+    title: "Đồng ý của phụ huynh",
+    intro:
+      "Hai phạm vi độc lập. Chỉ ghi nhận sau khi đã nhận phiếu đồng ý hợp lệ (phiếu giấy do nhà trường lưu). Không có ghi nhận = chưa đồng ý.",
+    draftNotice:
+      "Mẫu thông báo xử lý dữ liệu và phiếu đồng ý chưa được nhà trường duyệt — chỉ dùng với dữ liệu giả trong môi trường phát triển, chưa dùng cho học sinh thật.",
+    scopes: {
+      learning_data: {
+        title: "Dữ liệu học tập",
+        text: "Lưu kết quả luyện tập, điểm thưởng và tiến độ game. Chưa có → con chỉ chơi thử, không lưu gì. Rút lại → dừng ngay, thu hồi mọi thiết bị và thẻ học.",
+      },
+      leaderboard_display: {
+        title: "Hiển thị trên bảng xếp hạng lớp",
+        text: "Cho các bạn cùng lớp thấy tên hiển thị đã duyệt, avatar và điểm thưởng. Chưa có → không xuất hiện trên bảng, vẫn thấy điểm của mình.",
+      },
+    },
+    states: {
+      none: "Chưa xác nhận",
+      granted: "Đã xác nhận hợp lệ",
+      withdrawn: "Đã rút lại",
+    },
+    recordedAt: "Ghi nhận ngày {date} · thông báo {version}",
+    withdrawnAt: "Rút lại ngày {date}",
+    record: {
+      notice: "Phiên bản thông báo đã gửi phụ huynh",
+      method: "Hình thức",
+      methods: { paper_form: "Phiếu giấy có chữ ký", other: "Hình thức khác do nhà trường quy định" },
+      note: "Ghi chú (không ghi tên, số điện thoại của phụ huynh)",
+      attest: "Tôi xác nhận đã nhận phiếu đồng ý hợp lệ cho phạm vi này.",
+      submit: "Ghi nhận đồng ý",
+    },
+    withdraw: {
+      confirm: "Tôi xác nhận phụ huynh đã đề nghị rút lại đồng ý này.",
+      submit: "Rút lại đồng ý",
+    },
+  },
+
+  learnMe: {
+    meta: { title: "Trang của con", description: "Trang học sinh trên thiết bị đã liên kết thẻ học." },
+    title: "Trang của {name}",
+    className: "Lớp {name}",
+    chooseProfile: "Thiết bị này đã liên kết với nhiều bạn. Con là bạn nào?",
+    notLinked: {
+      title: "Thiết bị này chưa liên kết thẻ học",
+      text: "Bố mẹ quét mã QR trên thẻ học hoặc nhập mã dự phòng để vào trang của con.",
+      action: "Liên kết thiết bị",
+      demo: "Xem bản chơi thử",
+    },
+    teacherSession: {
+      title: "Trình duyệt đang đăng nhập tài khoản giáo viên",
+      text: "Trang của học sinh chỉ mở trên thiết bị đã liên kết thẻ học.",
+      action: "Về khu vực giáo viên",
+    },
+    notConfigured: "Máy chủ dữ liệu chưa được cấu hình.",
+    pendingNote:
+      "Điểm thưởng, bản đồ và bài luyện của con sẽ xuất hiện ở đây khi giáo viên hoàn tất chương trình và học liệu được duyệt.",
+    worldLink: "Xem Game World (minh họa)",
+    preferences: {
+      title: "Chọn avatar và cài đặt",
+      avatar: "Avatar của con",
+      motion: "Chuyển động",
+      motionOptions: { system: "Theo thiết bị", reduce: "Giảm chuyển động", full: "Đầy đủ" },
+      sound: "Âm thanh",
+      soundOptions: { on: "Bật", off: "Tắt" },
+      soundNote: "Âm thanh sẽ có ở bản sau.",
+      save: "Lưu",
+      saving: "Đang lưu…",
+      saved: "Đã lưu!",
+    },
+    signOut: "Đăng xuất khỏi thiết bị này",
+  },
+
+  learnHome: {
+    linkedCta: "Đã có thẻ học? Vào trang của con",
+  },
+
+  errors: {
+    NOT_CONFIGURED: "Máy chủ dữ liệu chưa được cấu hình.",
+    UNAUTHENTICATED: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    FORBIDDEN: "Bạn không có quyền thực hiện thao tác này.",
+    INVALID_INPUT: "Thông tin nhập chưa hợp lệ. Vui lòng kiểm tra lại.",
+    INVALID_CREDENTIALS: "Email hoặc mật khẩu chưa đúng.",
+    NOT_STAFF: "Tài khoản này không phải tài khoản giáo viên đang hoạt động.",
+    RATE_LIMITED: "Thử quá nhiều lần. Vui lòng đợi khoảng 15 phút rồi thử lại.",
+    DUPLICATE_NAME: "Lớp đã có bạn dùng biệt danh này. Hãy chọn biệt danh khác.",
+    DUPLICATE_NUMBER: "Số thứ tự này đã có trong lớp.",
+    DUPLICATE_ALIAS: "Tên hiển thị này đã có bạn trong lớp dùng.",
+    DUPLICATE_CLASS: "Trường đã có lớp cùng tên trong năm học này.",
+    CLASS_ARCHIVED: "Lớp đã lưu trữ — không thêm được học sinh.",
+    STUDENT_INACTIVE: "Hồ sơ đang tạm ngưng hoặc đã lưu trữ.",
+    ALIAS_MISSING: "Chưa có tên hiển thị để duyệt.",
+    ATTESTATION_REQUIRED: "Cần đánh dấu xác nhận đã nhận phiếu đồng ý hợp lệ.",
+    CONSENT_ALREADY_ACTIVE: "Phạm vi này đã có đồng ý còn hiệu lực.",
+    CONSENT_NOT_ACTIVE: "Phạm vi này chưa có đồng ý còn hiệu lực.",
+    CURRICULUM_NOT_CONFIRMABLE: "Chưa xác nhận được: cần bộ sách thật đã được duyệt.",
+    LESSON_NOT_IN_SERIES: "Bài học không thuộc bộ bài đã chọn.",
+    CODE_INVALID: "Mã chưa đúng hoặc đã hết hạn. Kiểm tra lại mã, hoặc nhờ giáo viên cấp thẻ học mới.",
+    TEACHER_SESSION_ACTIVE: "Trình duyệt đang đăng nhập tài khoản giáo viên. Hãy đăng xuất rồi liên kết thiết bị.",
+    UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  },
+
+  bands: {
+    foundation: "Nhóm 3 – Cần hỗ trợ nền tảng",
+    developing: "Nhóm 2 – Đang phát triển",
+    extending: "Nhóm 1 – Đọc tốt",
+  },
+
+  common: {
+    saving: "Đang lưu…",
+    saved: "Đã lưu.",
+    loading: "Đang tải…",
+  },
+
   practice: {
     badge: "Bản chơi thử",
     hints: {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { BookOpenCheck, Heart, Map as MapIcon } from "lucide-react";
+import Link from "next/link";
+import { BookOpenCheck, Heart, KeyRound, Map as MapIcon } from "lucide-react";
 import { AchievementBadge } from "@/components/adventure/achievement-badge";
 import { AdventureLink } from "@/components/adventure/adventure-button";
 import { AvatarFrame } from "@/components/adventure/avatar-frame";
@@ -35,6 +36,14 @@ export default function LearnPage() {
   return (
     <div className="flex flex-col gap-10">
       <PreviewRibbon />
+      {/* R03: trang có xác thực của học sinh (thiết bị đã liên kết thẻ học) tách khỏi bản minh họa này. */}
+      <Link
+        href="/learn/me"
+        className="inline-flex min-h-touch-kid items-center gap-3 self-start rounded-full border-2 border-brand-200 bg-surface px-6 text-lg font-bold text-brand-800 hover:border-brand-600"
+      >
+        <KeyRound aria-hidden="true" className="size-6" />
+        {vi.learnHome.linkedCta}
+      </Link>
 
       {/* Đầu trang: avatar, lời chào, điểm, nút chính */}
       <section

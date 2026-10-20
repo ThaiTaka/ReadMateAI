@@ -44,6 +44,8 @@ describe("chuỗi giao diện tiếng Việt (src/strings/vi.ts)", () => {
     expect(strings.demo.notice.items.join(" ")).toContain("chưa được giáo viên duyệt");
     expect(strings.demo.notice.items.join(" ")).toContain("Không tài khoản, không lưu kết quả, không gọi AI");
     expect(strings.demo.notice.items.join(" ")).toContain("Chưa có âm thanh");
-    expect(strings.join.notice.text).toContain("chưa nhận, chưa kiểm tra và chưa lưu");
+    // R03: /join đã nhận mã thật — thông báo mã sai không tiết lộ lý do (sai/hết hạn/thu hồi) và chỉ cách nhờ GV.
+    expect(strings.errors.CODE_INVALID).toContain("nhờ giáo viên cấp thẻ học mới");
+    expect(strings.errors.CODE_INVALID).not.toMatch(/thu hồi|không tồn tại/u);
   });
 });

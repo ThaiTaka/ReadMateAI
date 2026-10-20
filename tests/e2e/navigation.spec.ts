@@ -21,9 +21,10 @@ test.describe("điều hướng", () => {
     await page.getByRole("link", { name: "Trang chủ", exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
 
+    // R03: khu vực GV cần đăng nhập → khách được đưa tới trang đăng nhập.
     await page.getByRole("link", { name: "Khu vực giáo viên" }).click();
-    await expect(page).toHaveURL(/\/teacher$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bảng điều khiển giáo viên");
+    await expect(page).toHaveURL(/\/login\?reason=required/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Đăng nhập giáo viên");
 
     await page.getByRole("link", { name: "ReadMate AI — về trang chủ" }).click();
     await expect(page).toHaveURL(/\/$/);

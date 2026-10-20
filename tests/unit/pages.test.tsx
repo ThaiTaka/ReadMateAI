@@ -98,18 +98,19 @@ describe("Trang /demo (Bản chơi thử)", () => {
 });
 
 describe("Trang /teacher", () => {
-  it("nói rõ chức năng đang phát triển và chưa có đăng nhập", () => {
+  // R03: khu vực GV có xác thực (proxy + requireTeacher + RLS). Trang tổng quan chỉ giới thiệu và dẫn tới /teacher/classes.
+  it("nói rõ chỉ GV đã đăng nhập mới vào được và các mục còn lại đang phát triển", () => {
     render(<TeacherPage />);
     const note = screen.getAllByRole("note")[0];
-    expect(note).toHaveTextContent("Chức năng đang phát triển");
-    expect(note).toHaveTextContent("chưa được bảo vệ bằng tài khoản");
+    expect(note).toHaveTextContent("Chỉ giáo viên đã đăng nhập");
+    expect(note).toHaveTextContent("đang phát triển");
   });
 
-  it("không có ô nhập liệu; mọi nút đều khóa; không có nút đặt lại điểm hay bật bảng xếp hạng", () => {
+  it("không có ô nhập liệu ở trang tổng quan; dẫn tới quản lý lớp; không có nút đặt lại điểm hay bật bảng xếp hạng", () => {
     const { container } = render(<TeacherPage />);
     expect(container.querySelectorAll("input, textarea, select")).toHaveLength(0);
-    expect(screen.getByRole("button", { name: /Tạo lớp mới/ })).toBeDisabled();
-    for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Mở danh sách lớp" })).toHaveAttribute("href", "/teacher/classes");
+    for (const button of screen.queryAllByRole("button")) expect(button).toBeDisabled();
     expect(screen.queryByRole("button", { name: /đặt lại|reset|xóa điểm|bật bảng/i })).toBeNull();
   });
 
@@ -162,16 +163,20 @@ describe("Trang /learn (Student Adventure Dashboard — dữ liệu minh họa)"
 });
 
 describe("Trang /join", () => {
-  it("biểu mẫu bị khóa hoàn toàn và không có thẻ form", () => {
+  // R03: /join nhận mã thật qua Server Action (POST) — không còn biểu mẫu khóa.
+  it("một biểu mẫu nhập mã dự phòng có nhãn; không có ô họ tên, email hay số điện thoại", () => {
     const { container } = render(<JoinPage />);
-    expect(container.querySelector("form")).toBeNull();
-    expect(container.querySelector("fieldset")).toBeDisabled();
-    expect(screen.getByLabelText("Mã dự phòng trên thẻ học")).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Liên kết thiết bị/ })).toBeDisabled();
+    expect(container.querySelectorAll("form")).toHaveLength(1);
+    expect(screen.getByLabelText("Mã dự phòng trên thẻ học")).toBeEnabled();
+    expect(screen.getByRole("button", { name: /Liên kết thiết bị/ })).toBeEnabled();
+    expect(container.querySelector("input[name=kind]")).toHaveValue("backup");
+    expect(container.querySelectorAll("input[type=email], input[type=tel], input[name*=name]")).toHaveLength(0);
   });
 
-  it("thông báo chưa nhận và chưa lưu mã nào", () => {
+  it("có hướng dẫn nhờ giáo viên khi mã sai hoặc hết hạn, và giải thích bảo vệ dữ liệu", () => {
     render(<JoinPage />);
-    expect(screen.getByRole("note")).toHaveTextContent("chưa nhận, chưa kiểm tra và chưa lưu bất kỳ mã nào");
+    expect(screen.getByRole("heading", { name: "Cần giúp đỡ?" })).toBeInTheDocument();
+    expect(screen.getByText(/nhắn giáo viên để được cấp thẻ mới/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Dữ liệu của con được bảo vệ thế nào?" })).toBeInTheDocument();
   });
 });

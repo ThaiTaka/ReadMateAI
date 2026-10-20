@@ -339,12 +339,15 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
     expect(requests.filter((request) => request.body !== null)).toEqual([]);
     // Làm bài hoàn toàn trong trình duyệt. Sau khi trang tải, chỉ được phép có request GET không có dữ liệu do
     // Next.js tự tải trước các trang được liên kết (prefetch) — không request nào chứa câu trả lời hay kết quả.
-    const appPaths = new Set(["/", "/demo", "/learn", "/teacher", "/join"]);
+    // R03: prefetch /teacher của khách bị proxy chuyển sang /login (GET, không dữ liệu).
+    const appPaths = new Set(["/", "/demo", "/learn", "/teacher", "/join", "/login"]);
     const later = requests.slice(before).filter((request) => request.type === "fetch" || request.type === "xhr");
     expect(
       later.filter((request) => {
         const url = new URL(request.url);
-        const onlyRscParam = [...url.searchParams.keys()].every((key) => key === "_rsc");
+        // Chuyển hướng /teacher → /login chỉ mang lý do + đường quay lại (không có dữ liệu bài làm).
+        const allowed = url.pathname === "/login" ? ["_rsc", "reason", "next"] : ["_rsc"];
+        const onlyRscParam = [...url.searchParams.keys()].every((key) => allowed.includes(key));
         return !(appPaths.has(url.pathname) || url.pathname.startsWith("/_next/")) || !onlyRscParam;
       }),
     ).toEqual([]);

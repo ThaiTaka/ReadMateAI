@@ -6,7 +6,7 @@ import { FriendlyMonster, GuideOwl, HeroKid } from "@/components/art/characters"
 import { HonorPodium, TreasureChest } from "@/components/art/treasure";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ComingSoonState } from "@/components/ui/coming-soon-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -27,8 +27,9 @@ function SectionStatus() {
 }
 
 /**
- * Khung bảng điều khiển giáo viên — chưa có đăng nhập, chưa có dữ liệu thật; mọi thao tác đều bị khóa hoặc chỉ là
- * phần giới thiệu. KHÔNG có nút đặt lại điểm hay bật bảng xếp hạng (cần xác thực + phân quyền ở server — R03, R06).
+ * Bảng điều khiển giáo viên (đã đăng nhập — layout và proxy kiểm tra phiên). Lớp học/học sinh đã hoạt động ở
+ * /teacher/classes; các phần còn lại là giới thiệu chức năng sắp có. KHÔNG có nút đặt lại điểm hay bật bảng xếp
+ * hạng (R05–R06; cờ bảng xếp hạng còn bị CSDL chặn cho tới khi có chấp thuận).
  */
 export default function TeacherPage() {
   const t = vi.teacher;
@@ -62,20 +63,13 @@ export default function TeacherPage() {
       </section>
 
       <section id="lop-hoc" aria-labelledby="classes-title" className="mt-14 scroll-mt-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <SectionHeading size="md" id="classes-title" title={t.classes.title} description={t.classes.description} />
-          <SectionStatus />
-        </div>
+        <SectionHeading size="md" id="classes-title" title={t.classes.title} description={t.classes.description} />
         <EmptyState
           className="mt-6"
           icon={<School className="size-8" />}
           title={t.classes.emptyTitle}
           description={t.classes.emptyText}
-          action={
-            <Button disabled variant="outline">
-              {t.classes.action} ({vi.status.comingSoon.toLowerCase()})
-            </Button>
-          }
+          action={<ButtonLink href="/teacher/classes">{t.classes.action}</ButtonLink>}
         />
       </section>
 
