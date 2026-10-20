@@ -136,7 +136,7 @@ Baseline (chạy thật trước khi sửa): `format:check` ✅ · `lint` ✅ ·
 | `npm run db:seed` ×2 sau `supabase db reset` | ✅ không lỗi, không trùng |
 | `npm run test:db` | ✅ 3 tệp, **78/78** |
 | `npm run test:e2e:db` | ✅ **30 đạt, 12 bỏ qua theo thiết kế** (đo bố cục chỉ ở chromium-desktop) |
-| GitHub Actions | ✅ Run [39381461701](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39381461701) (checkpoint `4e5bb6a`): `verify` + `database` success; run của commit cuối ghi ở báo cáo R03 |
+| GitHub Actions | ✅ Run [39381461701](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39381461701) (checkpoint `4e5bb6a`): `verify` + `database` success · Run [39383193222](https://github.com/ThaiTaka/ReadMateAI/actions/runs/39383193222) (tài liệu `e04686b`): cả hai job success |
 
 ### 4.4 Sự cố gặp và cách xử lý
 
