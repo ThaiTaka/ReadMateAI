@@ -1,6 +1,6 @@
 # ReadMate AI — Thiết kế trò chơi và Game Engine
 
-> **Trạng thái: PLANNED** — thiết kế của Giai đoạn R01 (2026-10-16). **Chưa có game, asset hay mã game nào.** Hiện thực dự kiến: R02 (Game World, giao diện), R07 (Mê cung kho báu, điều khiển nhân vật), R08 (quái vật, chạm trán bằng câu hỏi), R09 (ba game còn lại).
+> **Trạng thái:** thiết kế R01 (2026-10-16). **R02 (2026-10-20) đã hiện thực phần hình ảnh và giao diện Game World với dữ liệu minh họa** — bản đồ, 4 thẻ khu vực, mốc khám phá, nhân vật/quái vật/avatar SVG (bản phác thảo chờ GV duyệt), xem [§15](#15-biểu-diễn-hình-ảnh-r02). **Chưa có game chơi được, chưa có Game Engine.** Hiện thực dự kiến: R02 (Game World, giao diện), R07 (Mê cung kho báu, điều khiển nhân vật), R08 (quái vật, chạm trán bằng câu hỏi), R09 (ba game còn lại).
 > Mọi con số điểm, HP, ngưỡng vào game lấy từ [GAMIFICATION_SPEC.md §1](GAMIFICATION_SPEC.md#1-hằng-số-chính-thức) — tài liệu này không định nghĩa lại.
 > **Tài liệu liên quan:** [PRODUCT_REDESIGN.md](PRODUCT_REDESIGN.md) · [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md) · [EXERCISE_ENGINE.md](EXERCISE_ENGINE.md) · [PRIVACY_AND_SECURITY.md](PRIVACY_AND_SECURITY.md)
 
@@ -20,6 +20,7 @@
 12. [Asset, âm thanh và giấy phép](#12-asset-âm-thanh-và-giấy-phép)
 13. [Kiểm thử](#13-kiểm-thử)
 14. [Câu hỏi mở](#14-câu-hỏi-mở)
+15. [Biểu diễn hình ảnh (R02)](#15-biểu-diễn-hình-ảnh-r02)
 
 ---
 
@@ -289,3 +290,12 @@ content/games/<game>/levels/*.json   # dữ liệu màn (kiểm bằng content:c
 | RQ-M3 | Số màn mỗi game, số thẻ bản đồ mỗi mùa (đề xuất 3 màn/game, 24 thẻ) |
 | RQ-M4 | Nhạc nền có cần không (có thể gây xao nhãng khi học)? Đề xuất: mặc định tắt trong màn thử thách |
 | RQ-M5 | Tên gọi các game, quái vật, nhân vật dẫn đường — GV góp ý |
+
+## 15. Biểu diễn hình ảnh (R02)
+
+- **Kỹ thuật:** SVG vẽ bằng mã trong `src/components/art/` (Server Components — không vào bundle JS), nhiều lớp, gradient, bóng mềm; hoạt cảnh bằng CSS (`animate-float/bob/sway/twinkle/drift/glow`), tắt khi giảm chuyển động. Đây là hướng §10 (React + SVG/CSS) áp dụng cho cảnh tĩnh; sprite sheet/PixiJS vẫn để POC R07.
+- **Bản đồ thế giới** (`world-map.tsx`): đảo lớn có trạm luyện tập ở giữa, Mê cung (tây nam), Rừng chữ (tây bắc), Lâu đài (đông bắc), Đảo dấu thanh (đảo riêng phía đông nam, nối cầu gỗ); đường phiêu lưu nét đứt theo thứ tự ngưỡng; vùng chưa đủ điểm **phủ mây**. Ghim tên bằng HTML theo `WORLD_MAP_SPOTS` (%).
+- **Bốn cảnh game** (`scenes.tsx`, khung 320×200): mê cung hàng rào cây + rương; rừng có cây cổ thụ mang "lá chữ"; biển với 5 phao dấu thanh (vẽ bằng nét, không dùng ký tự tổ hợp); lâu đài mái tím + khối chữ bay. Chế độ `dimmed` (giảm bão hòa + sương) cho trạng thái khóa, luôn kèm ổ khóa + chữ.
+- **Nhân vật:** Bạn nhỏ thám hiểm (học sinh), Cú Bông (hướng dẫn), Bé Mây Bông (quái vật thân thiện — không răng, không móng, má hồng), 5 avatar hình người, rương kho báu, bục vinh danh, 8 ô mốc bản đồ (đồi hoa, ao sen, lũy tre, ruộng lúa, cầu gỗ, đồi thả diều, làng đèn lồng, đài ngắm sao).
+- **Trạng thái:** tất cả `pending_review` trong `content/media/licenses.json`; GV xem ở `/teacher#duyet-hoc-lieu`. Tên gọi là tạm (RQ-M5).
+- **Giới hạn:** chưa có hoạt cảnh nhiều khung (đi bộ, biểu cảm), chưa có chuyển cảnh "phép thuật" của chạm trán; chất lượng mỹ thuật ở mức phác thảo trình diễn — nên có họa sĩ chỉnh sửa trước khi đưa vào game thật.

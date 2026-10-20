@@ -60,6 +60,43 @@
   --color-coral-700: #a43c1e;
   --color-coral-800: #7f2f18;
 
+  /*
+   * R02 — "Modern 2D Educational Adventure" (docs/DESIGN_SYSTEM.md).
+   * Vai trò màu: brand + jade = thế giới khám phá; lagoon = tri thức, luyện tập; sun = điểm thưởng, thành tích;
+   * magic = khu vực kỳ diệu (lâu đài, phép thuật); deep = nền đêm/khung cảnh có chiều sâu.
+   */
+
+  /* Xanh ngọc — thế giới khám phá */
+  --color-jade-50: #effcf9;
+  --color-jade-100: #cdf6ec;
+  --color-jade-200: #9cebd9;
+  --color-jade-300: #5fd6c0;
+  --color-jade-400: #2ebea7;
+  --color-jade-500: #14a290;
+  --color-jade-600: #0d8275;
+  --color-jade-700: #0f695f;
+  --color-jade-800: #11534c;
+  --color-jade-900: #0f4440;
+
+  /* Tím nhẹ — khu vực kỳ diệu */
+  --color-magic-50: #f6f3ff;
+  --color-magic-100: #ece5ff;
+  --color-magic-200: #dacfff;
+  --color-magic-300: #bfa9ff;
+  --color-magic-400: #9f80fa;
+  --color-magic-500: #8458f2;
+  --color-magic-600: #6d40dc;
+  --color-magic-700: #5932b6;
+  --color-magic-800: #482a92;
+  --color-magic-900: #3a2475;
+
+  /* Nền sâu cho khung cảnh (chữ trắng trên deep-800 ≈ 13:1) */
+  --color-deep-700: #1d4a63;
+  --color-deep-800: #143a52;
+  --color-deep-900: #0d283b;
+
+  --color-sun-600: #c98a00;
+
   /* Ngữ nghĩa */
   --color-primary: #0b7a63;
   --color-primary-hover: #0a6352;
@@ -85,4 +122,104 @@
   --radius-tile: 1.25rem;
   --shadow-soft: 0 1px 2px rgb(29 36 51 / 0.06), 0 8px 24px -12px rgb(29 36 51 / 0.18);
   --shadow-lift: 0 2px 4px rgb(29 36 51 / 0.06), 0 18px 40px -18px rgb(29 36 51 / 0.28);
+  --radius-world: 2rem;
+  /* Bóng "khối" cho nút phiêu lưu: viền đáy đậm tạo cảm giác bấm được (không dựa vào màu để truyền tin). */
+  --shadow-press-jade: 0 5px 0 #0b5a50, 0 12px 24px -10px rgb(13 130 117 / 0.55);
+  --shadow-press-sun: 0 5px 0 #b07800, 0 12px 24px -10px rgb(242 169 0 / 0.55);
+  --shadow-press-magic: 0 5px 0 #43258a, 0 12px 24px -10px rgb(109 64 220 / 0.5);
+  --shadow-press-plain: 0 5px 0 #d8c9b3, 0 12px 24px -12px rgb(29 36 51 / 0.25);
+  --shadow-world: 0 2px 6px rgb(13 40 59 / 0.08), 0 24px 48px -24px rgb(13 40 59 / 0.45);
+  --shadow-glow-sun: 0 0 0 4px rgb(253 193 38 / 0.25), 0 10px 30px -8px rgb(242 169 0 / 0.6);
+
+  /*
+   * Chuyển động nhẹ, chậm (≥ 2,4 s một chu kỳ; không nhấp nháy > 3 lần/giây — WCAG 2.3.1).
+   * Tắt khi prefers-reduced-motion (globals.css) hoặc khi bật công tắc "Giảm chuyển động" ([data-motion="reduce"]).
+   */
+  --animate-float: rm-float 6s ease-in-out infinite;
+  --animate-bob: rm-bob 3.2s ease-in-out infinite;
+  --animate-sway: rm-sway 5s ease-in-out infinite;
+  --animate-wave: rm-wave 2.8s ease-in-out infinite;
+  --animate-twinkle: rm-twinkle 3s ease-in-out infinite;
+  --animate-drift: rm-drift 22s ease-in-out infinite alternate;
+  --animate-pop-in: rm-pop-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+  --animate-glow: rm-glow 3.6s ease-in-out infinite;
+
+  @keyframes rm-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes rm-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes rm-sway {
+    0%,
+    100% {
+      transform: rotate(-2.5deg);
+    }
+    50% {
+      transform: rotate(2.5deg);
+    }
+  }
+  @keyframes rm-wave {
+    0%,
+    60%,
+    100% {
+      transform: rotate(0deg);
+    }
+    20% {
+      transform: rotate(-14deg);
+    }
+    40% {
+      transform: rotate(6deg);
+    }
+  }
+  @keyframes rm-twinkle {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(0.85);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes rm-drift {
+    from {
+      transform: translateX(-12px);
+    }
+    to {
+      transform: translateX(16px);
+    }
+  }
+  @keyframes rm-pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92) translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes rm-glow {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 }

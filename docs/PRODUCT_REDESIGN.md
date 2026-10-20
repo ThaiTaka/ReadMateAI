@@ -1,7 +1,7 @@
 # ReadMate AI — Định hướng sản phẩm mới (tái thiết kế R01)
 
 > **Phiên bản:** 1.0 — Giai đoạn R01 (2026-10-16)
-> **Trạng thái: PLANNED** — định hướng đã được người điều phối quyết định; **chưa hiện thực**. Sản phẩm đang chạy (bản chơi thử `/demo` của GĐ4) vẫn theo định hướng cũ cho tới R02.
+> **Trạng thái (cập nhật R02, 2026-10-20):** định hướng đã được người điều phối quyết định. **Giao diện đã chuyển sang định hướng mới ở R02** (trang chủ, `/learn`, `/demo`, sidebar GV — dữ liệu minh họa, xem [§10](#10-trạng-thái-sau-r02)); điểm thưởng thật, tài khoản, game chơi được vẫn **PLANNED** (R03–R09).
 > Tài liệu này **thay thế** các phần định hướng "học ở nhà → tự làm ở lớp" của [PRD.md](PRD.md) (xem [§4](#4-giữ--thay-đổi--loại-khỏi-luồng-chính)); các phần PRD không bị nêu tên vẫn còn hiệu lực.
 > **Tài liệu liên quan:** [GAMIFICATION_SPEC.md](GAMIFICATION_SPEC.md) · [GAME_DESIGN.md](GAME_DESIGN.md) · [LEADERBOARD_SPEC.md](LEADERBOARD_SPEC.md) · [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md) · [PRIVACY_AND_SECURITY.md](PRIVACY_AND_SECURITY.md) · [REDESIGN_TASKS.md](../REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](../REDESIGN_PROGRESS.md)
 
@@ -16,6 +16,7 @@
 7. [Phi mục tiêu](#7-phi-mục-tiêu)
 8. [Chỉ số thành công đề xuất](#8-chỉ-số-thành-công-đề-xuất)
 9. [Câu hỏi mở](#9-câu-hỏi-mở)
+10. [Trạng thái sau R02](#10-trạng-thái-sau-r02)
 
 ---
 
@@ -113,17 +114,17 @@ Nguyên tắc (AD-51): **không xóa module đang chạy và có kiểm thử �
 | `src/features/exercises/generation/pair.ts` (`generateHomeClassPair`) | Cặp bài ở nhà – ở lớp | **DEPRECATED** (giữ, còn test) | R11: xóa cùng `tests/unit/exercises/generation.test.ts` phần cặp nhà–lớp |
 | `src/features/exercises/core/worksheet.ts` (`ExerciseTaskContract`, `buildTaskContract`) | Hợp đồng phiếu | **DEPRECATED** | R11: xóa; gỡ trường `worksheet()` khỏi `ExerciseTypeModule` |
 | `worksheet()` trong `types/*/module.ts`, `worksheet` trong `variants.ts` | Biểu diễn phiếu của từng dạng | **DEPRECATED** | R11 cùng mục trên |
-| `src/features/exercises/ui/worksheet-preview.tsx` | Xem trước phiếu ở lớp trong `/demo` | **DEPRECATED** | R02: gỡ khỏi `/demo`; R11: xóa |
-| `src/features/demo/practice-data.ts` — bước `classroom_like` | "Thử như ở lớp" | **ĐỔI** | R02: đổi thành bước "Tự làm" (H0) |
-| `src/app/(site)/demo/demo-practice.tsx` | Dùng `classroom_like`, xem trước phiếu | **ĐỔI** | R02 |
-| `src/features/exercises/core/support.ts` (nhãn H0, `paperLike`) | "Giống phiếu ở lớp" | **ĐỔI nhãn** (logic giữ) | R02: H0 = "Tự làm"; bỏ bố cục "giống phiếu" ở H1/H0 |
-| `src/features/exercises/session/results.ts` — chỉ số "Cần GV ghi nhận ở lớp" | Chỉ số đo ở lớp | **DEPRECATED** | R02: bỏ khỏi giao diện; R11: xóa |
-| `src/strings/vi.ts` — các chuỗi "ở lớp", "phiếu", "Thử như ở lớp", mô tả trang chủ | Thông điệp cũ | **ĐỔI** | R02: viết lại; cập nhật `strings.test.ts` |
-| `src/app/(site)/page.tsx`, `src/config/site.ts`, `package.json` (`description`) | Thông điệp cũ | **ĐỔI** | R02 |
-| `src/components/layout/teacher-sidebar.tsx` — mục "Phiếu học tập" | Phiếu PDF | **ĐỔI** | R02: thay bằng Bảng điểm, Vinh danh, Mùa thi đua (ghi "Sắp có") |
+| `src/features/exercises/ui/worksheet-preview.tsx` | Xem trước phiếu ở lớp trong `/demo` | **DEPRECATED** — ✅ R02 đã gỡ khỏi `/demo` (không còn nơi nào import) | R11: xóa |
+| `src/features/demo/practice-data.ts` — bước `classroom_like` | "Thử như ở lớp" | ✅ **ĐÃ ĐỔI (R02)**: bước `independent` "Thử thách tự làm" (H0); bỏ gọi `generateHomeClassPair` | — |
+| `src/app/(site)/demo/demo-practice.tsx` | Dùng `classroom_like`, xem trước phiếu | ✅ **ĐÃ ĐỔI (R02)**: màn kết quả hiện lời nhắc điểm minh họa + "Về Game World" | — |
+| `src/features/exercises/core/support.ts` (nhãn H0, `paperLike`) | "Giống phiếu ở lớp" | ✅ **ĐÃ ĐỔI (R02)**: H0 = "Tự làm"; `layout` `paper_like` → `focused`; bỏ prop `paperLike` khỏi Player — logic số lượt/gợi ý giữ nguyên | — |
+| `src/features/exercises/session/results.ts` — chỉ số "Cần GV ghi nhận ở lớp" | Chỉ số đo ở lớp | **DEPRECATED** — ✅ R02: `results-panel.tsx` chỉ hiện chỉ số `source: "app"` | R11: xóa |
+| `src/strings/vi.ts` — các chuỗi "ở lớp", "phiếu", "Thử như ở lớp", mô tả trang chủ | Thông điệp cũ | ✅ **ĐÃ VIẾT LẠI (R02)**; chỉ còn nhánh `practice.worksheet` (dùng bởi `worksheet-preview.tsx`, ngừng dùng) — `tests/unit/redesign-copy.test.tsx` chặn tái xuất hiện | R11: xóa nhánh |
+| `src/app/(site)/page.tsx`, `src/config/site.ts`, `package.json` (`description`) | Thông điệp cũ | ✅ **ĐÃ ĐỔI (R02)** + Open Graph | — |
+| `src/components/layout/teacher-sidebar.tsx` — mục "Phiếu học tập" | Phiếu PDF | ✅ **ĐÃ ĐỔI (R02)**: 9 mục (Tổng quan … Cài đặt), mục chưa xây dựng ghi "Sắp có" | — |
 | `src/components/learning/visuals.tsx` — biểu tượng hướng dẫn "dùng chung app và phiếu" | Phiếu | **GIỮ** (biểu tượng vẫn dùng cho app) | Bỏ nhắc tới phiếu ở R02 |
 | `PRD §13`, `ARCHITECTURE §16`, `DATA_MODEL §4.H`, TASKS GĐ8 | Phiếu PDF | **SUPERSEDED** (đã ghi chú trong tài liệu ở R01) | Không hiện thực |
-| `tests/e2e/demo-practice.spec.ts` — bước thử như ở lớp, xem trước phiếu | Kiểm thử luồng cũ | **ĐỔI** | R02 cùng thay đổi giao diện (không xóa test để "cho xanh") |
+| `tests/e2e/demo-practice.spec.ts` — bước thử như ở lớp, xem trước phiếu | Kiểm thử luồng cũ | ✅ **ĐÃ ĐỔI (R02)**: kiểm không còn chữ "ở lớp/phiếu", có lời nhắc điểm minh họa và nút về Game World | — |
 
 ## 6. Quyết định đã chốt ở R01
 
@@ -172,3 +173,15 @@ Ngưỡng là đề xuất, thống nhất với GV trước khi thí điểm.
 | RQ-05 | Các câu hỏi về bảng xếp hạng: [LEADERBOARD_SPEC §11](LEADERBOARD_SPEC.md#11-kiểm-thử-bắt-buộc) (bảng RQ-L) | R05–R06 |
 | RQ-06 | Công việc "Prompt 05" (âm thanh + Vercel) bị gián đoạn **không tìm thấy** trong thư mục này hay trên GitHub — nếu nằm ở máy/phiên khác, người điều phối cần cung cấp để hợp nhất | R10, R11 |
 | — | Các câu hỏi cũ Q-01 → Q-20 ([PROGRESS §5](../PROGRESS.md#5-câu-hỏi-mở)) vẫn mở, nhất là Q-01, Q-02 (bộ sách, quy ước) — chưa có thì chế độ học thật không tạo được câu nào, kể cả cho game | Mọi giai đoạn có học thật |
+
+## 10. Trạng thái sau R02
+
+| Phần | Trạng thái R02 (2026-10-20) |
+|---|---|
+| Trang chủ `/` | ✅ Viết lại: "ReadMate AI – Học Tiếng Việt, khám phá thế giới kỳ diệu"; ba bước, ba lộ trình, bốn mini-game, công cụ GV (dự kiến), an toàn dữ liệu |
+| `/learn` | ✅ Student Adventure Dashboard — **bản chơi thử, dữ liệu minh họa** (hồ sơ hư cấu "Mây", 135 điểm): avatar, điểm, huy hiệu, Game World, mốc khám phá. Không đăng nhập, không lưu |
+| `/demo` | ✅ Sáu dạng bài giữ nguyên; H0 "Tự làm"; bỏ phiếu ở lớp; thêm xem trước Game World + bảng xếp hạng hư cấu |
+| `/teacher` | ✅ Menu 9 mục; các phần mới "Sắp có – Đang phát triển"; không có nút đặt lại điểm/bật bảng xếp hạng |
+| Điểm, mở khóa, bảng xếp hạng, game | Chỉ giao diện + dữ liệu minh họa; hằng số ở `src/features/gamification/rules.ts` (khớp GAMIFICATION_SPEC §1). Tính/lưu thật: R04–R09 |
+
+Lựa chọn mặc định đã dùng (chưa phải phê duyệt cuối cùng): **RQ-02** — H0 tạm gọi "Tự làm"; **RQ-M1** — nhân vật/quái vật là bản phác thảo thân thiện, trạng thái chờ GV duyệt; **RQ-M2** — SVG/vector tự vẽ, không phát sinh chi phí. Chi tiết: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md), [ASSET_MANIFEST.md](ASSET_MANIFEST.md).

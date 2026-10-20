@@ -5,9 +5,10 @@
  * tương đối có đuôi `.ts` (không dùng alias "@/"). Mã thoát 1 khi có lỗi; cảnh báo không chặn
  * nhưng phải được giáo viên rà soát.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { validateContent, type ContentIssue } from "../src/features/knowledge/content-validation.ts";
+import { MEDIA_LICENSES_FILE, validateMediaLicenses } from "../src/features/media/license-validation.ts";
 
 const CONTENT_DIR = join(process.cwd(), "content");
 
@@ -18,7 +19,21 @@ for (const entry of readdirSync(CONTENT_DIR, { recursive: true, withFileTypes: t
   files.set(relative(CONTENT_DIR, fullPath).split(sep).join("/"), readFileSync(fullPath, "utf8"));
 }
 
+// Danh mục giấy phép asset (R02): validateContent chỉ soát mức tệp thô (NFC, dữ liệu cá nhân…); nội dung kiểm riêng.
+const mediaRaw = files.get(MEDIA_LICENSES_FILE);
+
 const report = validateContent(files);
+const media = mediaRaw
+  ? validateMediaLicenses(mediaRaw, (path) => existsSync(join(process.cwd(), path)))
+  : {
+      issues: [{ severity: "error" as const, code: "MISSING_FILE", message: `Thiếu content/${MEDIA_LICENSES_FILE}.` }],
+      assets: [],
+    };
+for (const issue of media.issues) {
+  report.issues.push({ ...issue, file: MEDIA_LICENSES_FILE });
+  if (issue.severity === "error") report.errorCount += 1;
+  else report.warningCount += 1;
+}
 const { stats } = report;
 
 const line = (issue: ContentIssue, marker: string) =>
@@ -41,6 +56,7 @@ console.log(
     `nháp ${stats.corpusReview.draft} · từ chối ${stats.corpusReview.rejected}`,
 );
 console.log(`Tiến độ học tập: ${stats.series} bộ bài · ${stats.profiles} hồ sơ lớp`);
+console.log(`Asset hình ảnh/phông chữ: ${media.assets.length} mục có ghi giấy phép (content/${MEDIA_LICENSES_FILE})`);
 
 section("LỖI — phải sửa", "error", "✗");
 section("CẢNH BÁO — cần giáo viên rà soát", "warning", "!");

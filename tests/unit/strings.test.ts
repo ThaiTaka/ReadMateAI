@@ -28,9 +28,10 @@ describe("chuỗi giao diện tiếng Việt (src/strings/vi.ts)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("thông điệp thương hiệu đúng nguyên văn, dùng dấu gạch ngang (–)", () => {
-    expect(strings.brand.slogan).toBe("Mỗi em một nhịp đọc – Mỗi ngày một tiến bộ");
-    expect(strings.brand.slogan).toContain(" – ");
+  it("thông điệp thương hiệu đúng nguyên văn theo định hướng R02, dùng dấu gạch ngang (–)", () => {
+    expect(strings.brand.slogan).toBe("Học Tiếng Việt, khám phá thế giới kỳ diệu");
+    expect(strings.brand.tagline).toBe("Tự luyện mỗi ngày – Tích điểm, mở khóa và phiêu lưu cùng tri thức");
+    expect(strings.brand.tagline).toContain(" – ");
   });
 
   it("tên thương hiệu là ReadMate AI", () => {

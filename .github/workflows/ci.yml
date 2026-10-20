@@ -1,10 +1,12 @@
 # CI cơ bản của ReadMate AI: format → lint → typecheck → kiểm tra kho tri thức → unit test → build.
 # E2E (Playwright) chạy cục bộ bằng `npm run test:e2e`; sẽ đưa vào CI khi có môi trường Preview.
+# Chạy khi push lên `main` và nhánh tính năng `feature/**` (R02 — lộ trình tái cấu trúc nằm trên nhánh tính năng),
+# và trên pull request. Workflow chỉ đọc mã (permissions: contents: read), không dùng secret.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
 
 permissions:

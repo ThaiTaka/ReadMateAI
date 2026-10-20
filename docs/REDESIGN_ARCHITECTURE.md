@@ -1,6 +1,6 @@
 # ReadMate AI — Kiến trúc tái thiết kế (học tại nhà + phiêu lưu + thi đua lớp)
 
-> **Trạng thái: PLANNED** — thiết kế của Giai đoạn R01 (2026-10-16). **Chưa có migration, bảng, route hay mã nào** của tài liệu này. Chưa tạo dự án Supabase, chưa liên kết Vercel.
+> **Trạng thái: PLANNED** — thiết kế của Giai đoạn R01 (2026-10-16). **Chưa có migration, bảng hay API nào** của tài liệu này; R02 (2026-10-20) đã hiện thực phần giao diện với dữ liệu minh họa ([§4.1](#41-đã-hiện-thực-ở-r02-2026-10-20--chỉ-giao-diện-dữ-liệu-minh-họa)). Chưa tạo dự án Supabase, chưa liên kết Vercel.
 > Tài liệu này **bổ sung** [ARCHITECTURE.md](ARCHITECTURE.md) (v0.4): giữ nguyên AD-01 → AD-39 trừ chỗ ghi rõ "thay thế"; quyết định mới đánh số tiếp **AD-40 → AD-53** ([§9](#9-quyết-định-kiến-trúc-mới-ad-40--ad-53)). Mô hình dữ liệu GĐ1 ([DATA_MODEL.md](DATA_MODEL.md)) vẫn là nền; mục [§5](#5-mô-hình-dữ-liệu-dự-kiến) chỉ mô tả phần **thêm/đổi**.
 > **Tài liệu liên quan:** [PRODUCT_REDESIGN.md](PRODUCT_REDESIGN.md) · [GAMIFICATION_SPEC.md](GAMIFICATION_SPEC.md) · [GAME_DESIGN.md](GAME_DESIGN.md) · [LEADERBOARD_SPEC.md](LEADERBOARD_SPEC.md) · [PRIVACY_AND_SECURITY.md](PRIVACY_AND_SECURITY.md) · [REDESIGN_TASKS.md](../REDESIGN_TASKS.md)
 
@@ -144,6 +144,25 @@ supabase/
 └── tests/                             # kiểm thử RLS (pgTAP hoặc Vitest nhiều người dùng)
 content/games/<game>/levels/*.json     # R07+: dữ liệu màn (lược đồ + level-validate)
 ```
+
+### 4.1 Đã hiện thực ở R02 (2026-10-20) — chỉ giao diện, dữ liệu minh họa
+
+```text
+src/
+├── app/learn/                      # Student Adventure Dashboard + Game World (Server Component, dữ liệu minh họa)
+├── components/adventure/           # Design system phiêu lưu (docs/DESIGN_SYSTEM.md); client: adventure-dialog, motion
+├── components/art/                 # SVG tự vẽ: characters, avatars, treasure, scenes, world-map, map-tiles, hero-landscape
+├── features/gamification/          # rules.ts (hằng số GAMIFICATION_SPEC §1, SCORING_RULES_VERSION "r1"), unlocks.ts (hàm thuần)
+├── features/game-world/catalog.ts  # 4 game (ngưỡng lấy từ rules.ts), 8 mốc bản đồ
+├── features/avatars/catalog.ts     # 5 avatar (pending_review, licenseRef)
+├── features/media/license-validation.ts  # kiểm content/media/licenses.json trong content:check
+└── features/demo/adventure-data.ts # DEMO_PLAYER "Mây" 135 điểm, huy hiệu, bảng xếp hạng hư cấu
+content/media/licenses.json          # giấy phép mọi asset
+```
+
+- `rules.ts`/`unlocks.ts` được tạo sớm (kế hoạch ban đầu: R04) để giao diện R02 không chép con số; `apply.ts` (ghi điểm) vẫn thuộc R04 và chạy ở server.
+- AD-50 (giảm chuyển động): R02 hiện thực phần `prefers-reduced-motion` + công tắc trong trang (React state của phiên, **không** localStorage); lưu ở `students.preferences` từ R03.
+- Không route game nào được tạo (`/learn/games/*` chưa tồn tại); nút "Vào chơi" luôn khóa.
 
 ## 5. Mô hình dữ liệu dự kiến
 

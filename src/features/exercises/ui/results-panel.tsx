@@ -22,7 +22,8 @@ function formatDuration(ms: number | null): string {
 
 /**
  * Màn kết quả: phần cho trẻ là lời khen + ngôi sao (không điểm số so sánh, không xếp hạng); phần cho người
- * lớn là số liệu của buổi luyện — chỉ trong bộ nhớ trang — và các chỉ số nghiên cứu ghi rõ nguồn.
+ * lớn là số liệu của buổi luyện — chỉ trong bộ nhớ trang — và các chỉ số nghiên cứu đo được trong ứng dụng.
+ * Chỉ số cần quan sát ở lớp (`classroom_observation`) không còn hiển thị từ R02 (AD-51; mã giữ tới R11).
  */
 export function ResultsPanel({
   state,
@@ -39,6 +40,7 @@ export function ResultsPanel({
 }) {
   const t = vi.practice.results;
   const result = summarizeSession(state);
+  const research = result.research.filter((indicator) => indicator.source === "app");
   const rows: Array<[string, string]> = [
     [t.rows.completed, `${result.completedItems} / ${result.gradableItems}`],
     [t.rows.correct, String(result.correctItems)],
@@ -93,13 +95,11 @@ export function ResultsPanel({
         <p className="mt-2 text-xs text-ink-faint">{result.durationNote}</p>
         <h4 className="mt-6 font-bold text-ink">{t.researchTitle}</h4>
         <ul className="mt-2 space-y-3">
-          {result.research.map((indicator) => (
+          {research.map((indicator) => (
             <li key={indicator.id} className="rounded-2xl bg-canvas p-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold text-ink">{indicator.question}</span>
-                <Badge tone={indicator.source === "app" ? "brand" : "neutral"}>
-                  {indicator.source === "app" ? t.sourceApp : t.sourceClass}
-                </Badge>
+                <Badge tone="brand">{t.sourceApp}</Badge>
               </div>
               <p className="mt-1 font-bold text-ink">
                 {indicator.value ? `${indicator.value.numerator} / ${indicator.value.denominator}` : t.notMeasured}

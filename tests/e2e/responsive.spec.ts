@@ -26,7 +26,14 @@ test.describe("màn hình điện thoại 360px", () => {
       const box = await link.boundingBox();
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(64);
     }
-    const startBox = await page.getByRole("button", { name: /Bắt đầu/ }).boundingBox();
-    expect(startBox?.height ?? 0).toBeGreaterThanOrEqual(64);
+    // R02: nút chính của trang học sinh và nút "Xem chi tiết" trên thẻ khu vực đều ≥ 64px.
+    for (const name of [/Luyện bài/, /Khám phá Game World/]) {
+      const box = await page.getByRole("main").getByRole("link", { name }).boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(64);
+    }
+    for (const button of await page.getByRole("button", { name: /^Xem chi tiết:/u }).all()) {
+      const box = await button.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(64);
+    }
   });
 });

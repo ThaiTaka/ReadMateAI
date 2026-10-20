@@ -8,7 +8,7 @@ Tệp này được Claude Code nạp tự động ở mỗi phiên. Các quy t�
 
 **Triết lý: TỰ LUYỆN CÓ HƯỚNG DẪN TẠI NHÀ — KHÍCH LỆ BẰNG PHIÊU LƯU VÀ THI ĐUA LÀNH MẠNH.** (Triết lý cũ "học có hướng dẫn ở nhà → tự thực hiện ở lớp" của GĐ1–GĐ4 đã được thay thế; mã liên quan đánh dấu ngừng dùng, AD-51.)
 
-Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa) hiện là **PLANNED** — chưa có mã.
+Các chức năng gamification (điểm, mở khóa, game, bảng xếp hạng, vinh danh, mùa): **R02 đã có giao diện với dữ liệu minh họa hư cấu** (trang chủ mới, `/learn` = Student Adventure Dashboard + Game World, xem trước ở `/demo`, sidebar GV); tính/lưu điểm thật, tài khoản, game chơi được vẫn **PLANNED** (R03–R09).
 
 Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổi → an toàn và quyền riêng tư được ưu tiên hơn tốc độ phát triển.
 
@@ -38,6 +38,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) | **R01** — bảng xếp hạng thanh ngang, đồng hạng, avatar, vinh danh TOP 3, reset hai bước (PLANNED) |
 | [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) | **R01** — phân hệ, schema Supabase mới, API, giao dịch, RLS, AD-40 → AD-53 (PLANNED) |
 | [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) | **R01** — kiểm kê dữ liệu, đồng ý hai phạm vi, điều kiện bật bảng xếp hạng, mô hình mối đe dọa (PLANNED) |
+| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | **R02** — token màu/chuyển động, thành phần `src/components/adventure`, quy tắc giảm chuyển động, giới hạn |
+| [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) | **R02** — danh mục asset + quy tắc giấy phép; dữ liệu máy đọc `content/media/licenses.json` |
 | [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
 | [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
 | [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
@@ -48,7 +50,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - Node.js 24.18.0, npm 11.16.0 → dùng **npm** (không có pnpm/yarn). Git 2.54, GitHub CLI 2.100 (đã đăng nhập tài khoản `ThaiTaka`).
 - **Chưa cài** Vercel CLI và Supabase CLI → dùng `npx` khi được phép. Docker Desktop đã cài nhưng daemon chưa chạy (cần cho Supabase local).
 - Trình duyệt Playwright (Chromium, WebKit) đã cài ở `%LOCALAPPDATA%\ms-playwright` (GĐ2). `@axe-core/playwright` 4.13 (devDependency, GĐ4) cho kiểm tra trợ năng trong E2E.
-- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên push vào `main` và trên pull request (**không** chạy khi push nhánh tính năng — R02.9 dự kiến bổ sung). Từ R01 (2026-10-16) công việc tái cấu trúc nằm trên nhánh **`feature/home-learning-redesign`**; không merge vào `main` khi chưa được phép. Mọi lần push vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
+- Repo GitHub `ThaiTaka/ReadMateAI` đang **PUBLIC**; nhánh `main` **đã được push lần đầu ở GĐ3** (2026-10-14, theo chỉ đạo của người điều phối) và theo dõi `origin/main`. GitHub Actions CI chạy trên push vào `main`, push vào nhánh `feature/**` (từ R02) và trên pull request; quyền `contents: read`, không dùng secret. Từ R01 (2026-10-16) công việc tái cấu trúc nằm trên nhánh **`feature/home-learning-redesign`**; không merge vào `main` khi chưa được phép. Mọi lần push vẫn cần được phép trong yêu cầu của phiên (§2.3) và phải rà soát secret/dữ liệu trước.
 - Ngày 2026-10-16 thư mục dự án là **bản clone mới** từ GitHub (cấu hình git cục bộ đã được đặt lại — xem §2.1).
 - Node 24 chạy được TypeScript gốc (bỏ kiểu) — dùng cho `npm run content:check`. `zod` 4.6.7 là phụ thuộc trực tiếp (GĐ3).
 - `core.autocrlf=true` ở cấp hệ thống → `.gitattributes` chuẩn hóa LF.
@@ -61,7 +63,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 - GV: email/mật khẩu (không tự đăng ký). HS: người dùng ẩn danh Supabase + liên kết thiết bị bằng thẻ học QR/mã dự phòng.
 - **Student gateway**: mọi thao tác ghi của HS và nội dung phiên luyện đi qua server; HS chỉ đọc dữ liệu của mình qua RLS.
 - **Exercise Type Module** (GĐ4 đã hiện thực): mỗi dạng bài là thư mục `src/features/exercises/types/<dạng>/` gồm `schema.ts` (zod), `variants.ts` (câu lệnh chuẩn, mục tiêu, `audioPolicy`, bản phiếu), `runtime.ts` (chấm, gợi ý, hiện đáp án — chạy ở trình duyệt và máy chủ, **không zod**), `module.ts` (`validate()`, chống lộ đáp án, `worksheet()` — máy chủ/lúc build), `generate.ts`, `Player.tsx`. Phần phiếu (`worksheet()`, bản phiếu trong `variants.ts`, `core/worksheet.ts`, `generation/pair.ts`, `ui/worksheet-preview.tsx`) và `Paper.tsx` **ngừng dùng** từ R01 (AD-51 — giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11). Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
-- **PLANNED (R02–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
+- **R02 (đã có, dữ liệu minh họa):** design system phiêu lưu `src/components/adventure/` (client chỉ `adventure-dialog`, `motion`), asset SVG tự vẽ `src/components/art/` (Server Components, chờ GV duyệt), hằng số điểm `src/features/gamification/rules.ts` + hàm thuần `unlocks.ts`, danh mục `features/game-world`, `features/avatars`, dữ liệu hư cấu `features/demo/adventure-data.ts`, giấy phép `content/media/licenses.json` (kiểm trong `content:check`). Chi tiết: [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+- **PLANNED (R03–R11):** Question Instance Service phát câu ở server và chấm ở server cho chế độ có điểm (đáp án không xuống client trước khi nộp); Scoring Engine trên sổ cái `point_events` chỉ ghi thêm; mùa theo lớp, reset bằng một giao dịch; bảng xếp hạng qua DTO không định danh; Game Engine = lõi TS thuần + React/SVG/CSS (không Phaser). Chi tiết: [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md).
 - Bài tập của `/demo` sinh **ở máy chủ lúc build** từ kho tri thức (chế độ `demo`, hồ sơ minh họa); chế độ `production` chỉ nhận hồ sơ `confirmed` + nội dung `approved` — hiện chưa có nên không tạo bài nào (đúng thiết kế).
 - Kho tri thức lõi là dữ liệu JSON trong repo (`content/kb` — ngôn ngữ, `content/curriculum` — tiến độ) kiểm bằng zod + `npm run content:check`; thư viện ngôn ngữ xác định ở `src/lib/vietnamese/` (phân tích tiếng theo **danh mục vần**, quy ước qu/gi/kiểu dấu là **tham số hồ sơ lớp**), lớp nghiệp vụ ở `src/features/knowledge/` (`checkReadability`, `selectCorpusItems`). Chi tiết: [docs/VIETNAMESE_ENGINE.md](docs/VIETNAMESE_ENGINE.md).
 - Âm thanh sinh trước (TTS) hoặc ghi âm GV; phân hóa dựa trên luật; AI chỉ sau MVP qua adapter thay thế được. (PDF phiếu học tập bằng `@react-pdf/renderer` — bỏ khỏi lộ trình ở R01.)
@@ -158,6 +161,16 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 6. Reset mùa chỉ GV `owner`, xác nhận hai bước, một giao dịch; **không** chạm dữ liệu học tập hay lớp khác.
 7. Hoạt cảnh tôn trọng giảm chuyển động; không nhấp nháy > 3 lần/giây; asset game chỉ khi có giấy phép ghi trong repo.
 8. Dữ liệu minh họa của game/bảng xếp hạng là **hư cấu**, nằm ở `src/features/demo/`, không lưu.
+
+### 9.5 Quy tắc rút ra ở R02 (BẮT BUỘC)
+
+1. Hình minh họa/nhân vật là SVG trong `src/components/art/` (Server Component), dùng `useSvgIds` cho id gradient (không trùng id khi một hình xuất hiện nhiều lần) và `artA11y(title)` (có tiêu đề → `role="img"`, không → `aria-hidden`). Mỗi tệp art phải có dòng trong `content/media/licenses.json` (unit test chặn); asset mới luôn `pending_review`.
+2. Hoạt cảnh SVG: **không** đặt lớp `animate-*` lên phần tử có thuộc tính `transform` (CSS transform đè vị trí) — bọc `<g transform>` ngoài, hoạt cảnh ở phần tử trong; xoay/nhún dùng `origin-fill` + `origin-*`.
+3. Mọi hoạt cảnh phải dừng dưới `[data-motion="reduce"]` (công tắc `MotionToggle` trong `MotionScope`) và `prefers-reduced-motion`; lựa chọn chỉ giữ trong React state (không localStorage ở khu vực học sinh).
+4. Dữ liệu minh họa (điểm, huy hiệu, bảng xếp hạng) chỉ ở `src/features/demo/adventure-data.ts`, tên hư cấu, luôn kèm `PreviewRibbon`/chip "Minh họa"; không có thao tác nào sửa điểm; nút của chức năng chưa có (vd. "Vào chơi – Sắp có") luôn `disabled`, không `Link` tới route chưa tồn tại.
+5. Nội dung bảng thông tin (`AdventureDialog`) truyền qua `children` từ Server Component để hình SVG không vào bundle JS; client component chỉ giữ trạng thái mở/đóng.
+6. Không còn chữ "ở lớp/tại lớp/trên lớp/phiếu" trong giao diện (trừ nhánh ngừng dùng `vi.practice.worksheet`) — `tests/unit/redesign-copy.test.tsx`.
+7. Bash tool trên Windows: script dài có dấu nháy/backtick ghi bằng công cụ Write vào scratchpad rồi chạy `node tệp.cjs` (heredoc trong lệnh đôi khi bị cắt); sau khi Turbopack dev chạy lâu mà tệp bị thay bằng script, khởi động lại `next dev` nếu thấy giá trị cũ.
 
 ## 10. Kiểm thử và Definition of Done
 

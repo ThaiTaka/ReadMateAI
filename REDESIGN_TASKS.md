@@ -1,6 +1,6 @@
 # REDESIGN_TASKS — Lộ trình tái cấu trúc ReadMate AI (R01 → R11)
 
-> **Cập nhật:** 2026-10-16 · **Giai đoạn hiện tại:** R01 — chờ người điều phối đánh giá.
+> **Cập nhật:** 2026-10-20 · **Giai đoạn hiện tại:** R02 — hoàn thành, chờ người điều phối đánh giá (R01 đã được chấp nhận).
 > **Quy ước:** mỗi giai đoạn giao bằng prompt riêng; **chỉ bắt đầu giai đoạn mới khi được phê duyệt**. Mọi giai đoạn kết thúc bằng: kiểm tra đầy đủ (CLAUDE.md §10) → quét secret → commit → push nhánh `feature/home-learning-redesign` → xác minh trên GitHub (CLAUDE.md §2, theo yêu cầu R01 §12).
 > **Ký hiệu:** `[x]` xong · `[ ]` chưa · Quy mô: **S** ≤ 1 phiên · **M** 2–3 phiên · **L** ≥ 4 phiên.
 > **Tài liệu:** [PRODUCT_REDESIGN](docs/PRODUCT_REDESIGN.md) · [GAMIFICATION_SPEC](docs/GAMIFICATION_SPEC.md) · [GAME_DESIGN](docs/GAME_DESIGN.md) · [LEADERBOARD_SPEC](docs/LEADERBOARD_SPEC.md) · [REDESIGN_ARCHITECTURE](docs/REDESIGN_ARCHITECTURE.md) · [PRIVACY_AND_SECURITY](docs/PRIVACY_AND_SECURITY.md) · [REDESIGN_PROGRESS](REDESIGN_PROGRESS.md)
@@ -10,8 +10,8 @@
 
 | R | Tên | Phụ thuộc | Quy mô | Trạng thái |
 |---|---|---|---|---|
-| R01 | Kiểm tra dự án, bảo toàn công việc, thiết kế lại kiến trúc | — | S | ✅ Chờ duyệt |
-| R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ⏸ |
+| R01 | Kiểm tra dự án, bảo toàn công việc, thiết kế lại kiến trúc | — | S | ✅ Đã chấp nhận |
+| R02 | Giao diện mới, trang học sinh, Game World (dữ liệu minh họa) | R01 | L | ✅ Chờ duyệt |
 | R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ⏸ |
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ⏸ |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ⏸ |
@@ -51,41 +51,51 @@ Ngoài ra: dọn mã luồng cũ chia hai bước — gỡ khỏi giao diện �
 - [x] Không xóa/ghi đè tệp chưa đọc; không `reset --hard`, `clean`, force push; `main` không đổi
 - [x] Tài liệu tương lai ghi **PLANNED**; tài liệu cũ có ghi chú phần bị thay thế, không mâu thuẫn
 - [x] Bộ kiểm tra xanh; không secret/dữ liệu học sinh trong commit
-- [ ] Người điều phối duyệt kiến trúc và lộ trình
+- [x] Người điều phối duyệt kiến trúc và lộ trình (chấp nhận chuyển sang R02, 2026-10-20)
 
 **Đầu ra:** bộ tài liệu R01, nhánh trên GitHub, báo cáo R01.
 
 ---
 
-## R02 — Giao diện mới, trang học sinh, Game World (L)
+## R02 — Giao diện mới, trang học sinh, Game World (L) ✅
 
 **Phụ thuộc:** R01 được duyệt. **Không** CSDL, **không** tài khoản: mọi dữ liệu là minh họa hư cấu, không lưu.
 
 Nhiệm vụ:
 
-- [ ] 2.1 Hệ thống thiết kế "Modern 2D Educational Adventure": token màu/chuyển động/bóng mới trong `src/styles/tokens.css`; thành phần nút lớn, khung cảnh, thẻ khóa, ô điểm, trái tim HP (chỉ giao diện)
-- [ ] 2.2 Asset minh họa đầu tiên **có giấy phép** (tự vẽ SVG hoặc nguồn CC0 có ghi công) + `content/media/licenses.json`; phác thảo nhân vật/avatar/quái vật để GV xem (RQ-M1)
-- [ ] 2.3 `/learn` thành **bản đồ thế giới** (thẻ sương mù, trạm luyện tập, 4 lối vào game có khóa + ngưỡng, ô điểm) — dữ liệu minh họa
-- [ ] 2.4 Trang chủ `/`, metadata, `package.json` `description`, `src/config/site.ts`: viết lại theo định hướng mới
-- [ ] 2.5 Gỡ luồng cũ khỏi giao diện (AD-51): `classroom_like` → "Tự làm" (H0), bỏ xem trước phiếu khỏi `/demo`, bỏ "giống phiếu" ở H1/H0, bỏ chỉ số "cần GV ghi nhận ở lớp"; cập nhật chuỗi `vi.ts` và test tương ứng (không xóa test để "cho xanh")
-- [ ] 2.6 `/demo` bổ sung bản xem trước bản đồ, ô điểm và bảng xếp hạng **hư cấu** (nhãn rõ)
-- [ ] 2.7 Cài đặt trẻ: giảm chuyển động (theo `prefers-reduced-motion` + công tắc trong trang, chưa lưu server — R03), âm lượng (khóa, chưa có âm thanh)
-- [ ] 2.8 Sidebar GV: mục Bảng điểm, Vinh danh, Mùa thi đua ("Sắp có"), bỏ "Phiếu học tập"
-- [ ] 2.9 CI: thêm kích hoạt cho nhánh `feature/**` (hiện workflow chỉ chạy trên `main` và pull request)
+- [x] 2.1 Hệ thống thiết kế "Modern 2D Educational Adventure": token màu/chuyển động/bóng mới trong `src/styles/tokens.css`; thành phần nút lớn, khung cảnh, thẻ khóa, ô điểm, trái tim HP (chỉ giao diện)
+- [x] 2.2 Asset minh họa đầu tiên **có giấy phép** (tự vẽ SVG hoặc nguồn CC0 có ghi công) + `content/media/licenses.json`; phác thảo nhân vật/avatar/quái vật để GV xem (RQ-M1)
+- [x] 2.3 `/learn` thành **bản đồ thế giới** (thẻ sương mù, trạm luyện tập, 4 lối vào game có khóa + ngưỡng, ô điểm) — dữ liệu minh họa
+- [x] 2.4 Trang chủ `/`, metadata, `package.json` `description`, `src/config/site.ts`: viết lại theo định hướng mới
+- [x] 2.5 Gỡ luồng cũ khỏi giao diện (AD-51): `classroom_like` → "Tự làm" (H0), bỏ xem trước phiếu khỏi `/demo`, bỏ "giống phiếu" ở H1/H0, bỏ chỉ số "cần GV ghi nhận ở lớp"; cập nhật chuỗi `vi.ts` và test tương ứng (không xóa test để "cho xanh")
+- [x] 2.6 `/demo` bổ sung bản xem trước bản đồ, ô điểm và bảng xếp hạng **hư cấu** (nhãn rõ)
+- [x] 2.7 Cài đặt trẻ: giảm chuyển động (theo `prefers-reduced-motion` + công tắc trong trang, chưa lưu server — R03), âm lượng (khóa, chưa có âm thanh)
+- [x] 2.8 Sidebar GV: mục Bảng điểm, Vinh danh, Mùa thi đua ("Sắp có"), bỏ "Phiếu học tập"
+- [x] 2.9 CI: thêm kích hoạt cho nhánh `feature/**` (hiện workflow chỉ chạy trên `main` và pull request)
 
 **Tệp/module dự kiến:** `src/styles/tokens.css`, `src/components/{world,kid,ui}/`, `src/app/learn/**`, `src/app/(site)/page.tsx`, `src/app/(site)/demo/**`, `src/features/demo/**`, `src/features/exercises/core/support.ts`, `src/strings/vi.ts`, `src/components/layout/teacher-sidebar.tsx`, `.github/workflows/ci.yml`, `tests/unit/**`, `tests/e2e/**`.
 
 **Tiêu chí nghiệm thu**
 
-- [ ] Không còn chuỗi "Thử như ở lớp", "phiếu ở lớp", "tự thực hiện ở lớp" trong giao diện học sinh và trang chủ (unit test soát chuỗi)
-- [ ] Bản đồ dùng được ở 360 px, iPhone, iPad, desktop; vùng chạm ≥ 64 px; không cuộn ngang; axe không lỗi critical/serious
-- [ ] Giảm chuyển động tắt mọi hoạt cảnh di chuyển; không hiệu ứng nhấp nháy
-- [ ] Mọi asset có dòng giấy phép; không ảnh/nhân vật của SGK hay thương hiệu khác
-- [ ] `/demo` vẫn không request ghi, không `localStorage` (E2E giữ nguyên)
-- [ ] JS route `/learn` đo và ghi lại (ngân sách ≈ 200 KB gzip)
+- [x] Không còn chuỗi "Thử như ở lớp", "phiếu ở lớp", "tự thực hiện ở lớp" trong giao diện học sinh và trang chủ (unit test soát chuỗi)
+- [x] Bản đồ dùng được ở 360 px, iPhone, iPad, desktop; vùng chạm ≥ 64 px; không cuộn ngang; axe không lỗi critical/serious
+- [x] Giảm chuyển động tắt mọi hoạt cảnh di chuyển; không hiệu ứng nhấp nháy
+- [x] Mọi asset có dòng giấy phép; không ảnh/nhân vật của SGK hay thương hiệu khác
+- [x] `/demo` vẫn không request ghi, không `localStorage` (E2E giữ nguyên)
+- [x] JS route `/learn` đo và ghi lại (ngân sách ≈ 200 KB gzip)
 
 **Kiểm thử bắt buộc:** format, lint, typecheck, content:check, test:run, build, **test:e2e** (thay đổi giao diện/route).
 **Đầu ra:** giao diện mới chạy với dữ liệu minh họa; danh sách asset + giấy phép; ảnh chụp các màn ở 4 cỡ thiết bị.
+
+**Kết quả R02 (2026-10-20)** — chi tiết ở [REDESIGN_PROGRESS §3](REDESIGN_PROGRESS.md#3-việc-đã-làm-trong-r02):
+
+- 2.1: token `jade`/`magic`/`deep`, bóng "khối", 8 hoạt cảnh; 17 thành phần ở `src/components/adventure/` + `ComingSoonState` — [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+- 2.2: 22 dòng giấy phép (`content/media/licenses.json`, kiểm trong `content:check`): Bạn nhỏ thám hiểm, Cú Bông, Bé Mây Bông, 5 avatar, rương, bục vinh danh, 4 cảnh game, bản đồ thế giới, phông cảnh, 8 ô mốc — tất cả `pending_review`, xem ở `/teacher#duyet-hoc-lieu` — [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md).
+- 2.3: `/learn` = Student Adventure Dashboard (hồ sơ hư cấu "Mây", 135 điểm) + Game World (bản đồ, 4 thẻ khóa/đủ điểm, bảng chi tiết, "Vào chơi – Sắp có" khóa) + 8 mốc khám phá + huy hiệu. Mốc bản đồ hiện là dải 8 ô (chưa phải lưới 24 thẻ chạm để mở — thao tác mở thuộc R04).
+- 2.5: H0 "Tự làm", `layout` `focused`, bỏ xem trước phiếu, bỏ chỉ số ghi nhận ở lớp; buổi luyện mẫu kết thúc bằng "Thử thách tự làm".
+- 2.7: âm lượng **chưa làm** (chưa có âm thanh nào — để R10); giảm chuyển động có công tắc trong `/learn` và `/demo`.
+- 2.9: `.github/workflows/ci.yml` chạy trên push `feature/**`.
+- Ngoài kế hoạch: `src/features/gamification/rules.ts` + `unlocks.ts` (hằng số và hàm thuần, kế hoạch gốc R04) tạo sớm để giao diện không chép số.
 
 ---
 

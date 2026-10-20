@@ -131,6 +131,12 @@ async function runActivity(page: Page, activity: DemoActivity) {
 }
 
 test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
+  // WebKit của Playwright trên Windows vẽ bằng CPU (không tăng tốc GPU): luồng nhiều câu chạy chậm gấp ~2 lần
+  // Chromium (đo ở R02: 25–32 s) → nới thời gian chờ cho WebKit, không bỏ bước kiểm tra nào.
+  test.beforeEach(({ browserName }) => {
+    test.slow(browserName === "webkit", "WebKit trên Windows không tăng tốc GPU");
+  });
+
   for (const id of ["khoi-dong", "vung-buoc", "tang-toc"] as const) {
     test(`lộ trình ${PATH_NAMES[id]}: buổi luyện mẫu chạy trọn vẹn tới màn kết quả`, async ({ page, pageErrors }) => {
       await openPath(page, id);
@@ -150,7 +156,15 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
       await expect(page.getByText("Số câu đã làm xong").locator("xpath=following-sibling::dd")).toHaveText(
         `${total} / ${total}`,
       );
-      await expect(page.getByText("Cần GV ghi nhận ở lớp").first()).toBeVisible();
+      // R02 (AD-51): không còn chỉ số "ghi nhận ở lớp" hay phiếu tương đương; có lời nhắc điểm minh họa + về Game World.
+      await expect(page.getByText(/ở lớp|phiếu/u)).toHaveCount(0);
+      await expect(page.getByRole("complementary", { name: "Điểm thưởng ở bản chính thức" })).toContainText(
+        "không tính và không lưu điểm",
+      );
+      await expect(page.getByRole("link", { name: /Về Game World/ }).first()).toHaveAttribute(
+        "href",
+        "/learn#game-world",
+      );
       expect(pageErrors).toEqual([]);
     });
   }

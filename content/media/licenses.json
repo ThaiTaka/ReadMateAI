@@ -1,0 +1,406 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-20",
+  "note": "Danh mục nguồn và giấy phép của mọi hình ảnh, nhân vật, phông chữ dùng trong ReadMate AI (CLAUDE.md §7.9, §9.4.7). Asset do dự án tự tạo luôn bắt đầu ở pending_review; KHÔNG tự đặt approved — chỉ giáo viên duyệt (cần reviewedBy, reviewedAt). Kiểm tra bằng npm run content:check. Xem docs/ASSET_MANIFEST.md.",
+  "assets": [
+    {
+      "id": "art.character.hero-kid",
+      "name": "Bạn nhỏ thám hiểm (nhân vật học sinh phiêu lưu)",
+      "kind": "character",
+      "paths": ["src/components/art/characters.tsx#HeroKid"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Trang chủ, khu duyệt học liệu của GV",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.character.guide-owl",
+      "name": "Cú Bông (nhân vật hướng dẫn)",
+      "kind": "character",
+      "paths": ["src/components/art/characters.tsx#GuideOwl"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Trang chủ, /learn, khu duyệt học liệu",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.character.friendly-monster",
+      "name": "Bé Mây Bông (quái vật thân thiện)",
+      "kind": "character",
+      "paths": ["src/components/art/characters.tsx#FriendlyMonster"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Bảng chi tiết trò chơi, khu duyệt học liệu",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV xác nhận không gây sợ cho trẻ 6 tuổi (GAME_DESIGN §5, RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.may",
+      "name": "Avatar Bạn tóc búi",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:may"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn, /demo, bảng xếp hạng minh họa)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.bong",
+      "name": "Avatar Bạn tóc xoăn",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:bong"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn, /demo, bảng xếp hạng minh họa)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.na",
+      "name": "Avatar Bạn tóc ngắn",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:na"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn, /demo, bảng xếp hạng minh họa)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.ti",
+      "name": "Avatar Bạn đội mũ",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:ti"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn, /demo, bảng xếp hạng minh họa)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.avatar.bin",
+      "name": "Avatar Bạn đeo kính",
+      "kind": "avatar",
+      "paths": ["src/components/art/avatars.tsx#KidAvatar:bin"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Avatar có sẵn (/learn, /demo, bảng xếp hạng minh họa)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Avatar hoạt hình, không mô phỏng trẻ thật. Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.icon.treasure-chest",
+      "name": "Rương kho báu",
+      "kind": "icon",
+      "paths": ["src/components/art/treasure.tsx#TreasureChest"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Khu duyệt học liệu; biểu tượng đích của Mê cung",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.icon.honor-podium",
+      "name": "Bục vinh danh ba bậc",
+      "kind": "icon",
+      "paths": ["src/components/art/treasure.tsx#HonorPodium"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Giới thiệu tính năng vinh danh (khu GV)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.treasure-maze",
+      "name": "Cảnh Mê cung kho báu",
+      "kind": "scene",
+      "paths": ["src/components/art/scenes.tsx#MazeScene"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Thẻ trò chơi (trang chủ, /learn, /demo)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.wonder-forest",
+      "name": "Cảnh Rừng chữ kỳ diệu",
+      "kind": "scene",
+      "paths": ["src/components/art/scenes.tsx#ForestScene"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Thẻ trò chơi",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.tone-island",
+      "name": "Cảnh Đảo dấu thanh",
+      "kind": "scene",
+      "paths": ["src/components/art/scenes.tsx#IslandScene"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Thẻ trò chơi",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1). Ký hiệu dấu thanh vẽ bằng nét, cần GV xem hình dạng dấu."
+      }
+    },
+    {
+      "id": "art.scene.rhyme-castle",
+      "name": "Cảnh Lâu đài ghép vần",
+      "kind": "scene",
+      "paths": ["src/components/art/scenes.tsx#CastleScene"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Thẻ trò chơi",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.world-map",
+      "name": "Bản đồ thế giới phiêu lưu",
+      "kind": "scene",
+      "paths": ["src/components/art/world-map.tsx#WorldMapScene"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "/learn (Game World)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.hero-landscape",
+      "name": "Phông cảnh thế giới kỳ diệu (trang chủ)",
+      "kind": "scene",
+      "paths": ["src/components/art/hero-landscape.tsx#HeroLandscape"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Trang chủ",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.scene.map-tiles",
+      "name": "Tám ô mốc khám phá bản đồ + ô sương mù",
+      "kind": "scene",
+      "paths": ["src/components/art/map-tiles.tsx#MapTileArt", "src/components/art/map-tiles.tsx#FogTileArt"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "/learn (mốc khám phá)",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
+      }
+    },
+    {
+      "id": "art.icon.adventure-ui",
+      "name": "Biểu tượng giao diện phiêu lưu (ngôi sao điểm, trái tim HP)",
+      "kind": "icon",
+      "paths": [
+        "src/components/adventure/score-badge.tsx#StarMark",
+        "src/components/adventure/heart-indicator.tsx#Heart"
+      ],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Ô điểm, chỉ báo trái tim",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Biểu tượng giao diện; vẫn chờ GV xem cùng bộ hình."
+      }
+    },
+    {
+      "id": "art.logo.readmate",
+      "name": "Biểu trưng ReadMate AI",
+      "kind": "icon",
+      "paths": ["src/components/layout/logo.tsx#LogoMark"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Mọi trang",
+      "createdAt": "2026-10-20",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Có từ GĐ2; ghi bổ sung vào danh mục ở R02."
+      }
+    },
+    {
+      "id": "font.be-vietnam-pro",
+      "name": "Be Vietnam Pro",
+      "kind": "font",
+      "paths": ["src/app/fonts.ts#beVietnamPro"],
+      "author": "Lâm Bảo, Tony Le, ViệtAnh Nguyễn",
+      "source": "Google Fonts qua next/font (tải lúc build, không commit tệp font vào repo)",
+      "license": "SIL Open Font License 1.1",
+      "usage": "Chữ giao diện",
+      "createdAt": "2026-10-12",
+      "review": {
+        "status": "not_required",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Phông chữ, không phải học liệu."
+      }
+    },
+    {
+      "id": "font.andika",
+      "name": "Andika",
+      "kind": "font",
+      "paths": ["src/app/fonts.ts#andika"],
+      "author": "SIL International",
+      "source": "Google Fonts qua next/font (tải lúc build, không commit tệp font vào repo)",
+      "license": "SIL Open Font License 1.1",
+      "usage": "Chữ học liệu cần đọc",
+      "createdAt": "2026-10-12",
+      "review": {
+        "status": "not_required",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Phông chữ, không phải học liệu."
+      }
+    },
+    {
+      "id": "icons.lucide",
+      "name": "Lucide icons (lucide-react 1.55.0)",
+      "kind": "icon-set",
+      "paths": ["package.json#lucide-react"],
+      "author": "Lucide Contributors",
+      "source": "Gói npm lucide-react",
+      "license": "ISC",
+      "usage": "Biểu tượng điều khiển phụ (nút, nhãn trạng thái) — không dùng làm nhân vật hay cảnh quan",
+      "createdAt": "2026-10-12",
+      "review": {
+        "status": "not_required",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Biểu tượng giao diện chung."
+      }
+    }
+  ]
+}

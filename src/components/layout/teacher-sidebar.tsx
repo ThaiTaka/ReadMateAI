@@ -1,13 +1,16 @@
 import Link from "next/link";
 import type { Route } from "next";
 import {
-  ChartLine,
+  CalendarRange,
   ClipboardCheck,
-  FileText,
+  Crown,
   House,
   LayoutDashboard,
   Library,
   School,
+  Settings,
+  Trophy,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,19 +20,25 @@ import { LogoMark } from "./logo";
 type TeacherNavItem = {
   label: string;
   Icon: LucideIcon;
-  /** Không có href = chức năng chưa có trang (hiển thị "Sắp có", không bấm được). */
+  /** Mỗi mục dẫn tới phần giới thiệu trên trang tổng quan; không có href = chưa có gì để xem. */
   href?: Route;
+  /** Chức năng chưa xây dựng: hiện nhãn "Sắp có" cạnh tên mục. */
+  comingSoon?: boolean;
 };
 
 const s = vi.teacher.sidebar;
 
+/** Menu R02 (REDESIGN_TASKS 2.8): bỏ "Phiếu học tập"; thêm Bảng điểm, Vinh danh, Mùa thi đua — đều "Sắp có". */
 const ITEMS: readonly TeacherNavItem[] = [
   { label: s.overview, Icon: LayoutDashboard, href: "/teacher#tong-quan" },
-  { label: s.classes, Icon: School, href: "/teacher#lop-hoc" },
-  { label: s.bank, Icon: Library, href: "/teacher#ngan-hang-bai-tap" },
-  { label: s.progress, Icon: ChartLine, href: "/teacher#tien-bo" },
-  { label: s.worksheets, Icon: FileText },
-  { label: s.observations, Icon: ClipboardCheck },
+  { label: s.classes, Icon: School, href: "/teacher#lop-hoc", comingSoon: true },
+  { label: s.students, Icon: Users, href: "/teacher#hoc-sinh", comingSoon: true },
+  { label: s.bank, Icon: Library, href: "/teacher#ngan-hang-bai-tap", comingSoon: true },
+  { label: s.review, Icon: ClipboardCheck, href: "/teacher#duyet-hoc-lieu", comingSoon: true },
+  { label: s.scoreboard, Icon: Trophy, href: "/teacher#bang-diem", comingSoon: true },
+  { label: s.honors, Icon: Crown, href: "/teacher#vinh-danh", comingSoon: true },
+  { label: s.seasons, Icon: CalendarRange, href: "/teacher#mua-thi-dua", comingSoon: true },
+  { label: s.settings, Icon: Settings, href: "/teacher#cai-dat", comingSoon: true },
 ];
 
 const itemClass = "flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition-colors";
@@ -50,18 +59,23 @@ export function TeacherSidebar() {
 
       <nav aria-label={vi.a11y.teacherNav} className="px-4 pb-4 lg:flex-1 lg:px-4">
         <ul className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible">
-          {ITEMS.map(({ label, Icon, href }) => (
+          {ITEMS.map(({ label, Icon, href, comingSoon }) => (
             <li key={label} className="shrink-0">
               {href ? (
                 <Link href={href} className={`${itemClass} text-ink-soft hover:bg-surface-muted hover:text-ink`}>
                   <Icon aria-hidden="true" className="size-5" />
                   {label}
+                  {comingSoon ? (
+                    <Badge tone="neutral" className="ml-auto shrink-0 whitespace-nowrap">
+                      {vi.status.comingSoon}
+                    </Badge>
+                  ) : null}
                 </Link>
               ) : (
                 <span className={`${itemClass} cursor-not-allowed text-ink-faint`}>
                   <Icon aria-hidden="true" className="size-5" />
                   {label}
-                  <Badge tone="neutral" className="ml-auto">
+                  <Badge tone="neutral" className="ml-auto shrink-0 whitespace-nowrap">
                     {vi.status.comingSoon}
                   </Badge>
                 </span>

@@ -109,8 +109,11 @@ describe("chính sách âm thanh theo mục tiêu học tập (PRD §9.2, §12)"
     ]);
     expect(SUPPORT_POLICIES[3].showWorkedExample).toBe(true);
     expect(SUPPORT_POLICIES[2].showWorkedExample).toBe(false);
-    expect(SUPPORT_POLICIES[1].layout).toBe("paper_like");
-    expect(SUPPORT_POLICIES[0].layout).toBe("paper_like");
+    // R02 (AD-51): H1/H0 dùng khung gọn "focused" — không còn bố cục "giống phiếu ở lớp"; H0 đổi tên "Tự làm".
+    expect(SUPPORT_POLICIES[3].layout).toBe("guided");
+    expect(SUPPORT_POLICIES[1].layout).toBe("focused");
+    expect(SUPPORT_POLICIES[0].layout).toBe("focused");
+    expect(SUPPORT_POLICIES[0].name).toBe("Tự làm");
   });
 
   it("câu lệnh chuẩn của mọi biến thể không chứa tiếng/từ cụ thể nào — chỉ mô tả việc cần làm (A1)", () => {

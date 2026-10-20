@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
+  keywords: [...SITE.keywords],
+  // Chưa có tên miền chính thức → không khai báo url/ảnh Open Graph tuyệt đối (thêm khi deploy — R11).
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    siteName: SITE.name,
+    title: `${vi.brand.name} — ${vi.brand.slogan}`,
+    description: SITE.description,
+  },
   // Bản xem trước: chưa cho công cụ tìm kiếm lập chỉ mục (xem docs/ARCHITECTURE.md §19).
   robots: { index: false, follow: false },
 };

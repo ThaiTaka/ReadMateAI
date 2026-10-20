@@ -65,12 +65,12 @@ describe("dữ liệu demo giả lập", () => {
     expect(DEMO_DATA_IS_FICTIONAL).toBe(true);
   });
 
-  it("buổi luyện mẫu mỗi lộ trình: ôn bài cũ → luyện tập → kết thúc bằng 'Thử như ở lớp'", () => {
+  it("buổi luyện mẫu mỗi lộ trình: ôn bài cũ → luyện tập → kết thúc bằng thử thách 'Tự làm' (H0, R02)", () => {
     for (const id of PATH_IDS) {
       const steps = DEMO_PLANS[id].session;
       expect(steps[0]?.kind).toBe("review");
       expect(steps.some((step) => step.kind === "practice")).toBe(true);
-      expect(steps.at(-1)?.kind).toBe("classroom_like");
+      expect(steps.at(-1)?.kind).toBe("independent");
     }
   });
 

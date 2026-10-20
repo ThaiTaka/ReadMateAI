@@ -1,12 +1,13 @@
 # ReadMate AI
 
-> **Mỗi em một nhịp đọc – Mỗi ngày một tiến bộ**
+> **Học Tiếng Việt, khám phá thế giới kỳ diệu**
+> *Tự luyện mỗi ngày – Tích điểm, mở khóa và phiêu lưu cùng tri thức*
 
 ReadMate AI là **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** cho học sinh lớp 1 — nhận diện chữ, âm, vần, đánh vần, đọc trơn và phát triển vốn từ. Học sinh luyện ở nhà với lời đọc yêu cầu, hình ảnh và gợi ý; mỗi câu đúng được điểm thưởng để khám phá bản đồ và mở các mini-game phiêu lưu (câu hỏi trong game vẫn là câu hỏi Tiếng Việt). Giáo viên quản lý và duyệt nội dung, theo dõi kết quả, vinh danh TOP 3 và tổ chức các mùa thi đua.
 
-> **Định hướng mới từ Giai đoạn R01 (2026-10-16)** — điểm thưởng, bản đồ, mini-game, bảng xếp hạng, vinh danh và mùa thi đua hiện là **PLANNED (chưa có mã)**. Thiết kế: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) · lộ trình: [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · tiến độ: [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md). Các mô tả "tự thực hiện ở lớp", "phiếu tương đương", "Thử như ở lớp" bên dưới thuộc định hướng cũ — mã vẫn chạy và sẽ được gỡ khỏi giao diện ở R02.
+> **Trạng thái: Giai đoạn R02 — giao diện mới "Modern 2D Educational Adventure"** (nhánh `feature/home-learning-redesign`). Trang chủ, trang học sinh `/learn` (Student Adventure Dashboard + Game World), phần xem trước Game World ở `/demo` và khu giáo viên đã thiết kế lại; nhân vật, avatar, quái vật và bốn bản đồ là **SVG tự vẽ — bản phác thảo chờ giáo viên duyệt**. Điểm, bản đồ, bảng xếp hạng **chỉ là dữ liệu minh họa hư cấu** (không lưu, không gửi); điểm thật, tài khoản, mini-game chơi được thuộc R03–R09. Thiết kế: [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) · [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) · [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) · lộ trình [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · tiến độ [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md).
 
-**Trạng thái mã nguồn: hết Giai đoạn 4 — bộ máy bài tập và bản chơi thử `/demo`** (công việc tái cấu trúc ở nhánh `feature/home-learning-redesign`). Đã có thư viện phân tích tiếng Việt, kho tri thức có kiểm thử, **bộ máy bài tập sáu dạng** (sinh bài theo quy tắc, kiểm tra chống lộ đáp án, mức hỗ trợ H3→H0, cặp bài ở nhà – phiếu ở lớp) và trang **chơi thử** dùng dữ liệu minh họa. **Chưa** có âm thanh, tài khoản, cơ sở dữ liệu, lưu kết quả hay AI; toàn bộ nội dung **đang chờ giáo viên duyệt**. Xem lộ trình ở [TASKS.md](TASKS.md) và tiến độ ở [PROGRESS.md](PROGRESS.md).
+Đã có từ GĐ3–GĐ4 và vẫn giữ nguyên: thư viện phân tích tiếng Việt, kho tri thức có kiểm thử, **bộ máy bài tập sáu dạng / 17 biến thể** (sinh bài theo quy tắc, chống lộ đáp án, mức hỗ trợ H3 → H0 — H0 nay gọi là **"Tự làm"**) và bản chơi thử tương tác `/demo`. **Chưa** có âm thanh, tài khoản, cơ sở dữ liệu, lưu kết quả hay AI; toàn bộ nội dung **đang chờ giáo viên duyệt**.
 
 ## Yêu cầu
 
@@ -67,7 +68,7 @@ src/
 ├── app/                    # App Router
 │   ├── (site)/             # Trang công khai có header/footer: / · /demo · /join
 │   ├── teacher/            # Khung khu vực giáo viên (/teacher)
-│   ├── learn/              # Khung khu vực học sinh (/learn), ưu tiên điện thoại
+│   ├── learn/              # Student Adventure Dashboard + Game World (/learn) — dữ liệu minh họa
 │   ├── layout.tsx          # Layout gốc: lang="vi", font, metadata
 │   ├── fonts.ts            # Be Vietnam Pro (giao diện) + Andika (học liệu đọc)
 │   └── globals.css         # Tailwind CSS 4 + style nền
@@ -76,15 +77,17 @@ src/
 │   ├── layout/             # Header, menu di động, footer, sidebar giáo viên, điều hướng học sinh
 │   ├── learning/           # Biểu tượng hướng dẫn, màu/biểu tượng lộ trình
 │   ├── kid/                # Thành phần cho trẻ: thẻ chọn ≥ 64px, tranh, dấu thanh SVG, nút âm thanh (khóa), phản hồi, tiến độ
-│   └── illustrations/      # Minh họa ghép tiếng, linh vật
+│   ├── adventure/          # R02: nút phiêu lưu, thẻ game/khóa, bản đồ, ô điểm, avatar, huy hiệu, dialog, giảm chuyển động…
+│   └── art/                # R02: nhân vật, avatar, quái vật, kho báu, 4 cảnh game, bản đồ thế giới (SVG tự vẽ, chờ GV duyệt)
 ├── config/                 # site.ts (điều hướng), security-headers.ts (CSP, Permissions-Policy…)
-├── features/               # exercises/ (bộ máy bài tập 6 dạng — GĐ4), learning-paths/ (3 lộ trình), demo/ (dữ liệu và fixture bản chơi thử),
+├── features/               # exercises/ (bộ máy bài tập 6 dạng — GĐ4), learning-paths/ (3 lộ trình), demo/ (dữ liệu minh họa hư cấu),
+│                           # gamification/ (hằng số điểm + hàm mở khóa thuần), game-world/ (4 game, mốc bản đồ), avatars/, media/ (kiểm giấy phép),
 │                           # knowledge/ (kho tri thức: nạp, hồ sơ lớp, kiểm tra ngữ liệu, content:check)
 ├── lib/                    # cn.ts, vietnamese/ (NFC, thanh, phân tích tiếng, chính tả, giải mã, độ khó)
 ├── strings/vi.ts           # Toàn bộ câu chữ giao diện tiếng Việt
 ├── styles/tokens.css       # Design tokens (màu, cỡ chữ, vùng chạm, bo góc, đổ bóng)
 └── types/learning.ts       # Kiểu dùng chung
-content/                    # Kho tri thức (JSON): kb/ (chữ, âm, thanh, vần, quy tắc, tiếng, từ, câu), curriculum/ (bộ bài, hồ sơ lớp)
+content/                    # Kho tri thức (JSON): kb/, curriculum/; media/licenses.json (giấy phép mọi asset hình ảnh, phông chữ)
 scripts/content-check.ts    # npm run content:check
 tests/
 ├── unit/                   # Vitest + Testing Library (vietnamese/, knowledge/ từ GĐ3; exercises/ từ GĐ4)
@@ -92,15 +95,16 @@ tests/
 docs/                       # PRD, kiến trúc, mô hình dữ liệu, bộ máy tiếng Việt, bộ máy bài tập, phiếu rà soát cho GV
 ```
 
-## Xem thử bản chơi thử (Giai đoạn 4)
+## Xem thử (Giai đoạn R02)
 
-1. `npm ci` (lần đầu), rồi `npm run dev` — hoặc `npm run build && npm run start`.
-2. Mở <http://localhost:3000/demo>.
-3. **Bước 1:** chọn lộ trình — Khởi động, Vững bước hoặc Tăng tốc (dành cho người lớn chọn; học sinh không thấy tên nhóm).
-4. **Bước 2:** chọn mức hỗ trợ (H3 → H0), rồi bấm **Bắt đầu buổi luyện** (ôn bài cũ → luyện tập → thử như ở lớp) hoặc **Làm thử** một trong sáu dạng bài.
-5. Làm bài: chạm chọn → **Kiểm tra** → phản hồi → **Thử lại** / **Gợi ý** / **Câu tiếp** → **Xem kết quả**. Sau khi làm xong một dạng bài, màn kết quả có **bản xem trước phiếu ở lớp tương đương**.
+1. `npm ci` (lần đầu), rồi `npm run dev` → <http://localhost:3000> (hoặc `npm run build && npm run start`).
+2. **Trang chủ** `/`: thông điệp mới, ba bước, ba lộ trình, bốn vùng Game World, công cụ dự kiến cho giáo viên.
+3. **Student Dashboard** `/learn` — hồ sơ hư cấu **Mây, 135 điểm** (nhãn "BẢN CHƠI THỬ – DỮ LIỆU MINH HỌA"): avatar, ô điểm, huy hiệu; **Game World** (`/learn#game-world`): bản đồ, 4 thẻ khu vực (Mê cung, Rừng chữ: đủ điểm; Đảo dấu thanh, Lâu đài: còn khóa) → **Xem chi tiết** mở bảng thông tin; nút "Vào chơi – Sắp có" bị khóa (chưa có game). Mốc khám phá mỗi 30 điểm, công tắc **Giảm chuyển động** ở đầu trang.
+4. **Bản chơi thử** `/demo`: chọn lộ trình → mức hỗ trợ (H3 → H0 "Tự làm") → **Bắt đầu buổi luyện** (ôn bài cũ → luyện tập → thử thách tự làm) hoặc **Làm thử** một dạng bài → kết quả → **Về Game World**. Phần **Xem trước Game World** có avatar, ô điểm, 4 vùng đất, bảng xếp hạng hư cấu.
+5. **Giáo viên** `/teacher`: menu mới (Bảng điểm, Vinh danh, Mùa thi đua… "Sắp có"), bản phác thảo nhân vật chờ duyệt ở mục **Duyệt học liệu**.
+6. **Trên điện thoại:** công cụ giả lập thiết bị của trình duyệt (360–390 px), hoặc xem bằng điện thoại thật cùng Wi-Fi (mục "Chạy trên máy").
 
-Bản chơi thử dùng dữ liệu minh họa **chưa được giáo viên duyệt**, **không có âm thanh** (nút loa ghi "Chưa có âm thanh"), không tài khoản, không lưu kết quả, không gửi dữ liệu đi đâu. Bài "Nghe âm – chọn chữ" chỉ xem được giao diện. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md).
+Mọi dữ liệu minh họa **chưa được giáo viên duyệt**, **không có âm thanh**, không tài khoản, không lưu, không gửi dữ liệu đi đâu. Chi tiết: [docs/EXERCISE_ENGINE.md](docs/EXERCISE_ENGINE.md), [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
 ## Bộ máy bài tập (Giai đoạn 4)
 
@@ -117,10 +121,10 @@ Bản chơi thử dùng dữ liệu minh họa **chưa được giáo viên duy�
 
 ## Chức năng đã có (Giai đoạn 2)
 
-- Trang chủ `/`: giới thiệu ReadMate AI, ba hướng hỗ trợ học tập, quy trình "luyện ở nhà → vận dụng ở lớp", công cụ dự kiến cho giáo viên, cam kết bảo vệ dữ liệu trẻ em.
+- Trang chủ `/`: GĐ2 giới thiệu theo định hướng cũ — **R02 đã viết lại** theo định hướng tự luyện tại nhà + phiêu lưu.
 - `/demo`: GĐ2 là trang giới thiệu; từ GĐ4 là **bản chơi thử tương tác** (xem mục trên).
 - `/teacher`: khung bảng điều khiển giáo viên (điều hướng, các khu vực dự kiến) — **chưa có đăng nhập, chưa có dữ liệu**.
-- `/learn`: khung góc học tập cho học sinh, ưu tiên điện thoại, vùng chạm ≥ 64px — **chưa lưu thông tin học sinh**.
+- `/learn`: GĐ2 là khung góc học tập — **R02 thành Student Adventure Dashboard** (dữ liệu minh họa, không lưu).
 - `/join`: giao diện chuẩn bị cho liên kết thiết bị bằng thẻ học — **biểu mẫu bị khóa, không nhận hay lưu mã nào**.
 - Design system (màu, typography, khoảng cách, nút, thẻ, badge, thông báo, trạng thái trống/đang tải, tab, điều hướng), hỗ trợ bàn phím và trình đọc màn hình cơ bản.
 - Header bảo mật: CSP, `X-Content-Type-Options`, `Referrer-Policy` (riêng `/join` là `no-referrer`), `Permissions-Policy` tắt camera/microphone/định vị, `X-Frame-Options`; không có `X-Powered-By`.
@@ -128,7 +132,7 @@ Bản chơi thử dùng dữ liệu minh họa **chưa được giáo viên duy�
 
 ## Chức năng chưa phát triển (lộ trình R02 → R11)
 
-Giao diện mới và Game World (R02), Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh (R03), điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
+Supabase — cơ sở dữ liệu, đăng nhập giáo viên, liên kết thiết bị, đồng ý của phụ huynh (R03), điểm thưởng và mở khóa bản đồ (R04), bảng xếp hạng lớp và avatar (R05), vinh danh TOP 3 và mùa thi đua (R06), Mê cung kho báu và quái vật (R07–R08), ba mini-game khác (R09), âm thanh, giao diện duyệt nội dung, góc phụ huynh, dashboard (R10), kiểm thử tổng thể và triển khai Vercel (R11). AI hỗ trợ giáo viên tạo bài: sau R11. Phiếu PDF ở lớp: **bỏ khỏi lộ trình**.
 
 ## Triển khai
 
@@ -136,7 +140,8 @@ Giao diện mới và Game World (R02), Supabase — cơ sở dữ liệu, đăn
 
 ## Tài liệu dự án
 
-- **Tái thiết kế (R01, PLANNED):** [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) — định hướng mới · [docs/GAMIFICATION_SPEC.md](docs/GAMIFICATION_SPEC.md) — điểm, mở khóa, mùa · [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) — game · [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) — bảng xếp hạng, vinh danh · [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) — kiến trúc, dữ liệu · [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) — quyền riêng tư · [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)
+- **Giao diện R02:** [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — hệ thống thiết kế · [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md) — asset và giấy phép
+- **Tái thiết kế (R01, phần lớn PLANNED):** [docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md) — định hướng mới · [docs/GAMIFICATION_SPEC.md](docs/GAMIFICATION_SPEC.md) — điểm, mở khóa, mùa · [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md) — game · [docs/LEADERBOARD_SPEC.md](docs/LEADERBOARD_SPEC.md) — bảng xếp hạng, vinh danh · [docs/REDESIGN_ARCHITECTURE.md](docs/REDESIGN_ARCHITECTURE.md) — kiến trúc, dữ liệu · [docs/PRIVACY_AND_SECURITY.md](docs/PRIVACY_AND_SECURITY.md) — quyền riêng tư · [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)
 - Báo cáo PDF (định hướng cũ, lập 2026-10-16): [docs/BaoCao_ReadMateAI.pdf](docs/BaoCao_ReadMateAI.pdf) · [docs/LuongHoatDong_ReadMateAI.pdf](docs/LuongHoatDong_ReadMateAI.pdf)
 - [docs/PRD.md](docs/PRD.md) — yêu cầu sản phẩm (một phần đã được thay thế, xem đầu tệp)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — kiến trúc kỹ thuật
@@ -153,5 +158,6 @@ Dự án không thu thập dữ liệu học sinh ở giai đoạn này; bản c
 ## Giấy phép
 
 - Font Be Vietnam Pro và Andika: SIL Open Font License 1.1 (tải qua `next/font/google`).
-- Biểu tượng và tranh minh họa tạm của bản chơi thử: [Lucide](https://lucide.dev) (ISC; một phần gốc Feather — MIT).
+- Biểu tượng và tranh minh họa tạm của bản chơi thử: [Lucide](https://lucide.dev) (ISC; một phần gốc Feather — MIT) — chỉ cho điều khiển phụ và tranh câu hỏi.
+- Nhân vật, avatar, cảnh Game World (R02): tác phẩm gốc của dự án, SVG tự vẽ, chờ giáo viên duyệt — danh mục [content/media/licenses.json](content/media/licenses.json), [docs/ASSET_MANIFEST.md](docs/ASSET_MANIFEST.md).
 - Mã nguồn dự án: chưa chọn giấy phép — chủ dự án sẽ quyết định.

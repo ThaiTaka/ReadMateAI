@@ -1,13 +1,14 @@
 import { test as base, expect } from "@playwright/test";
 
-export const SLOGAN = "Mỗi em một nhịp đọc – Mỗi ngày một tiến bộ";
+/** h1 của trang chủ từ R02: thương hiệu + thông điệp chính. */
+export const SLOGAN = "ReadMate AI – Học Tiếng Việt, khám phá thế giới kỳ diệu";
 
-/** Các route nền tảng của Giai đoạn 2 và tiêu đề h1 mong đợi. */
+/** Các route chính và tiêu đề h1 mong đợi (R02: /learn dùng hồ sơ minh họa hư cấu "Mây"). */
 export const ROUTES = [
   { path: "/", slug: "home", heading: SLOGAN },
   { path: "/demo", slug: "demo", heading: "Chơi thử bài luyện đọc lớp 1" },
   { path: "/teacher", slug: "teacher", heading: "Bảng điều khiển giáo viên" },
-  { path: "/learn", slug: "learn", heading: "Chào con!" },
+  { path: "/learn", slug: "learn", heading: "Chào Mây!" },
   { path: "/join", slug: "join", heading: "Liên kết thiết bị học tập" },
 ] as const;
 
