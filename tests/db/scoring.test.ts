@@ -46,6 +46,20 @@ async function itemsOf(device: Parameters<typeof candidates>[0], studentId: stri
   return (result.data as { items: Candidate[] }).items;
 }
 
+// Fixture có một bản sao nội dung: hai mục cùng fingerprint trong một buổi thì mục sau không tính điểm (đúng thiết kế),
+// nên test cần cộng điểm chỉ dùng các mục có fingerprint khác nhau — không phụ thuộc thứ tự UUID ngẫu nhiên.
+async function distinctItemIds(device: Parameters<typeof candidates>[0], studentId: string, count: number) {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const item of await itemsOf(device, studentId)) {
+    if (seen.has(item.fingerprint)) continue;
+    seen.add(item.fingerprint);
+    ids.push(item.exerciseItemId);
+    if (ids.length === count) break;
+  }
+  return ids;
+}
+
 async function fixtureItemIds(keys: string[]): Promise<Record<string, string[]>> {
   const { data } = await admin
     .from("exercises")
@@ -144,7 +158,7 @@ describe("phát câu: chỉ nội dung đã duyệt, đã học, đúng nhóm", 
 describe("buổi luyện: tải lại không đổi câu", () => {
   it("gọi lại khi buổi còn dở → đúng buổi cũ, cùng câu, cùng số lượt đã dùng", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 4).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 4);
     const first = await rpcOk(startSession(device, studentId, planItems(items)));
     const questions = await sessionQuestions((first as { sessionId: string }).sessionId);
     await rpcOk(submit(device, questions[0]!.id, "wrong"));
@@ -159,7 +173,7 @@ describe("buổi luyện: tải lại không đổi câu", () => {
 describe("ghi điểm: +10 / −5 / sàn 0, sổ cái chỉ ghi thêm", () => {
   it("đúng +10; sai −5; sai ở 0 điểm vẫn 0 (nominal −5, applied 0); số dư khớp sổ cái", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 4).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 4);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1, q2, q3] = await sessionQuestions(session.sessionId);
 
@@ -193,7 +207,7 @@ describe("ghi điểm: +10 / −5 / sàn 0, sổ cái chỉ ghi thêm", () => {
 
   it("gửi lại đúng câu trả lời cũ → DUPLICATE_RESPONSE: không tốn lượt, không trừ điểm", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 2).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 2);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1] = await sessionQuestions(session.sessionId);
     await rpcOk(submit(device, q1!.id, "correct"));
@@ -207,7 +221,7 @@ describe("ghi điểm: +10 / −5 / sàn 0, sổ cái chỉ ghi thêm", () => {
 
   it("câu đã đóng → QUESTION_CLOSED; câu hết lượt → exhausted (H1: 2 lượt), không câu thay thế", async () => {
     const { studentId, device } = await linkedStudent(world.teacherB.client, world.classB, { band: "extending" });
-    const items = (await itemsOf(device, studentId)).slice(0, 2).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 2);
     const session = (await rpcOk(
       startSession(device, studentId, planItems(items, { supportLevel: 1, maxAttempts: 2 })),
     )) as {
@@ -228,7 +242,7 @@ describe("ghi điểm: +10 / −5 / sàn 0, sổ cái chỉ ghi thêm", () => {
 describe("chống trùng: khóa ý định, double click, song song, nhiều tab", () => {
   it("cùng clientAttemptId gửi 5 lần tuần tự + 5 lần song song → 1 lượt, 1 sự kiện điểm", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 2).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 2);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1] = await sessionQuestions(session.sessionId);
     const clientAttemptId = randomUUID();
@@ -253,7 +267,7 @@ describe("chống trùng: khóa ý định, double click, song song, nhiều tab
 
   it("cùng clientAttemptId nhưng câu trả lời khác → IDEMPOTENCY_CONFLICT (không coi là lượt mới)", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 1);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1] = await sessionQuestions(session.sessionId);
     const id = randomUUID();
@@ -264,7 +278,7 @@ describe("chống trùng: khóa ý định, double click, song song, nhiều tab
 
   it("câu còn 1 lượt, hai câu trả lời KHÁC nhau gửi song song (hai tab) → đúng một lượt được ghi", async () => {
     const { studentId, device } = await linkedStudent(world.teacherB.client, world.classB, { band: "extending" });
-    const items = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 1);
     const session = (await rpcOk(
       startSession(device, studentId, planItems(items, { supportLevel: 1, maxAttempts: 2 })),
     )) as {
@@ -285,7 +299,7 @@ describe("chống trùng: khóa ý định, double click, song song, nhiều tab
 
   it("nhiều câu đúng song song của cùng học sinh → số dư = tổng sổ cái (khóa dòng điểm)", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 6).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 6);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const questions = await sessionQuestions(session.sessionId);
     const results = await Promise.all(questions.map((question) => submit(device, question.id, "correct")));
@@ -297,7 +311,7 @@ describe("chống trùng: khóa ý định, double click, song song, nhiều tab
 
   it("hai tab bấm 'Luyện' cùng lúc → một buổi luyện duy nhất", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 3).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 3);
     const [a, b] = await Promise.all([
       startSession(device, studentId, planItems(items)),
       startSession(device, studentId, planItems(items)),
@@ -340,7 +354,7 @@ describe("không tích điểm vô hạn: mỗi nội dung tính điểm một l
 
   it("câu chỉ luyện thêm (máy chủ đề nghị không tính điểm) → chấm nhưng 0 dòng sổ cái", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 1);
     const session = (await rpcOk(startSession(device, studentId, planItems(items, { scorable: false })))) as {
       sessionId: string;
     };
@@ -365,7 +379,7 @@ describe("không tích điểm vô hạn: mỗi nội dung tính điểm một l
     );
     await confirmFixtureCurriculum(teacher, classId, 2);
     const { studentId, device } = await linkedStudent(teacher, classId);
-    const items = (await itemsOf(device, studentId)).slice(0, 2).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 2);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1, q2] = await sessionQuestions(session.sessionId);
     await rpcOk(submit(device, q1!.id, "correct"));
@@ -417,7 +431,7 @@ describe("thẻ bản đồ (30 điểm tích lũy / thẻ, kề nhau, không ti
   it("29 → không mở được; 30 → mở 1 thẻ kề; thẻ không kề bị từ chối; gửi lại không tốn lượt; điểm giữ nguyên", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
     expect(errorMessage(await reveal(device, studentId, "lotus_pond", [], true))).toBe("NO_TILE_AVAILABLE");
-    const items = (await itemsOf(device, studentId)).slice(0, 4).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 4);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const questions = await sessionQuestions(session.sessionId);
     for (const question of questions.slice(0, 3)) await rpcOk(submit(device, question.id, "correct"));
@@ -447,7 +461,7 @@ describe("thẻ bản đồ (30 điểm tích lũy / thẻ, kề nhau, không ti
 describe("dấu mở khóa game: lần đầu đạt ngưỡng, không cấp quyền vĩnh viễn", () => {
   it("đạt 50 → treasure_maze ghi một lần; tụt dưới 50 vẫn giữ dấu (quyền vào chơi xét điểm hiện tại)", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 7).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 7);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const questions = await sessionQuestions(session.sessionId);
     const unlockedAt: string[][] = [];
@@ -468,7 +482,7 @@ describe("dấu mở khóa game: lần đầu đạt ngưỡng, không cấp quy
 describe("chống truy cập trái phép và sửa điểm", () => {
   it("thiết bị khác / đã thu hồi / chưa liên kết không nộp được câu của học sinh A", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 1);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1] = await sessionQuestions(session.sessionId);
     for (const other of [world.deviceB1, world.revokedDevice, world.unlinkedDevice]) {
@@ -525,7 +539,7 @@ describe("chống truy cập trái phép và sửa điểm", () => {
 
   it("sổ cái chỉ ghi thêm: kể cả service_role không sửa/xóa trực tiếp được; số dư lệch sổ cái bị CSDL chặn", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 1);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     await rpcOk(submit(device, (await sessionQuestions(session.sessionId))[0]!.id, "correct"));
     expect(
@@ -582,7 +596,7 @@ describe("chống truy cập trái phép và sửa điểm", () => {
 describe("đồng ý và dữ liệu kiểm thử", () => {
   it("rút learning_data → buổi dở bị hủy, thiết bị mất quyền, không ghi thêm điểm", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const items = (await itemsOf(device, studentId)).slice(0, 2).map((item) => item.exerciseItemId);
+    const items = await distinctItemIds(device, studentId, 2);
     const session = (await rpcOk(startSession(device, studentId, planItems(items)))) as { sessionId: string };
     const [q1, q2] = await sessionQuestions(session.sessionId);
     await rpcOk(submit(device, q1!.id, "correct"));
@@ -598,7 +612,7 @@ describe("đồng ý và dữ liệu kiểm thử", () => {
 
   it("môi trường không cho phép fixture (như production) → không phát, không tạo được nội dung kiểm thử", async () => {
     const { studentId, device } = await linkedStudent(world.teacherA.client, world.classA);
-    const ids = (await itemsOf(device, studentId)).slice(0, 1).map((item) => item.exerciseItemId);
+    const ids = await distinctItemIds(device, studentId, 1);
     setTestFixturesAllowed(false);
     try {
       expect(((await candidates(device, studentId)).data as { items: unknown[] }).items).toEqual([]);
