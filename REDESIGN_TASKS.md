@@ -16,11 +16,13 @@
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
-| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.5b1 |
+| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.5b2 xong; còn R07.6 |
 | R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | ⏸ |
-| R09 | Ba mini-game còn lại | R08 | L | ⏸ |
+| R09 | Ba mini-game còn lại | R08 | L | ⏸ **Tạm hoãn sau khi nộp dự án** |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
 | R11 | Kiểm thử tổng thể, bảo mật, responsive, dọn mã cũ, deploy Vercel | R02–R10 | M–L | ⏸ |
+
+**Lộ trình nộp dự án (chủ dự án quyết định, 2026-10-21): R07 → R08 → R10 → R11 → NỘP DỰ ÁN.** R09 (ba mini-game còn lại) **tạm hoãn sau khi nộp**, không xóa khỏi kế hoạch và **không bắt đầu trước ngày nộp**. Ba mini-game còn lại hiển thị "Sắp ra mắt", không cho vào. Giữ nguyên mọi tiêu chí bảo mật, kiểm duyệt học liệu và bản quyền của R10–R11.
 
 ### Điều chỉnh thứ tự và lý do
 
@@ -234,7 +236,8 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 - [x] 7.3 (xong) Lược đồ màn + 3 màn Mê cung trong `content/games/treasure-maze/levels/`; mở rộng `content:check` chạy `level-validate`
 - [x] 7.4 (xong) Điều khiển: 4 nút mũi tên ≥ 64 px, phím mũi tên/WASD, giữ để đi, `aria-live`
 - [x] 7.5a (xong, chờ CI — PROGRESS §5l) Migrations `game_runs` (+ RLS), RPC bắt đầu/tiếp tục/lưu vị trí (`state_version`), ngưỡng 50 điểm, reset mùa đóng lượt dở
-- [ ] 7.5b API Next.js `/api/student/game-runs` + lưu vị trí + nối giao diện + khôi phục sau tải lại
+- [x] 7.5b1 (xong, CI + E2E xanh trên `65328eb`) API Next.js `POST /api/student/game-runs` + `PATCH …/[runId]/position`
+- [x] 7.5b2 (xong, chờ CI) Trang `/learn/me/games/treasure-maze` nối API: chọn hồ sơ, ngưỡng 50 điểm, `INSUFFICIENT_CONTENT` → bản thử nghiệm, tự lưu (5 bước/3 giây/tạm dừng/ẩn trang), khôi phục sau tải lại, `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng; ba mini-game còn lại "Sắp ra mắt"
 - [ ] 7.6 Hoạt cảnh di chuyển, chuyển cảnh; giảm chuyển động; tạm dừng/tiếp tục
 
 **Tiêu chí nghiệm thu:** đi hết mê cung bằng nút và phím trên 5 cấu hình Playwright; tải lại giữ vị trí; không vào được khi < 50 điểm; mọi màn qua `level-validate`.
@@ -260,7 +263,9 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 ---
 
-## R09 — Ba mini-game còn lại (L)
+## R09 — Ba mini-game còn lại (L) — ⏸ TẠM HOÃN SAU KHI NỘP DỰ ÁN
+
+> Quyết định chủ dự án 2026-10-21: không bắt đầu R09 trước ngày nộp; giữ nguyên nội dung kế hoạch bên dưới. Trong lúc hoãn, `/learn/me` ghi "Sắp ra mắt" cho ba game này và không có đường vào.
 
 **Phụ thuộc:** R08.
 
@@ -295,7 +300,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 ## R11 — Kiểm thử tổng thể, bảo mật, responsive, deploy Vercel (M–L)
 
-**Phụ thuộc:** R02–R10. **Điều kiện trước:** chủ dự án cho phép liên kết/deploy Vercel; xác nhận điều khoản gói (R-02); dự án Supabase prod (Pro) nếu thí điểm; rà soát pháp lý ([PRIVACY_AND_SECURITY §12](docs/PRIVACY_AND_SECURITY.md#12-danh-mục-kiểm-tra-trước-khi-bật-cho-học-sinh-thật)).
+**Phụ thuộc:** R02–R08 và R10 (R09 hoãn sau khi nộp). **Điều kiện trước:** chủ dự án cho phép liên kết/deploy Vercel; xác nhận điều khoản gói (R-02); dự án Supabase prod (Pro) nếu thí điểm; rà soát pháp lý ([PRIVACY_AND_SECURITY §12](docs/PRIVACY_AND_SECURITY.md#12-danh-mục-kiểm-tra-trước-khi-bật-cho-học-sinh-thật)).
 
 - [ ] 11.1 Xóa mã luồng cũ có kiểm soát ([PRODUCT_REDESIGN §5](docs/PRODUCT_REDESIGN.md#5-kiểm-kê-mã-cũ-và-phương-án-loại-bỏ-an-toàn)) cùng test tương ứng
 - [ ] 11.2 Rà soát bảo mật: RLS, gateway, header (xem lại CSP nonce — R-16), phụ thuộc, quét secret toàn lịch sử

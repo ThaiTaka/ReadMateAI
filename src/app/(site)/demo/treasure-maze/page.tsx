@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { MotionScope } from "@/components/adventure/motion";
 import { Container } from "@/components/ui/container";
-import { levelFileSchema, toLevel } from "@/features/game-engine/levels/schema";
+import { BUNDLED_LEVEL_FILES, BUNDLED_LEVELS } from "@/features/game-engine/levels/bundled";
 import { MazePlayer } from "@/features/game-engine/ui/maze-player";
 import { vi } from "@/strings/vi";
-import level1 from "../../../../../content/games/treasure-maze/levels/level-01.json";
-import level2 from "../../../../../content/games/treasure-maze/levels/level-02.json";
-import level3 from "../../../../../content/games/treasure-maze/levels/level-03.json";
 
 export const metadata: Metadata = {
   title: vi.treasureMazeDemo.meta.title,
   robots: { index: false },
 };
-
-const FILES = [level1, level2, level3].map((raw) => levelFileSchema.parse(raw));
 
 /** /demo/treasure-maze — R07.4: đi lại được bằng lõi Game Engine; dữ liệu minh họa, không điểm, không lưu gì. */
 export default function TreasureMazeDemoPage() {
@@ -29,7 +24,7 @@ export default function TreasureMazeDemoPage() {
         </p>
         <h1 className="mt-4 text-3xl font-extrabold text-ink">{t.title}</h1>
         <p className="mt-2 mb-6 max-w-prose text-ink-soft">{t.note}</p>
-        <MazePlayer levels={FILES.map(toLevel)} names={FILES.map((file) => file.name)} />
+        <MazePlayer levels={BUNDLED_LEVELS} names={BUNDLED_LEVEL_FILES.map((file) => file.name)} />
       </Container>
     </MotionScope>
   );

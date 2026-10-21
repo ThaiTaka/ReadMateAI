@@ -83,7 +83,8 @@ describe("Game World không lưu, không gửi, không thanh toán (quét mã ng
   it("không có thanh toán/mua bán, không liên kết ra ngoài, không route game chưa tồn tại", () => {
     const payment = /payment|checkout|stripe|paypal|thanh toán|mua ngay|nạp tiền/iu;
     const external = /href=["'`]https?:/u;
-    const gameRoute = /\/learn\/games|\/games\//u;
+    // Route game có thật duy nhất: Mê cung kho báu có xác thực (R07.5b2); mọi đường dẫn game khác vẫn bị cấm.
+    const gameRoute = /\/learn\/games|\/games\/(?!treasure-maze\b)/u;
     expect(files.filter((file) => payment.test(file.text)).map((file) => file.path)).toEqual([]);
     expect(files.filter((file) => external.test(file.text)).map((file) => file.path)).toEqual([]);
     expect(files.filter((file) => gameRoute.test(file.text)).map((file) => file.path)).toEqual([]);

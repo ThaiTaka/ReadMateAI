@@ -268,3 +268,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-21 | R07.3 | 3 màn Mê cung kho báu (JSON) + schema zod + `content:check` kiểm màn; CI chờ. Không làm R07.4 |
 | 2026-10-21 | R07.4 | Điều khiển nhân vật Mê cung kho báu (bàn phím, 4 nút, giữ/thả, camera 7×7, tạm dừng, thử thách minh họa); unit + E2E 48/48 local; CI chờ. Không làm R07.5 |
 | 2026-10-21 | R07.5a | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí, reset mùa đóng lượt dở; pgTAP + DB local xanh; CI chờ. Không làm R07.5b |
+| 2026-10-21 | R07.5b2 | Trang Mê cung có xác thực nối API lượt chơi: tự lưu vị trí (5 bước/3 giây/tạm dừng/ẩn trang), khôi phục sau tải lại, STATE_CONFLICT/SEASON_CLOSED/mất mạng; unit + E2E CSDL local; lộ trình nộp: R09 hoãn sau khi nộp. Không làm R07.6/R08 |

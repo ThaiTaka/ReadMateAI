@@ -18,8 +18,10 @@ import {
   type GameState,
   type Level,
   type ParsedLevel,
+  type Position,
 } from "../core/index.ts";
 import { cameraOrigin, viewCells } from "./camera.ts";
+import type { PositionSaver } from "./position-saver.ts";
 import { useHoldMove } from "./use-hold-move.ts";
 
 /*
@@ -47,7 +49,14 @@ const PAD: readonly { direction: Direction; label: string; Icon: typeof ArrowUp;
   { direction: "right", label: t.moves.right, Icon: ArrowRight, cell: "col-start-3 row-start-2" },
 ];
 
-type PlayState = { game: GameState; bumps: number };
+type PlayState = { game: GameState; bumps: number; trail: readonly Position[] };
+
+/**
+ * Lượt chơi có lưu (R07.5b2): bắt đầu từ vị trí máy chủ xác nhận và đẩy từng bước đi THỰC SỰ cho bộ tự lưu.
+ * Chạm trán TẮT ở chế độ này: chưa có `game_encounters` (R08), nên client không tự đánh dấu thử thách nào đã xong và
+ * rương luôn khóa. Lưu vị trí KHÔNG xác thực thử thách — R08 phải chặn việc đi qua điểm kích hoạt chưa giải quyết ở máy chủ.
+ */
+export type SavedBinding = { readonly initial: Position; readonly saver: PositionSaver };
 
 function messageFor(event: GameEvent): string {
   switch (event.type) {
@@ -97,29 +106,49 @@ function isTypingTarget(target: EventTarget | null): boolean {
   );
 }
 
-function MazeRun({
+export function MazeRun({
   level,
   rootRef,
   onReplay,
+  saved,
 }: {
   level: Level;
   rootRef: RefObject<HTMLDivElement | null>;
   onReplay: () => void;
+  saved?: SavedBinding;
 }) {
-  const parsed: ParsedLevel = useMemo(() => parseLevel(level), [level]);
+  const parsed: ParsedLevel = useMemo(
+    () => (saved ? { ...parseLevel(level), triggers: [] } : parseLevel(level)),
+    [level, saved],
+  );
   const reducer = useMemo(
     () =>
       (state: PlayState, action: GameAction): PlayState => {
         const game = gameReducer(parsed, state.game, action);
-        return { game, bumps: game.lastEvent.type === "blocked" ? state.bumps + 1 : state.bumps };
+        const stepped = saved && game.moves > state.game.moves;
+        return {
+          game,
+          bumps: game.lastEvent.type === "blocked" ? state.bumps + 1 : state.bumps,
+          trail: stepped ? [...state.trail, game.position] : state.trail,
+        };
       },
-    [parsed],
+    [parsed, saved],
   );
-  const [{ game, bumps }, dispatch] = useReducer(reducer, parsed, (p): PlayState => ({
-    game: createInitialState(p),
-    bumps: 0,
-  }));
+  const [{ game, bumps, trail }, dispatch] = useReducer(reducer, parsed, (p): PlayState => {
+    const initial = createInitialState(p);
+    return { game: saved ? { ...initial, position: saved.initial } : initial, bumps: 0, trail: [] };
+  });
   const hold = useHoldMove((direction) => dispatch({ type: "MOVE", direction }));
+
+  const forwarded = useRef(0);
+  useEffect(() => {
+    if (!saved) return;
+    while (forwarded.current < trail.length) saved.saver.push(trail[forwarded.current++]!);
+  }, [trail, saved]);
+  const paused = game.paused;
+  useEffect(() => {
+    if (saved && paused) saved.saver.flush();
+  }, [paused, saved]);
 
   useEffect(() => {
     if (STOPPING.has(game.lastEvent.type)) hold.releaseAll();
@@ -196,10 +225,12 @@ function MazeRun({
         {messageFor(game.lastEvent)}
       </p>
       <p className="mx-auto max-w-[34rem] text-center text-sm font-semibold text-ink-soft">
-        {t.found.replace("{n}", String(game.resolved.length)).replace("{total}", String(ENCOUNTERS_PER_LEVEL))}
+        {saved
+          ? vi.treasureMazePlay.lockedNote
+          : t.found.replace("{n}", String(game.resolved.length)).replace("{total}", String(ENCOUNTERS_PER_LEVEL))}
       </p>
 
-      {pending !== null && (
+      {!saved && pending !== null && (
         <div
           role="group"
           aria-label={t.demoStep.title}

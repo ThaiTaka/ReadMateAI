@@ -82,6 +82,52 @@ export const vi = {
       button: "Tiếp tục bản chơi thử",
     },
   },
+  /** Mê cung kho báu có xác thực (R07.5b2): lượt chơi lưu vị trí ở máy chủ. */
+  treasureMazePlay: {
+    meta: { title: "Mê cung kho báu của con" },
+    title: "Mê cung kho báu",
+    levelsLabel: "Chọn màn",
+    level: "Màn {n}",
+    back: "Về trang của con",
+    loading: "Đang mở mê cung…",
+    tryRibbon: "Chơi thử — không tính điểm",
+    tryNote:
+      "Đây là lượt chơi để làm quen: chưa có câu hỏi, chưa cộng hay trừ điểm. Vị trí của con được lưu để lần sau đi tiếp.",
+    scoredRibbon: "Lượt chơi có điểm",
+    lockedNote: "Các thử thách chưa mở ở bản này, nên rương kho báu vẫn đang khóa.",
+    needPoints:
+      "Con cần {min} điểm thưởng để vào Mê cung kho báu. Điểm hiện tại của con là {n}. Hãy luyện tập thêm nhé!",
+    practiceCta: "Đi luyện tập",
+    preparing: "Mê cung đang được chuẩn bị. Con có thể chơi bản thử nghiệm!",
+    demoCta: "Chơi bản thử nghiệm",
+    loadFailed: "Chưa mở được mê cung. Hãy kiểm tra mạng rồi thử lại.",
+    retryLoad: "Thử lại",
+    save: {
+      label: "Trạng thái lưu",
+      saved: "Đã lưu",
+      saving: "Đang lưu",
+      unsaved: "Chưa lưu được",
+      retry: "Thử lại",
+      unsavedHint: "Vị trí mới nhất chưa được lưu. Con có thể chơi tiếp, hoặc kiểm tra mạng rồi bấm Thử lại.",
+    },
+    conflict: {
+      title: "Màn chơi đã thay đổi ở nơi khác",
+      text: "Vị trí của con đã được lưu từ một cửa sổ khác. {n} bước vừa đi ở cửa sổ này chưa được lưu và sẽ không dùng nữa. Bấm nút để quay về vị trí đã lưu.",
+      textNone: "Vị trí của con đã được lưu từ một cửa sổ khác. Bấm nút để quay về vị trí đã lưu.",
+      action: "Tải lại vị trí đã lưu",
+    },
+    closed: {
+      title: "Màn chơi đã dừng",
+      text: "Mùa thi đua này đã khép lại nên màn chơi dừng ở đây. Con hãy quay về trang của con nhé!",
+    },
+    signedOut: {
+      title: "Chưa lưu được",
+      text: "Thiết bị này không còn được liên kết hoặc phiên đã hết hạn, nên vị trí chưa được lưu. Hãy quay về trang của con.",
+    },
+    comingSoon: "Sắp ra mắt: {names}.",
+    entry: "Vào Mê cung kho báu",
+    entryText: "Cần {min} điểm thưởng. Vị trí của con được lưu lại, lần sau đi tiếp được.",
+  },
   adventure: {
     previewRibbon: "Bản chơi thử – Dữ liệu minh họa",
     previewRibbonNote: "Tên, điểm và thành tích trên trang này là hư cấu: không lưu, không gửi đi đâu.",

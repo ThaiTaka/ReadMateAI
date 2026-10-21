@@ -18,7 +18,7 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { Notice } from "@/components/ui/notice";
 import { avatarChoices, safeAvatarKey } from "@/components/forms/avatar-choices";
 import { gameWorld, MAP_TILES, type MapTileKey } from "@/features/game-world/catalog";
-import { MAP_TILE_STEP, POINTS_CORRECT } from "@/features/gamification/rules";
+import { GAME_MIN_BALANCE, MAP_TILE_STEP, POINTS_CORRECT } from "@/features/gamification/rules";
 import type { StudentHomeDto } from "@/features/scored-practice/types";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getStudentHome } from "@/server/scoring/home";
@@ -274,6 +274,26 @@ function StudentDashboard({ home, studentId, query }: { home: StudentHomeDto; st
             />
           ))}
         </ul>
+        <div className="flex flex-col gap-3 rounded-2xl border-2 border-jade-200 bg-jade-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-ink">
+            <span className="font-extrabold">{vi.treasureMazePlay.title}</span>
+            <span className="block text-sm text-ink-soft">
+              {vi.treasureMazePlay.entryText.replace("{min}", String(GAME_MIN_BALANCE.treasure_maze))}
+            </span>
+          </p>
+          <AdventureLink href={`/learn/me/games/treasure-maze${query}` as Route} tone="sun" className="self-start">
+            {vi.treasureMazePlay.entry}
+          </AdventureLink>
+        </div>
+        <p className="text-sm font-semibold text-ink-soft" data-testid="games-coming-soon">
+          {vi.treasureMazePlay.comingSoon.replace(
+            "{names}",
+            home.games
+              .filter((state) => state.game !== "treasure_maze")
+              .map((state) => gameWorld(state.game).name)
+              .join(", "),
+          )}
+        </p>
         <Link
           href="/learn#game-world"
           className="inline-flex min-h-12 items-center gap-2 self-start font-bold text-brand-800 underline"
