@@ -140,7 +140,9 @@ export function validateContent(files: ReadonlyMap<string, string>): ContentRepo
       required.includes(path) ||
       isCurriculumFile(path, SERIES_DIR) ||
       isCurriculumFile(path, PROFILES_DIR) ||
-      path === "media/licenses.json";
+      path === "media/licenses.json" ||
+      // games/ (màn Mê cung, R07.3) có bộ kiểm riêng: src/features/game-engine/levels/.
+      path.startsWith("games/");
     if (!known)
       add(
         "error",
