@@ -184,9 +184,14 @@ async function earnFor(browser: Browser, member: Member, count: number) {
 }
 
 async function axeClean(page: Page) {
+  // Bỏ trạng thái hover và đợi hết chuyển màu (transition-colors) để axe không đo giữa chừng.
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(400);
   const results = await new AxeBuilder({ page }).analyze();
   const serious = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
-  expect(serious.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+  expect(
+    serious.map((v) => `${v.id}: ${v.help} @ ${v.nodes.map((node) => node.target.join(" ")).join(" | ")}`),
+  ).toEqual([]);
 }
 
 async function noHorizontalScroll(page: Page) {
