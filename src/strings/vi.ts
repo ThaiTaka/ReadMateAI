@@ -53,6 +53,13 @@ export const vi = {
   },
 
   /** Chuỗi dùng chung của các thành phần giao diện phiêu lưu (src/components/adventure). */
+  treasureMazeDemo: {
+    meta: { title: "Mê cung kho báu – bản thử nghiệm" },
+    ribbon: "Bản thử nghiệm – Dữ liệu minh họa",
+    title: "Mê cung kho báu",
+    note: "Chỉ là hình vẽ để đánh giá đồ họa: chưa đi được, chưa có câu hỏi, không tính điểm, không lưu hay gửi gì.",
+    boardLabel: "Mê cung 11 nhân 11 ô: bạn nhỏ ở góc trên bên trái, rương kho báu ở góc dưới bên phải",
+  },
   adventure: {
     previewRibbon: "Bản chơi thử – Dữ liệu minh họa",
     previewRibbonNote: "Tên, điểm và thành tích trên trang này là hư cấu: không lưu, không gửi đi đâu.",

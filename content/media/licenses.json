@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-22",
+  "updatedAt": "2026-10-21",
   "note": "Danh mục nguồn và giấy phép của mọi hình ảnh, nhân vật, phông chữ dùng trong ReadMate AI (CLAUDE.md §7.9, §9.4.7). Asset do dự án tự tạo luôn bắt đầu ở pending_review; KHÔNG tự đặt approved — chỉ giáo viên duyệt (cần reviewedBy, reviewedAt). Kiểm tra bằng npm run content:check. Xem docs/ASSET_MANIFEST.md.",
   "assets": [
     {
@@ -598,6 +598,24 @@
         "reviewedBy": null,
         "reviewedAt": null,
         "notes": "Biểu tượng giao diện chung."
+      }
+    },
+    {
+      "id": "art.scene.treasure-maze-board",
+      "name": "Bản đồ mê cung 2D (nguyên mẫu R07.1: bụi cây, cây, đá, hoa, đường cát)",
+      "kind": "scene",
+      "paths": ["src/components/art/maze-board.tsx"],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R07.1, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Nguyên mẫu /demo/treasure-maze",
+      "createdAt": "2026-10-21",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV đánh giá mức độ phù hợp với trẻ 6–7 tuổi (RQ-M1)."
       }
     }
   ]

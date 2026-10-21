@@ -1,12 +1,13 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.5 (API vinh danh học sinh + chống snapshot trùng)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R07.1 (nghiệm thu R06 + nguyên mẫu Mê cung kho báu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **R06.5 xong (chờ CI): API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
+- **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, chờ CI — §5h.**
+- (trước đó) **R06.5 xong: API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
 - **Giai đoạn trước: R06.4 — giao diện reset điểm hai bước (nghiệm thu: CI + E2E xanh trên `a918a56`).** Chi tiết §5f. R06.3 (backend reset) đã nghiệm thu: CI + E2E 9/9 xanh trên `17146c0`. Tiếp theo: R06.5 (API học sinh xem lần vinh danh gần nhất, rà chống snapshot trùng, nghiệm thu R06).
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
 - (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
@@ -21,7 +22,9 @@
 | R03 | ✅ Đã chấp nhận (2026-10-20) |
 | R04 | ✅ Hoàn thành (local) |
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
-| R06–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
+| R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
+| R07 | 🔄 R07.1 xong (nguyên mẫu đồ họa) |
+| R08–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
 
@@ -305,6 +308,25 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Kiểm thử (local):** unit 1007/1007; pgTAP 7 tệp / 109 test (mới `07_honor_dedupe`, `05` sửa chữ ký); DB tích hợp `honor-dedupe.test.ts` 13/13 (cùng requestId 2 lần, 5 yêu cầu đồng thời, 4 yêu cầu khác requestId đồng thời → 1 snapshot, vinh danh lại sau khoảng chống lặp, bất biến, rút đồng ý/đổi tên, cách ly lớp, thiết bị thu hồi, mùa cũ, cờ tắt, none) + `honors.test.ts` và `season-reset.test.ts` (cập nhật chữ ký) đạt; E2E `honors.spec.ts` -g R06.5 chromium-desktop đạt (hai tab bấm cùng lúc = 1 snapshot, API no-store/noindex/400/401, không rò dữ liệu). Hồi quy đầy đủ: GitHub Actions.
 **Giới hạn:** gộp theo khoảng chống lặp trả snapshot cũ cho GV thứ hai (không báo "đã gộp" trên giao diện); khoảng 15 giây tính theo đồng hồ CSDL; `honors.test.ts` đặt khoảng chống lặp = 0 cục bộ để tạo nhiều snapshot liên tiếp (khôi phục 15 khi xong); chưa có giao diện học sinh dùng API (R07+/sau).
 
+## 5h. Nghiệm thu R06 và R07.1 — nguyên mẫu đồ họa Mê cung kho báu (2026-10-21)
+
+**R06 hoàn thành.** GitHub Actions trên commit `ebb027a`: CI run `39533560083` PASS, E2E run `39533560105` PASS (người điều phối xác minh). Cờ `leaderboard_feature_approved` và cờ vinh danh vẫn **tắt** mặc định. Giới hạn còn lại: chưa có giao diện học sinh xem vinh danh; chưa thử trên điện thoại thật; chống trùng snapshot gộp trong 15 giây.
+
+**R07.1 (chờ CI):** route `/demo/treasure-maze` (nhãn "Bản thử nghiệm – Dữ liệu minh họa"), lưới 11×11 (`features/demo/treasure-maze-data.ts`), `components/art/maze-board.tsx` (SVG nền + lớp HTML cho nhân vật/rương theo phần trăm ô, sẵn sàng nội suy `transform` ở R07.2), nhân vật `HeroKid`, rương `TreasureChest`, hoạt cảnh `animate-bob/sway` dừng theo giảm chuyển động. Không điểm, không điều khiển, không migration, không dữ liệu học sinh. Asset mới có dòng `art.scene.treasure-maze-board` (`pending_review`).
+
+**Số đo thật** (`node scripts/measure-maze-perf.mjs`, Chromium 156 headless trên máy phát triển, bản production, viewport 390×844, 5 giây/lần; rAF headless bị khóa ở 60 Hz nên FPS không vượt 60 — số hữu ích là tỉ lệ khung chậm và độ bận luồng chính):
+
+| Điều kiện | FPS | Khung > 33 ms | Luồng chính bận |
+|---|---|---|---|
+| Bình thường | 60,2 | 0 | 5,7% |
+| CPU chậm 4× | 60,2 | 0 | 46,9% |
+| CPU chậm 6× | 59,7 | 2 / 299 | 59,9% (style 10%) |
+| Giảm chuyển động | 60,4 | 0 | 0,9% |
+
+JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 KB → route thêm ≈ 5 KB. DOM 954 nút (787 trong SVG), 17 hoạt cảnh chạy, heap JS ≈ 4,9 MB. Bố cục: bảng 328 px (ô 29,8 px) ở 360; 358 px (32,5) ở 390; 544 px (49,5) ở tablet 820 và desktop 1280 — không cuộn ngang. E2E `treasure-maze-demo.spec.ts` (nhãn, bố cục, không form/liên kết ngoài, axe nghiêm trọng, giảm chuyển động hệ điều hành + công tắc) đạt trên chromium-desktop/mobile, webkit-desktop/mobile/tablet (16/16 ở 4 project cuối + 4/4 chromium-desktop).
+
+**Kết luận (đề xuất RD-07):** React + SVG/CSS đáp ứng — không cài PixiJS/Phaser. **Chưa đo** trên Android phổ thông thật (giả lập CPU chậm chỉ là xấp xỉ): ở 6× luồng chính bận ~60% do hoạt cảnh `sway` trên SVG (không lên compositor); nếu máy thật chậm, giảm số cây lắc hoặc chỉ lắc khi rảnh. Ô 29,8 px ở 360 px là nhỏ cho hoạt cảnh bước chân — R07.2/7.4 cân nhắc cuộn/phóng to quanh nhân vật cho màn rộng hơn 11×11.
+
 ## 6. Nhật ký quyết định (lộ trình R)
 
 | Mã | Quyết định | Trạng thái | Chi tiết |
@@ -386,3 +408,4 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 | 2026-10-20 | R04 (tiếp, sau khi hết hạn mức) | R04 | Đọc lại tiến độ: 3 checkpoint đã push (CI run 39400938083 xanh), tài liệu R04 + sửa ngày fixture chưa commit. Khởi động lại Docker/Supabase local (sự cố `kong` mất ánh xạ cổng — §5.4). Chạy lại thật: format/lint/typecheck ✅, content:check 0 lỗi/52 cảnh báo, unit 900/900, build 18 route, check:bundle sạch, db:lint 0, pgTAP 52/52, seed ×2, test:db 106/106, test:e2e:db 40 đạt/17 bỏ qua; quét byte + secret 9 tệp sạch. Commit tài liệu `40c961e` + push nhánh; CI run 39434099659 xanh (`verify` + `database`). Không bắt đầu R05 |
 | 2026-10-21 | R05 (nghiệm thu) | R05 | Chuyển kiểm thử nặng lên GitHub Actions (workflow E2E, 9 job, 1 worker); sửa 2 điểm chập chờn của test (hết giờ WebKit, fixture trùng fingerprint); CI + E2E xanh trên `83b34a7`; cập nhật tài liệu. Không bắt đầu R06 |
 | 2026-10-21 | R06.1 | R06 | Backend vinh danh TOP 3: migration `20261023090000`, ảnh chụp bất biến, quyền owner/co_teacher+can_honor, cờ hệ thống tắt, đọc lọc theo quyền hiện tại; pgTAP 81, tích hợp 19 (mới), unit 967. Không làm giao diện/hoạt cảnh/reset |
+| 2026-10-21 | R07.1 | R07 | Nghiệm thu R06; nguyên mẫu `/demo/treasure-maze` (SVG/CSS), đo FPS/bundle/bố cục thật, E2E 5 project; chọn React + SVG/CSS; CI chờ. Không làm R07.2 |

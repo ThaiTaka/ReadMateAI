@@ -29,7 +29,7 @@ export default defineConfig({
     {
       name: "webkit-tablet",
       use: { ...devices["iPad (gen 7)"] },
-      testMatch: /(demo-practice|responsive|game-world)\.spec\.ts/,
+      testMatch: /(demo-practice|responsive|game-world|treasure-maze-demo)\.spec\.ts/,
     },
   ],
   webServer: {

@@ -15,8 +15,8 @@
 | R03 | Supabase, tài khoản, phân quyền, dữ liệu nền | R01 | L | ✅ Đã chấp nhận (local; Cloud chờ xác nhận) |
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
-| R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ⏸ |
-| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ⏸ |
+| R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
+| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.1 |
 | R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | ⏸ |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
@@ -213,8 +213,8 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **Phụ thuộc:** R05.
 
-- [~] 6.1 Migrations: `honor_snapshots` (+ `honor_snapshot_entries`) **xong ở R06.1** (`20261023090000_r06_honors.sql`); `season_resets`, cột `final_rank`, hàm `private.reset_class_season` **xong ở R06.3** (`20261024090000_r06_season_reset.sql`) ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
-- [~] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason({classId, requestId, expectedSeasonId, confirmation})` **xong ở R06.3** (`src/server/teacher/season.ts`)
+- [x] 6.1 Migrations: `honor_snapshots` (+ `honor_snapshot_entries`) **xong ở R06.1** (`20261023090000_r06_honors.sql`); `season_resets`, cột `final_rank`, hàm `private.reset_class_season` **xong ở R06.3** (`20261024090000_r06_season_reset.sql`) ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
+- [x] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason({classId, requestId, expectedSeasonId, confirmation})` **xong ở R06.3** (`src/server/teacher/season.ts`)
 - [x] 6.3 Màn vinh danh TOP 3 → 2 → 1, hào quang TOP 1, Bỏ qua, Xem lại, giảm chuyển động, đồng hạng — **xong ở R06.2** (`/teacher/classes/[classId]/honors/[snapshotId]`, nút + lịch sử ở trang bảng điểm GV)
 - [x] 6.4 Màn reset hai bước (gõ tên lớp) — **xong ở R06.4** (`season-reset.tsx`, unit + E2E `season-reset.spec.ts`; chờ CI)
 - [x] 6.5 `GET /api/student/honors/latest` + chống tạo snapshot trùng (khóa ý định `requestId`, khóa lớp, khoảng chống lặp 15 giây) — **xong ở R06.5** (`20261025090000_r06_honor_dedupe.sql`; chờ CI)
@@ -229,7 +229,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **Phụ thuộc:** R02 (lõi có thể bắt đầu sớm); R04 (lưu tiến độ, ngưỡng vào game).
 
-- [ ] 7.1 POC kết xuất (SVG/CSS) + đo FPS có CPU throttling + đo bundle route game (T-22, T-26); kiểm tra `npm view` nếu cần PixiJS
+- [x] 7.1 (xong, chờ CI — PROGRESS §5h) POC kết xuất (SVG/CSS) + đo FPS có CPU throttling + đo bundle route game (T-22, T-26); kiểm tra `npm view` nếu cần PixiJS
 - [ ] 7.2 `src/features/game-engine/core/` (grid, reducer, level-validate) + unit test
 - [ ] 7.3 Lược đồ màn + 3 màn Mê cung trong `content/games/treasure-maze/levels/`; mở rộng `content:check` chạy `level-validate`
 - [ ] 7.4 Điều khiển: 4 nút mũi tên ≥ 64 px, phím mũi tên/WASD, giữ để đi, `aria-live`

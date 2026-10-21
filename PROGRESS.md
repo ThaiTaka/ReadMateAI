@@ -263,3 +263,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-21 | R06.3 | R06 | Backend reset mùa: migration 20261024090000, `teacher_reset_season`, `resetSeason`, khóa ý định + mùa xác nhận, hạng cuối 1-2-2-4, đồng thời/rollback; pgTAP 95, DB 14 mới, unit +12. Chưa có giao diện (R06.4) |
 | 2026-10-21 | R06.4 | R06 | Giao diện reset mùa hai bước nối `resetSeason`; unit +9, E2E season-reset 9/9 local; CI chờ |
 | 2026-10-21 | R06.5 | R06 | API học sinh `GET /api/student/honors/latest` + khóa ý định chống snapshot vinh danh trùng (migration 20261025090000); unit/pgTAP/DB/E2E mục tiêu đạt local; CI chờ |
+| 2026-10-21 | R07.1 | Nghiệm thu R06; nguyên mẫu đồ họa Mê cung kho báu `/demo/treasure-maze` (React + SVG/CSS), số đo FPS/bundle ở REDESIGN_PROGRESS §5h; CI chờ |
