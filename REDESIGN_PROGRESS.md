@@ -6,7 +6,8 @@
 
 ## 1. Trạng thái hiện tại
 
-- **R07.2 xong: lõi Game Engine thuần TS `src/features/game-engine/core/` (24 unit test); chờ CI — §5i.**
+- **R07.3 xong: 3 màn JSON `content/games/treasure-maze/levels/` (9×9, 11×11, 13×13) + zod `game-engine/levels/` + `content:check` kiểm màn — §5j.**
+- (trước đó) **R07.2 xong: lõi Game Engine thuần TS `src/features/game-engine/core/` (24 unit test); chờ CI — §5i.**
 - (trước đó) **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, CI + E2E xanh trên `d912a56` — §5h.**
 - (trước đó) **R06.5 xong: API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
 - **Giai đoạn trước: R06.4 — giao diện reset điểm hai bước (nghiệm thu: CI + E2E xanh trên `a918a56`).** Chi tiết §5f. R06.3 (backend reset) đã nghiệm thu: CI + E2E 9/9 xanh trên `17146c0`. Tiếp theo: R06.5 (API học sinh xem lần vinh danh gần nhất, rà chống snapshot trùng, nghiệm thu R06).
@@ -24,7 +25,7 @@
 | R04 | ✅ Hoàn thành (local) |
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
-| R07 | 🔄 R07.1, R07.2 xong (nguyên mẫu đồ họa, lõi engine) |
+| R07 | 🔄 R07.1–R07.3 xong (nguyên mẫu đồ họa, lõi engine, 3 màn) |
 | R08–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
@@ -309,6 +310,10 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Kiểm thử (local):** unit 1007/1007; pgTAP 7 tệp / 109 test (mới `07_honor_dedupe`, `05` sửa chữ ký); DB tích hợp `honor-dedupe.test.ts` 13/13 (cùng requestId 2 lần, 5 yêu cầu đồng thời, 4 yêu cầu khác requestId đồng thời → 1 snapshot, vinh danh lại sau khoảng chống lặp, bất biến, rút đồng ý/đổi tên, cách ly lớp, thiết bị thu hồi, mùa cũ, cờ tắt, none) + `honors.test.ts` và `season-reset.test.ts` (cập nhật chữ ký) đạt; E2E `honors.spec.ts` -g R06.5 chromium-desktop đạt (hai tab bấm cùng lúc = 1 snapshot, API no-store/noindex/400/401, không rò dữ liệu). Hồi quy đầy đủ: GitHub Actions.
 **Giới hạn:** gộp theo khoảng chống lặp trả snapshot cũ cho GV thứ hai (không báo "đã gộp" trên giao diện); khoảng 15 giây tính theo đồng hồ CSDL; `honors.test.ts` đặt khoảng chống lặp = 0 cục bộ để tạo nhiều snapshot liên tiếp (khôi phục 15 khi xong); chưa có giao diện học sinh dùng API (R07+/sau).
 
+## 5j. R07.3 — Ba màn Mê cung kho báu (2026-10-21)
+
+`content/games/treasure-maze/levels/level-0{1,2,3}.json` (`{id, name, rows, triggers[7]}`; id `treasure-maze-0N`, trigger `tm0N-tK`). Màn 1 9×9: hành lang ngoằn ngoèo, ít ngã rẽ; màn 2 11×11 và màn 3 13×13: mê cung sinh bằng DFS (hạt giống cố định, có vài vòng), rương ở ô xa nhất theo đường đi (29 và 35 bước). Trigger chọn đều theo khoảng cách từ xuất phát. `src/features/game-engine/levels/{schema,validate-files,index}.ts`: zod `strictObject` (hình dạng) + `validateLevelFiles` (thiếu/thừa tệp, id trùng/lệch, kích thước, NFC, BOM) gọi lại `validateLevel` của lõi — không có bộ kiểm đường đi thứ hai. `content:check` tách `games/` khỏi bộ kiểm kho tri thức, lỗi in `[mã] tệp: thông báo tại hàng, cột` và thoát mã 1. Test `tests/unit/game-engine/levels.test.ts` (chạy cả `content:check` thật trên bản sao lỗi). **Bảo mật:** JSON trong repo (public) không phải cơ chế bảo mật; R08 phải xác thực mọi sự kiện kích hoạt ở server. Không điều khiển/DB/API/quái vật. Màn là mê cung riêng, không phải ô bản đồ thế giới 3×3.
+
 ## 5i. R07.2 — Lõi Game Engine (2026-10-21)
 
 `core/{types,grid,reducer,level-validate,index}.ts`, thuần TS (import `.ts` tương đối, không zod/DOM/ngẫu nhiên/thời gian). Màn = `{ id, rows (# . S T, tương thích nguyên mẫu 11×11), triggers[7] }`. Reducer `gameReducer(parsedLevel, state, action)` với `MOVE | PAUSE | RESUME | ENCOUNTER_RESOLVED{triggerId, outcome}`: đi từng ô, va tường/biên, tạm dừng chặn đi, điểm kích hoạt ẩn (`revealedTriggers` chỉ trả điểm đã bước vào) và mỗi điểm một lần, đang chạm trán thì chặn đi, rương chỉ mở khi đủ 7 chạm trán đã giải quyết. Lõi không đụng điểm/HP/dữ liệu học sinh. `validateLevel` trả `LevelError[]` có mã + vị trí (13 mã: kích thước 9–13, hàng đều, ký tự lạ, 1 S, 1 T, đúng 7 trigger, trùng mã/tọa độ, ngoài bản đồ, không trên đường, liên thông, rương/trigger tới được). Fixture chỉ ở `tests/unit/game-engine/`; 3 màn JSON + `content:check` thuộc R07.3; chưa có migration/API/điều khiển.
@@ -414,3 +419,4 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 | 2026-10-21 | R05 (nghiệm thu) | R05 | Chuyển kiểm thử nặng lên GitHub Actions (workflow E2E, 9 job, 1 worker); sửa 2 điểm chập chờn của test (hết giờ WebKit, fixture trùng fingerprint); CI + E2E xanh trên `83b34a7`; cập nhật tài liệu. Không bắt đầu R06 |
 | 2026-10-21 | R06.1 | R06 | Backend vinh danh TOP 3: migration `20261023090000`, ảnh chụp bất biến, quyền owner/co_teacher+can_honor, cờ hệ thống tắt, đọc lọc theo quyền hiện tại; pgTAP 81, tích hợp 19 (mới), unit 967. Không làm giao diện/hoạt cảnh/reset |
 | 2026-10-21 | R07.1 | R07 | Nghiệm thu R06; nguyên mẫu `/demo/treasure-maze` (SVG/CSS), đo FPS/bundle/bố cục thật, E2E 5 project; chọn React + SVG/CSS; CI chờ. Không làm R07.2 |
+| 2026-10-21 | R07.3 | R07 | 3 màn JSON + schema zod + `content:check` kiểm màn; unit đạt local; CI chờ. Không làm R07.4 |
