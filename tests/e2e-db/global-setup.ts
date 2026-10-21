@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
-import { setLocalLeaderboardApproval } from "../../scripts/lib/test-fixtures";
+import { setLocalHonorsApproval, setLocalLeaderboardApproval } from "../../scripts/lib/test-fixtures";
 
 /**
  * Trước E2E có CSDL: xác minh Supabase LOCAL đang chạy và có dữ liệu giả; xóa bộ đếm giới hạn tần suất của máy dev
@@ -23,4 +23,6 @@ export default async function globalSetup() {
   if (cleared.error) throw cleared.error;
   // R05: giả lập 'cờ hệ thống bảng xếp hạng đã được chấp thuận' CHỈ trên local trong lúc chạy E2E; global-teardown trả về TẮT.
   setLocalLeaderboardApproval(true);
+  // R06.2: tương tự cho cờ hệ thống vinh danh TOP 3 (global-teardown trả về TẮT).
+  setLocalHonorsApproval(true);
 }

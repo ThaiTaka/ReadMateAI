@@ -146,7 +146,17 @@
   /* R04: sương mù tan khi khám phá ô bản đồ — trạng thái gốc của lớp sương là trong suốt, nên khi tắt hoạt cảnh
      (giảm chuyển động) sương biến mất ngay, không bị kẹt. */
   --animate-fog-clear: rm-fog-clear 1.1s ease-out both;
+  /* R06.2: hoa giấy rơi chậm (vinh danh) — chậm, không nhấp nháy; lớp hoa giấy ẩn hẳn khi giảm chuyển động. */
+  --animate-confetti: rm-confetti 9s linear infinite;
 
+  @keyframes rm-confetti {
+    from {
+      transform: translateY(-12%) rotate(0deg);
+    }
+    to {
+      transform: translateY(112vh) rotate(200deg);
+    }
+  }
   @keyframes rm-float {
     0%,
     100% {

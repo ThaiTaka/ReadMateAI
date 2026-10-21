@@ -1,11 +1,11 @@
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.1 (backend vinh danh TOP 3)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.2 (giao diện vinh danh TOP 3)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn hiện tại: R06.1 — backend vinh danh TOP 3 (chưa có giao diện/hoạt cảnh/reset; R06.2–R06.3 chưa làm).** Chi tiết §5c.
+- **Giai đoạn hiện tại: R06.2 — giao diện vinh danh TOP 3 (bục danh dự, hoạt cảnh 3 → 2 → 1). Reset mùa (R06.3) chưa làm.** Chi tiết §5d; backend R06.1 ở §5c.
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
 - (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
 - **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
@@ -270,6 +270,14 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Kiểm thử (local, chỉ phần mới/ảnh hưởng):** pgTAP 81/81 (mới 16), tích hợp `tests/db/honors.test.ts` 19/19 (JWT thật, điểm thật qua gateway), unit 967/967 (mới 15), db:lint sạch, format/lint/typecheck sạch. Kết quả CI của commit: xem nhật ký phiên bên dưới.
 
 **Giới hạn:** chưa chống bấm đúp (hai lần bấm tạo hai ảnh chụp — chấp nhận ở R06.1, có thể thêm khóa ý định ở R06.2); `co_teacher` chưa có giao diện cấp `can_honor` (cột đã có, kiểm thử cấp qua máy chủ); chưa có API học sinh xem ảnh chụp gần nhất.
+
+## 5d. R06.2 — Giao diện vinh danh TOP 3 (2026-10-21)
+
+**Route:** `/teacher/classes/[classId]/honors/[snapshotId]` (khung trình chiếu `(present)`). Trang kiểm tra ảnh chụp thuộc đúng lớp (qua `listHonorSnapshots`), cờ hệ thống tắt → màn "chưa dùng được", lớp khác → 404. **Không** tính lại hạng: chỉ dựng từ `HonorSnapshotDto` (`tiers`, `playbackOrder`).
+**Mã:** `src/features/honors/playback.ts` (máy trạng thái thuần: start/next/skip/replay, bố cục ≤ 6 hàng / lưới), `src/components/honors/honor-stage.tsx` (client: bục vàng/bạc/đồng, avatar `KidAvatar`, hào quang `animate-glow`, hoa giấy `animate-confetti` mới ở `tokens.css`, ẩn khi `data-motion=reduce`), `honor-launcher.tsx` (nút "Vinh danh TOP 3" khóa khi pending + bật/tắt của chủ nhiệm), mục "Lịch sử vinh danh" ở trang bảng điểm GV. Không âm thanh, không thư viện mới, không asset ngoài.
+**Hành vi:** 3 → 2 → 1, bậc trống bị bỏ (1,1,3 → 3 → 1; 1,1,1 → chỉ bậc 1); đồng hạng cùng một bậc, >6 → lưới, không loại ai; Bỏ qua → tổng kết; Xem lại → về đầu (Next giữ trang ẩn nên state được đặt lại khi bị ẩn); không tạo ảnh chụp, không đổi điểm/mùa (E2E đối chiếu).
+**Kiểm thử:** unit mới 11 (playback 5 nhóm + stage 6); E2E CSDL `tests/e2e-db/honors.spec.ts` (2 kịch bản) xanh cục bộ trên chromium-desktop và chromium-mobile; `global-setup/teardown` bật/trả cờ vinh danh về TẮT. WebKit + toàn bộ regression: GitHub Actions.
+**Giới hạn:** chưa chống bấm đúp ở server (chỉ khóa nút ở giao diện; hai tab/thiết bị vẫn tạo hai ảnh chụp — cần khóa ý định ở bước backend sau); `KidAvatar` vào bundle client của trang vinh danh (chỉ khu GV); `co_teacher` có `can_honor` vẫn chưa có giao diện cấp quyền; chưa có API học sinh xem vinh danh (6.5); cờ hệ thống vẫn TẮT.
 
 ## 6. Nhật ký quyết định (lộ trình R)
 

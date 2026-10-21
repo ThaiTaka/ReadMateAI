@@ -1,7 +1,7 @@
 import type { Metadata, Route } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, Crown, Lock, MonitorPlay, RotateCcw, Trophy } from "lucide-react";
+import { ArrowLeft, Crown, History, Lock, MonitorPlay, RotateCcw, Trophy } from "lucide-react";
 import { BoardPanel, LeaderboardBoard } from "@/components/leaderboard/leaderboard-board";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -11,11 +11,20 @@ import { Notice } from "@/components/ui/notice";
 import { eligibilityBlockers, maxPointsOf } from "@/features/gamification/ranking";
 import { requireTeacher } from "@/server/auth/teacher";
 import { getTeacherBoardOverview } from "@/server/leaderboard/teacher";
+import { listHonorSnapshots } from "@/server/teacher/honor-queries";
 import { getClassDetail } from "@/server/teacher/queries";
 import { vi } from "@/strings/vi";
+import { HonorLauncher } from "./honor-launcher";
 import { LeaderboardSettingsForm } from "./leaderboard-forms";
 
 const t = vi.leaderboard.teacher;
+const h = vi.honors.teacher;
+
+const timeFormat = new Intl.DateTimeFormat("vi-VN", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Ho_Chi_Minh",
+});
 
 export const metadata: Metadata = { title: t.metaTitle, robots: { index: false, follow: false } };
 
@@ -38,6 +47,10 @@ async function Content({ params }: Pick<PageProps<"/teacher/classes/[classId]/le
   const overview = await getTeacherBoardOverview(teacher, classId);
   if (!overview.ok) notFound();
   const board = overview.data;
+  // Lịch sử chỉ đọc được khi cờ hệ thống vinh danh đã bật; ngược lại hàm CSDL trả HONORS_DISABLED → khóa khu vực.
+  const honors = await listHonorSnapshots(teacher, classId);
+  const honorsApproved = honors.ok;
+  const history = honors.ok ? honors.data : [];
   const isOwner = cls.role === "owner";
   const canPresent = board.enabled && board.featureApproved;
   const rows = board.ranked.map((student) => ({
@@ -199,17 +212,63 @@ async function Content({ params }: Pick<PageProps<"/teacher/classes/[classId]/le
         )}
       </section>
 
+      <section aria-labelledby="honors-title" className="mt-10">
+        <h2 id="honors-title" className="flex items-center gap-2 text-2xl font-extrabold text-ink">
+          <Crown aria-hidden="true" className="size-6 text-sun-700" />
+          {h.title}
+        </h2>
+        <Card className="mt-4 p-5 sm:p-6">
+          <HonorLauncher
+            classId={classId}
+            honorsEnabled={cls.honorsEnabled}
+            featureApproved={honorsApproved}
+            isOwner={isOwner}
+          />
+        </Card>
+        <h3 className="mt-6 flex items-center gap-2 text-xl font-extrabold text-ink">
+          <History aria-hidden="true" className="size-5 text-ink-soft" />
+          {h.historyTitle}
+        </h3>
+        {history.length === 0 ? (
+          <p className="mt-2 text-ink-soft">{h.historyEmpty}</p>
+        ) : (
+          <>
+            <p className="mt-1 text-sm text-ink-soft">{h.historyNote}</p>
+            <ul className="mt-3 space-y-2" data-testid="honor-history">
+              {history.map((item) => {
+                const time = timeFormat.format(new Date(item.createdAt));
+                return (
+                  <li
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3"
+                  >
+                    <span className="font-semibold text-ink">
+                      {h.historyItem.replace("{season}", String(item.seasonNo)).replace("{time}", time)}
+                    </span>
+                    <ButtonLink
+                      href={`/teacher/classes/${classId}/honors/${item.id}` as Route}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {h.replay}
+                      <span className="sr-only">
+                        {" "}
+                        {h.replayContext.replace("{season}", String(item.seasonNo)).replace("{time}", time)}
+                      </span>
+                    </ButtonLink>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </section>
+
       <section aria-labelledby="coming-title" className="mt-10">
         <h2 id="coming-title" className="text-2xl font-extrabold text-ink">
           {t.comingTitle}
         </h2>
         <Card variant="placeholder" className="mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:flex-wrap">
-          <div>
-            <Button type="button" variant="outline" disabled aria-describedby="coming-reason">
-              <Crown aria-hidden="true" className="size-5" />
-              {t.comingHonors}
-            </Button>
-          </div>
           <div>
             <Button type="button" variant="outline" disabled aria-describedby="coming-reason">
               <RotateCcw aria-hidden="true" className="size-5" />
