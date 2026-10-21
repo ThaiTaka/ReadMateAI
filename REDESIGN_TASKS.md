@@ -16,7 +16,7 @@
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
-| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.4 |
+| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.5a |
 | R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | ⏸ |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
@@ -231,9 +231,10 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 - [x] 7.1 (xong, chờ CI — PROGRESS §5h) POC kết xuất (SVG/CSS) + đo FPS có CPU throttling + đo bundle route game (T-22, T-26); kiểm tra `npm view` nếu cần PixiJS
 - [x] 7.2 (xong, chờ CI) `src/features/game-engine/core/` (types, grid, reducer, level-validate) + 24 unit test
-- [ ] 7.3 Lược đồ màn + 3 màn Mê cung trong `content/games/treasure-maze/levels/`; mở rộng `content:check` chạy `level-validate`
-- [ ] 7.4 Điều khiển: 4 nút mũi tên ≥ 64 px, phím mũi tên/WASD, giữ để đi, `aria-live`
-- [ ] 7.5 Migrations `game_runs` (+ RLS); API bắt đầu/tiếp tục lượt chơi, lưu vị trí (`state_version`); kiểm tra ngưỡng 50 điểm
+- [x] 7.3 (xong) Lược đồ màn + 3 màn Mê cung trong `content/games/treasure-maze/levels/`; mở rộng `content:check` chạy `level-validate`
+- [x] 7.4 (xong) Điều khiển: 4 nút mũi tên ≥ 64 px, phím mũi tên/WASD, giữ để đi, `aria-live`
+- [x] 7.5a (xong, chờ CI — PROGRESS §5l) Migrations `game_runs` (+ RLS), RPC bắt đầu/tiếp tục/lưu vị trí (`state_version`), ngưỡng 50 điểm, reset mùa đóng lượt dở
+- [ ] 7.5b API Next.js `/api/student/game-runs` + lưu vị trí + nối giao diện + khôi phục sau tải lại
 - [ ] 7.6 Hoạt cảnh di chuyển, chuyển cảnh; giảm chuyển động; tạm dừng/tiếp tục
 
 **Tiêu chí nghiệm thu:** đi hết mê cung bằng nút và phím trên 5 cấu hình Playwright; tải lại giữ vị trí; không vào được khi < 50 điểm; mọi màn qua `level-validate`.

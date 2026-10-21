@@ -565,6 +565,82 @@ export type Database = {
           },
         ];
       };
+      game_runs: {
+        Row: {
+          class_id: string;
+          completed_at: string | null;
+          encounter_count: number;
+          ended_at: string | null;
+          game_key: string;
+          id: string;
+          last_active_at: string;
+          level_key: string;
+          level_version: string;
+          position: NonNullable<Json>;
+          scored: boolean;
+          season_id: string;
+          started_at: string;
+          state_version: number;
+          status: string;
+          student_id: string;
+          treasure_opened_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          completed_at?: string | null;
+          encounter_count?: number;
+          ended_at?: string | null;
+          game_key: string;
+          id?: string;
+          last_active_at?: string;
+          level_key: string;
+          level_version: string;
+          position: NonNullable<Json>;
+          scored?: boolean;
+          season_id: string;
+          started_at?: string;
+          state_version?: number;
+          status?: string;
+          student_id: string;
+          treasure_opened_at?: string | null;
+        };
+        Update: {
+          class_id?: string;
+          completed_at?: string | null;
+          encounter_count?: number;
+          ended_at?: string | null;
+          game_key?: string;
+          id?: string;
+          last_active_at?: string;
+          level_key?: string;
+          level_version?: string;
+          position?: NonNullable<Json>;
+          scored?: boolean;
+          season_id?: string;
+          started_at?: string;
+          state_version?: number;
+          status?: string;
+          student_id?: string;
+          treasure_opened_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_runs_season_id_class_id_fkey";
+            columns: ["season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "game_runs_student_id_class_id_fkey";
+            columns: ["student_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       game_unlocks: {
         Row: {
           balance_at_unlock: number;
@@ -1312,6 +1388,7 @@ export type Database = {
           performed_by: string;
           request_id: string;
           scored_students: number;
+          voided_game_runs: number;
           voided_questions: number;
           voided_sessions: number;
         };
@@ -1324,6 +1401,7 @@ export type Database = {
           performed_by: string;
           request_id: string;
           scored_students: number;
+          voided_game_runs?: number;
           voided_questions: number;
           voided_sessions: number;
         };
@@ -1335,6 +1413,7 @@ export type Database = {
           performed_by?: string;
           request_id?: string;
           scored_students?: number;
+          voided_game_runs?: number;
           voided_questions?: number;
           voided_sessions?: number;
         };
@@ -1834,7 +1913,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      gateway_save_game_position: {
+        Args: { p_auth_user_id: string; p_path: Json; p_run_id: string; p_state_version: number; p_student_id: string };
+        Returns: Json;
+      };
       gateway_scoring_rules: { Args: { p_version: string }; Returns: Json };
+      gateway_start_game_run: {
+        Args: { p_auth_user_id: string; p_game_key: string; p_level_key: string; p_student_id: string };
+        Returns: Json;
+      };
       gateway_start_practice_session: {
         Args: { p_auth_user_id: string; p_items: Json; p_planner_version: string; p_student_id: string };
         Returns: Json;

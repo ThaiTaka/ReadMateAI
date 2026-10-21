@@ -44,3 +44,15 @@ export function setLocalHonorDedupeSeconds(seconds: number): void {
     stdio: ["ignore", "ignore", "pipe"],
   });
 }
+
+/**
+ * Cho phép tạo lượt chơi game KHÔNG tính điểm để kiểm thử cơ chế lưu trạng thái (R07.5a) CHỈ trên Supabase LOCAL.
+ * Cần cả `fixtures_allowed` (enableLocalTestFixtures). Production luôn tắt: tạo lượt mới trả INSUFFICIENT_CONTENT
+ * cho tới khi R08 phân bổ 7 chạm trán + 21 câu. Kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalGameRunFixtures(allowed: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.test_environment set game_run_fixtures_allowed = ${allowed ? "true" : "false"}, updated_at = now() where singleton"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}
