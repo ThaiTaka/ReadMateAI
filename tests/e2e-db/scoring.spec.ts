@@ -255,7 +255,12 @@ test.describe("R04 — luyện có điểm, bản đồ, điều kiện mini-gam
     await maze.getByRole("button", { name: /Xem chi tiết/u }).click();
     await expect(page.getByRole("dialog").getByRole("button", { name: "Mini-game đang phát triển" })).toBeDisabled();
     await page.keyboard.press("Escape");
-    expect(await page.locator('a[href*="/games"]').count()).toBe(0);
+    // Chỉ còn đúng một đường vào game có thật: Mê cung kho báu có xác thực (R07.5b2); ba game kia không có liên kết.
+    expect(
+      await page
+        .locator('a[href*="/games"]')
+        .evaluateAll((links) => links.map((a) => a.getAttribute("href")?.split("?")[0])),
+    ).toEqual(["/learn/me/games/treasure-maze"]);
     await noHorizontalScroll(page);
     await axeClean(page);
     await page.screenshot({ path: testInfo.outputPath("learn-me-scored.png"), fullPage: true });
