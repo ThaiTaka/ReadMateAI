@@ -6,7 +6,7 @@
 
 ## 1. Trạng thái hiện tại
 
-- **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, chờ CI — §5h.**
+- **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, CI + E2E xanh trên `d912a56` — §5h.**
 - (trước đó) **R06.5 xong: API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
 - **Giai đoạn trước: R06.4 — giao diện reset điểm hai bước (nghiệm thu: CI + E2E xanh trên `a918a56`).** Chi tiết §5f. R06.3 (backend reset) đã nghiệm thu: CI + E2E 9/9 xanh trên `17146c0`. Tiếp theo: R06.5 (API học sinh xem lần vinh danh gần nhất, rà chống snapshot trùng, nghiệm thu R06).
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
@@ -312,7 +312,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **R06 hoàn thành.** GitHub Actions trên commit `ebb027a`: CI run `39533560083` PASS, E2E run `39533560105` PASS (người điều phối xác minh). Cờ `leaderboard_feature_approved` và cờ vinh danh vẫn **tắt** mặc định. Giới hạn còn lại: chưa có giao diện học sinh xem vinh danh; chưa thử trên điện thoại thật; chống trùng snapshot gộp trong 15 giây.
 
-**R07.1 (chờ CI):** route `/demo/treasure-maze` (nhãn "Bản thử nghiệm – Dữ liệu minh họa"), lưới 11×11 (`features/demo/treasure-maze-data.ts`), `components/art/maze-board.tsx` (SVG nền + lớp HTML cho nhân vật/rương theo phần trăm ô, sẵn sàng nội suy `transform` ở R07.2), nhân vật `HeroKid`, rương `TreasureChest`, hoạt cảnh `animate-bob/sway` dừng theo giảm chuyển động. Không điểm, không điều khiển, không migration, không dữ liệu học sinh. Asset mới có dòng `art.scene.treasure-maze-board` (`pending_review`).
+**R07.1 (nghiệm thu: CI `39549482836` + E2E `39549482832` xanh trên `d912a56`):** route `/demo/treasure-maze` (nhãn "Bản thử nghiệm – Dữ liệu minh họa"), lưới 11×11 (`features/demo/treasure-maze-data.ts`), `components/art/maze-board.tsx` (SVG nền + lớp HTML cho nhân vật/rương theo phần trăm ô, sẵn sàng nội suy `transform` ở R07.2), nhân vật `HeroKid`, rương `TreasureChest`, hoạt cảnh `animate-bob/sway` dừng theo giảm chuyển động. Không điểm, không điều khiển, không migration, không dữ liệu học sinh. Asset mới có dòng `art.scene.treasure-maze-board` (`pending_review`).
 
 **Số đo thật** (`node scripts/measure-maze-perf.mjs`, Chromium 156 headless trên máy phát triển, bản production, viewport 390×844, 5 giây/lần; rAF headless bị khóa ở 60 Hz nên FPS không vượt 60 — số hữu ích là tỉ lệ khung chậm và độ bận luồng chính):
 
