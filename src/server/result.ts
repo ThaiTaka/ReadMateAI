@@ -49,6 +49,11 @@ export const ERROR_CODES = [
   // R06.3 — reset mùa (migration 20261024090000).
   "CONFIRMATION_MISMATCH",
   "SEASON_MISMATCH",
+  // R07.5 — lượt chơi Mê cung kho báu (migration 20261026090000).
+  "INSUFFICIENT_POINTS",
+  "STATE_CONFLICT",
+  "INVALID_POSITION",
+  "RUN_NOT_ACTIVE",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

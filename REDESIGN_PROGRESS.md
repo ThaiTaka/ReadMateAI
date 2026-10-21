@@ -443,4 +443,5 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 | 2026-10-21 | R05 (nghiệm thu) | R05 | Chuyển kiểm thử nặng lên GitHub Actions (workflow E2E, 9 job, 1 worker); sửa 2 điểm chập chờn của test (hết giờ WebKit, fixture trùng fingerprint); CI + E2E xanh trên `83b34a7`; cập nhật tài liệu. Không bắt đầu R06 |
 | 2026-10-21 | R06.1 | R06 | Backend vinh danh TOP 3: migration `20261023090000`, ảnh chụp bất biến, quyền owner/co_teacher+can_honor, cờ hệ thống tắt, đọc lọc theo quyền hiện tại; pgTAP 81, tích hợp 19 (mới), unit 967. Không làm giao diện/hoạt cảnh/reset |
 | 2026-10-21 | R07.1 | R07 | Nghiệm thu R06; nguyên mẫu `/demo/treasure-maze` (SVG/CSS), đo FPS/bundle/bố cục thật, E2E 5 project; chọn React + SVG/CSS; CI chờ. Không làm R07.2 |
+| 2026-10-21 | R07.5b1 | R07 | API `POST /api/student/game-runs` + `PATCH /api/student/game-runs/[runId]/position` (zod strict, DTO tối thiểu, 4 mã lỗi mới, no-store); unit 5 + DB 3 local. Không nối UI (R07.5b2) |
 | 2026-10-21 | R07.3 | R07 | 3 màn JSON + schema zod + `content:check` kiểm màn; unit đạt local; CI chờ. Không làm R07.4 |

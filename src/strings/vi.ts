@@ -1131,6 +1131,10 @@ export const vi = {
     NO_HONOREES: "Chưa có bạn nào đủ điều kiện được vinh danh (cần có điểm lớn hơn 0 và đã được đồng ý hiển thị).",
     CONFIRMATION_MISMATCH: "Tên lớp gõ lại chưa đúng. Hãy gõ chính xác tên lớp để xác nhận.",
     SEASON_MISMATCH: "Mùa thi đua đã thay đổi kể từ lúc bạn xác nhận. Hãy tải lại trang rồi xác nhận lại.",
+    INSUFFICIENT_POINTS: "Em cần thêm điểm thưởng để vào màn chơi này. Hãy luyện tập thêm nhé!",
+    STATE_CONFLICT: "Màn chơi đã có thay đổi mới hơn ở nơi khác. Hãy tải lại màn chơi.",
+    INVALID_POSITION: "Vị trí trong màn chơi chưa hợp lệ. Hãy tải lại màn chơi.",
+    RUN_NOT_ACTIVE: "Lượt chơi này đã kết thúc.",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 
