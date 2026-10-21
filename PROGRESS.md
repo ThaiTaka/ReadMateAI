@@ -264,3 +264,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-21 | R06.4 | R06 | Giao diện reset mùa hai bước nối `resetSeason`; unit +9, E2E season-reset 9/9 local; CI chờ |
 | 2026-10-21 | R06.5 | R06 | API học sinh `GET /api/student/honors/latest` + khóa ý định chống snapshot vinh danh trùng (migration 20261025090000); unit/pgTAP/DB/E2E mục tiêu đạt local; CI chờ |
 | 2026-10-21 | R07.1 | Nghiệm thu R06; nguyên mẫu đồ họa Mê cung kho báu `/demo/treasure-maze` (React + SVG/CSS), số đo FPS/bundle ở REDESIGN_PROGRESS §5h; CI chờ |
+| 2026-10-21 | R07.2 | Lõi Game Engine thuần TS (grid, reducer, level-validate) + 24 unit test; CI chờ |

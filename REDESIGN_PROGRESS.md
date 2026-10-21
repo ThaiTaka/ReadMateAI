@@ -6,7 +6,8 @@
 
 ## 1. Trạng thái hiện tại
 
-- **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, CI + E2E xanh trên `d912a56` — §5h.**
+- **R07.2 xong: lõi Game Engine thuần TS `src/features/game-engine/core/` (24 unit test); chờ CI — §5i.**
+- (trước đó) **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, CI + E2E xanh trên `d912a56` — §5h.**
 - (trước đó) **R06.5 xong: API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
 - **Giai đoạn trước: R06.4 — giao diện reset điểm hai bước (nghiệm thu: CI + E2E xanh trên `a918a56`).** Chi tiết §5f. R06.3 (backend reset) đã nghiệm thu: CI + E2E 9/9 xanh trên `17146c0`. Tiếp theo: R06.5 (API học sinh xem lần vinh danh gần nhất, rà chống snapshot trùng, nghiệm thu R06).
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
@@ -23,7 +24,7 @@
 | R04 | ✅ Hoàn thành (local) |
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
-| R07 | 🔄 R07.1 xong (nguyên mẫu đồ họa) |
+| R07 | 🔄 R07.1, R07.2 xong (nguyên mẫu đồ họa, lõi engine) |
 | R08–R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
@@ -307,6 +308,10 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Chống trùng (tại CSDL):** `teacher_create_honor_snapshot(class, request_id)` (đường 1 tham số bị gỡ) trả `{snapshot_id, replayed, deduplicated}`. (1) khóa dòng lớp `FOR UPDATE` tuần tự hóa mọi yêu cầu cùng lớp; (2) bảng bất biến `honor_snapshot_requests` (PK `request_id`): cùng request_id → cùng snapshot; khác lớp/người tạo → `IDEMPOTENCY_CONFLICT` (kể cả đua khác lớp qua PK → `mapDbError`); (3) khoảng chống lặp `private.honor_settings.dedupe_seconds` (mặc định 15, chỉ đổi ở local qua `setLocalHonorDedupeSeconds`): yêu cầu khác request_id khi lớp vừa có snapshot → gộp vào snapshot đó và ghi nhớ request_id (thử lại sau 15 giây vẫn không tạo mới); hết khoảng → GV vinh danh lần mới được. Không sửa snapshot cũ/điểm/mùa. `honor-launcher.tsx`: một `requestId` mỗi ý định, giữ khi lỗi tạm (UNKNOWN/RATE_LIMITED), đổi sau thành công/lỗi dứt khoát.
 **Kiểm thử (local):** unit 1007/1007; pgTAP 7 tệp / 109 test (mới `07_honor_dedupe`, `05` sửa chữ ký); DB tích hợp `honor-dedupe.test.ts` 13/13 (cùng requestId 2 lần, 5 yêu cầu đồng thời, 4 yêu cầu khác requestId đồng thời → 1 snapshot, vinh danh lại sau khoảng chống lặp, bất biến, rút đồng ý/đổi tên, cách ly lớp, thiết bị thu hồi, mùa cũ, cờ tắt, none) + `honors.test.ts` và `season-reset.test.ts` (cập nhật chữ ký) đạt; E2E `honors.spec.ts` -g R06.5 chromium-desktop đạt (hai tab bấm cùng lúc = 1 snapshot, API no-store/noindex/400/401, không rò dữ liệu). Hồi quy đầy đủ: GitHub Actions.
 **Giới hạn:** gộp theo khoảng chống lặp trả snapshot cũ cho GV thứ hai (không báo "đã gộp" trên giao diện); khoảng 15 giây tính theo đồng hồ CSDL; `honors.test.ts` đặt khoảng chống lặp = 0 cục bộ để tạo nhiều snapshot liên tiếp (khôi phục 15 khi xong); chưa có giao diện học sinh dùng API (R07+/sau).
+
+## 5i. R07.2 — Lõi Game Engine (2026-10-21)
+
+`core/{types,grid,reducer,level-validate,index}.ts`, thuần TS (import `.ts` tương đối, không zod/DOM/ngẫu nhiên/thời gian). Màn = `{ id, rows (# . S T, tương thích nguyên mẫu 11×11), triggers[7] }`. Reducer `gameReducer(parsedLevel, state, action)` với `MOVE | PAUSE | RESUME | ENCOUNTER_RESOLVED{triggerId, outcome}`: đi từng ô, va tường/biên, tạm dừng chặn đi, điểm kích hoạt ẩn (`revealedTriggers` chỉ trả điểm đã bước vào) và mỗi điểm một lần, đang chạm trán thì chặn đi, rương chỉ mở khi đủ 7 chạm trán đã giải quyết. Lõi không đụng điểm/HP/dữ liệu học sinh. `validateLevel` trả `LevelError[]` có mã + vị trí (13 mã: kích thước 9–13, hàng đều, ký tự lạ, 1 S, 1 T, đúng 7 trigger, trùng mã/tọa độ, ngoài bản đồ, không trên đường, liên thông, rương/trigger tới được). Fixture chỉ ở `tests/unit/game-engine/`; 3 màn JSON + `content:check` thuộc R07.3; chưa có migration/API/điều khiển.
 
 ## 5h. Nghiệm thu R06 và R07.1 — nguyên mẫu đồ họa Mê cung kho báu (2026-10-21)
 
