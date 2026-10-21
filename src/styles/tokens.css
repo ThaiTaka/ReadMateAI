@@ -148,6 +148,21 @@
   --animate-fog-clear: rm-fog-clear 1.1s ease-out both;
   /* R06.2: hoa giấy rơi chậm (vinh danh) — chậm, không nhấp nháy; lớp hoa giấy ẩn hẳn khi giảm chuyển động. */
   --animate-confetti: rm-confetti 9s linear infinite;
+  /* R07.4: nhân vật va tường — rung ngang nhẹ một lần (~0,25 s), không nhấp nháy. */
+  --animate-bump: rm-bump 0.25s ease-out 1;
+
+  @keyframes rm-bump {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    30% {
+      transform: translateX(-3px);
+    }
+    65% {
+      transform: translateX(3px);
+    }
+  }
 
   @keyframes rm-confetti {
     from {

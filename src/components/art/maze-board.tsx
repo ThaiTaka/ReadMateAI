@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/cn";
 import { parseDemoMaze, type MazeCell } from "@/features/demo/treasure-maze-data";
 import { HeroKid } from "./characters";
@@ -7,7 +8,8 @@ import { artA11y, useSvgIds, type ArtProps } from "./svg-ids";
 /*
  * Bản đồ Mê cung kho báu 2D (R07.1, bản phác thảo — chờ GV duyệt): lưới ô vẽ bằng SVG, nhân vật và rương là
  * lớp HTML đặt theo phần trăm ô (để R07.2 nội suy vị trí bằng `transform`). Hoạt cảnh dùng lớp có sẵn
- * (`animate-*`) nên dừng theo giảm chuyển động. Chỉ vẽ — chưa có điều khiển, điểm hay trạng thái.
+ * (`animate-*`) nên dừng theo giảm chuyển động. R07.4: nhân vật đặt theo `hero` (transform theo ô, nội suy bằng CSS),
+ * phần địa hình SVG được memo để mỗi bước chân không vẽ lại toàn bộ bản đồ. Bảng không giữ trạng thái.
  */
 
 const CELL = 40;
@@ -100,16 +102,84 @@ function BorderDecor({ cell }: { cell: MazeCell }) {
   return <Hedge x={x} y={y} shade={n} />;
 }
 
-export function MazeBoard({ rows, className, title }: ArtProps & { rows?: readonly string[] }) {
+export type MazeHero = {
+  row: number;
+  col: number;
+  facing: "up" | "down" | "left" | "right";
+  /** Đổi giá trị này để chạy lại hoạt cảnh va tường; 0 = chưa va. */
+  bumpKey?: number;
+};
+
+export type MazeBoardProps = ArtProps & {
+  rows?: readonly string[];
+  /** Mặc định: đứng ở ô xuất phát, quay mặt xuống. */
+  hero?: MazeHero;
+  /** Chỉ các ô thử thách người chơi đã bước vào; không bao giờ truyền điểm chưa dùng. */
+  foundMarkers?: readonly { row: number; col: number }[];
+};
+
+const Terrain = memo(function Terrain({ rows }: { rows?: readonly string[] }) {
   const grid = parseDemoMaze(rows);
   const size = grid.length;
   const id = useSvgIds(["grass", "vignette"]);
   const last = size - 1;
   const cells = grid.flat();
+  const side = size * CELL;
+  return (
+    <svg viewBox={`0 0 ${side} ${side}`} className="absolute inset-0 size-full" {...artA11y(undefined)}>
+      <defs>
+        <linearGradient id={id.grass} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c9f3b0" />
+          <stop offset="1" stopColor="#9fe38c" />
+        </linearGradient>
+        <radialGradient id={id.vignette} cx="0.5" cy="0.5" r="0.75">
+          <stop offset="0.65" stopColor="#0d283b" stopOpacity="0" />
+          <stop offset="1" stopColor="#0d283b" stopOpacity="0.2" />
+        </radialGradient>
+      </defs>
+      <rect width={side} height={side} fill={`url(#${id.grass})`} />
+      {cells.map((cell) => (cell.kind === "wall" ? null : <PathTile key={`p${cell.row}-${cell.col}`} cell={cell} />))}
+      {cells.map((cell) => {
+        if (cell.kind !== "wall") return null;
+        const border = cell.row === 0 || cell.col === 0 || cell.row === last || cell.col === last;
+        return border ? (
+          <BorderDecor key={`w${cell.row}-${cell.col}`} cell={cell} />
+        ) : (
+          <Hedge
+            key={`w${cell.row}-${cell.col}`}
+            x={cell.col * CELL}
+            y={cell.row * CELL}
+            shade={pick(cell.row, cell.col, 3)}
+          />
+        );
+      })}
+      {/* Bóng bụi cây đổ xuống đường đi phía dưới */}
+      {cells.map((cell) =>
+        cell.kind !== "wall" && grid[cell.row - 1]?.[cell.col]?.kind === "wall" ? (
+          <rect
+            key={`s${cell.row}-${cell.col}`}
+            x={cell.col * CELL}
+            y={cell.row * CELL}
+            width={CELL}
+            height="6"
+            fill="#b88a3c"
+            opacity="0.22"
+          />
+        ) : null,
+      )}
+      <rect width={side} height={side} fill={`url(#${id.vignette})`} />
+    </svg>
+  );
+});
+
+export function MazeBoard({ rows, className, title, hero, foundMarkers }: MazeBoardProps) {
+  const grid = parseDemoMaze(rows);
+  const size = grid.length;
+  const cells = grid.flat();
   const percent = (n: number) => `${(n / size) * 100}%`;
   const start = cells.find((cell) => cell.kind === "start");
   const treasure = cells.find((cell) => cell.kind === "treasure");
-  const side = size * CELL;
+  const at = hero ?? (start ? { row: start.row, col: start.col, facing: "down" as const, bumpKey: 0 } : undefined);
 
   return (
     <div
@@ -117,49 +187,17 @@ export function MazeBoard({ rows, className, title }: ArtProps & { rows?: readon
       aria-label={title}
       className={cn("relative aspect-square w-full overflow-hidden rounded-[2rem] shadow-world", className)}
     >
-      <svg viewBox={`0 0 ${side} ${side}`} className="absolute inset-0 size-full" {...artA11y(undefined)}>
-        <defs>
-          <linearGradient id={id.grass} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#c9f3b0" />
-            <stop offset="1" stopColor="#9fe38c" />
-          </linearGradient>
-          <radialGradient id={id.vignette} cx="0.5" cy="0.5" r="0.75">
-            <stop offset="0.65" stopColor="#0d283b" stopOpacity="0" />
-            <stop offset="1" stopColor="#0d283b" stopOpacity="0.2" />
-          </radialGradient>
-        </defs>
-        <rect width={side} height={side} fill={`url(#${id.grass})`} />
-        {cells.map((cell) => (cell.kind === "wall" ? null : <PathTile key={`p${cell.row}-${cell.col}`} cell={cell} />))}
-        {cells.map((cell) => {
-          if (cell.kind !== "wall") return null;
-          const border = cell.row === 0 || cell.col === 0 || cell.row === last || cell.col === last;
-          return border ? (
-            <BorderDecor key={`w${cell.row}-${cell.col}`} cell={cell} />
-          ) : (
-            <Hedge
-              key={`w${cell.row}-${cell.col}`}
-              x={cell.col * CELL}
-              y={cell.row * CELL}
-              shade={pick(cell.row, cell.col, 3)}
-            />
-          );
-        })}
-        {/* Bóng bụi cây đổ xuống đường đi phía dưới */}
-        {cells.map((cell) =>
-          cell.kind !== "wall" && grid[cell.row - 1]?.[cell.col]?.kind === "wall" ? (
-            <rect
-              key={`s${cell.row}-${cell.col}`}
-              x={cell.col * CELL}
-              y={cell.row * CELL}
-              width={CELL}
-              height="6"
-              fill="#b88a3c"
-              opacity="0.22"
-            />
-          ) : null,
-        )}
-        <rect width={side} height={side} fill={`url(#${id.vignette})`} />
-      </svg>
+      <Terrain rows={rows} />
+      {foundMarkers?.map((m) => (
+        <div
+          key={`m${m.row}-${m.col}`}
+          aria-hidden="true"
+          className="pointer-events-none absolute flex items-center justify-center"
+          style={{ left: percent(m.col), top: percent(m.row), width: percent(1), height: percent(1) }}
+        >
+          <span className="size-[45%] rotate-45 rounded-[20%] border-2 border-sun-600 bg-sun-300" />
+        </div>
+      ))}
       {treasure && (
         <div
           className="pointer-events-none absolute"
@@ -168,13 +206,29 @@ export function MazeBoard({ rows, className, title }: ArtProps & { rows?: readon
           <TreasureChest title="Rương kho báu" />
         </div>
       )}
-      {start && (
+      {at && (
+        // Ô một-ô-vuông dịch bằng transform (phần trăm của chính nó = 1 ô) → nội suy mượt, không bố cục lại.
         <div
-          className="pointer-events-none absolute"
-          style={{ left: percent(start.col - 0.1), top: percent(start.row - 0.5), width: percent(1.2) }}
+          data-testid="maze-hero"
+          data-row={at.row}
+          data-col={at.col}
+          data-facing={at.facing}
+          className="pointer-events-none absolute top-0 left-0 transition-transform duration-200 ease-linear"
+          style={{
+            width: percent(1),
+            height: percent(1),
+            transform: `translate(${at.col * 100}%, ${at.row * 100}%)`,
+          }}
         >
-          <div className="animate-bob">
-            <HeroKid title="Bạn nhỏ thám hiểm" />
+          <div
+            className="absolute top-[-50%] left-[-10%] w-[120%]"
+            style={{ transform: at.facing === "left" ? "scaleX(-1)" : undefined }}
+          >
+            <div key={at.bumpKey ?? 0} className={at.bumpKey ? "animate-bump" : undefined}>
+              <div className="animate-bob">
+                <HeroKid title="Bạn nhỏ thám hiểm" />
+              </div>
+            </div>
           </div>
         </div>
       )}

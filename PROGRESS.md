@@ -266,3 +266,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-21 | R07.1 | Nghiệm thu R06; nguyên mẫu đồ họa Mê cung kho báu `/demo/treasure-maze` (React + SVG/CSS), số đo FPS/bundle ở REDESIGN_PROGRESS §5h; CI chờ |
 | 2026-10-21 | R07.2 | Lõi Game Engine thuần TS (grid, reducer, level-validate) + 24 unit test; CI chờ |
 | 2026-10-21 | R07.3 | 3 màn Mê cung kho báu (JSON) + schema zod + `content:check` kiểm màn; CI chờ. Không làm R07.4 |
+| 2026-10-21 | R07.4 | Điều khiển nhân vật Mê cung kho báu (bàn phím, 4 nút, giữ/thả, camera 7×7, tạm dừng, thử thách minh họa); unit + E2E 48/48 local; CI chờ. Không làm R07.5 |

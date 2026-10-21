@@ -1,12 +1,13 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R07.1 (nghiệm thu R06 + nguyên mẫu Mê cung kho báu)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R07.4 (điều khiển nhân vật Mê cung kho báu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **R07.3 xong: 3 màn JSON `content/games/treasure-maze/levels/` (9×9, 11×11, 13×13) + zod `game-engine/levels/` + `content:check` kiểm màn — §5j.**
+- **R07.4 xong: `/demo/treasure-maze` đi lại được (bàn phím + 4 nút cảm ứng), camera phóng to trên điện thoại, tạm dừng, thử thách minh họa — §5k. Chờ CI.**
+- (trước đó) **R07.3 xong: 3 màn JSON `content/games/treasure-maze/levels/` (9×9, 11×11, 13×13) + zod `game-engine/levels/` + `content:check` kiểm màn — §5j.**
 - (trước đó) **R07.2 xong: lõi Game Engine thuần TS `src/features/game-engine/core/` (24 unit test); chờ CI — §5i.**
 - (trước đó) **R06 đã nghiệm thu (CI + E2E xanh trên `ebb027a`); R07.1 (nguyên mẫu đồ họa Mê cung) xong, CI + E2E xanh trên `d912a56` — §5h.**
 - (trước đó) **R06.5 xong: API `GET /api/student/honors/latest` + khóa ý định chống snapshot trùng — §5g. Sẵn sàng nghiệm thu R06 khi CI xanh.**
@@ -309,6 +310,17 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Chống trùng (tại CSDL):** `teacher_create_honor_snapshot(class, request_id)` (đường 1 tham số bị gỡ) trả `{snapshot_id, replayed, deduplicated}`. (1) khóa dòng lớp `FOR UPDATE` tuần tự hóa mọi yêu cầu cùng lớp; (2) bảng bất biến `honor_snapshot_requests` (PK `request_id`): cùng request_id → cùng snapshot; khác lớp/người tạo → `IDEMPOTENCY_CONFLICT` (kể cả đua khác lớp qua PK → `mapDbError`); (3) khoảng chống lặp `private.honor_settings.dedupe_seconds` (mặc định 15, chỉ đổi ở local qua `setLocalHonorDedupeSeconds`): yêu cầu khác request_id khi lớp vừa có snapshot → gộp vào snapshot đó và ghi nhớ request_id (thử lại sau 15 giây vẫn không tạo mới); hết khoảng → GV vinh danh lần mới được. Không sửa snapshot cũ/điểm/mùa. `honor-launcher.tsx`: một `requestId` mỗi ý định, giữ khi lỗi tạm (UNKNOWN/RATE_LIMITED), đổi sau thành công/lỗi dứt khoát.
 **Kiểm thử (local):** unit 1007/1007; pgTAP 7 tệp / 109 test (mới `07_honor_dedupe`, `05` sửa chữ ký); DB tích hợp `honor-dedupe.test.ts` 13/13 (cùng requestId 2 lần, 5 yêu cầu đồng thời, 4 yêu cầu khác requestId đồng thời → 1 snapshot, vinh danh lại sau khoảng chống lặp, bất biến, rút đồng ý/đổi tên, cách ly lớp, thiết bị thu hồi, mùa cũ, cờ tắt, none) + `honors.test.ts` và `season-reset.test.ts` (cập nhật chữ ký) đạt; E2E `honors.spec.ts` -g R06.5 chromium-desktop đạt (hai tab bấm cùng lúc = 1 snapshot, API no-store/noindex/400/401, không rò dữ liệu). Hồi quy đầy đủ: GitHub Actions.
 **Giới hạn:** gộp theo khoảng chống lặp trả snapshot cũ cho GV thứ hai (không báo "đã gộp" trên giao diện); khoảng 15 giây tính theo đồng hồ CSDL; `honors.test.ts` đặt khoảng chống lặp = 0 cục bộ để tạo nhiều snapshot liên tiếp (khôi phục 15 khi xong); chưa có giao diện học sinh dùng API (R07+/sau).
+
+## 5k. R07.4 — Điều khiển nhân vật (2026-10-21)
+
+`/demo/treasure-maze` chọn được 3 màn JSON R07.3; `features/game-engine/ui/{maze-player.tsx,use-hold-move.ts,camera.ts}`; `MazeBoard` (R07.1) nhận `hero`/`foundMarkers`, phần SVG địa hình `memo` (bước chân chỉ đổi `transform` của nhân vật, không vẽ lại SVG). Dùng `gameReducer` R07.2 nguyên vẹn (bọc thêm bộ đếm va tường cho hoạt cảnh `animate-bump`).
+
+- **Điều khiển:** phím mũi tên + WASD, 4 nút `size-16` (64 px) cách nhau 12 px, `aria-label` tiếng Việt. MỘT bộ hẹn giờ `setTimeout` nối tiếp cho mọi nguồn: bấm = đi ngay 1 ô; giữ ≥ 350 ms thì 1 ô/200 ms; key repeat của hệ điều hành bị bỏ qua nên không tăng tốc. Thả bằng pointerup/pointercancel/lostpointercapture/keyup, `window blur`, ẩn tab, unmount; va tường/tạm dừng/chạm trán tự thả. Phím bị bỏ qua khi đang gõ vào ô nhập hoặc tiêu điểm ở điều khiển tương tác ngoài vùng game (`<main>` vẫn nhận phím — sau khi bấm nút WebKit đưa tiêu điểm về đó).
+- **Camera:** điện thoại (< 768 px) khung 7×7 ô bám nhân vật, kẹp ở mép bản đồ (`camera.ts`, hàm thuần), CSS `transform` trên lớp "thế giới"; nút "Xem toàn cảnh"; máy tính mặc định toàn cảnh. Ô rộng ≈ 47 px ở 360 px (R07.1: ~30 px).
+- **Thử thách minh họa:** gặp điểm kích hoạt thì dừng, hiện khung "Thao tác minh họa" + nút "Tiếp tục bản chơi thử" (chỉ gọi `ENCOUNTER_RESOLVED`, không điểm, không câu hỏi). Điểm kích hoạt chỉ hiện dấu sau khi đã bước vào. Đủ 7 → rương mở theo luật R07.2; có nút "Chơi lại màn này".
+- **Giảm chuyển động:** dùng `data-motion="reduce"` sẵn có (chuyển tiếp ~0 ms, bỏ rung); không âm thanh, không nhấp nháy. `aria-live="polite"` chỉ ở dòng trạng thái, không thông báo từng bước.
+- **Giới hạn:** sprite nhân vật chỉ có mặt trước — quay trái dùng lật ngang, lên/xuống chưa có hình riêng; trạng thái không lưu (R07.5); chưa đo FPS trên Android thật; lớp bước chân dùng `transform` nên chạy trên compositor nhưng hoạt cảnh `sway` của cây (R07.1) vẫn ở luồng chính. Danh sách trigger nằm trong payload trang demo (chỉ là minh họa; R08 xác thực ở server).
+- **Kiểm thử:** unit `tests/unit/game-engine/{maze-player,camera}.test.*` (+21), E2E `treasure-maze-demo.spec.ts` 12 kịch bản × Chromium/WebKit × desktop/mobile 48/48 local (axe, 360/390/820 px, giữ/thả, blur/ẩn tab, 7 thử thách → mở rương).
 
 ## 5j. R07.3 — Ba màn Mê cung kho báu (2026-10-21)
 
