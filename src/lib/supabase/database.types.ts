@@ -725,6 +725,49 @@ export type Database = {
           },
         ];
       };
+      honor_snapshot_requests: {
+        Row: {
+          class_id: string;
+          created_at: string;
+          deduplicated: boolean;
+          request_id: string;
+          requested_by: string;
+          snapshot_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          created_at?: string;
+          deduplicated: boolean;
+          request_id: string;
+          requested_by: string;
+          snapshot_id: string;
+        };
+        Update: {
+          class_id?: string;
+          created_at?: string;
+          deduplicated?: boolean;
+          request_id?: string;
+          requested_by?: string;
+          snapshot_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "honor_snapshot_requests_class_id_fkey";
+            columns: ["class_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "honor_snapshot_requests_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "honor_snapshots";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       honor_snapshots: {
         Row: {
           class_id: string;
@@ -1754,6 +1797,7 @@ export type Database = {
         Args: { p_key_hash: string; p_limit: number; p_window_seconds: number };
         Returns: boolean;
       };
+      gateway_latest_honors: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
       gateway_practice_candidates: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
       gateway_record_attempt: {
         Args: {
@@ -1804,7 +1848,7 @@ export type Database = {
       teacher_assign_band: { Args: { p_band: string; p_reason: string; p_student_id: string }; Returns: undefined };
       teacher_confirm_class_curriculum: { Args: { p_class_id: string }; Returns: undefined };
       teacher_create_class: { Args: { p_name: string; p_school_year: string }; Returns: string };
-      teacher_create_honor_snapshot: { Args: { p_class_id: string }; Returns: string };
+      teacher_create_honor_snapshot: { Args: { p_class_id: string; p_request_id: string }; Returns: Json };
       teacher_create_student: {
         Args: { p_avatar_key: string; p_class_id: string; p_display_name: string; p_student_number: number };
         Returns: string;

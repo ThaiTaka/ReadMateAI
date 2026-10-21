@@ -458,7 +458,10 @@ describe("reset mùa — ảnh chụp vinh danh còn nguyên", () => {
       const m = await boardMember(t, cls.id, { alias: "Sao Vàng" });
       await player(m).correct(2);
       await rpcOk(t.rpc("teacher_set_honors_enabled", { p_class_id: cls.id, p_enabled: true }));
-      const snapshotId = await rpcOk(t.rpc("teacher_create_honor_snapshot", { p_class_id: cls.id }));
+      const created = await rpcOk(
+        t.rpc("teacher_create_honor_snapshot", { p_class_id: cls.id, p_request_id: randomUUID() }),
+      );
+      const snapshotId = (created as { snapshot_id: string }).snapshot_id;
       const season1 = (await activeOf(cls.id)).id;
       expect((await reset(t, cls.id, randomUUID(), season1, cls.name)).error).toBeNull();
       const snap = await t.rpc("teacher_get_honor_snapshot", { p_snapshot_id: snapshotId });

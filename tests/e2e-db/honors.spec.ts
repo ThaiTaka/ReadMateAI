@@ -386,4 +386,61 @@ test.describe("R06.2 — vinh danh TOP 3", () => {
     expect(await snapshotCount(cls.id)).toBe(0);
     await shot(page, "honors-empty", testInfo.project.name);
   });
+
+  test("R06.5 — hai tab bấm vinh danh cùng lúc chỉ tạo một ảnh chụp; học sinh xem qua API riêng tư", async ({
+    browser,
+    page,
+  }) => {
+    test.slow();
+    test.setTimeout(300_000);
+    const cls = await freshClass("VD-API");
+    const may = await newMember(cls, "Mây", { avatar: "may" });
+    const hidden = await newMember(cls, "Ẩn Danh", { avatar: "bin", display: false });
+    await earnFor(browser, may, 2);
+    await earnFor(browser, hidden, 3);
+    await must(admin.from("classes").update({ honors_enabled: true }).eq("id", cls.id).select("id"));
+
+    // Học sinh (thiết bị đã liên kết): chưa có ảnh chụp → none; query lạ (classId) bị từ chối; chưa liên kết → 401.
+    await link(page, may.backup);
+    const none = await page.request.get("/api/student/honors/latest");
+    expect(none.status()).toBe(200);
+    expect(none.headers()["cache-control"]).toContain("no-store");
+    expect(none.headers()["x-robots-tag"]).toContain("noindex");
+    expect((await none.json()).data).toEqual({ status: "none" });
+    expect((await page.request.get(`/api/student/honors/latest?classId=${cls.id}`)).status()).toBe(400);
+    const anonymous = await (await browser.newContext()).request.get("/api/student/honors/latest");
+    expect([401, 403]).toContain(anonymous.status());
+
+    // Hai tab của cùng GV bấm "Vinh danh TOP 3" gần như đồng thời (hai requestId khác nhau).
+    const contexts = await Promise.all([
+      browser.newContext({ locale: "vi-VN" }),
+      browser.newContext({ locale: "vi-VN" }),
+    ]);
+    const tabs = await Promise.all(contexts.map((context) => context.newPage()));
+    for (const tab of tabs) {
+      await login(tab, TEACHER_A);
+      await tab.goto(`/teacher/classes/${cls.id}/leaderboard`);
+      await expect(tab.getByRole("button", { name: "Vinh danh TOP 3" })).toBeEnabled();
+    }
+    await Promise.all(tabs.map((tab) => tab.getByRole("button", { name: "Vinh danh TOP 3" }).click()));
+    for (const tab of tabs) {
+      await expect(tab).toHaveURL(/\/teacher\/classes\/[0-9a-f-]+\/honors\/[0-9a-f-]+$/u, { timeout: 30_000 });
+    }
+    expect(tabs[0]!.url()).toBe(tabs[1]!.url());
+    expect(await snapshotCount(cls.id)).toBe(1);
+    await Promise.all(contexts.map((context) => context.close()));
+
+    // Học sinh thấy đúng người đủ điều kiện, không có khóa cấm/bạn ẩn.
+    const seen = await page.request.get("/api/student/honors/latest");
+    const text = await seen.text();
+    const body = JSON.parse(text).data as {
+      status: string;
+      tiers: Array<{ rank: number; entries: Array<{ alias: string }> }>;
+    };
+    expect(body.status).toBe("ok");
+    expect(body.tiers.map((tier) => [tier.rank, tier.entries.map((entry) => entry.alias)])).toEqual([[1, ["Mây"]]]);
+    for (const key of ["student_id", "studentId", "class_id", "classId", "band", "email", "Ẩn Danh"]) {
+      expect(text).not.toContain(key);
+    }
+  });
 });

@@ -20,14 +20,16 @@ type Props = {
 };
 
 /**
- * Nút "Vinh danh TOP 3" + công tắc bật/tắt của chủ nhiệm. Khóa nút khi đang gửi (trạng thái pending VÀ ref đồng bộ cho
- * cú bấm đúp trước khi React kịp vẽ lại). Đây chỉ là chặn ở giao diện — server chưa có khóa ý định, nên hai lần gửi từ
- * hai tab/thiết bị vẫn tạo hai ảnh chụp (giới hạn ghi ở REDESIGN_PROGRESS).
+ * Nút "Vinh danh TOP 3" + công tắc bật/tắt của chủ nhiệm. Khóa nút khi đang gửi (pending + ref đồng bộ cho cú bấm
+ * đúp). Chống trùng thật nằm ở CSDL (R06.5): mỗi ý định vinh danh có một `requestId` giữ nguyên khi thử lại; chỉ khi gửi
+ * xong (thành công hoặc bị từ chối dứt khoát) mới đổi sang ý định mới.
  */
 export function HonorLauncher({ classId, honorsEnabled: savedEnabled, featureApproved, isOwner }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const busy = useRef(false);
+  // Khóa ý định của lần vinh danh đang diễn ra; null = chưa có ý định, sẽ tạo khi bấm.
+  const intent = useRef<string | null>(null);
   // Giá trị hiện trên công tắc: đổi ngay khi bấm, trả lại nếu máy chủ từ chối.
   const [honorsEnabled, setEnabled] = useState(savedEnabled);
   const [message, setMessage] = useState<{ tone: "error" | "ok"; text: string } | null>(null);
@@ -39,11 +41,15 @@ export function HonorLauncher({ classId, honorsEnabled: savedEnabled, featureApp
     setMessage(null);
     startTransition(async () => {
       try {
-        const result = await createHonorSnapshot({ classId });
+        intent.current ??= crypto.randomUUID();
+        const result = await createHonorSnapshot({ classId, requestId: intent.current });
         if (result.ok) {
+          intent.current = null;
           router.push(`/teacher/classes/${classId}/honors/${result.data.snapshotId}` as Route);
           return;
         }
+        // Lỗi tạm (mạng/máy chủ) giữ nguyên ý định để thử lại không tạo trùng; lỗi dứt khoát thì bỏ ý định.
+        if (result.code !== "UNKNOWN" && result.code !== "RATE_LIMITED") intent.current = null;
         setMessage({ tone: "error", text: vi.errors[result.code] });
       } finally {
         busy.current = false;

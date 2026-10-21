@@ -217,7 +217,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 - [~] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason({classId, requestId, expectedSeasonId, confirmation})` **xong ở R06.3** (`src/server/teacher/season.ts`)
 - [x] 6.3 Màn vinh danh TOP 3 → 2 → 1, hào quang TOP 1, Bỏ qua, Xem lại, giảm chuyển động, đồng hạng — **xong ở R06.2** (`/teacher/classes/[classId]/honors/[snapshotId]`, nút + lịch sử ở trang bảng điểm GV)
 - [x] 6.4 Màn reset hai bước (gõ tên lớp) — **xong ở R06.4** (`season-reset.tsx`, unit + E2E `season-reset.spec.ts`; chờ CI)
-- [ ] 6.5 `GET /api/student/honors/latest` (nếu lớp bật)
+- [x] 6.5 `GET /api/student/honors/latest` + chống tạo snapshot trùng (khóa ý định `requestId`, khóa lớp, khoảng chống lặp 15 giây) — **xong ở R06.5** (`20261025090000_r06_honor_dedupe.sql`; chờ CI)
 
 **Tiêu chí nghiệm thu:** reset nguyên tử (lỗi giữa chừng → không thay đổi gì), lớp khác không đổi, dữ liệu học tập không đổi, gửi lại `requestId` không tạo mùa thứ ba, nộp vào mùa cũ → `SEASON_CLOSED`; ảnh chụp bất biến; chỉ GV có quyền.
 **Kiểm thử bắt buộc:** bộ đầy đủ + RLS + tích hợp (song song reset/nộp đáp án) + test:e2e.

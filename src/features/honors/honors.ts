@@ -80,3 +80,44 @@ export function buildHonorSummaries(raw: unknown): HonorSnapshotSummary[] | null
   if (!parsed.success) return null;
   return parsed.data.map((row) => ({ id: row.id, seasonNo: row.season_no, createdAt: row.created_at }));
 }
+
+/**
+ * Lần vinh danh gần nhất cho HỌC SINH (R06.5). Không có mã ảnh chụp, tên lớp, mã học sinh hay thông tin hàng bị ẩn.
+ * `disabled` = không được xem (cờ tắt hoặc thiếu đồng ý học tập) — không kèm dữ liệu; `none` = lớp chưa có lần vinh danh nào.
+ */
+export type StudentHonorsDto =
+  | { status: "disabled" | "none" }
+  | { status: "ok"; seasonNo: number; honoredAt: string; tiers: HonorTierDto[]; playbackOrder: HonorRank[] };
+
+const studentHonorsSchema = z.union([
+  z.object({ status: z.enum(["disabled", "none"]) }),
+  z.object({
+    status: z.literal("ok"),
+    season_no: z.number().int().min(1),
+    created_at: z.string().min(1),
+    entries: snapshotSchema.shape.entries,
+  }),
+]);
+
+export function buildStudentHonors(raw: unknown): StudentHonorsDto | null {
+  const parsed = studentHonorsSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  if (parsed.data.status !== "ok") return { status: parsed.data.status };
+  const { season_no, created_at, entries } = parsed.data;
+  // Dùng lại bộ dựng bậc của DTO giáo viên rồi bỏ các trường chỉ dành cho giáo viên.
+  const built = buildHonorSnapshot({
+    id: "00000000-0000-4000-8000-000000000000",
+    season_no,
+    class_name: "-",
+    created_at,
+    entries,
+  });
+  if (!built) return null;
+  return {
+    status: "ok",
+    seasonNo: season_no,
+    honoredAt: created_at,
+    tiers: built.tiers,
+    playbackOrder: built.playbackOrder,
+  };
+}

@@ -492,7 +492,7 @@ Không có câu lệnh nào chạm `item_attempts`, `student_unit_mastery`, `stu
 
 ### 7.4 Vinh danh
 
-Server Action `createHonorSnapshot({ classId })` → kiểm tra quyền (`owner` hoặc `co_teacher` có `can_honor`) và `honors_enabled` → đọc `season_scores` mùa hiện tại + điều kiện hiển thị → `rankScores` → lọc `rank ≤ 3`, `points > 0` → chèn `honor_snapshots` → trả `snapshotId`. Trang `/teacher/classes/[classId]/honors/[snapshotId]` phát hoạt cảnh **chỉ từ dữ liệu ảnh chụp** (xem lại cho kết quả giống hệt).
+Server Action `createHonorSnapshot({ classId, requestId })` (R06.5: khóa ý định + khóa lớp + khoảng chống lặp 15 giây, xem REDESIGN_PROGRESS §5g) → kiểm tra quyền (`owner` hoặc `co_teacher` có `can_honor`) và `honors_enabled` → đọc `season_scores` mùa hiện tại + điều kiện hiển thị → `rankScores` → lọc `rank ≤ 3`, `points > 0` → chèn `honor_snapshots` → trả `snapshotId`. Trang `/teacher/classes/[classId]/honors/[snapshotId]` phát hoạt cảnh **chỉ từ dữ liệu ảnh chụp** (xem lại cho kết quả giống hệt).
 
 ### 7.5 Lưu và khôi phục tiến độ
 

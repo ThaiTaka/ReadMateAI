@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { RankableRow } from "@/features/gamification/ranking";
-import { buildHonorSnapshot, buildHonorSummaries, selectHonorees } from "@/features/honors/honors";
+import { buildHonorSnapshot, buildHonorSummaries, buildStudentHonors, selectHonorees } from "@/features/honors/honors";
 
 const row = (key: string, points: number, reachedAt: string | null = "2026-10-20T01:00:00Z"): RankableRow => ({
   key,
@@ -128,5 +128,63 @@ describe("migration vinh danh", () => {
 
   it("ảnh chụp bất biến: trigger chặn sửa/xóa cho cả hai bảng", () => {
     expect(sql.match(/block_direct_change/gu)?.length).toBe(2);
+  });
+});
+
+describe("buildStudentHonors (R06.5)", () => {
+  const entry = (rank: number, alias: string) => ({ rank, alias, avatar_key: "may", points: 30 });
+
+  it("disabled/none không kèm dữ liệu", () => {
+    expect(buildStudentHonors({ status: "disabled" })).toEqual({ status: "disabled" });
+    expect(buildStudentHonors({ status: "none", entries: [entry(1, "Lộ")] })).toEqual({ status: "none" });
+  });
+
+  it("ok: bậc theo hạng, đồng hạng chung bậc, thứ tự phát 3→1, không có mã định danh", () => {
+    const dto = buildStudentHonors({
+      status: "ok",
+      season_no: 2,
+      created_at: "2026-10-21T00:00:00Z",
+      entries: [entry(1, "Bống"), entry(1, "Na"), entry(3, "Mây")],
+    });
+    expect(dto).toEqual({
+      status: "ok",
+      seasonNo: 2,
+      honoredAt: "2026-10-21T00:00:00Z",
+      tiers: [
+        {
+          rank: 1,
+          entries: [
+            { rank: 1, alias: "Bống", avatarKey: "may", points: 30 },
+            { rank: 1, alias: "Na", avatarKey: "may", points: 30 },
+          ],
+        },
+        { rank: 3, entries: [{ rank: 3, alias: "Mây", avatarKey: "may", points: 30 }] },
+      ],
+      playbackOrder: [3, 1],
+    });
+    expect(JSON.stringify(dto)).not.toMatch(/student|class|id"/iu);
+  });
+
+  it("dữ liệu sai hình → null", () => {
+    expect(buildStudentHonors({ status: "ok", season_no: 0, created_at: "x", entries: [] })).toBeNull();
+    expect(buildStudentHonors({ status: "ok", season_no: 1, created_at: "x", entries: [entry(4, "A")] })).toBeNull();
+    expect(buildStudentHonors(null)).toBeNull();
+  });
+});
+
+describe("migration chống trùng vinh danh (R06.5)", () => {
+  const sql = readFileSync(
+    `supabase/migrations/${readdirSync("supabase/migrations").find((name) => name.endsWith("_r06_honor_dedupe.sql"))}`,
+    "utf8",
+  );
+
+  it("khóa lớp, khóa ý định, khoảng chống lặp; gỡ đường gọi cũ; gateway chỉ service_role", () => {
+    expect(sql).toMatch(/from public\.classes c where c\.id = p_class_id for update/u);
+    expect(sql).toMatch(/honor_snapshot_requests r where r\.request_id = p_request_id/u);
+    expect(sql).toMatch(/dedupe_seconds/u);
+    expect(sql).toMatch(/drop function public\.teacher_create_honor_snapshot\(uuid\)/u);
+    expect(sql).toMatch(/grant execute on function public\.gateway_latest_honors\(uuid, uuid\) to service_role;/u);
+    expect(sql).not.toMatch(/gateway_latest_honors[^;]*to[^;]*authenticated/u);
+    expect(sql).not.toMatch(/feature_flags/u);
   });
 });

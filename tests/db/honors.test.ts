@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { setLocalHonorsApproval } from "../../scripts/lib/test-fixtures";
+import { setLocalHonorDedupeSeconds, setLocalHonorsApproval } from "../../scripts/lib/test-fixtures";
 import { buildHonorSnapshot, selectHonorees } from "../../src/features/honors/honors";
 import type { RankableRow } from "../../src/features/gamification/ranking";
 import { buildTeacherOverview } from "../../src/features/leaderboard/build";
@@ -25,7 +25,9 @@ async function newClass(teacher: Db): Promise<string> {
 }
 
 const message = (result: { error: { message?: string } | null }) => result.error?.message ?? null;
-const create = (teacher: Db, classId: string) => teacher.rpc("teacher_create_honor_snapshot", { p_class_id: classId });
+const create = (teacher: Db, classId: string) =>
+  teacher.rpc("teacher_create_honor_snapshot", { p_class_id: classId, p_request_id: randomUUID() });
+const snapshotIdOf = (data: unknown) => (data as { snapshot_id: string }).snapshot_id;
 const get = (teacher: Db, id: string) => teacher.rpc("teacher_get_honor_snapshot", { p_snapshot_id: id });
 
 type Entry = { rank: number; alias: string; avatar_key: string; points: number };
@@ -54,12 +56,15 @@ async function scoreState(classId: string) {
 
 beforeAll(async () => {
   setLocalHonorsApproval(false);
+  // Các kiểm thử R06.1 tạo nhiều ảnh chụp liên tiếp cho cùng lớp: tắt khoảng chống lặp (kiểm thử riêng ở honor-dedupe.test.ts).
+  setLocalHonorDedupeSeconds(0);
   await fixtures();
   world = await buildWorld();
 });
 
 afterAll(() => {
   setLocalHonorsApproval(false);
+  setLocalHonorDedupeSeconds(15);
 });
 
 describe("cờ hệ thống tắt (mặc định)", () => {
@@ -126,7 +131,7 @@ describe("vinh danh TOP 3 (cờ hệ thống bật trên local)", () => {
   });
 
   it("TOP 3 đồng hạng 1–1–3: hai bạn 30 điểm cùng hạng 1, bậc 2 trống, bạn 20 điểm hạng 3; bạn 10 điểm và 0 điểm bị loại", async () => {
-    snapshotId = await rpcOk(create(world.teacherA.client, classId));
+    snapshotId = snapshotIdOf(await rpcOk(create(world.teacherA.client, classId)));
     const stored = await storedEntries(snapshotId);
     expect(stored.map((e) => [e.alias, e.rank, e.points])).toEqual([
       ["Mai Vàng", 1, 30],
@@ -212,7 +217,7 @@ describe("vinh danh TOP 3 (cờ hệ thống bật trên local)", () => {
       ["Nam Bé", 1, 30],
       ["Lan Hồng", 3, 20],
     ]);
-    const second = await rpcOk(create(world.teacherA.client, classId));
+    const second = snapshotIdOf(await rpcOk(create(world.teacherA.client, classId)));
     expect(second).not.toBe(snapshotId);
     expect((await storedEntries(second)).map((e) => [e.alias, e.rank, e.points])).toEqual([
       ["Đức Nhỏ", 1, 40],
@@ -286,7 +291,7 @@ describe("vinh danh TOP 3 (cờ hệ thống bật trên local)", () => {
     await admin.from("class_staff").update({ can_honor: true }).eq("class_id", classId).eq("staff_id", co.id);
     const made = await create(co.client, classId);
     expect(made.error).toBeNull();
-    expect(message(await get(co.client, made.data as string))).toBeNull();
+    expect(message(await get(co.client, snapshotIdOf(made.data)))).toBeNull();
     // Gỡ khỏi lớp → mất quyền ngay.
     await admin
       .from("class_staff")

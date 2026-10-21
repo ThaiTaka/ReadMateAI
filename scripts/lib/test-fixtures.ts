@@ -36,3 +36,11 @@ export function setLocalHonorsApproval(approved: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/** Khoảng chống lặp tạo ảnh chụp vinh danh (giây) — chỉ đổi ở Supabase local, mặc định của hệ thống là 15. */
+export function setLocalHonorDedupeSeconds(seconds: number): void {
+  if (!Number.isInteger(seconds) || seconds < 0 || seconds > 600) throw new Error("dedupe_seconds không hợp lệ");
+  execSync(`npx supabase db query --local "update private.honor_settings set dedupe_seconds = ${seconds}"`, {
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+}

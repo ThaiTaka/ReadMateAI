@@ -33,12 +33,12 @@ select ok(not has_table_privilege('anon', 'public.honor_snapshots', 'SELECT')
   'anon không có quyền trên bảng vinh danh');
 
 -- Hàm: GV (authenticated) gọi được bốn hàm teacher_*; anon thì không; hàm nội bộ chỉ service_role.
-select ok(has_function_privilege('authenticated', 'public.teacher_create_honor_snapshot(uuid)', 'EXECUTE')
+select ok(has_function_privilege('authenticated', 'public.teacher_create_honor_snapshot(uuid, uuid)', 'EXECUTE')
   and has_function_privilege('authenticated', 'public.teacher_get_honor_snapshot(uuid)', 'EXECUTE')
   and has_function_privilege('authenticated', 'public.teacher_list_honor_snapshots(uuid)', 'EXECUTE')
   and has_function_privilege('authenticated', 'public.teacher_set_honors_enabled(uuid, boolean)', 'EXECUTE'),
   'GV gọi được các hàm vinh danh (hàm tự kiểm tra quyền lớp)');
-select ok(not has_function_privilege('anon', 'public.teacher_create_honor_snapshot(uuid)', 'EXECUTE')
+select ok(not has_function_privilege('anon', 'public.teacher_create_honor_snapshot(uuid, uuid)', 'EXECUTE')
   and not has_function_privilege('anon', 'public.teacher_get_honor_snapshot(uuid)', 'EXECUTE'),
   'khách (anon) không gọi được hàm vinh danh');
 select ok(not has_function_privilege('authenticated', 'private.require_honor_staff(uuid)', 'EXECUTE')

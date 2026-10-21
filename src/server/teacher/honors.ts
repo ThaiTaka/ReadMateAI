@@ -10,20 +10,30 @@ import { fail, mapDbError, ok, type Result } from "@/server/result";
  * CSDL kiểm tra/thực hiện trong một giao dịch — trình duyệt không gửi hạng hay điểm.
  */
 
-const classInput = z.strictObject({ classId: z.uuid() });
+const createInput = z.strictObject({ classId: z.uuid(), requestId: z.uuid() });
+const createResultSchema = z.object({ snapshot_id: z.uuid(), deduplicated: z.boolean() });
 const enabledInput = z.strictObject({ classId: z.uuid(), enabled: z.boolean() });
 
-export async function createHonorSnapshot(input: unknown): Promise<Result<{ snapshotId: string }>> {
-  const parsed = classInput.safeParse(input);
+/**
+ * `requestId` = khóa ý định (một UUID cho mỗi lần GV quyết định vinh danh, giữ nguyên khi thử lại). Chống trùng do CSDL
+ * thực hiện: cùng requestId → cùng ảnh chụp; ảnh chụp vừa có trong khoảng chống lặp → được gộp (`deduplicated`).
+ */
+export async function createHonorSnapshot(
+  input: unknown,
+): Promise<Result<{ snapshotId: string; deduplicated: boolean }>> {
+  const parsed = createInput.safeParse(input);
   if (!parsed.success) return fail("INVALID_INPUT");
   const auth = await getTeacherSession();
   if (!auth.ok) return fail(auth.code === "STUDENT_DEVICE" || auth.code === "NOT_STAFF" ? "FORBIDDEN" : auth.code);
   const { data, error } = await auth.data.supabase.rpc("teacher_create_honor_snapshot", {
     p_class_id: parsed.data.classId,
+    p_request_id: parsed.data.requestId,
   });
   if (error) return fail(mapDbError(error));
-  const id = z.uuid().safeParse(data);
-  return id.success ? ok({ snapshotId: id.data }) : fail("UNKNOWN");
+  const created = createResultSchema.safeParse(data);
+  return created.success
+    ? ok({ snapshotId: created.data.snapshot_id, deduplicated: created.data.deduplicated })
+    : fail("UNKNOWN");
 }
 
 /** Chủ nhiệm bật/tắt vinh danh cho lớp. Bật chỉ được khi cờ hệ thống đã bật (HONORS_NOT_APPROVED). */
