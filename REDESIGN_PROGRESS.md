@@ -1,11 +1,12 @@
+| 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.3 (backend reset mùa)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.4 (giao diện reset mùa)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn hiện tại: R06.3 — backend reset điểm / bắt đầu mùa mới (chưa có giao diện — R06.4).** Chi tiết §5e. R06.2 (giao diện vinh danh) đã nghiệm thu: CI + E2E 9/9 xanh trên `78cff5e`.
+- **Giai đoạn hiện tại: R06.4 — giao diện reset điểm hai bước (chờ CI/E2E nghiệm thu).** Chi tiết §5f. R06.3 (backend reset) đã nghiệm thu: CI + E2E 9/9 xanh trên `17146c0`. Tiếp theo: R06.5 (API học sinh xem lần vinh danh gần nhất, rà chống snapshot trùng, nghiệm thu R06).
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
 - (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
 - **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
@@ -287,6 +288,13 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Điểm mùa mới = 0** vì `season_scores`/`map_tile_reveals`/`game_unlocks` gắn `season_id` (dòng tạo lúc ghi điểm đầu tiên); lịch sử (`point_events`, `item_attempts`, nhóm, ảnh chụp vinh danh) không bị đụng. **Quy tắc cho R07–R09:** mọi bảng trạng thái game phải có `season_id` và hàm reset phải void lượt chơi/chạm trán dở.
 **Kiểm thử (local, chỉ phần mới/ảnh hưởng):** pgTAP 95/95 (mới 14), tích hợp `tests/db/season-reset.test.ts` 14/14 (quyền co_teacher/GV lớp khác/thiết bị/khách/service_role, sai tên lớp, sai mùa, rollback bằng mùa 2 chặn sẵn, hạng 1-1-3-4, replay, hai request đồng thời cùng/khác requestId, ba vòng reset ∥ ghi điểm với bất biến số dư = tổng sổ cái, SEASON_CLOSED, bản đồ khóa lại, lớp khác nguyên vẹn, ảnh chụp vinh danh còn đọc được), unit +12 (994 tổng), honors/rls DB vẫn xanh, db:lint sạch. Toàn bộ regression: GitHub Actions.
 **Còn thiếu / giới hạn:** giao diện hai bước (R06.4); chưa void trạng thái game (bảng game chưa có); `requestId` do client sinh nên giao diện R06.4 phải sinh một lần cho mỗi lần mở hộp thoại; chưa có API học sinh thông báo "mùa mới" (học sinh nhận `SEASON_CLOSED` ở lần nộp kế tiếp); lớp chưa có dòng điểm nào ở mùa cũ vẫn reset được (`final_rank` trống).
+
+## 5f. R06.4 — Giao diện reset mùa (2026-10-21)
+
+**Giao diện:** `/teacher/classes/[classId]/leaderboard` thay nút khóa bằng **BẮT ĐẦU MÙA MỚI** (`season-reset.tsx`, `<dialog>` gốc: khóa focus, Esc hủy, focus về nút mở). Bước 1 nêu hệ quả (điểm về 0, bản đồ bắt đầu lại, mini-game khóa lại, mùa cũ lưu lịch sử, không xóa học sinh/bài đã làm/tiến độ, không ảnh hưởng lớp khác) + "không thể hoàn tác"; bước 2 hiện tên lớp, ô gõ lại, nút **XÁC NHẬN BẮT ĐẦU MÙA MỚI** chỉ bật khi `confirmationMatches`. Màu dịu (sun), không hoạt cảnh. Chỉ chủ nhiệm mở được (co-teacher: nút khóa kèm lý do); lớp chưa có mùa active: khóa.
+**Kết nối:** `getClassDetail` trả thêm `season.id` (mùa active thật, không suy từ `seqNo`). `requestId` = `crypto.randomUUID()` **một lần mỗi lần mở hộp thoại**, giữ cho mọi lần thử lại; khóa nút bằng `useTransition` + ref đồng bộ (bấm đúp = 1 lời gọi); Esc bị chặn khi đang gửi. Thành công → đóng, "Đã bắt đầu mùa N…", `router.refresh()`. `SEASON_MISMATCH` → ẩn nút xác nhận, chỉ còn "Tải lại thông tin"; `CONFIRMATION_MISMATCH` → xóa ô, focus lại. Không log phía client.
+**Kiểm thử:** unit `tests/unit/season-reset-ui.test.tsx` 9/9 (cả bộ 1003/1003); E2E local `tests/e2e-db/season-reset.spec.ts` 3 kịch bản × chromium-desktop, chromium-mobile, webkit-mobile = 9/9 (owner reset + Esc/Hủy/Quay lại không đổi dữ liệu + sai tên khóa nút + bấm đúp 1 mùa + điểm/bản đồ mùa mới = 0 + mùa cũ, `item_attempts`, `point_events` giữ nguyên + axe + không cuộn ngang; tab cũ → `SEASON_MISMATCH`, không mùa thứ ba; co-teacher bị khóa, lớp khác nguyên vẹn). Toàn bộ E2E để GitHub Actions. `leaderboard.spec.ts` sửa dòng cũ (nút Reset khóa → nút mùa mới bật cho chủ nhiệm).
+**Giới hạn:** chưa test "retry dùng lại requestId" qua mạng thật ở E2E (chỉ unit + CSDL R06.3); mất phản hồi sau khi đã reset thì mở lại hộp thoại sẽ gặp `SEASON_MISMATCH` (đúng thiết kế, tải lại để thấy mùa mới); snapshot vinh danh không bị reset đụng tới (kiểm ở pgTAP/tích hợp R06.3); chưa đo bằng màn hình 360px thật (Playwright giả lập Pixel 7/iPhone 13).
 
 ## 6. Nhật ký quyết định (lộ trình R)
 

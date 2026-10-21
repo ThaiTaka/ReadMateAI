@@ -21,7 +21,7 @@ export async function listMyClasses(session: TeacherSession): Promise<ClassSumma
   const { data } = await session.supabase
     .from("classes")
     .select(
-      "id, name, school_year, status, class_staff(staff_id, role, removed_at), students(id), seasons(seq_no, status)",
+      "id, name, school_year, status, class_staff(staff_id, role, removed_at), students(id), seasons(id, seq_no, status)",
     )
     .order("school_year", { ascending: false })
     .order("name");
@@ -48,14 +48,14 @@ export type ClassDetail = ClassSummary & {
   curriculumStatus: "unconfirmed" | "confirmed";
   curriculumSeriesId: string | null;
   currentLessonId: string | null;
-  season: { seqNo: number; status: string; rulesVersion: string; startedAt: string } | null;
+  season: { id: string; seqNo: number; status: string; rulesVersion: string; startedAt: string } | null;
 };
 
 export async function getClassDetail(session: TeacherSession, classId: string): Promise<ClassDetail | null> {
   const { data: row } = await session.supabase
     .from("classes")
     .select(
-      "id, name, school_year, status, leaderboard_enabled, honors_enabled, curriculum_status, curriculum_series_id, current_lesson_id, class_staff(staff_id, role, removed_at), students(id), seasons(seq_no, status, rules_version, started_at)",
+      "id, name, school_year, status, leaderboard_enabled, honors_enabled, curriculum_status, curriculum_series_id, current_lesson_id, class_staff(staff_id, role, removed_at), students(id), seasons(id, seq_no, status, rules_version, started_at)",
     )
     .eq("id", classId)
     .maybeSingle();
@@ -78,6 +78,7 @@ export async function getClassDetail(session: TeacherSession, classId: string): 
     currentLessonId: row.current_lesson_id,
     season: active
       ? {
+          id: active.id,
           seqNo: active.seq_no,
           status: active.status,
           rulesVersion: active.rules_version,

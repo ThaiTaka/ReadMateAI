@@ -16,9 +16,11 @@ import { getClassDetail } from "@/server/teacher/queries";
 import { vi } from "@/strings/vi";
 import { HonorLauncher } from "./honor-launcher";
 import { LeaderboardSettingsForm } from "./leaderboard-forms";
+import { SeasonReset } from "./season-reset";
 
 const t = vi.leaderboard.teacher;
 const h = vi.honors.teacher;
+const r = vi.leaderboard.teacher.reset;
 
 const timeFormat = new Intl.DateTimeFormat("vi-VN", {
   dateStyle: "medium",
@@ -264,20 +266,13 @@ async function Content({ params }: Pick<PageProps<"/teacher/classes/[classId]/le
         )}
       </section>
 
-      <section aria-labelledby="coming-title" className="mt-10">
-        <h2 id="coming-title" className="text-2xl font-extrabold text-ink">
-          {t.comingTitle}
+      <section aria-labelledby="reset-title" className="mt-10">
+        <h2 id="reset-title" className="flex items-center gap-2 text-2xl font-extrabold text-ink">
+          <RotateCcw aria-hidden="true" className="size-6 text-sun-700" />
+          {r.title}
         </h2>
-        <Card variant="placeholder" className="mt-4 flex flex-col gap-4 p-5 sm:flex-row sm:flex-wrap">
-          <div>
-            <Button type="button" variant="outline" disabled aria-describedby="coming-reason">
-              <RotateCcw aria-hidden="true" className="size-5" />
-              {t.comingReset}
-            </Button>
-          </div>
-          <p id="coming-reason" className="basis-full text-sm text-ink-soft">
-            {t.comingReason}
-          </p>
+        <Card className="mt-4 p-5 sm:p-6">
+          <SeasonReset classId={classId} className={cls.name} seasonId={cls.season?.id ?? null} isOwner={isOwner} />
         </Card>
       </section>
     </>

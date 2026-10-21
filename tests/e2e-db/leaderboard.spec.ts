@@ -283,9 +283,9 @@ test.describe("R05 — bảng xếp hạng lớp", () => {
     await expect(enable).toBeEnabled();
     await expect(teacher.getByLabel("Kiểu hiển thị cho học sinh")).toHaveValue("top10_and_me");
     await expect(teacher.getByRole("button", { name: "Mở chế độ trình chiếu" })).toBeDisabled();
-    // Hai nút của R06 chỉ là chỗ giữ, đã khóa và có lý do.
+    // Vinh danh còn khóa (lớp chưa bật); reset mùa dành cho chủ nhiệm nên bật sẵn.
     await expect(teacher.getByRole("button", { name: "Vinh danh TOP 3" })).toBeDisabled();
-    await expect(teacher.getByRole("button", { name: /Reset điểm/u })).toBeDisabled();
+    await expect(teacher.getByRole("button", { name: "BẮT ĐẦU MÙA MỚI", exact: true })).toBeEnabled();
     await enable.check();
     await teacher.getByRole("button", { name: "Lưu cài đặt" }).click();
     await expect(teacher.getByText("Đã lưu cài đặt bảng điểm.")).toBeVisible();
