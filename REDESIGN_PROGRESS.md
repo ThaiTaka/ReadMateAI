@@ -1,11 +1,11 @@
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.2 (giao diện vinh danh TOP 3)
+> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R06.3 (backend reset mùa)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
-- **Giai đoạn hiện tại: R06.2 — giao diện vinh danh TOP 3 (bục danh dự, hoạt cảnh 3 → 2 → 1). Reset mùa (R06.3) chưa làm.** Chi tiết §5d; backend R06.1 ở §5c.
+- **Giai đoạn hiện tại: R06.3 — backend reset điểm / bắt đầu mùa mới (chưa có giao diện — R06.4).** Chi tiết §5e. R06.2 (giao diện vinh danh) đã nghiệm thu: CI + E2E 9/9 xanh trên `78cff5e`.
 - **Giai đoạn trước:** R05 — Ranking Engine, bảng xếp hạng lớp, avatar → **hoàn thành, nghiệm thu bằng GitHub Actions trên commit `83b34a7`** (§5b). Cờ hệ thống bảng xếp hạng vẫn **tắt**. Không tự chuyển sang R06.
 - (R04 trước đó: Scoring Engine, chấm bài ở máy chủ — hoàn thành trên Supabase LOCAL, đã được chấp nhận.)
 - **Nhánh làm việc:** `feature/home-learning-redesign` — 3 checkpoint R04 + commit tài liệu đã push, GitHub Actions xanh (cả job `database`) — xem §5.3. `main` **không đổi**, không merge.
@@ -278,6 +278,15 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Hành vi:** 3 → 2 → 1, bậc trống bị bỏ (1,1,3 → 3 → 1; 1,1,1 → chỉ bậc 1); đồng hạng cùng một bậc, >6 → lưới, không loại ai; Bỏ qua → tổng kết; Xem lại → về đầu (Next giữ trang ẩn nên state được đặt lại khi bị ẩn); không tạo ảnh chụp, không đổi điểm/mùa (E2E đối chiếu).
 **Kiểm thử:** unit mới 11 (playback 5 nhóm + stage 6); E2E CSDL `tests/e2e-db/honors.spec.ts` (2 kịch bản) xanh cục bộ trên chromium-desktop và chromium-mobile; `global-setup/teardown` bật/trả cờ vinh danh về TẮT. WebKit + toàn bộ regression: GitHub Actions.
 **Giới hạn:** chưa chống bấm đúp ở server (chỉ khóa nút ở giao diện; hai tab/thiết bị vẫn tạo hai ảnh chụp — cần khóa ý định ở bước backend sau); `KidAvatar` vào bundle client của trang vinh danh (chỉ khu GV); `co_teacher` có `can_honor` vẫn chưa có giao diện cấp quyền; chưa có API học sinh xem vinh danh (6.5); cờ hệ thống vẫn TẮT.
+
+## 5e. R06.3 — Backend reset mùa (2026-10-21)
+
+**Migration** `20261024090000_r06_season_reset.sql`: bảng `season_resets` (bất biến, RLS chỉ SELECT cho GV lớp; `request_id` PK, `unique(old_season_id)`, `unique(new_season_id)`), cột `season_scores.final_rank` (NULL đến khi đóng mùa), `private.reset_class_season` (chỉ service_role) + vỏ `public.teacher_reset_season(class, request_id, expected_season_id, confirmation)` cấp cho `authenticated`. **Server Action** `resetSeason` (`src/server/teacher/season.ts`; zod + so khớp tên lớp ở `features/gamification/season-reset.ts`), mã lỗi mới `CONFIRMATION_MISMATCH`, `SEASON_MISMATCH`.
+**Một giao dịch:** quyền owner theo `auth.uid()` → khóa lớp `FOR UPDATE` → khóa ý định `request_id` → tên lớp → khóa mùa active `FOR UPDATE` + đối chiếu `expected_season_id` → `final_rank` (rank() = 1-2-2-4) → void câu mở + buổi luyện dở → đóng mùa cũ, mở mùa `seq_no+1` → `season_resets` + `audit_logs`.
+**Chống reset trùng:** cùng `request_id` (kể cả đồng thời) → một mùa mới, lần sau `replayed: true`; cùng `request_id` khác tham số → `IDEMPOTENCY_CONFLICT`; `request_id` khác nhưng cùng mùa xác nhận → `SEASON_MISMATCH` (không bao giờ hai mùa liên tiếp). Thứ tự khóa lớp → mùa → dòng con; ghi điểm R04 khóa mùa `FOR SHARE` nên đi trước thì vào hạng cuối, đi sau thì `SEASON_CLOSED`.
+**Điểm mùa mới = 0** vì `season_scores`/`map_tile_reveals`/`game_unlocks` gắn `season_id` (dòng tạo lúc ghi điểm đầu tiên); lịch sử (`point_events`, `item_attempts`, nhóm, ảnh chụp vinh danh) không bị đụng. **Quy tắc cho R07–R09:** mọi bảng trạng thái game phải có `season_id` và hàm reset phải void lượt chơi/chạm trán dở.
+**Kiểm thử (local, chỉ phần mới/ảnh hưởng):** pgTAP 95/95 (mới 14), tích hợp `tests/db/season-reset.test.ts` 14/14 (quyền co_teacher/GV lớp khác/thiết bị/khách/service_role, sai tên lớp, sai mùa, rollback bằng mùa 2 chặn sẵn, hạng 1-1-3-4, replay, hai request đồng thời cùng/khác requestId, ba vòng reset ∥ ghi điểm với bất biến số dư = tổng sổ cái, SEASON_CLOSED, bản đồ khóa lại, lớp khác nguyên vẹn, ảnh chụp vinh danh còn đọc được), unit +12 (994 tổng), honors/rls DB vẫn xanh, db:lint sạch. Toàn bộ regression: GitHub Actions.
+**Còn thiếu / giới hạn:** giao diện hai bước (R06.4); chưa void trạng thái game (bảng game chưa có); `requestId` do client sinh nên giao diện R06.4 phải sinh một lần cho mỗi lần mở hộp thoại; chưa có API học sinh thông báo "mùa mới" (học sinh nhận `SEASON_CLOSED` ở lần nộp kế tiếp); lớp chưa có dòng điểm nào ở mùa cũ vẫn reset được (`final_rank` trống).
 
 ## 6. Nhật ký quyết định (lộ trình R)
 

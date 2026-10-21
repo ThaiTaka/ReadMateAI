@@ -1075,6 +1075,8 @@ export const vi = {
     HONORS_NOT_APPROVED: "Chưa bật được vinh danh: chức năng này chưa được nhà trường chấp thuận ở cấp hệ thống.",
     HONORS_DISABLED: "Vinh danh của lớp đang tắt.",
     NO_HONOREES: "Chưa có bạn nào đủ điều kiện được vinh danh (cần có điểm lớn hơn 0 và đã được đồng ý hiển thị).",
+    CONFIRMATION_MISMATCH: "Tên lớp gõ lại chưa đúng. Hãy gõ chính xác tên lớp để xác nhận.",
+    SEASON_MISMATCH: "Mùa thi đua đã thay đổi kể từ lúc bạn xác nhận. Hãy tải lại trang rồi xác nhận lại.",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 

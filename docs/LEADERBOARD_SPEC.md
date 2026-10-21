@@ -146,7 +146,7 @@ Lấy cảm hứng từ biểu đồ thanh ngang của bảng xếp hạng FIFA 
 
 ### 9.2 Xử lý ở server
 
-Server Action `resetSeason({ classId, requestId, confirmation })`: xác thực GV → kiểm tra vai trò `owner` với lớp → zod → kiểm tra `confirmation` khớp tên lớp → gọi hàm CSDL `private.reset_class_season` **trong một giao dịch** (các bước và hệ quả: [GAMIFICATION_SPEC §8.2](GAMIFICATION_SPEC.md#82-reset-điểm-bắt-đầu-mùa-mới); SQL phác thảo: [REDESIGN_ARCHITECTURE §7.3](REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch)) → trả `{ ok: true, data: { newSeasonId, seqNo } }` hoặc `{ ok: false, code }` (`FORBIDDEN`, `CONFIRMATION_MISMATCH`, `ALREADY_RESET` khi gửi lại cùng `requestId`).
+Server Action `resetSeason({ classId, requestId, expectedSeasonId, confirmation })` (R06.3): xác thực GV → kiểm tra vai trò `owner` với lớp → zod → kiểm tra `confirmation` khớp tên lớp → gọi hàm CSDL `private.reset_class_season` **trong một giao dịch** (các bước và hệ quả: [GAMIFICATION_SPEC §8.2](GAMIFICATION_SPEC.md#82-reset-điểm-bắt-đầu-mùa-mới); SQL phác thảo: [REDESIGN_ARCHITECTURE §7.3](REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch)) → trả `{ ok: true, data: { newSeasonId, seqNo } }` hoặc `{ ok: false, code }` (`FORBIDDEN`, `CONFIRMATION_MISMATCH`, `SEASON_MISMATCH` khi mùa đang diễn ra khác `expectedSeasonId`, `IDEMPOTENCY_CONFLICT` khi dùng lại `requestId` với tham số khác; gửi lại **đúng** tham số trả lại mùa đã tạo, không reset lần hai).
 
 - Ghi `audit_logs` (UUID GV, UUID lớp, UUID mùa cũ/mới) — không ghi tên học sinh.
 - Sau reset: bảng xếp hạng hiện mùa mới (mọi người 0 điểm); thiết bị học sinh đang mở nhận lỗi `SEASON_CLOSED` ở lần nộp kế tiếp và tải lại trạng thái.

@@ -428,7 +428,7 @@ sequenceDiagram
 
 ### 7.3 Reset mùa trong một giao dịch
 
-Phác thảo — migration thật viết và kiểm thử ở R06. Hàm `security definer`, `set search_path = ''`, chỉ được gọi từ server sau khi Server Action đã kiểm tra quyền; hàm **kiểm tra lại** quyền bằng `auth.uid()` (phòng thủ nhiều lớp).
+**Đã hiện thực ở R06.3** (`supabase/migrations/20261024090000_r06_season_reset.sql`: `season_resets`, `season_scores.final_rank`, `private.reset_class_season` + vỏ RPC `public.teacher_reset_season`). Khác phác thảo bên dưới: thêm tham số `expected_season_id` và `confirmation` (kiểm tra ở CSDL), khóa lớp `FOR UPDATE` trước khóa mùa, `unique(old_season_id)`, bảng game chưa có nên chưa void. Phác thảo gốc: Hàm `security definer`, `set search_path = ''`, chỉ được gọi từ server sau khi Server Action đã kiểm tra quyền; hàm **kiểm tra lại** quyền bằng `auth.uid()` (phòng thủ nhiều lớp).
 
 ```sql
 -- PLANNED (R06) — phác thảo, chưa chạy

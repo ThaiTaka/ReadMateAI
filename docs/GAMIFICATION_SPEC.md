@@ -184,6 +184,8 @@ stateDiagram-v2
 
 ### 8.2 Reset điểm (bắt đầu mùa mới)
 
+> **Đã hiện thực ở R06.3 (backend, migration `20261024090000_r06_season_reset.sql`)**; giao diện hai bước thuộc R06.4. Khác phác thảo: hợp đồng có thêm `expectedSeasonId` (mùa GV đã xác nhận → `SEASON_MISMATCH` nếu đã đổi) và CSDL tự kiểm tra lại `confirmation` = tên lớp (`CONFIRMATION_MISMATCH`). Chưa có bảng game (R07–R09): hàm sẽ phải void `game_runs`/`game_encounters` của mùa cũ khi các bảng đó ra đời.
+
 Chỉ GV có quyền quản lý lớp (vai trò `owner` trong `class_staff`). Giao diện: xác nhận **hai bước** ([LEADERBOARD_SPEC §9](LEADERBOARD_SPEC.md#9-reset-điểm--bắt-đầu-mùa-mới)). Server thực hiện **trong một giao dịch** (hàm CSDL `private.reset_class_season` — [REDESIGN_ARCHITECTURE §7.3](REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch)):
 
 1. Kiểm tra lại quyền GV với lớp (không tin `class_id` từ client ngoài vai trò khóa tra cứu; kiểm tra `class_staff`), khóa ý định `request_id` (gửi lại không reset hai lần).

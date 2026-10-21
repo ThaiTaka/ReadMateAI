@@ -46,6 +46,9 @@ export const ERROR_CODES = [
   "HONORS_NOT_APPROVED",
   "HONORS_DISABLED",
   "NO_HONOREES",
+  // R06.3 — reset mùa (migration 20261024090000).
+  "CONFIRMATION_MISMATCH",
+  "SEASON_MISMATCH",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
@@ -74,6 +77,8 @@ export function mapDbError(error: PostgrestLikeError): ErrorCode {
     if (text.includes("students_alias_per_class")) return "DUPLICATE_ALIAS";
     if (text.includes("classes_school_id_name_school_year_key")) return "DUPLICATE_CLASS";
     if (text.includes("guardian_consents_one_active")) return "CONSENT_ALREADY_ACTIVE";
+    // Cùng request_id đã dùng cho lớp khác (hai lớp ghi đồng thời) — như khóa ý định bị xung đột.
+    if (text.includes("season_resets")) return "IDEMPOTENCY_CONFLICT";
   }
   if (error.code === "23514" || error.code === "22023") return "INVALID_INPUT";
   return "UNKNOWN";

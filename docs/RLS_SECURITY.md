@@ -68,3 +68,7 @@ R = đọc qua RLS · F = chỉ qua hàm · — = không.
 3. `revoke all … from anon, authenticated` rồi GRANT tối thiểu; hàm mới: `revoke execute … from public, anon, authenticated` rồi GRANT đúng vai trò.
 4. Hàm security definer luôn `set search_path = ''`.
 5. Thêm kiểm thử tích hợp cho ma trận quyền của bảng trong **cùng** thay đổi (CLAUDE.md §6.2).
+
+## R06.3 — `season_resets`
+
+RLS bật, chỉ policy SELECT (GV của lớp), không GRANT ghi; bất biến bằng trigger `block_direct_change`. Ghi chỉ qua `private.reset_class_season` (không cấp cho client) do `teacher_reset_season` gọi; hàm kiểm tra owner bằng `auth.uid()`. pgTAP `06_season_reset`, tích hợp `tests/db/season-reset.test.ts`.

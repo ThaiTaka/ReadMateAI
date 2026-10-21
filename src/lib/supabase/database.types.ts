@@ -1260,6 +1260,65 @@ export type Database = {
         };
         Relationships: [];
       };
+      season_resets: {
+        Row: {
+          class_id: string;
+          new_season_id: string;
+          old_season_id: string;
+          performed_at: string;
+          performed_by: string;
+          request_id: string;
+          scored_students: number;
+          voided_questions: number;
+          voided_sessions: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          class_id: string;
+          new_season_id: string;
+          old_season_id: string;
+          performed_at?: string;
+          performed_by: string;
+          request_id: string;
+          scored_students: number;
+          voided_questions: number;
+          voided_sessions: number;
+        };
+        Update: {
+          class_id?: string;
+          new_season_id?: string;
+          old_season_id?: string;
+          performed_at?: string;
+          performed_by?: string;
+          request_id?: string;
+          scored_students?: number;
+          voided_questions?: number;
+          voided_sessions?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "season_resets_class_id_fkey";
+            columns: ["class_id"];
+            isOneToOne: false;
+            referencedRelation: "classes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "season_resets_new_season_id_class_id_fkey";
+            columns: ["new_season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+          {
+            foreignKeyName: "season_resets_old_season_id_class_id_fkey";
+            columns: ["old_season_id", "class_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id", "class_id"];
+          },
+        ];
+      };
       season_scores: {
         Row: {
           balance: number;
@@ -1268,6 +1327,7 @@ export type Database = {
           created_at: string;
           deducted_total: number;
           earned_total: number;
+          final_rank: number | null;
           season_id: string;
           student_id: string;
           updated_at: string;
@@ -1280,6 +1340,7 @@ export type Database = {
           created_at?: string;
           deducted_total?: number;
           earned_total?: number;
+          final_rank?: number | null;
           season_id: string;
           student_id: string;
           updated_at?: string;
@@ -1291,6 +1352,7 @@ export type Database = {
           created_at?: string;
           deducted_total?: number;
           earned_total?: number;
+          final_rank?: number | null;
           season_id?: string;
           student_id?: string;
           updated_at?: string;
@@ -1773,6 +1835,10 @@ export type Database = {
         Returns: string;
       };
       teacher_rename_class: { Args: { p_class_id: string; p_name: string }; Returns: undefined };
+      teacher_reset_season: {
+        Args: { p_class_id: string; p_confirmation: string; p_expected_season_id: string; p_request_id: string };
+        Returns: Json;
+      };
       teacher_revoke_device: { Args: { p_device_id: string }; Returns: undefined };
       teacher_revoke_login_code: { Args: { p_code_id: string }; Returns: undefined };
       teacher_set_class_curriculum: {

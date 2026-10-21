@@ -213,10 +213,10 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 **Phụ thuộc:** R05.
 
-- [~] 6.1 Migrations: `honor_snapshots` (+ `honor_snapshot_entries`) **xong ở R06.1** (`20261023090000_r06_honors.sql`); `season_resets`, cột `final_rank`, hàm `private.reset_class_season` còn lại cho R06.3 ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
-- [~] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason` còn lại cho R06.3
+- [~] 6.1 Migrations: `honor_snapshots` (+ `honor_snapshot_entries`) **xong ở R06.1** (`20261023090000_r06_honors.sql`); `season_resets`, cột `final_rank`, hàm `private.reset_class_season` **xong ở R06.3** (`20261024090000_r06_season_reset.sql`) ([REDESIGN_ARCHITECTURE §7.3](docs/REDESIGN_ARCHITECTURE.md#73-reset-mùa-trong-một-giao-dịch))
+- [~] 6.2 Server Actions: `createHonorSnapshot` (+ `setHonorsEnabled`, đọc/liệt kê ảnh chụp) **xong ở R06.1**; `resetSeason({classId, requestId, expectedSeasonId, confirmation})` **xong ở R06.3** (`src/server/teacher/season.ts`)
 - [x] 6.3 Màn vinh danh TOP 3 → 2 → 1, hào quang TOP 1, Bỏ qua, Xem lại, giảm chuyển động, đồng hạng — **xong ở R06.2** (`/teacher/classes/[classId]/honors/[snapshotId]`, nút + lịch sử ở trang bảng điểm GV)
-- [ ] 6.4 Màn reset hai bước (gõ tên lớp)
+- [ ] 6.4 Màn reset hai bước (gõ tên lớp) — backend đã có (R06.3), còn giao diện
 - [ ] 6.5 `GET /api/student/honors/latest` (nếu lớp bật)
 
 **Tiêu chí nghiệm thu:** reset nguyên tử (lỗi giữa chừng → không thay đổi gì), lớp khác không đổi, dữ liệu học tập không đổi, gửi lại `requestId` không tạo mùa thứ ba, nộp vào mùa cũ → `SEASON_CLOSED`; ảnh chụp bất biến; chỉ GV có quyền.
