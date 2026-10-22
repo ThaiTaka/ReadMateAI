@@ -294,3 +294,35 @@ describe("camera", () => {
     expect(screen.getByRole("button", { name: "Phóng to theo bạn nhỏ" })).toHaveAttribute("aria-pressed", "true");
   });
 });
+
+describe("lớp phủ tạm dừng (R07.6)", () => {
+  it("hiện hai lựa chọn, focus vào 'Chơi tiếp', Esc/nút tiếp tục đóng lớp phủ; không đổi vị trí", () => {
+    setup();
+    expect(screen.queryByTestId("pause-overlay")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Tạm dừng" }));
+    const overlay = screen.getByTestId("pause-overlay");
+    expect(within(overlay).getByRole("button", { name: "Chơi tiếp" })).toHaveFocus();
+    expect(within(overlay).getByRole("link", { name: "Về bản đồ" })).toHaveAttribute("href", "/demo");
+    expect(overlay).toHaveTextContent("Điểm thưởng của con vẫn nguyên");
+    expect(moves()).toBe(0);
+    fireEvent.keyDown(document.body, { code: "Escape" });
+    expect(screen.queryByTestId("pause-overlay")).toBeNull();
+    expect(screen.getByRole("button", { name: "Tạm dừng" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Tạm dừng" }));
+    fireEvent.click(screen.getByRole("button", { name: "Chơi tiếp" }));
+    expect(screen.queryByTestId("pause-overlay")).toBeNull();
+    key("ArrowRight");
+    expect(at()).toEqual([1, 2]);
+  });
+
+  it("Tab quay vòng trong lớp phủ", () => {
+    setup();
+    fireEvent.click(screen.getByRole("button", { name: "Tạm dừng" }));
+    const overlay = screen.getByTestId("pause-overlay");
+    screen.getByRole("link", { name: "Về bản đồ" }).focus();
+    fireEvent.keyDown(overlay, { key: "Tab" });
+    expect(screen.getByRole("button", { name: "Chơi tiếp" })).toHaveFocus();
+    fireEvent.keyDown(overlay, { key: "Tab", shiftKey: true });
+    expect(screen.getByRole("link", { name: "Về bản đồ" })).toHaveFocus();
+  });
+});

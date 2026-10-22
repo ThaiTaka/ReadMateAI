@@ -296,7 +296,7 @@ function ReadyMaze({
               {t.save.unsavedHint}
             </p>
           ) : null}
-          <MazeRun level={level} rootRef={rootRef} onReplay={() => undefined} saved={binding} />
+          <MazeRun level={level} rootRef={rootRef} onReplay={() => undefined} saved={binding} backHref={home} />
         </>
       )}
     </div>

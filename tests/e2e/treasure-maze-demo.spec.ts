@@ -207,10 +207,36 @@ test.describe("/demo/treasure-maze (bản chơi thử, dữ liệu minh họa)",
     await expect(page.getByRole("button", { name: "Phải", exact: true })).toBeDisabled();
     await page.keyboard.press("ArrowRight");
     expect(await moves(page)).toBe(0);
-    await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+    const overlay = page.getByTestId("pause-overlay");
+    await expect(overlay).toBeVisible();
+    await expect(page.getByRole("button", { name: "Chơi tiếp" })).toBeFocused();
+    await expect(overlay.getByRole("link", { name: "Về bản đồ" })).toHaveAttribute("href", "/demo");
+    await noHorizontalScroll(page);
+    const board = (await page.getByTestId("maze-board").boundingBox())!;
+    const card = (await overlay.locator("> div").boundingBox())!;
+    expect(card.y).toBeGreaterThanOrEqual(board.y - 1);
+    expect(card.y + card.height).toBeLessThanOrEqual(board.y + board.height + 1);
+    await page.getByRole("button", { name: "Chơi tiếp" }).click();
     await expect(page.getByTestId("maze-status")).toHaveText("Tiếp tục khám phá!");
+    await expect(overlay).toHaveCount(0);
     await page.keyboard.press("ArrowRight");
     await expect.poll(() => moves(page)).toBe(1);
+    await page.getByRole("button", { name: "Tạm dừng" }).click();
+    await page.keyboard.press("Escape");
+    await expect(overlay).toHaveCount(0);
+    await page.getByRole("button", { name: "Tạm dừng" }).click();
+    await page.getByRole("link", { name: "Về bản đồ" }).click();
+    await expect(page).toHaveURL(/\/demo$/u);
+  });
+
+  test("bước đi nội suy 160–220 ms", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await openMaze(page);
+    const ms = await hero(page).evaluate(
+      (element) => Number.parseFloat(getComputedStyle(element).transitionDuration) * 1000,
+    );
+    expect(ms).toBeGreaterThanOrEqual(160);
+    expect(ms).toBeLessThanOrEqual(220);
   });
 
   test("thử thách → dừng; không kích hoạt lại; đủ 7 thử thách minh họa thì mở được rương", async ({ page }) => {

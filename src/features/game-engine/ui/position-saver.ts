@@ -88,6 +88,30 @@ export class PositionSaver {
       .then((result) => this.settle(batch, result));
   }
 
+  /**
+   * Rời màn: lưu bước còn chờ rồi đợi máy chủ xác nhận. `true` CHỈ khi không còn bước nào chưa được xác nhận;
+   * hết hạn, lỗi mạng hoặc trạng thái cuối → `false` (không bao giờ hứa rằng đã lưu).
+   */
+  flushAndWait(timeoutMs: number): Promise<boolean> {
+    const done = () => !this.terminal && !this.failed && !this.inflight && this.queue.length === 0 && !this.frozen;
+    if (done()) return Promise.resolve(true);
+    this.retry();
+    return new Promise((resolve) => {
+      const finish = (ok: boolean) => {
+        clearTimeout(timer);
+        this.listeners.delete(check);
+        resolve(ok);
+      };
+      const check = () => {
+        if (done()) finish(true);
+        else if (this.terminal || this.failed) finish(false);
+      };
+      const timer = setTimeout(() => finish(false), timeoutMs);
+      this.listeners.add(check);
+      check();
+    });
+  }
+
   /** Nút "Thử lại" hoặc khi có mạng trở lại. */
   retry(): void {
     if (this.terminal || this.inflight) return;

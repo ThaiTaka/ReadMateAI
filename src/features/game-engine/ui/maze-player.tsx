@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import type { Route } from "next";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Maximize2, Minimize2, Pause, Play, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { MotionToggle } from "@/components/adventure/motion";
@@ -106,16 +108,95 @@ function isTypingTarget(target: EventTarget | null): boolean {
   );
 }
 
+/** Lớp phủ tạm dừng: tự giữ trạng thái "đang lưu/chưa lưu" nên được dựng lại sạch mỗi lần tạm dừng. */
+function PauseOverlay({ backHref, saved, onResume }: { backHref: Route; saved?: SavedBinding; onResume: () => void }) {
+  const [leave, setLeave] = useState<"idle" | "saving" | "unsaved">("idle");
+  const backRef = useRef<HTMLAnchorElement>(null);
+  const continueRef = useRef<HTMLButtonElement>(null);
+  const skipGuard = useRef(false);
+  useEffect(() => {
+    continueRef.current?.focus();
+  }, []);
+  return (
+    <div
+      role="dialog"
+      aria-label={t.pauseOverlay.title}
+      data-testid="pause-overlay"
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("button,a[href]"));
+        const first = items[0];
+        const last = items.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }}
+      className="absolute inset-0 z-10 flex items-center justify-center bg-ink/55 p-4"
+    >
+      <div className="animate-pop-in w-full max-w-xs rounded-3xl border-2 border-line bg-surface p-5 text-center">
+        <h2 className="text-xl font-extrabold text-ink">
+          {leave === "unsaved" ? t.pauseOverlay.unsavedTitle : t.pauseOverlay.title}
+        </h2>
+        <p className="mt-1 text-sm font-semibold text-ink-soft">
+          {leave === "unsaved" ? t.pauseOverlay.unsavedText : t.pauseOverlay.text}
+        </p>
+        <div className="mt-4 flex flex-col gap-3">
+          <button
+            ref={continueRef}
+            type="button"
+            onClick={onResume}
+            className="inline-flex min-h-16 items-center justify-center gap-2 rounded-2xl border-2 border-jade-600 bg-jade-600 px-5 text-lg font-extrabold text-white"
+          >
+            <Play aria-hidden="true" className="size-5" />
+            {t.pauseOverlay.continue}
+          </button>
+          <Link
+            ref={backRef}
+            href={backHref}
+            aria-disabled={leave === "saving"}
+            onClick={(event) => {
+              if (!saved || skipGuard.current || leave === "unsaved") return;
+              event.preventDefault();
+              if (leave === "saving") return;
+              setLeave("saving");
+              void saved.saver.flushAndWait(4000).then((ok) => {
+                if (ok) {
+                  skipGuard.current = true;
+                  backRef.current?.click();
+                } else setLeave("unsaved");
+              });
+            }}
+            className="inline-flex min-h-16 items-center justify-center rounded-2xl border-2 border-line-strong bg-surface px-5 text-lg font-bold text-ink"
+          >
+            {leave === "saving"
+              ? t.pauseOverlay.leaving
+              : leave === "unsaved"
+                ? t.pauseOverlay.leaveAnyway
+                : t.pauseOverlay.toMap}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MazeRun({
   level,
   rootRef,
   onReplay,
   saved,
+  backHref,
 }: {
   level: Level;
   rootRef: RefObject<HTMLDivElement | null>;
   onReplay: () => void;
   saved?: SavedBinding;
+  /** Đích của "Về bản đồ" ở lớp phủ tạm dừng. */
+  backHref: Route;
 }) {
   const parsed: ParsedLevel = useMemo(
     () => (saved ? { ...parseLevel(level), triggers: [] } : parseLevel(level)),
@@ -138,6 +219,7 @@ export function MazeRun({
     const initial = createInitialState(p);
     return { game: saved ? { ...initial, position: saved.initial } : initial, bumps: 0, trail: [] };
   });
+  const pauseRef = useRef<HTMLButtonElement>(null);
   const hold = useHoldMove((direction) => dispatch({ type: "MOVE", direction }));
 
   const forwarded = useRef(0);
@@ -150,6 +232,13 @@ export function MazeRun({
     if (saved && paused) saved.saver.flush();
   }, [paused, saved]);
 
+  const wasPaused = useRef(false);
+  useEffect(() => {
+    // Thoát tạm dừng thì trả tiêu điểm về nút tạm dừng (lớp phủ tự lấy tiêu điểm khi hiện).
+    if (!paused && wasPaused.current) pauseRef.current?.focus();
+    wasPaused.current = paused;
+  }, [paused]);
+
   useEffect(() => {
     if (STOPPING.has(game.lastEvent.type)) hold.releaseAll();
   }, [game.lastEvent, hold]);
@@ -160,6 +249,10 @@ export function MazeRun({
     const inGameArea = (target: EventTarget | null) =>
       !(target instanceof Element) || !!rootRef.current?.contains(target) || target.closest(INTERACTIVE) === null;
     const down = (event: KeyboardEvent) => {
+      if (event.code === "Escape" && paused && !isTypingTarget(event.target) && inGameArea(event.target)) {
+        dispatch({ type: "RESUME" });
+        return;
+      }
       const direction = KEY_DIRECTIONS[event.code];
       if (!direction || event.ctrlKey || event.metaKey || event.altKey) return;
       if (isTypingTarget(event.target) || !inGameArea(event.target)) return;
@@ -175,7 +268,7 @@ export function MazeRun({
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [hold, rootRef]);
+  }, [hold, rootRef, paused]);
 
   const desktop = useSyncExternalStore(
     subscribeDesktop,
@@ -215,6 +308,9 @@ export function MazeRun({
             foundMarkers={found}
           />
         </div>
+        {paused && !game.completed && (
+          <PauseOverlay backHref={backHref} saved={saved} onResume={() => dispatch({ type: "RESUME" })} />
+        )}
       </div>
 
       <p
@@ -296,6 +392,7 @@ export function MazeRun({
         </div>
         <div className="flex flex-col gap-3">
           <button
+            ref={pauseRef}
             type="button"
             disabled={game.completed}
             onClick={() => dispatch({ type: game.paused ? "RESUME" : "PAUSE" })}
@@ -371,7 +468,13 @@ export function MazePlayer({ levels, names }: { levels: readonly Level[]; names:
           </button>
         ))}
       </div>
-      <MazeRun key={`${level.id}:${round}`} level={level} rootRef={rootRef} onReplay={() => setRound(round + 1)} />
+      <MazeRun
+        key={`${level.id}:${round}`}
+        level={level}
+        rootRef={rootRef}
+        onReplay={() => setRound(round + 1)}
+        backHref={"/demo" as Route}
+      />
       <p className="mx-auto mt-4 max-w-[34rem] text-sm text-ink-soft">{t.help}</p>
       <div className="mt-4">
         <MotionToggle />

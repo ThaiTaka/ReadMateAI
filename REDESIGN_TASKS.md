@@ -16,7 +16,7 @@
 | R04 | Scoring Engine, phát câu ở server, điểm thưởng, mở khóa bản đồ | R03 (+ R02 cho giao diện) | L | ✅ Chờ duyệt (local) |
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
-| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | 🔄 R07.5b2 xong; còn R07.6 |
+| R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ✅ R07.6 xong (chờ CI) — nghiệm thu R07 về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi; chưa phải mini-game hoàn chỉnh (R08) |
 | R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | ⏸ |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ **Tạm hoãn sau khi nộp dự án** |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
@@ -238,7 +238,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 - [x] 7.5a (xong, chờ CI — PROGRESS §5l) Migrations `game_runs` (+ RLS), RPC bắt đầu/tiếp tục/lưu vị trí (`state_version`), ngưỡng 50 điểm, reset mùa đóng lượt dở
 - [x] 7.5b1 (xong, CI + E2E xanh trên `65328eb`) API Next.js `POST /api/student/game-runs` + `PATCH …/[runId]/position`
 - [x] 7.5b2 (xong, chờ CI) Trang `/learn/me/games/treasure-maze` nối API: chọn hồ sơ, ngưỡng 50 điểm, `INSUFFICIENT_CONTENT` → bản thử nghiệm, tự lưu (5 bước/3 giây/tạm dừng/ẩn trang), khôi phục sau tải lại, `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng; ba mini-game còn lại "Sắp ra mắt"
-- [ ] 7.6 Hoạt cảnh di chuyển, chuyển cảnh; giảm chuyển động; tạm dừng/tiếp tục
+- [x] 7.6 (xong, chờ CI — PROGRESS §5n) Lớp phủ tạm dừng ("Chơi tiếp"/"Về bản đồ", focus + Esc + Tab vòng), rời màn chờ máy chủ xác nhận lưu (không hứa đã lưu), quay mặt mượt, đo FPS/bundle lại
 
 **Tiêu chí nghiệm thu:** đi hết mê cung bằng nút và phím trên 5 cấu hình Playwright; tải lại giữ vị trí; không vào được khi < 50 điểm; mọi màn qua `level-validate`.
 **Kiểm thử bắt buộc:** bộ đầy đủ + test:e2e + đo hiệu năng.

@@ -221,7 +221,7 @@ export function MazeBoard({ rows, className, title, hero, foundMarkers }: MazeBo
           }}
         >
           <div
-            className="absolute top-[-50%] left-[-10%] w-[120%]"
+            className="absolute top-[-50%] left-[-10%] w-[120%] transition-transform duration-150 ease-out"
             style={{ transform: at.facing === "left" ? "scaleX(-1)" : undefined }}
           >
             <div key={at.bumpKey ?? 0} className={at.bumpKey ? "animate-bump" : undefined}>

@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-21 — Phiên Claude Code R07.5b2 (nối Mê cung với học sinh: tự lưu, khôi phục)
+> **Cập nhật lần cuối:** 2026-10-22 — Phiên Claude Code R07.6 (tạm dừng, chuyển cảnh, đo lại hiệu năng; nghiệm thu R07)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R07.6 xong (chờ CI): lớp phủ tạm dừng, rời màn chờ xác nhận lưu, hoạt cảnh quay mặt mượt, đo lại FPS/bundle — R07 nghiệm thu về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi (chưa phải mini-game hoàn chỉnh, xem §5n).** Bước tiếp: R08.1 (migration `game_encounters`).
 - **R07.5b2 xong (chờ CI): trang `/learn/me/games/treasure-maze` nối API lượt chơi — tự lưu vị trí, khôi phục sau tải lại, xử lý `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng — §5m. R07.5b1 đã nghiệm thu (CI + E2E xanh `65328eb`). **Lộ trình nộp dự án: R07 → R08 → R10 → R11 → NỘP; R09 tạm hoãn sau khi nộp (không bắt đầu trước ngày nộp).**
 - (trước đó) **R07.4 xong: `/demo/treasure-maze` đi lại được (bàn phím + 4 nút cảm ứng), camera phóng to trên điện thoại, tạm dừng, thử thách minh họa — §5k. Chờ CI.**
 - (trước đó) **R07.3 xong: 3 màn JSON `content/games/treasure-maze/levels/` (9×9, 11×11, 13×13) + zod `game-engine/levels/` + `content:check` kiểm màn — §5j.**
@@ -27,7 +28,7 @@
 | R04 | ✅ Hoàn thành (local) |
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
-| R07 | 🔄 R07.1–R07.5b2 xong (nguyên mẫu, lõi, 3 màn, điều khiển, DB + API + giao diện lưu); còn R07.6 |
+| R07 | ✅ R07.1–R07.6 xong (chờ CI); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08, R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
@@ -324,6 +325,16 @@ Migration `20261026090000_r07_game_runs.sql` + `20261026090100_r07_reset_voids_g
 - **Reset mùa:** `private.reset_class_season` thay bằng migration mới (R06.3 giữ nguyên), thêm bước đóng `game_runs` in_progress → `void_season_reset` cùng giao dịch; `season_resets.voided_game_runs`. Thứ tự khóa lớp → mùa → dòng con; lưu vị trí khóa mùa FOR SHARE → dòng lượt, nên song song với reset ra "lưu trước, reset thấy" hoặc `SEASON_CLOSED`.
 - **Giới hạn/R08:** lưu vị trí không kích hoạt chạm trán nên một đường lưu có thể đi qua ô kích hoạt — R08 phải ghi nhận việc bước vào điểm kích hoạt phía server (chặn đi qua khi còn chạm trán chưa xong). Ngưỡng 50 cũng xét khi tiếp tục lượt dở (điểm tụt dưới 50 thì chưa vào lại được). Kiểm thử: pgTAP `08_game_runs` 23, tích hợp `game-runs.test.ts` 16.
 
+## 5n. R07.6 — Hoàn thiện trải nghiệm Mê cung + nghiệm thu R07 (2026-10-22)
+
+- **Tạm dừng:** `PauseOverlay` (trong `maze-player.tsx`) phủ bảng chơi: "Chơi tiếp" (nhận focus khi hiện), "Về bản đồ" (`/demo` ở bản thử, `/learn/me` ở bản có lưu), Esc = chơi tiếp, Tab quay vòng trong lớp phủ, trả focus về nút Tạm dừng khi đóng. Mọi điều khiển/bộ lặp phím dừng (reducer chặn khi `paused`); không đổi điểm hay vị trí đã lưu.
+- **Rời màn có lưu:** `PositionSaver.flushAndWait(4000)`; chỉ khi máy chủ xác nhận hết bước mới đi tiếp. Lỗi mạng/hết hạn → lớp phủ đổi sang "Vị trí mới nhất chưa lưu được", nút thành "Vẫn về bản đồ" — không bao giờ nói đã lưu. Hoạt cảnh không có đường nào vượt luật CSDL (không đổi trigger/rương/điểm).
+- **Hoạt cảnh:** bước nội suy 200 ms (E2E kiểm 160–220 ms), camera cùng 200 ms `linear` đồng bộ; quay trái/phải có chuyển tiếp lật 150 ms; va tường rung nhẹ 0,25 s chỉ riêng nhân vật; lớp phủ `animate-pop-in`. Địa hình SVG đã `memo` → mỗi bước chỉ cập nhật `transform` của nhân vật/camera. Giảm chuyển động (hệ điều hành hoặc công tắc): mọi `transition`/`animation` về 0 (CSS toàn cục sẵn có).
+- **Giới hạn hoạt cảnh:** sprite chỉ có mặt trước — lên/xuống chưa có hình riêng (chờ asset được duyệt, không sản xuất ở R07.6).
+- **Số đo thật** (`scripts/measure-maze-perf.mjs`, bản production, Chromium headless, 390×844): FPS 60,1 (bình thường, 0 khung >33 ms, luồng chính bận 5,4%), 60,0 (CPU 4×, 0 khung chậm, 46,3%), 60,4 (giảm chuyển động, 0,8%) — tương đương R07.1 (60,2 / 60,2 / 60,4). Đo ở trạng thái đứng yên (không tự bấm phím). **JS tải về 224,5 KB gzip, 19 tệp** (R07.1: 206,6 KB): +17,9 KB là cộng dồn lõi game, điều khiển, lớp phủ và biểu tượng của R07.2–R07.6, chưa tách riêng phần R07.6. DOM 806 nút. Không cuộn ngang ở 360/390/820/1280.
+- **Kiểm thử:** unit game-engine 83 (mới: lớp phủ 2, `flushAndWait`, rời màn thất bại/thành công); E2E `treasure-maze-demo` 13/project, chạy local chromium-desktop + chromium-mobile 26/26; WebKit/tablet và e2e-db (lưu, tải lại, mất mạng, reset mùa, không giả lập trigger ở chế độ học sinh) do GitHub Actions chạy.
+- **Nghiệm thu R07:** hoàn thành về Game Engine, đồ họa, điều khiển, lưu vị trí và bảo mật lượt chơi. **Chưa phải mini-game hoàn chỉnh.** Giới hạn: (1) chưa có 7 chạm trán và 21 câu thật — R08; (2) Mê cung tính điểm thật chưa mở; (3) R08 phải kiểm tra trigger ở server và không để đường lưu vị trí bỏ qua chạm trán; (4) asset còn `pending_review`, không tự duyệt; (5) chưa thử Android vật lý.
+
 ## 5m. R07.5b2 — Nối Mê cung với học sinh: tự lưu và khôi phục (2026-10-21)
 
 Nghiệm thu R07.5b1 trước khi làm: CI + E2E xanh trên `65328eb`.
@@ -443,12 +454,15 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 **Đề xuất R05 — Leaderboard kiểu FIFA, avatar hình người, xếp hạng trong lớp** ([REDESIGN_TASKS R05](REDESIGN_TASKS.md#r05--leaderboard-kiểu-fifa-avatar-ranking-m)), dựng trên `season_scores` (chỉ mục `season_id, balance desc`, `balance_updated_at`) của R04. Điều kiện trước: người điều phối duyệt R04; rà soát pháp lý cờ `leaderboard_feature_approved` (Luật 91/2025 Điều 24); bộ avatar hình người có giấy phép (RQ-M1). Song song: R10 (giao diện duyệt học liệu, âm thanh) để có nội dung thật; quyết định tạo Supabase Cloud *dev*. Vẫn chờ RQ-06 (nhánh âm thanh), RQ-G1/G2/G5, RD-27/RD-28 (GV góp ý mức hỗ trợ và gợi ý).
 
+**Cập nhật 2026-10-22 (R07.6):** bước tiếp theo là **R08.1** (migration `game_encounters`: tối đa 7 chạm trán mỗi màn, không kích hoạt trùng, nền cho 21 câu mỗi màn). Trước đó:
+
 **Cập nhật 2026-10-21 (R07.5b2):** bước tiếp theo là **R07.6** (hoàn thiện trải nghiệm mê cung: hoạt cảnh di chuyển/chuyển cảnh), rồi **R08** (7 chạm trán + 21 câu Tiếng Việt mỗi màn; chặn đi qua điểm kích hoạt chưa giải quyết ở máy chủ — §5m), **R10**, **R11**, nộp dự án. R09 hoãn sau khi nộp.
 
 ## 9. Nhật ký phiên
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-22 | R07.6 | R07 | Lớp phủ tạm dừng (Chơi tiếp/Về bản đồ, focus, Esc), `flushAndWait` khi rời màn, quay mặt mượt; FPS 60 (CPU 4× vẫn 60), bundle 224,5 KB gzip; unit 83, E2E chromium 26/26 local; CI chờ. Không làm R08 |
 | 2026-10-21 | R07.5a | R07 | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí (ngưỡng 50, optimistic concurrency, kiểm tường), reset mùa đóng lượt dở; pgTAP 23 + DB 16 local. Không làm R07.5b |
 | 2026-10-21 | R07.5b2 | R07 | Nghiệm thu R07.5b1 (CI + E2E xanh `65328eb`); trang `/learn/me/games/treasure-maze` + `PositionSaver` + khôi phục + xử lý lỗi; lộ trình nộp dự án (R09 hoãn); unit 20 mới, E2E có CSDL 7 kịch bản local. Không làm R07.6/R08 |
 | 2026-10-21 | R06.5 | R06 | API học sinh xem vinh danh gần nhất (`gateway_latest_honors`), chống snapshot trùng bằng khóa ý định + khóa lớp + khoảng chống lặp 15 giây; unit/pgTAP/DB/E2E đạt local. Không làm R07 |

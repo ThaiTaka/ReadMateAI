@@ -153,4 +153,28 @@ describe("PositionSaver", () => {
     saver.flush(true);
     expect(calls[0]!.keepalive).toBe(true);
   });
+
+  it("flushAndWait: true chỉ khi máy chủ xác nhận hết; lỗi mạng hoặc hết hạn → false", async () => {
+    const clean = harness();
+    await expect(clean.saver.flushAndWait(1000)).resolves.toBe(true);
+
+    const okCase = harness();
+    okCase.saver.push(cell(1));
+    const waiting = okCase.saver.flushAndWait(4000);
+    okCase.calls[0]!.resolve(ok(2, 1));
+    await expect(waiting).resolves.toBe(true);
+
+    const failCase = harness();
+    failCase.saver.push(cell(1));
+    const failing = failCase.saver.flushAndWait(4000);
+    failCase.calls[0]!.resolve({ kind: "failed" });
+    await expect(failing).resolves.toBe(false);
+    expect(failCase.saver.getSnapshot().status).toBe("unsaved");
+
+    const slow = harness();
+    slow.saver.push(cell(1));
+    const timedOut = slow.saver.flushAndWait(4000);
+    await vi.advanceTimersByTimeAsync(4000);
+    await expect(timedOut).resolves.toBe(false);
+  });
 });

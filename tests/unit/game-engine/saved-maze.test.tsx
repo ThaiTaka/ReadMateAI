@@ -205,4 +205,40 @@ describe("SavedMaze", () => {
     expect(await screen.findByTestId("maze-signed-out")).toBeTruthy();
     expect(screen.queryByText(strings.treasureMazePlay.save.saved)).toBeNull();
   });
+
+  it("'Về bản đồ' khi lưu thất bại: cảnh báo, không hứa đã lưu, cho phép vẫn về", async () => {
+    replies = [{ body: run(1, 1, 2) }, new TypeError("Failed to fetch"), new TypeError("Failed to fetch")];
+    mount();
+    await ready();
+    stepRight();
+    await pause();
+    await act(async () => undefined);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("link", { name: strings.treasureMazeDemo.pauseOverlay.toMap }));
+    });
+    await act(async () => undefined);
+    const overlay = screen.getByTestId("pause-overlay");
+    expect(overlay.textContent).toContain(strings.treasureMazeDemo.pauseOverlay.unsavedTitle);
+    expect(screen.queryByText(strings.treasureMazePlay.save.saved)).toBeNull();
+    expect(
+      screen.getByRole("link", { name: strings.treasureMazeDemo.pauseOverlay.leaveAnyway }).getAttribute("href"),
+    ).toBe("/learn/me");
+  });
+
+  it("'Về bản đồ' khi đã lưu xong: đi thẳng sau khi máy chủ xác nhận", async () => {
+    replies = [{ body: run(1, 1, 2) }, saved(1, 2, 3)];
+    mount();
+    await ready();
+    stepRight();
+    await pause();
+    await act(async () => undefined);
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click");
+    await act(async () => {
+      fireEvent.click(screen.getByRole("link", { name: strings.treasureMazeDemo.pauseOverlay.toMap }));
+    });
+    await act(async () => undefined);
+    expect(requests).toHaveLength(2); // bước đã được lưu khi tạm dừng, không gửi lại
+    expect(click).toHaveBeenCalled();
+    click.mockRestore();
+  });
 });

@@ -65,6 +65,17 @@ export const vi = {
     pause: "Tạm dừng",
     resume: "Tiếp tục",
     replay: "Chơi lại màn này",
+    pauseOverlay: {
+      title: "Đang tạm dừng",
+      text: "Điểm thưởng của con vẫn nguyên. Con nghỉ một chút rồi chơi tiếp nhé!",
+      continue: "Chơi tiếp",
+      toMap: "Về bản đồ",
+      leaving: "Đang lưu vị trí…",
+      unsavedTitle: "Vị trí mới nhất chưa lưu được",
+      unsavedText:
+        "Nếu về bây giờ, lần sau con có thể quay lại điểm đã lưu trước đó. Con có thể chơi tiếp rồi thử lại sau.",
+      leaveAnyway: "Vẫn về bản đồ",
+    },
     overview: { on: "Xem toàn cảnh", off: "Phóng to theo bạn nhỏ" },
     found: "Thử thách đã tìm: {n}/{total}",
     help: "Máy tính: phím mũi tên hoặc W A S D. Điện thoại: chạm nút một lần để đi một ô, giữ nút để đi tiếp.",
