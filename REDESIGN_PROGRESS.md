@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-22 — Phiên Claude Code R07.6 (tạm dừng, chuyển cảnh, đo lại hiệu năng; nghiệm thu R07)
+> **Cập nhật lần cuối:** 2026-10-22 — Phiên Claude Code R08.1 (database 7 chạm trán + schema 21 câu; sửa test chập chờn reset mùa)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R08.1 xong (CI chờ): migration `game_encounters` + `game_level_triggers` + ngữ cảnh `game_encounter` của `question_instances` + chặn lưu vị trí xuyên điểm kích hoạt + reset mùa đóng chạm trán — §5o.** Chưa phân bổ thật (R08.2). Bước tiếp: R08.2.
 - **R07.6 xong (CI xanh `8701cfa`): lớp phủ tạm dừng, rời màn chờ xác nhận lưu, hoạt cảnh quay mặt mượt, đo lại FPS/bundle — R07 nghiệm thu về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi (chưa phải mini-game hoàn chỉnh, xem §5n).** Bước tiếp: R08.1 (migration `game_encounters`).
 - **R07.5b2 xong (chờ CI): trang `/learn/me/games/treasure-maze` nối API lượt chơi — tự lưu vị trí, khôi phục sau tải lại, xử lý `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng — §5m. R07.5b1 đã nghiệm thu (CI + E2E xanh `65328eb`). **Lộ trình nộp dự án: R07 → R08 → R10 → R11 → NỘP; R09 tạm hoãn sau khi nộp (không bắt đầu trước ngày nộp).**
 - (trước đó) **R07.4 xong: `/demo/treasure-maze` đi lại được (bàn phím + 4 nút cảm ứng), camera phóng to trên điện thoại, tạm dừng, thử thách minh họa — §5k. Chờ CI.**
@@ -29,7 +30,8 @@
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
-| R08, R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
+| R08 | 🔄 R08.1 xong (schema + ràng buộc, §5o); R08.2–R08.6 chưa làm |
+| R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)
@@ -325,6 +327,19 @@ Migration `20261026090000_r07_game_runs.sql` + `20261026090100_r07_reset_voids_g
 - **Reset mùa:** `private.reset_class_season` thay bằng migration mới (R06.3 giữ nguyên), thêm bước đóng `game_runs` in_progress → `void_season_reset` cùng giao dịch; `season_resets.voided_game_runs`. Thứ tự khóa lớp → mùa → dòng con; lưu vị trí khóa mùa FOR SHARE → dòng lượt, nên song song với reset ra "lưu trước, reset thấy" hoặc `SEASON_CLOSED`.
 - **Giới hạn/R08:** lưu vị trí không kích hoạt chạm trán nên một đường lưu có thể đi qua ô kích hoạt — R08 phải ghi nhận việc bước vào điểm kích hoạt phía server (chặn đi qua khi còn chạm trán chưa xong). Ngưỡng 50 cũng xét khi tiếp tục lượt dở (điểm tụt dưới 50 thì chưa vào lại được). Kiểm thử: pgTAP `08_game_runs` 23, tích hợp `game-runs.test.ts` 16.
 
+## 5o. R08.1 — Database 7 chạm trán + schema 21 câu (2026-10-22)
+
+Migration `20261027090000_r08_encounters.sql` + `20261027090100_r08_reset_voids_encounters.sql`. **Chỉ schema và ràng buộc** — không phân bổ chạm trán/câu thật (R08.2), không API kích hoạt/chấm (R08.3), không UI.
+
+- **Test chập chờn R07 (CI `39703541786`):** `season-reset-ui.test.tsx` "thử lại sau lỗi tạm thời" — thông báo lỗi hiện *trước* khi `pending` của transition tắt, nên nút xác nhận còn `disabled` và cú nhấp thứ hai bị bỏ qua (mock chỉ được gọi 1 lần). Lỗi chờ bất đồng bộ của test, không phải lỗi nghiệp vụ (nút khóa khi đang gửi là hành vi đúng). Sửa: chờ nút bật lại (`waitFor … toBeEnabled`) trước cú nhấp; không nới assertion. Chạy lặp 3 lần: 9/9.
+- **`private.game_level_triggers`:** 7 điểm kích hoạt mỗi phiên bản màn (21 dòng), FK tới `game_levels` (đúng `level_version`), unique id và tọa độ, trigger bắt buộc nằm trên ô đường đi, bất biến (`block_change`); migration kiểm đủ 7/màn. Test đối chiếu CSDL ↔ JSON (id + tọa độ). Tọa độ không bao giờ nhận từ trình duyệt.
+- **`game_encounters`:** đủ cột theo yêu cầu; check `encounter_no` 1–7, HP 0–3, status 5 giá trị, ràng buộc trạng thái ↔ thời điểm ↔ vị trí quay lại (defeated ⇒ HP 0, undefeated ⇒ HP > 0); unique `(run_id, encounter_no)`, `(run_id, trigger_key)`, `(run_id, monster_key)`; unique một chạm trán `active` mỗi lượt; **khóa ngoại tổng hợp** `(run_id, student_id, class_id, season_id)` → `game_runs` (khớp chính xác). Trigger `guard_game_encounter` (áp dụng cả service_role): khóa lượt FOR SHARE; lượt phải `in_progress` + `treasure_maze`; trạng thái đầu `pending`; **chạm trán thứ tám bị từ chối** (`ENCOUNTER_LIMIT`, ngoài ra check 1–7 và unique); trigger phải thuộc đúng phiên bản màn của lượt (`UNKNOWN_TRIGGER`); trigger/quái vật/định danh bất biến; chuyển trạng thái chỉ pending→active|void, active→defeated|undefeated|void; đã kết thúc không đổi/mở lại (`ENCOUNTER_FINISHED`); HP chỉ giảm 1 bước khi `active`; vị trí quay lại/thời điểm kích hoạt đặt một lần; không xóa trực tiếp.
+- **21 câu (`question_instances`):** `context_kind` thêm `game_encounter`; cột `run_id`, `game_encounter_id` (khóa ngoại tổng hợp cùng học sinh/lớp/mùa/lượt, cascade); check hình dạng ngữ cảnh (luyện tập: có buổi, không lượt/chạm trán; game: có lượt + chạm trán, không buổi, vị trí 1–3); unique `(game_encounter_id, position)`, `(run_id, exercise_item_id)`, `(run_id, content_fingerprint)` → đúng 3 câu riêng biệt mỗi chạm trán, không lặp nội dung trong lượt. Guard chèn: chạm trán phải `pending|active` và lượt `in_progress`; vẫn chỉ nội dung `approved`; `run_id`/`game_encounter_id` bất biến. Chỉ mục chống tính điểm lặp R04 (`question_instances_scorable_once`) và bài luyện R04 **không đổi**. Không tạo câu giả.
+- **RLS:** `game_encounters` bật RLS, chỉ policy SELECT; GV thấy lớp mình; thiết bị chỉ thấy dòng của chính học sinh **đã kích hoạt/kết thúc** (`status <> 'pending'`) — dòng chờ ẩn nên không lộ điểm kích hoạt/quái vật chưa gặp; thiết bị bị thu hồi/học sinh lớp khác không thấy gì; client không INSERT/UPDATE/DELETE. `game_level_triggers` ở schema private, chỉ service_role. Chưa có API đọc chạm trán cho học sinh (R08.3 chỉ trả chạm trán hiện tại).
+- **Chặn bỏ qua chạm trán** (`gateway_save_game_position` thay bằng migration mới + `private.game_check_encounter_path`): (a) lượt có chạm trán — không đi xuyên hay rời ô kích hoạt chưa xử lý (`ENCOUNTER_PENDING`), chỉ được *dừng* tại đó; không di chuyển khi có chạm trán `active` (`ENCOUNTER_ACTIVE`); (b) lượt `scored` mà số chạm trán ≠ `encounter_count` không hoạt động, kể cả chỉ báo còn hoạt động (`ENCOUNTERS_INCOMPLETE`); (c) lượt fixture `scored = false` chưa có chạm trán giữ nguyên hành vi R07. **Còn phải làm ở R08.3:** hàm kích hoạt (pending→active, `return_position` từ vị trí đã lưu, kiểm ô đang đứng là ô trigger), chấm câu/HP trong hàm ghi điểm, mở kho báu khi 7/7, ánh xạ 4 mã lỗi mới sang API.
+- **Reset mùa:** `private.reset_class_season` thay bằng migration mới: sau khi void `game_runs` (7b), `game_encounters` `pending|active` → `void` + `resolved_at` (7c); đã kết thúc giữ nguyên; không xóa lịch sử; `season_resets.voided_encounters`. Thứ tự khóa lớp → mùa → lượt → chạm trán (cũng là thứ tự insert/guard) ⇒ không deadlock; insert song song với reset hoặc bị từ chối (`RUN_NOT_ACTIVE`) hoặc được void. Câu game còn mở đã bị bước (7) void. Idempotency R06 giữ nguyên.
+- **Kiểm thử (local):** pgTAP 186 (9 tệp; mới `09_game_encounters` 54), `test:db` 216/216 (11 tệp; mới `game-encounters.test.ts` 22: đối chiếu JSON, 7/8 chạm trán, đồng thời, trạng thái, RLS, thu hồi thiết bị, 21 câu, đường đi, cờ fixture TẮT, reset + reset song song), `db:lint` 0 lỗi, format/lint/typecheck xanh. Toàn bộ Playwright và unit chạy ở GitHub Actions.
+
 ## 5n. R07.6 — Hoàn thiện trải nghiệm Mê cung + nghiệm thu R07 (2026-10-22)
 
 **CI xanh trên `8701cfa`:** CI `39701093462` + E2E `39701093463` (9 job); lượt push `39701089525` có 1 lỗi chập chờn ở `e2e-db` webkit-mobile (test hai tab, hết giờ 4 phút ở thao tác click, không liên quan lớp phủ) và đã xanh sau khi chạy lại phần lỗi.
@@ -456,7 +471,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 **Đề xuất R05 — Leaderboard kiểu FIFA, avatar hình người, xếp hạng trong lớp** ([REDESIGN_TASKS R05](REDESIGN_TASKS.md#r05--leaderboard-kiểu-fifa-avatar-ranking-m)), dựng trên `season_scores` (chỉ mục `season_id, balance desc`, `balance_updated_at`) của R04. Điều kiện trước: người điều phối duyệt R04; rà soát pháp lý cờ `leaderboard_feature_approved` (Luật 91/2025 Điều 24); bộ avatar hình người có giấy phép (RQ-M1). Song song: R10 (giao diện duyệt học liệu, âm thanh) để có nội dung thật; quyết định tạo Supabase Cloud *dev*. Vẫn chờ RQ-06 (nhánh âm thanh), RQ-G1/G2/G5, RD-27/RD-28 (GV góp ý mức hỗ trợ và gợi ý).
 
-**Cập nhật 2026-10-22 (R07.6):** bước tiếp theo là **R08.1** (migration `game_encounters`: tối đa 7 chạm trán mỗi màn, không kích hoạt trùng, nền cho 21 câu mỗi màn). Trước đó:
+**Cập nhật 2026-10-22 (R08.1):** bước tiếp theo là **R08.2** (phân bổ 7 chạm trán + 21 câu đã duyệt, không trùng nội dung, một giao dịch khi bắt đầu lượt; thay cổng `INSUFFICIENT_CONTENT`/fixture của `gateway_start_game_run`). Trước đó (R07.6): **R08.1** (migration `game_encounters`: tối đa 7 chạm trán mỗi màn, không kích hoạt trùng, nền cho 21 câu mỗi màn). Trước đó:
 
 **Cập nhật 2026-10-21 (R07.5b2):** bước tiếp theo là **R07.6** (hoàn thiện trải nghiệm mê cung: hoạt cảnh di chuyển/chuyển cảnh), rồi **R08** (7 chạm trán + 21 câu Tiếng Việt mỗi màn; chặn đi qua điểm kích hoạt chưa giải quyết ở máy chủ — §5m), **R10**, **R11**, nộp dự án. R09 hoãn sau khi nộp.
 
@@ -464,6 +479,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-22 | R08.1 | R08 | Sửa test chập chờn reset mùa (chờ nút bật lại); migration `game_encounters` + `game_level_triggers` + ngữ cảnh game của `question_instances` + chặn lưu vị trí xuyên trigger + reset đóng chạm trán; pgTAP 186, DB 216 local; CI chờ. Không làm R08.2 |
 | 2026-10-22 | R07.6 | R07 | Lớp phủ tạm dừng (Chơi tiếp/Về bản đồ, focus, Esc), `flushAndWait` khi rời màn, quay mặt mượt; FPS 60 (CPU 4× vẫn 60), bundle 224,5 KB gzip; unit 83, E2E chromium 26/26 local; CI chờ. Không làm R08 |
 | 2026-10-21 | R07.5a | R07 | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí (ngưỡng 50, optimistic concurrency, kiểm tường), reset mùa đóng lượt dở; pgTAP 23 + DB 16 local. Không làm R07.5b |
 | 2026-10-21 | R07.5b2 | R07 | Nghiệm thu R07.5b1 (CI + E2E xanh `65328eb`); trang `/learn/me/games/treasure-maze` + `PositionSaver` + khôi phục + xử lý lỗi; lộ trình nộp dự án (R09 hoãn); unit 20 mới, E2E có CSDL 7 kịch bản local. Không làm R07.6/R08 |

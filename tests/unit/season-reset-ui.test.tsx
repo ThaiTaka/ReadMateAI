@@ -96,6 +96,8 @@ describe("SeasonReset — hộp thoại hai bước", () => {
     fireEvent.change(screen.getByLabelText(t.inputLabel), { target: { value: "1A2" } });
     fireEvent.click(confirmButton());
     await screen.findByText(vi.errors.UNKNOWN);
+    // Thông báo lỗi hiện trước khi transition kết thúc; nút còn khóa thì nhấp bị bỏ qua.
+    await waitFor(() => expect(confirmButton()).toBeEnabled());
     fireEvent.click(confirmButton());
     await waitFor(() => expect(resetSeason).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(screen.getByLabelText(t.inputLabel)).toBeEnabled());

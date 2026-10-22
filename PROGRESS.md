@@ -270,3 +270,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-21 | R07.5a | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí, reset mùa đóng lượt dở; pgTAP + DB local xanh; CI chờ. Không làm R07.5b |
 | 2026-10-21 | R07.5b2 | Trang Mê cung có xác thực nối API lượt chơi: tự lưu vị trí (5 bước/3 giây/tạm dừng/ẩn trang), khôi phục sau tải lại, STATE_CONFLICT/SEASON_CLOSED/mất mạng; unit + E2E CSDL local; lộ trình nộp: R09 hoãn sau khi nộp. Không làm R07.6/R08 |
 | 2026-10-22 | R07.6 | Lớp phủ tạm dừng, chờ xác nhận lưu khi rời màn, đo lại FPS/bundle (60 FPS, 224,5 KB gzip); R07 nghiệm thu phần engine; CI chờ. Không làm R08 |
+| 2026-10-22 | R08.1 | Database 7 chạm trán (`game_encounters`, `game_level_triggers`), ngữ cảnh game của `question_instances`, chặn lưu vị trí xuyên trigger, reset mùa đóng chạm trán; sửa test chập chờn reset mùa; pgTAP + DB local xanh; CI chờ. Không làm R08.2 |

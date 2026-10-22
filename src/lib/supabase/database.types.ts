@@ -565,6 +565,63 @@ export type Database = {
           },
         ];
       };
+      game_encounters: {
+        Row: {
+          activated_at: string | null;
+          class_id: string;
+          encounter_no: number;
+          hp_remaining: number;
+          id: string;
+          monster_key: string;
+          resolved_at: string | null;
+          return_position: Json | null;
+          run_id: string;
+          season_id: string;
+          status: string;
+          student_id: string;
+          trigger_key: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          activated_at?: string | null;
+          class_id: string;
+          encounter_no: number;
+          hp_remaining?: number;
+          id?: string;
+          monster_key: string;
+          resolved_at?: string | null;
+          return_position?: Json | null;
+          run_id: string;
+          season_id: string;
+          status?: string;
+          student_id: string;
+          trigger_key: string;
+        };
+        Update: {
+          activated_at?: string | null;
+          class_id?: string;
+          encounter_no?: number;
+          hp_remaining?: number;
+          id?: string;
+          monster_key?: string;
+          resolved_at?: string | null;
+          return_position?: Json | null;
+          run_id?: string;
+          season_id?: string;
+          status?: string;
+          student_id?: string;
+          trigger_key?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_encounters_run_id_student_id_class_id_season_id_fkey";
+            columns: ["run_id", "student_id", "class_id", "season_id"];
+            isOneToOne: false;
+            referencedRelation: "game_runs";
+            referencedColumns: ["id", "student_id", "class_id", "season_id"];
+          },
+        ];
+      };
       game_runs: {
         Row: {
           class_id: string;
@@ -1241,6 +1298,7 @@ export type Database = {
           context_kind: string;
           exercise_item_id: string;
           exercise_version_id: string;
+          game_encounter_id: string | null;
           id: string;
           max_attempts: number;
           not_scorable_reason: string | null;
@@ -1248,6 +1306,7 @@ export type Database = {
           position: number;
           practice_session_id: string | null;
           rewarded: boolean;
+          run_id: string | null;
           scorable: boolean;
           season_id: string;
           status: string;
@@ -1264,6 +1323,7 @@ export type Database = {
           context_kind?: string;
           exercise_item_id: string;
           exercise_version_id: string;
+          game_encounter_id?: string | null;
           id?: string;
           max_attempts: number;
           not_scorable_reason?: string | null;
@@ -1271,6 +1331,7 @@ export type Database = {
           position: number;
           practice_session_id?: string | null;
           rewarded?: boolean;
+          run_id?: string | null;
           scorable: boolean;
           season_id: string;
           status?: string;
@@ -1286,6 +1347,7 @@ export type Database = {
           context_kind?: string;
           exercise_item_id?: string;
           exercise_version_id?: string;
+          game_encounter_id?: string | null;
           id?: string;
           max_attempts?: number;
           not_scorable_reason?: string | null;
@@ -1293,6 +1355,7 @@ export type Database = {
           position?: number;
           practice_session_id?: string | null;
           rewarded?: boolean;
+          run_id?: string | null;
           scorable?: boolean;
           season_id?: string;
           status?: string;
@@ -1314,6 +1377,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "exercise_versions";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "question_instances_game_encounter_fk";
+            columns: ["game_encounter_id", "run_id", "student_id", "class_id", "season_id"];
+            isOneToOne: false;
+            referencedRelation: "game_encounters";
+            referencedColumns: ["id", "run_id", "student_id", "class_id", "season_id"];
           },
           {
             foreignKeyName: "question_instances_practice_session_id_fkey";
@@ -1388,6 +1458,7 @@ export type Database = {
           performed_by: string;
           request_id: string;
           scored_students: number;
+          voided_encounters: number;
           voided_game_runs: number;
           voided_questions: number;
           voided_sessions: number;
@@ -1401,6 +1472,7 @@ export type Database = {
           performed_by: string;
           request_id: string;
           scored_students: number;
+          voided_encounters?: number;
           voided_game_runs?: number;
           voided_questions: number;
           voided_sessions: number;
@@ -1413,6 +1485,7 @@ export type Database = {
           performed_by?: string;
           request_id?: string;
           scored_students?: number;
+          voided_encounters?: number;
           voided_game_runs?: number;
           voided_questions?: number;
           voided_sessions?: number;
