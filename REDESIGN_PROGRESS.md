@@ -6,7 +6,7 @@
 
 ## 1. Trạng thái hiện tại
 
-- **R07.6 xong (chờ CI): lớp phủ tạm dừng, rời màn chờ xác nhận lưu, hoạt cảnh quay mặt mượt, đo lại FPS/bundle — R07 nghiệm thu về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi (chưa phải mini-game hoàn chỉnh, xem §5n).** Bước tiếp: R08.1 (migration `game_encounters`).
+- **R07.6 xong (CI xanh `8701cfa`): lớp phủ tạm dừng, rời màn chờ xác nhận lưu, hoạt cảnh quay mặt mượt, đo lại FPS/bundle — R07 nghiệm thu về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi (chưa phải mini-game hoàn chỉnh, xem §5n).** Bước tiếp: R08.1 (migration `game_encounters`).
 - **R07.5b2 xong (chờ CI): trang `/learn/me/games/treasure-maze` nối API lượt chơi — tự lưu vị trí, khôi phục sau tải lại, xử lý `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng — §5m. R07.5b1 đã nghiệm thu (CI + E2E xanh `65328eb`). **Lộ trình nộp dự án: R07 → R08 → R10 → R11 → NỘP; R09 tạm hoãn sau khi nộp (không bắt đầu trước ngày nộp).**
 - (trước đó) **R07.4 xong: `/demo/treasure-maze` đi lại được (bàn phím + 4 nút cảm ứng), camera phóng to trên điện thoại, tạm dừng, thử thách minh họa — §5k. Chờ CI.**
 - (trước đó) **R07.3 xong: 3 màn JSON `content/games/treasure-maze/levels/` (9×9, 11×11, 13×13) + zod `game-engine/levels/` + `content:check` kiểm màn — §5j.**
@@ -28,7 +28,7 @@
 | R04 | ✅ Hoàn thành (local) |
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
-| R07 | ✅ R07.1–R07.6 xong (chờ CI); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
+| R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08, R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
@@ -326,6 +326,8 @@ Migration `20261026090000_r07_game_runs.sql` + `20261026090100_r07_reset_voids_g
 - **Giới hạn/R08:** lưu vị trí không kích hoạt chạm trán nên một đường lưu có thể đi qua ô kích hoạt — R08 phải ghi nhận việc bước vào điểm kích hoạt phía server (chặn đi qua khi còn chạm trán chưa xong). Ngưỡng 50 cũng xét khi tiếp tục lượt dở (điểm tụt dưới 50 thì chưa vào lại được). Kiểm thử: pgTAP `08_game_runs` 23, tích hợp `game-runs.test.ts` 16.
 
 ## 5n. R07.6 — Hoàn thiện trải nghiệm Mê cung + nghiệm thu R07 (2026-10-22)
+
+**CI xanh trên `8701cfa`:** CI `39701093462` + E2E `39701093463` (9 job); lượt push `39701089525` có 1 lỗi chập chờn ở `e2e-db` webkit-mobile (test hai tab, hết giờ 4 phút ở thao tác click, không liên quan lớp phủ) và đã xanh sau khi chạy lại phần lỗi.
 
 - **Tạm dừng:** `PauseOverlay` (trong `maze-player.tsx`) phủ bảng chơi: "Chơi tiếp" (nhận focus khi hiện), "Về bản đồ" (`/demo` ở bản thử, `/learn/me` ở bản có lưu), Esc = chơi tiếp, Tab quay vòng trong lớp phủ, trả focus về nút Tạm dừng khi đóng. Mọi điều khiển/bộ lặp phím dừng (reducer chặn khi `paused`); không đổi điểm hay vị trí đã lưu.
 - **Rời màn có lưu:** `PositionSaver.flushAndWait(4000)`; chỉ khi máy chủ xác nhận hết bước mới đi tiếp. Lỗi mạng/hết hạn → lớp phủ đổi sang "Vị trí mới nhất chưa lưu được", nút thành "Vẫn về bản đồ" — không bao giờ nói đã lưu. Hoạt cảnh không có đường nào vượt luật CSDL (không đổi trigger/rương/điểm).
