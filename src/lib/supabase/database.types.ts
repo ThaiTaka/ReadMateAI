@@ -1992,7 +1992,7 @@ export type Database = {
       };
       gateway_scoring_rules: { Args: { p_version: string }; Returns: Json };
       gateway_start_game_run: {
-        Args: { p_auth_user_id: string; p_game_key: string; p_level_key: string; p_student_id: string };
+        Args: { p_auth_user_id: string; p_game_key: string; p_level_key: string; p_plan?: Json; p_student_id: string };
         Returns: Json;
       };
       gateway_start_practice_session: {

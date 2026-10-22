@@ -6,7 +6,7 @@
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { contentFingerprint } from "../../src/features/exercises/fingerprint.ts";
-import { FIXTURE_EXERCISES, FIXTURE_SERIES_KEY, FIXTURE_TAG } from "../fixtures/scoring-items.ts";
+import { FIXTURE_EXERCISES, FIXTURE_SERIES_KEY, FIXTURE_TAG, type FixtureExercise } from "../fixtures/scoring-items.ts";
 
 export type InstalledFixtures = { seriesId: string; lessonIds: Record<1 | 2 | 3, string> };
 
@@ -20,7 +20,23 @@ export function versionHash(fingerprints: readonly string[]): string {
   return createHash("sha256").update(fingerprints.join(","), "utf8").digest("hex");
 }
 
-export async function installScoringFixtures(admin: SupabaseClient, reviewerId: string): Promise<InstalledFixtures> {
+export type FixtureSet = { seriesKey: string; tag: string; title: string; exercises: readonly FixtureExercise[] };
+
+export function installScoringFixtures(admin: SupabaseClient, reviewerId: string): Promise<InstalledFixtures> {
+  return installFixtureSet(admin, reviewerId, {
+    seriesKey: FIXTURE_SERIES_KEY,
+    tag: FIXTURE_TAG,
+    title: "Chuỗi bài KIỂM THỬ R04 (hư cấu — không phải sách giáo khoa)",
+    exercises: FIXTURE_EXERCISES,
+  });
+}
+
+/** Cài một bộ fixture (chuỗi bài kiểm thử 3 bài + bài tập đã/chưa duyệt) — dùng chung cho R04 và R08.2. */
+export async function installFixtureSet(
+  admin: SupabaseClient,
+  reviewerId: string,
+  set: FixtureSet,
+): Promise<InstalledFixtures> {
   const release = must(
     await admin.from("content_releases").select("id").order("synced_at", { ascending: false }).limit(1).maybeSingle(),
     "release",
@@ -32,14 +48,14 @@ export async function installScoringFixtures(admin: SupabaseClient, reviewerId: 
       .from("curriculum_series")
       .upsert(
         {
-          key: FIXTURE_SERIES_KEY,
+          key: set.seriesKey,
           series_kind: "test_fixture",
-          title: "Chuỗi bài KIỂM THỬ R04 (hư cấu — không phải sách giáo khoa)",
+          title: set.title,
           source: "Dữ liệu kiểm thử tự động của dự án; chỉ tồn tại trên Supabase local",
           review_status: "approved",
-          reviewed_by: FIXTURE_TAG,
+          reviewed_by: set.tag,
           reviewed_at: "2026-10-20",
-          content_hash: createHash("sha256").update(FIXTURE_SERIES_KEY).digest("hex"),
+          content_hash: createHash("sha256").update(set.seriesKey).digest("hex"),
           release_id: release.id,
         },
         { onConflict: "key" },
@@ -62,7 +78,7 @@ export async function installScoringFixtures(admin: SupabaseClient, reviewerId: 
   ) as Array<{ id: string; ordinal: 1 | 2 | 3 }>;
   const lessonIds = Object.fromEntries(lessonRows.map((row) => [row.ordinal, row.id])) as Record<1 | 2 | 3, string>;
 
-  for (const fixture of FIXTURE_EXERCISES) {
+  for (const fixture of set.exercises) {
     const existing = must(await admin.from("exercises").select("id").eq("key", fixture.key), "exercise read") as Array<{
       id: string;
     }>;
@@ -89,7 +105,7 @@ export async function installScoringFixtures(admin: SupabaseClient, reviewerId: 
           version_no: 1,
           series_id: series.id,
           lesson_ordinal: fixture.lessonOrdinal,
-          source: { fixture: FIXTURE_TAG },
+          source: { fixture: set.tag },
           validation_report: { note: "Fixture kiểm thử dựng tay — lược đồ zod kiểm ở tests/unit/scoring" },
         })
         .select("id")

@@ -17,7 +17,7 @@
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
 | R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ✅ R07.6 xong (CI xanh `8701cfa`) — nghiệm thu R07 về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi; chưa phải mini-game hoàn chỉnh (R08) |
-| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 xong (database chạm trán + schema 21 câu); R08.2–R08.6 chưa làm |
+| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 (database chạm trán + schema 21 câu) và R08.2 (phân bổ 7 × 21) xong; R08.3–R08.6 chưa làm |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ **Tạm hoãn sau khi nộp dự án** |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
 | R11 | Kiểm thử tổng thể, bảo mật, responsive, dọn mã cũ, deploy Vercel | R02–R10 | M–L | ⏸ |
@@ -251,7 +251,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Phụ thuộc:** R07, R04.
 
 - [x] 8.1 Migrations `game_encounters` (check 1–7, unique, trigger chặn thứ 8), cột `run_id` của `question_instances` — 2026-10-22: schema + ràng buộc + RLS + reset; phân bổ thật ở 8.2 (REDESIGN_PROGRESS §5o)
-- [ ] 8.2 Bắt đầu lượt chơi phân bổ 7 chạm trán + 21 câu khác nhau từ bộ máy bài tập (`production`); thiếu → `INSUFFICIENT_CONTENT`
+- [x] 8.2 Bắt đầu lượt chơi phân bổ 7 chạm trán + 21 câu khác nhau từ bộ máy bài tập (`production`); thiếu → `INSUFFICIENT_CONTENT` — 2026-10-22: một giao dịch, CSDL kiểm lại kế hoạch của máy chủ, fixture riêng; production chưa có nội dung duyệt nên chưa tạo lượt thật (REDESIGN_PROGRESS §5p)
 - [ ] 8.3 API kích hoạt chạm trán, mở kho báu; HP trong `record_graded_attempt`
 - [ ] 8.4 Màn thử thách: quái vật thân thiện, 3 trái tim có nhãn chữ, Player GĐ4 nhúng; hoạt cảnh xuất hiện phép thuật, biến thành sao, bay đi ngủ; quay lại đúng vị trí
 - [ ] 8.5 Bộ soát lộ đáp án cho tên/lời thoại quái vật; asset quái vật có giấy phép, GV đã xem phác thảo

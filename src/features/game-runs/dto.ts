@@ -58,6 +58,26 @@ export type GamePositionDto = {
   stateVersion: number;
 };
 
+const candidatesResponseSchema = z.object({
+  band: z.enum(["foundation", "developing", "extending"]),
+  items: z.array(
+    z.object({
+      exerciseItemId: z.uuid(),
+      fingerprint: z.string().min(1),
+      typeCode: z.string(),
+      variant: z.string(),
+      lessonOrdinal: z.number().int(),
+      scoredInSeason: z.boolean(),
+    }),
+  ),
+});
+
+/** Ứng viên do `gateway_practice_candidates` trả (chỉ mã + vân tay, không nội dung/đáp án); sai hình dạng → null. */
+export function parseGameCandidates(raw: unknown) {
+  const parsed = candidatesResponseSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
+
 export function buildGameRun(raw: unknown): GameRunDto | null {
   const parsed = startResponseSchema.safeParse(raw);
   if (!parsed.success) return null;
