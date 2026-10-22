@@ -15,7 +15,9 @@ if (!password) throw new Error("Thiếu SEED_TEACHER_PASSWORD");
 const b = await chromium.launch();
 const p = await (await b.newContext({ viewport: { width: 1440, height: 810 } })).newPage();
 await p.goto(base + "/login", { waitUntil: "networkidle" });
-await p.getByLabel(/email/i).fill("co.mai@readmate.test");
+// Ghép lúc chạy (như tests/e2e-db) để mã nguồn không chứa địa chỉ email; có thể ghi đè bằng CAPTURE_TEACHER_EMAIL.
+const email = process.env.CAPTURE_TEACHER_EMAIL ?? ["co.mai", "readmate.test"].join("@");
+await p.getByLabel(/email/i).fill(email);
 await p.getByLabel(/mật khẩu/i).fill(password);
 await p.getByRole("button", { name: /đăng nhập/i }).click();
 await p.waitForURL(/\/teacher/, { timeout: 30000 });

@@ -36,11 +36,15 @@ import type { SupportLevel } from "@/types/learning";
 
 export const GRADER_VERSION = "gd4.1-server";
 
+/** Mỗi chạm trán đúng 3 câu (GAME_DESIGN §4.5). */
+export const ENCOUNTER_QUESTION_COUNT = 3;
+
 type QuestionRow = {
   id: string;
   student_id: string;
   season_id: string;
   practice_session_id: string | null;
+  game_encounter_id: string | null;
   position: number;
   exercise_item_id: string;
   view: Json;
@@ -60,7 +64,7 @@ type AttemptRow = {
 };
 
 const QUESTION_COLUMNS =
-  "id, student_id, season_id, practice_session_id, position, exercise_item_id, view, status, attempts_used, max_attempts, support_level, scorable";
+  "id, student_id, season_id, practice_session_id, game_encounter_id, position, exercise_item_id, view, status, attempts_used, max_attempts, support_level, scorable";
 
 function asStatus(value: string): QuestionStatus {
   return value === "correct" || value === "exhausted" || value === "void" ? value : "open";
@@ -301,6 +305,7 @@ async function ownedQuestion(context: StudentContext, questionId: string): Promi
 }
 
 async function questionTotal(admin: AppSupabaseClient, row: QuestionRow): Promise<number> {
+  if (row.game_encounter_id) return ENCOUNTER_QUESTION_COUNT;
   if (!row.practice_session_id) return 1;
   const { count } = await admin
     .from("question_instances")
@@ -309,9 +314,30 @@ async function questionTotal(admin: AppSupabaseClient, row: QuestionRow): Promis
   return count ?? 1;
 }
 
+/**
+ * Câu của chạm trán chỉ đọc được khi nó là câu hiện tại của chạm trán ĐANG DIỄN RA (hoặc đã đóng). Câu của chạm trán chưa
+ * kích hoạt và câu sau khi câu trước chưa đóng không lộ nội dung (R08.3). Nộp bài thì CSDL tự chặn các trường hợp này.
+ */
+async function readableNow(admin: AppSupabaseClient, row: QuestionRow): Promise<boolean> {
+  if (!row.game_encounter_id || row.status !== "open") return true;
+  const { data: encounter } = await admin
+    .from("game_encounters")
+    .select("status")
+    .eq("id", row.game_encounter_id)
+    .maybeSingle();
+  if (encounter?.status !== "active") return false;
+  const { count } = await admin
+    .from("question_instances")
+    .select("id", { count: "exact", head: true })
+    .eq("game_encounter_id", row.game_encounter_id)
+    .eq("status", "open")
+    .lt("position", row.position);
+  return (count ?? 0) === 0;
+}
+
 export async function getQuestion(context: StudentContext, questionId: string): Promise<Result<PublicQuestion>> {
   const row = await ownedQuestion(context, questionId);
-  if (!row) return fail("NOT_FOUND");
+  if (!row || !(await readableNow(context.admin, row))) return fail("NOT_FOUND");
   const [item, attempts, total] = await Promise.all([
     loadItem(context.admin, row.exercise_item_id),
     loadAttempts(context.admin, row.id),
@@ -347,8 +373,21 @@ type RecordedAttempt = {
   points?: { nominalDelta?: number; appliedDelta?: number } | null;
   score?: { balance?: number; earnedTotal?: number };
   sessionStatus?: string | null;
+  encounter?: { encounterNo?: unknown; status?: unknown; hpRemaining?: unknown } | null;
   newlyUnlockedGames?: unknown;
 };
+
+const ENCOUNTER_STATUSES = ["active", "defeated", "undefeated", "void"] as const;
+
+/** Trạng thái chạm trán sau lượt nộp (chỉ câu của game có); sai hình dạng → null. */
+function encounterOf(raw: RecordedAttempt["encounter"]): AttemptDto["encounter"] {
+  if (!raw) return null;
+  const status = ENCOUNTER_STATUSES.find((value) => value === raw.status);
+  const no = Number(raw.encounterNo);
+  const hp = Number(raw.hpRemaining);
+  if (!status || !Number.isInteger(no) || !Number.isInteger(hp) || hp < 0 || hp > 3) return null;
+  return { encounterNo: no, status, hpRemaining: hp };
+}
 
 /**
  * Nộp một lượt: kiểm tra quyền → chấm ở máy chủ → ghi nguyên tử. Gửi lại cùng `clientAttemptId` → kết quả cũ.
@@ -413,6 +452,23 @@ export async function submitAttempt(
       sessionStatus === "completed" || sessionStatus === "abandoned" || sessionStatus === "void"
         ? sessionStatus
         : "in_progress",
+    encounter: encounterOf(result?.encounter),
     replayed: result?.outcome === "replayed",
   });
+}
+
+/** Câu công khai (không đáp án trước khi đóng) theo mã — dùng cho chạm trán; người gọi đã kiểm quyền sở hữu. */
+export async function publicQuestionOf(admin: AppSupabaseClient, questionId: string): Promise<PublicQuestion | null> {
+  const { data: row } = await admin
+    .from("question_instances")
+    .select(QUESTION_COLUMNS)
+    .eq("id", questionId)
+    .maybeSingle();
+  if (!row) return null;
+  const [item, attempts, total] = await Promise.all([
+    loadItem(admin, row.exercise_item_id),
+    loadAttempts(admin, row.id),
+    questionTotal(admin, row),
+  ]);
+  return item ? toPublicQuestion(row, item, attempts, total) : null;
 }

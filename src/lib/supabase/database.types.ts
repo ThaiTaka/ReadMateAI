@@ -1943,6 +1943,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      gateway_activate_encounter: {
+        Args: { p_auth_user_id: string; p_run_id: string; p_student_id: string };
+        Returns: Json;
+      };
       gateway_check_login_code: { Args: { p_code_hmac: string; p_kind: string }; Returns: string };
       gateway_class_leaderboard: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
       gateway_consume_rate_limit: {
@@ -1950,6 +1954,10 @@ export type Database = {
         Returns: boolean;
       };
       gateway_latest_honors: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
+      gateway_open_treasure: {
+        Args: { p_auth_user_id: string; p_run_id: string; p_student_id: string };
+        Returns: Json;
+      };
       gateway_practice_candidates: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
       gateway_record_attempt: {
         Args: {

@@ -54,6 +54,15 @@ export const ERROR_CODES = [
   "STATE_CONFLICT",
   "INVALID_POSITION",
   "RUN_NOT_ACTIVE",
+  // R08.3 — chạm trán và kho báu (migration 20261029090000; ENCOUNTER_* đã có ở CSDL từ R08.1).
+  "ENCOUNTER_PENDING",
+  "ENCOUNTER_ACTIVE",
+  "ENCOUNTERS_INCOMPLETE",
+  "ENCOUNTER_LIMIT",
+  "ENCOUNTER_FINISHED",
+  "NOT_AT_TRIGGER",
+  "NOT_AT_TREASURE",
+  "QUESTION_NOT_CURRENT",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

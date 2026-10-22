@@ -25,6 +25,7 @@ function rowFor(item: ExerciseItem, patch: Partial<Row> = {}): Row {
     student_id: "00000000-0000-4000-8000-000000000002",
     season_id: "00000000-0000-4000-8000-000000000003",
     practice_session_id: "00000000-0000-4000-8000-000000000004",
+    game_encounter_id: null,
     position: 1,
     exercise_item_id: "00000000-0000-4000-8000-000000000005",
     view: { type: item.type, variant: item.variant, content: item.content } as unknown as Json,

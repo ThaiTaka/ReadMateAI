@@ -67,6 +67,8 @@ export type AttemptDto = {
   tilesAvailable: number;
   newlyUnlockedGames: GameKey[];
   sessionStatus: PracticeSessionDto["status"];
+  /** Chỉ câu của chạm trán trong game: trạng thái chạm trán và số trái tim còn lại sau lượt này (null với buổi luyện). */
+  encounter: { encounterNo: number; status: "active" | "defeated" | "undefeated" | "void"; hpRemaining: number } | null;
   /** true khi đây là kết quả của lần gửi trước (cùng clientAttemptId). */
   replayed: boolean;
 };
