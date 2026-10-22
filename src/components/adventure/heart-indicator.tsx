@@ -22,12 +22,14 @@ type HeartIndicatorProps = {
   remaining: number;
   total?: number;
   className?: string;
+  /** Nhãn chữ tùy biến ("{n}" và "{total}" được thay); mặc định dùng câu chung của design system. */
+  label?: string;
 };
 
 /** Trái tim của quái vật: đầy / viền đứt + nhãn chữ "Quái vật còn n/3 trái tim" (không chỉ dựa vào màu). */
-export function HeartIndicator({ remaining, total = 3, className }: HeartIndicatorProps) {
+export function HeartIndicator({ remaining, total = 3, className, label: template }: HeartIndicatorProps) {
   const left = Math.min(Math.max(remaining, 0), total);
-  const label = vi.adventure.hearts.label.replace("{n}", String(left)).replace("{total}", String(total));
+  const label = (template ?? vi.adventure.hearts.label).replace("{n}", String(left)).replace("{total}", String(total));
   return (
     <div className={cn("inline-flex flex-wrap items-center gap-2", className)}>
       <span className="flex gap-1">

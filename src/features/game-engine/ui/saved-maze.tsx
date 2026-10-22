@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import type { EncounterStateDto } from "@/features/game-runs/encounter-dto";
 import type { Route } from "next";
 import { vi } from "@/strings/vi";
 import type { GameRunDto } from "@/features/game-runs/dto";
 import type { Level } from "../core/index.ts";
+import { EncounterGate } from "./encounter/encounter-gate.tsx";
+import { fetchEncounterState } from "./encounter/encounter-client.ts";
+import { TreasureGate } from "./encounter/treasure-gate.tsx";
 import { sendPosition, startRun, type StartResult } from "./game-run-client.ts";
 import { MazeRun, type SavedBinding } from "./maze-player.tsx";
 import { PositionSaver, type SaveStatus } from "./position-saver.ts";
@@ -54,11 +58,14 @@ export function SavedMaze({
   multipleProfiles,
   levelKey,
   level,
+  balance = null,
 }: {
   studentId: string;
   multipleProfiles: boolean;
   levelKey: string;
   level: Level;
+  /** Điểm hiện tại do máy chủ trả khi mở trang (hiện ở màn quái vật; sau mỗi câu được thay bằng số máy chủ trả). */
+  balance?: number | null;
 }) {
   type Load =
     | { phase: "loading" }
@@ -67,29 +74,42 @@ export function SavedMaze({
         phase: "ready";
         run: GameRunDto["run"];
         epoch: number;
+        /** Trạng thái chạm trán của máy chủ (tiến độ, điểm đã dùng, chạm trán đang diễn ra); null = lượt không có chạm trán. */
+        encounters: EncounterStateDto | null;
       };
   const [load, setLoad] = useState<Load>({ phase: "loading" });
   const epoch = useRef(0);
   const home = homeHref(studentId, multipleProfiles);
 
+  /** Bắt đầu/tiếp tục lượt rồi nạp trạng thái chạm trán của MÁY CHỦ (không suy từ trình duyệt). */
+  const fetchRun = useCallback(async (): Promise<Load> => {
+    const result = await startRun(studentId, levelKey);
+    if (!result.ok) return { phase: "failed", result };
+    const state = await fetchEncounterState(result.data.run.id);
+    if (!state.ok) return { phase: "failed", result: { ok: false, code: state.code } };
+    epoch.current += 1;
+    return {
+      phase: "ready",
+      run: result.data.run,
+      epoch: epoch.current,
+      encounters: state.data.progress.total > 0 ? state.data : null,
+    };
+  }, [studentId, levelKey]);
+
   const open = useCallback(async () => {
     setLoad({ phase: "loading" });
-    const result = await startRun(studentId, levelKey);
-    epoch.current += 1;
-    setLoad(result.ok ? { phase: "ready", run: result.data.run, epoch: epoch.current } : { phase: "failed", result });
-  }, [studentId, levelKey]);
+    setLoad(await fetchRun());
+  }, [fetchRun]);
 
   useEffect(() => {
     let cancelled = false;
-    void startRun(studentId, levelKey).then((result) => {
-      if (cancelled) return;
-      epoch.current += 1;
-      setLoad(result.ok ? { phase: "ready", run: result.data.run, epoch: epoch.current } : { phase: "failed", result });
+    void fetchRun().then((next) => {
+      if (!cancelled) setLoad(next);
     });
     return () => {
       cancelled = true;
     };
-  }, [studentId, levelKey]);
+  }, [fetchRun]);
 
   if (load.phase === "loading") {
     return (
@@ -159,6 +179,8 @@ export function SavedMaze({
       key={`${load.run.id}:${load.epoch}`}
       studentId={studentId}
       run={load.run}
+      encounters={load.encounters}
+      balance={balance}
       level={level}
       home={home}
       onReload={() => void open()}
@@ -178,12 +200,16 @@ const STATUS_TEXT: Record<SaveStatus, string> = {
 function ReadyMaze({
   studentId,
   run,
+  encounters,
+  balance,
   level,
   home,
   onReload,
 }: {
   studentId: string;
   run: GameRunDto["run"];
+  encounters: EncounterStateDto | null;
+  balance: number | null;
   level: Level;
   home: Route;
   onReload: () => void;
@@ -196,7 +222,78 @@ function ReadyMaze({
       }),
     [run.id, run.stateVersion, studentId],
   );
-  const binding: SavedBinding = useMemo(() => ({ initial: run.position, saver }), [run.position, saver]);
+  const [progress, setProgress] = useState(encounters?.progress ?? null);
+  // Chạm trán đang diễn ra khi tải lại: chỉ dùng cho cổng ĐẦU TIÊN; các chạm trán sau do máy chủ kích hoạt.
+  const [resume, setResume] = useState<EncounterStateDto | null>(encounters?.encounter ? encounters : null);
+  const [treasureOpened, setTreasureOpened] = useState(false);
+  // Điểm hiện có theo máy chủ: cập nhật sau mỗi lượt nộp để chạm trán kế tiếp không hiện số cũ lúc mở trang.
+  const [liveBalance, setLiveBalance] = useState(balance);
+  const refreshProgress = useCallback(async () => {
+    const result = await fetchEncounterState(run.id);
+    if (result.ok) setProgress(result.data.progress);
+  }, [run.id]);
+  const binding: SavedBinding = useMemo(
+    () => ({
+      initial: run.position,
+      saver,
+      encounters: encounters
+        ? {
+            resolvedTriggerIds: encounters.resolvedTriggerKeys,
+            progressText: progress
+              ? vi.mazeProgress.met.replace("{n}", String(progress.resolved)).replace("{total}", String(progress.total))
+              : vi.mazeProgress.unknown,
+            locked: treasureOpened,
+            renderEncounter: ({ triggerId, dismiss }) => (
+              <EncounterGate
+                key={triggerId}
+                studentId={studentId}
+                runId={run.id}
+                saver={saver}
+                resume={resume}
+                balance={liveBalance}
+                onScore={setLiveBalance}
+                home={home}
+                onDismiss={() => {
+                  setResume(null);
+                  dismiss();
+                  void refreshProgress();
+                }}
+                onFinished={(next) => {
+                  setResume(null);
+                  dismiss();
+                  if (next) setProgress(next);
+                  else void refreshProgress();
+                }}
+              />
+            ),
+            renderTreasure: (atTreasure) => (
+              <TreasureGate
+                studentId={studentId}
+                runId={run.id}
+                saver={saver}
+                active={atTreasure}
+                progress={progress}
+                home={home}
+                onOpened={() => setTreasureOpened(true)}
+              />
+            ),
+          }
+        : undefined,
+    }),
+    [
+      run.position,
+      run.id,
+      saver,
+      encounters,
+      progress,
+      resume,
+      treasureOpened,
+      studentId,
+      liveBalance,
+      home,
+      refreshProgress,
+    ],
+  );
   const snapshot = useSyncExternalStore(saver.subscribe, saver.getSnapshot, saver.getSnapshot);
   const rootRef = useRef<HTMLDivElement>(null);
 

@@ -3,6 +3,8 @@ import { randomBytes, randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { createClient } from "@supabase/supabase-js";
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
+import { installGameFixtures } from "../../scripts/lib/game-fixtures";
+import { enableLocalTestFixtures } from "../../scripts/lib/test-fixtures";
 import { generateLoginCode, hmacLoginCode, toPgBytea } from "../../src/features/login-codes/codes";
 
 /**
@@ -38,7 +40,20 @@ export const resetRateLimits = () => admin.from("rate_limit_buckets").delete().n
 export type ClassRow = { id: string; name: string; ownerId: string };
 export type Member = { id: string; backup: string; classId: string };
 
-export async function freshClass(label: string): Promise<ClassRow> {
+/** Lớp dùng chuỗi bài fixture RIÊNG của game (R08.2: 32 câu khác nhau đã duyệt GIẢ LẬP ở bài 2) — chỉ trên Supabase local. */
+export async function freshGameClass(label: string): Promise<ClassRow> {
+  enableLocalTestFixtures();
+  const reference = (await must(admin.from("classes").select("created_by").eq("id", CLASS_C).single())) as {
+    created_by: string;
+  };
+  const fixtures = await installGameFixtures(admin, reference.created_by);
+  return freshClass(label, { seriesId: fixtures.seriesId, lessonId: fixtures.lessonIds[2] });
+}
+
+export async function freshClass(
+  label: string,
+  curriculum?: { seriesId: string; lessonId: string },
+): Promise<ClassRow> {
   const reference = (await must(
     admin
       .from("classes")
@@ -55,8 +70,8 @@ export async function freshClass(label: string): Promise<ClassRow> {
         name,
         school_year: "2026-2027",
         created_by: reference.created_by,
-        curriculum_series_id: reference.curriculum_series_id,
-        current_lesson_id: reference.current_lesson_id,
+        curriculum_series_id: curriculum?.seriesId ?? reference.curriculum_series_id,
+        current_lesson_id: curriculum?.lessonId ?? reference.current_lesson_id,
         curriculum_status: "confirmed",
         curriculum_confirmed_by: reference.created_by,
         curriculum_confirmed_at: new Date().toISOString(),
@@ -72,7 +87,11 @@ export async function freshClass(label: string): Promise<ClassRow> {
   return { id: created.id, name, ownerId: reference.created_by };
 }
 
-export async function newMember(cls: ClassRow, alias: string): Promise<Member> {
+export async function newMember(
+  cls: ClassRow,
+  alias: string,
+  band: "foundation" | "developing" | "extending" = "developing",
+): Promise<Member> {
   const name = `${alias} ${[...randomBytes(5)].map((byte) => String.fromCharCode(97 + (byte % 26))).join("")}`;
   const now = new Date().toISOString();
   const student = (await must(
@@ -93,7 +112,7 @@ export async function newMember(cls: ClassRow, alias: string): Promise<Member> {
   await must(
     admin
       .from("student_band_assignments")
-      .insert({ student_id: student.id, class_id: cls.id, band: "developing", set_by: cls.ownerId }),
+      .insert({ student_id: student.id, class_id: cls.id, band, set_by: cls.ownerId }),
   );
   for (const scope of ["learning_data", "leaderboard_display"] as const) {
     await must(

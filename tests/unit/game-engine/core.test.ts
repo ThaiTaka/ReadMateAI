@@ -232,6 +232,20 @@ describe("gameReducer", () => {
     expect(wrong.pendingEncounter).toBe("t1");
     expect(wrong.lastEvent).toEqual({ type: "rejected", reason: "wrong_encounter" });
   });
+  it("ENCOUNTER_DISMISSED (lượt có lưu): chỉ gỡ chặn, không ghi nhận kết quả; sai mã/không có chạm trán bị từ chối", () => {
+    const pending = run(parsed, fresh(), [move("down"), move("down")]);
+    const wrong = gameReducer(parsed, pending, { type: "ENCOUNTER_DISMISSED", triggerId: "t2" });
+    expect(wrong.pendingEncounter).toBe("t1");
+    expect(wrong.lastEvent).toEqual({ type: "rejected", reason: "wrong_encounter" });
+    const freed = gameReducer(parsed, pending, { type: "ENCOUNTER_DISMISSED", triggerId: "t1" });
+    expect(freed.pendingEncounter).toBeNull();
+    expect(freed.resolved).toEqual([]);
+    expect(freed.triggered).toEqual(["t1"]);
+    const none = gameReducer(parsed, fresh(), { type: "ENCOUNTER_DISMISSED", triggerId: "t1" });
+    expect(none.lastEvent).toEqual({ type: "rejected", reason: "no_pending_encounter" });
+    // Lõi không tự mở rương dựa trên số chạm trán đã gỡ chặn.
+    expect(isTreasureOpenable(freed)).toBe(false);
+  });
   it("không lộ điểm kích hoạt chưa dùng", () => {
     expect(revealedTriggers(parsed, fresh())).toEqual([]);
     const s = run(parsed, fresh(), [move("down"), move("down")]);

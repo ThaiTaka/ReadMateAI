@@ -342,14 +342,17 @@ test.describe("R05 — bảng xếp hạng lớp", () => {
         ).map(Number),
       )
       .toEqual([100, 100, 37.5, 25]);
-    // Chờ hoạt cảnh thanh kết thúc rồi đo chiều rộng thật so với đường nền.
+    // Đo chiều rộng thật so với đường nền; poll vì hoạt cảnh thanh có thể chậm trên CI tải nặng.
+    const measure = () =>
+      page.getByTestId("score-bar").evaluateAll((bars) =>
+        bars.map((bar) => {
+          const fill = bar.firstElementChild as HTMLElement;
+          return Math.round((fill.getBoundingClientRect().width / bar.getBoundingClientRect().width) * 1000) / 10;
+        }),
+      );
+    await expect.poll(async () => (await measure())[0], { timeout: 10_000 }).toBeGreaterThan(95);
     await page.waitForTimeout(900);
-    const widths = await page.getByTestId("score-bar").evaluateAll((bars) =>
-      bars.map((bar) => {
-        const fill = bar.firstElementChild as HTMLElement;
-        return Math.round((fill.getBoundingClientRect().width / bar.getBoundingClientRect().width) * 1000) / 10;
-      }),
-    );
+    const widths = await measure();
     expect(widths[0]).toBeGreaterThan(95);
     expect(widths[2]).toBeGreaterThan(34);
     expect(widths[2]).toBeLessThan(41);

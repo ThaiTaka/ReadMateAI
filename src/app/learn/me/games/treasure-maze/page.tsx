@@ -136,6 +136,7 @@ async function Content({ searchParams }: Pick<PageProps<"/learn/me/games/treasur
           multipleProfiles={multiple}
           levelKey={levelFile.id}
           level={BUNDLED_LEVELS[levelIndex]!}
+          balance={home.data.score.balance}
         />
         <p className="mx-auto mt-4 max-w-[34rem] text-sm text-ink-soft">{vi.treasureMazeDemo.help}</p>
       </>

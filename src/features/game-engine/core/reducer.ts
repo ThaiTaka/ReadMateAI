@@ -79,6 +79,12 @@ export function gameReducer(level: ParsedLevel, state: GameState, action: GameAc
       return next(state, moved, { type: "moved" });
     }
 
+    case "ENCOUNTER_DISMISSED": {
+      if (state.pendingEncounter === null) return reject(state, "no_pending_encounter");
+      if (state.pendingEncounter !== action.triggerId) return reject(state, "wrong_encounter");
+      return next(state, { pendingEncounter: null }, { type: "encounter_resolved", triggerId: action.triggerId });
+    }
+
     case "ENCOUNTER_RESOLVED": {
       if (state.pendingEncounter === null) return reject(state, "no_pending_encounter");
       if (state.pendingEncounter !== action.triggerId) return reject(state, "wrong_encounter");

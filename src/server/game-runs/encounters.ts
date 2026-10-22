@@ -65,20 +65,20 @@ async function activeEncounterDto(admin: AppSupabaseClient, encounterId: string)
 async function stateOf(admin: AppSupabaseClient, runId: string): Promise<Result<EncounterStateDto>> {
   const [{ data: run }, { data: encounters }] = await Promise.all([
     admin.from("game_runs").select("id, encounter_count").eq("id", runId).maybeSingle(),
-    admin.from("game_encounters").select("id, status").eq("run_id", runId),
+    admin.from("game_encounters").select("id, status, trigger_key").eq("run_id", runId),
   ]);
   if (!run || !encounters) return fail("NOT_FOUND");
   const active = encounters.find((encounter) => encounter.status === "active") ?? null;
   const dto = active ? await activeEncounterDto(admin, active.id) : null;
   if (active && !dto) return fail("UNKNOWN");
+  const finished = encounters.filter(
+    (encounter) => encounter.status === "defeated" || encounter.status === "undefeated",
+  );
   return ok({
     runId: run.id,
     encounter: dto,
-    progress: {
-      resolved: encounters.filter((encounter) => encounter.status === "defeated" || encounter.status === "undefeated")
-        .length,
-      total: run.encounter_count,
-    },
+    progress: { resolved: finished.length, total: run.encounter_count },
+    resolvedTriggerKeys: finished.map((encounter) => encounter.trigger_key),
   });
 }
 

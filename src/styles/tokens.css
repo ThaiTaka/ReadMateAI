@@ -150,6 +150,63 @@
   --animate-confetti: rm-confetti 9s linear infinite;
   /* R07.4: nhân vật va tường — rung ngang nhẹ một lần (~0,25 s), không nhấp nháy. */
   --animate-bump: rm-bump 0.25s ease-out 1;
+  /* R08.4: quái vật xuất hiện (1 s, một lần), biến thành sao (khi hạ hết trái tim) và bay đi ngủ (còn trái tim).
+     Trạng thái gốc của phần tử là trạng thái cuối "đọc được" nên khi tắt hoạt cảnh (giảm chuyển động) vẫn đủ thông tin. */
+  --animate-monster-in: rm-monster-in 1s ease-out both;
+  --animate-monster-spin: rm-monster-spin 1.8s ease-in-out both;
+  --animate-monster-away: rm-monster-away 2.8s ease-in-out both;
+  --animate-star-rise: rm-star-rise 1.4s ease-out both;
+
+  @keyframes rm-monster-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes rm-monster-spin {
+    0% {
+      transform: rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    60% {
+      transform: rotate(-10deg) scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(10deg) scale(0.35);
+      opacity: 0.25;
+    }
+  }
+  @keyframes rm-monster-away {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 1;
+    }
+    25% {
+      transform: translate(0, 0) rotate(-8deg);
+    }
+    45% {
+      transform: translate(0, 0) rotate(8deg);
+    }
+    100% {
+      transform: translate(30%, -22%) rotate(6deg) scale(0.6);
+      opacity: 0.3;
+    }
+  }
+  @keyframes rm-star-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 
   @keyframes rm-bump {
     0%,

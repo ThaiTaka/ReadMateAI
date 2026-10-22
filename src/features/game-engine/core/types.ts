@@ -61,7 +61,9 @@ export type GameAction =
   | { readonly type: "MOVE"; readonly direction: Direction }
   | { readonly type: "PAUSE" }
   | { readonly type: "RESUME" }
-  | { readonly type: "ENCOUNTER_RESOLVED"; readonly triggerId: string; readonly outcome: EncounterOutcome };
+  | { readonly type: "ENCOUNTER_RESOLVED"; readonly triggerId: string; readonly outcome: EncounterOutcome }
+  /** Lượt có lưu (R08.4): chỉ gỡ chặn di chuyển — máy chủ mới là nơi ghi nhận chạm trán nào đã xong, lõi không đếm. */
+  | { readonly type: "ENCOUNTER_DISMISSED"; readonly triggerId: string };
 
 export type LevelErrorCode =
   | "SIZE_OUT_OF_RANGE"

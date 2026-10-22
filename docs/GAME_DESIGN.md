@@ -162,6 +162,16 @@ Sau cả hai kết quả: chuyển cảnh ngược → nhân vật **đứng đ�
 - Mỗi màn có **một lượt chơi tính điểm mỗi mùa**. Sau khi hoàn thành (hoặc khi mùa mới bắt đầu), học sinh có thể **chơi lại để vui**: câu hỏi vẫn chấm và có phản hồi nhưng **không tính điểm** ("Chơi lại — không tính điểm" hiển thị rõ trước khi vào).
 - Màn kế tiếp mở khi hoàn thành màn trước (đề xuất 3 màn mỗi game ở bản đầu).
 
+### 4.9 Hiện thực giao diện (R08.4)
+
+- **Dừng → lưu → kích hoạt.** Bản đồ đóng gói (`content/games/treasure-maze`) chỉ dùng để *dừng* nhân vật tại điểm kích hoạt. Ở điểm kích hoạt chưa dùng, `EncounterGate` buộc bộ tự lưu gửi hết bước (`flushAndWait`) và **chỉ khi máy chủ xác nhận** mới gọi `POST …/encounters/activate` (không gửi tọa độ/mã điểm). Lưu hỏng → không kích hoạt, hiện "Thử lại"; nhân vật vẫn bị chặn đi tiếp. Mọi quyết định (chạm trán nào, đã xong chưa, HP, điểm, 7/7) vẫn do máy chủ; `ENCOUNTER_FINISHED`/`NOT_AT_TRIGGER` chỉ gỡ chặn.
+- **Điểm đã dùng.** `GET …/encounter` trả thêm `resolvedTriggerKeys` (mã điểm kích hoạt của chạm trán **đã kết thúc** — không tọa độ, không chạm trán chưa gặp) để sau khi tải lại nhân vật không bị dừng lại ở điểm cũ. Bản đồ không vẽ trước/đánh dấu điểm kích hoạt nào.
+- **Màn quái vật** là hộp thoại toàn màn hình (`role="dialog" aria-modal`, bàn chơi phía sau `inert`, giữ Tab trong hộp thoại, Esc không đóng): quái vật (SVG `FriendlyMonster` đổi màu theo `monsterKey`, tên từ danh mục an toàn `vi.monsters`), `HeartIndicator` với nhãn chữ "Bạn quái vật còn n trong 3 trái tim.", điểm hiện có của máy chủ, "Câu hỏi n / 3", `ViewPlayer` (sáu dạng bài GĐ4), gợi ý, phản hồi, "+10/−5" trung tính. HP/điểm luôn là số máy chủ trả trong phản hồi nộp bài; mỗi lần bấm "Kiểm tra" có `clientAttemptId` riêng, nút khóa trong lúc gửi (cả khi hai lần bấm rơi cùng một lô cập nhật), mất mạng → "Gửi lại" dùng đúng lượt cũ.
+- **Kết thúc** (theo `encounter.status` của máy chủ): `defeated` → quái vật mỉm cười, xoay nhẹ, thu nhỏ thành năm ngôi sao + "Giỏi quá! Bạn ấy biến thành những ngôi sao!"; `undefeated` → vẫy tay, bay đi ngủ "Zzz" + "Hẹn gặp lại nhé!". Tiến độ "Con đã gặp n/7 bạn quái vật!" lấy từ `GET …/encounter`. Trạng thái gốc của mỗi phần tử là trạng thái cuối nên giảm chuyển động (OS hoặc công tắc) vẫn đủ thông tin, không xoay.
+- **Tải lại giữa chạm trán**: trang nạp `GET …/encounter` ngay sau khi mở lượt; có chạm trán đang diễn ra → mở thẳng đúng câu/HP/điểm (không lưu/kích hoạt lại); đứng ở điểm chưa dùng (máy chủ không cho rời) → mở cổng và kích hoạt.
+- **Kho báu**: đứng ở ô rương → lưu vị trí rồi `POST …/treasure/open`; chưa đủ 7/7 → "Rương kho báu đang khóa… còn n bạn đang chờ con"; đủ → hoạt cảnh rương + "Con đã khám phá xong Mê cung kho báu!" + số liệu máy chủ, khóa điều khiển, không cộng điểm; gọi lại → `replayed`.
+- Chưa làm (đúng phạm vi): duyệt tên/hình/lời thoại quái vật và giấy phép (R08.5), chơi lại không tính điểm (R08.6), âm thanh (R10).
+
 ## 5. Quái vật thân thiện
 
 - Hình dáng tròn trịa, mắt to, màu pastel, **không răng nhọn, không móng vuốt, không máu**; mỗi quái vật có tên dễ thương và tính cách (ví dụ "Bé Mây Bông" thích vần *ông*).

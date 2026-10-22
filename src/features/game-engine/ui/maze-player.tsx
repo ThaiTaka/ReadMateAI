@@ -3,7 +3,17 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Maximize2, Minimize2, Pause, Play, RotateCcw } from "lucide-react";
-import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { MotionToggle } from "@/components/adventure/motion";
 import { MazeBoard } from "@/components/art/maze-board";
 import { cn } from "@/lib/cn";
@@ -12,6 +22,7 @@ import {
   ENCOUNTERS_PER_LEVEL,
   createInitialState,
   gameReducer,
+  positionKey,
   parseLevel,
   revealedTriggers,
   type Direction,
@@ -55,10 +66,28 @@ type PlayState = { game: GameState; bumps: number; trail: readonly Position[] };
 
 /**
  * Lượt chơi có lưu (R07.5b2): bắt đầu từ vị trí máy chủ xác nhận và đẩy từng bước đi THỰC SỰ cho bộ tự lưu.
- * Chạm trán TẮT ở chế độ này: chưa có `game_encounters` (R08), nên client không tự đánh dấu thử thách nào đã xong và
- * rương luôn khóa. Lưu vị trí KHÔNG xác thực thử thách — R08 phải chặn việc đi qua điểm kích hoạt chưa giải quyết ở máy chủ.
+ * Không có `encounters`: chạm trán TẮT (client không phát hiện điểm kích hoạt, rương luôn khóa) — kiểu R07.5b2.
+ * Có `encounters` (R08.4): bản đồ đóng gói dùng để DỪNG nhân vật ở điểm kích hoạt và hiện màn quái vật do `renderEncounter`
+ * dựng; MÁY CHỦ vẫn là nơi quyết định chạm trán nào kích hoạt/đã xong/rương mở được. Lõi không đếm chạm trán đã xong.
  */
-export type SavedBinding = { readonly initial: Position; readonly saver: PositionSaver };
+export type EncounterHost = {
+  /** Điểm kích hoạt đã kết thúc (máy chủ báo, chỉ mã) — không dừng lại ở đó nữa. */
+  readonly resolvedTriggerIds: readonly string[];
+  /** Màn quái vật (lớp phủ). `dismiss` chỉ gỡ chặn di chuyển, không ghi nhận kết quả. */
+  readonly renderEncounter: (ctx: { triggerId: string; dismiss: () => void }) => ReactNode;
+  /** Vùng kho báu; `atTreasure` = nhân vật đang đứng ở ô rương. */
+  readonly renderTreasure: (atTreasure: boolean) => ReactNode;
+  /** Dòng tiến độ dưới bàn chơi ("Con đã gặp 3/7 bạn quái vật!"). */
+  readonly progressText: string;
+  /** Khóa điều khiển (đã mở rương xong). */
+  readonly locked: boolean;
+};
+
+export type SavedBinding = {
+  readonly initial: Position;
+  readonly saver: PositionSaver;
+  readonly encounters?: EncounterHost;
+};
 
 function messageFor(event: GameEvent): string {
   switch (event.type) {
@@ -198,13 +227,16 @@ export function MazeRun({
   /** Đích của "Về bản đồ" ở lớp phủ tạm dừng. */
   backHref: Route;
 }) {
+  const hosted = saved?.encounters;
   const parsed: ParsedLevel = useMemo(
-    () => (saved ? { ...parseLevel(level), triggers: [] } : parseLevel(level)),
-    [level, saved],
+    () => (saved && !hosted ? { ...parseLevel(level), triggers: [] } : parseLevel(level)),
+    [level, saved, hosted],
   );
   const reducer = useMemo(
     () =>
       (state: PlayState, action: GameAction): PlayState => {
+        // Rương đã mở (máy chủ xác nhận): không đi tiếp nữa, kể cả bằng bàn phím.
+        if (action.type === "MOVE" && hosted?.locked) return state;
         const game = gameReducer(parsed, state.game, action);
         const stepped = saved && game.moves > state.game.moves;
         return {
@@ -213,17 +245,37 @@ export function MazeRun({
           trail: stepped ? [...state.trail, game.position] : state.trail,
         };
       },
-    [parsed, saved],
+    [parsed, saved, hosted],
   );
   const [{ game, bumps, trail }, dispatch] = useReducer(reducer, parsed, (p): PlayState => {
     const initial = createInitialState(p);
-    return { game: saved ? { ...initial, position: saved.initial } : initial, bumps: 0, trail: [] };
+    if (!saved) return { game: initial, bumps: 0, trail: [] };
+    const host = saved.encounters;
+    // Điểm đã dùng (máy chủ báo) coi như đã kích hoạt → không dừng lại nữa. Đang đứng ở điểm CHƯA dùng (đang diễn ra hoặc
+    // chưa kích hoạt được) thì máy chủ cũng không cho rời đi → mở lại ngay cổng chạm trán.
+    const used = host
+      ? p.triggers.filter((trigger) => host.resolvedTriggerIds.includes(trigger.id)).map((x) => x.id)
+      : [];
+    const here = host
+      ? p.triggers.find((trigger) => positionKey(trigger) === positionKey(saved.initial) && !used.includes(trigger.id))
+      : undefined;
+    return {
+      game: {
+        ...initial,
+        position: saved.initial,
+        triggered: here ? [...used.filter((id) => id !== here.id), here.id] : used,
+        pendingEncounter: here?.id ?? null,
+      },
+      bumps: 0,
+      trail: [],
+    };
   });
   const pauseRef = useRef<HTMLButtonElement>(null);
   const hold = useHoldMove((direction) => dispatch({ type: "MOVE", direction }));
 
   const forwarded = useRef(0);
-  useEffect(() => {
+  // Layout effect: bước cuối phải vào hàng chờ lưu TRƯỚC khi các effect con (cổng chạm trán) hỏi "đã lưu hết chưa".
+  useLayoutEffect(() => {
     if (!saved) return;
     while (forwarded.current < trail.length) saved.saver.push(trail[forwarded.current++]!);
   }, [trail, saved]);
@@ -249,6 +301,8 @@ export function MazeRun({
     const inGameArea = (target: EventTarget | null) =>
       !(target instanceof Element) || !!rootRef.current?.contains(target) || target.closest(INTERACTIVE) === null;
     const down = (event: KeyboardEvent) => {
+      // Màn quái vật là lớp phủ trong cây DOM của bàn chơi: phím trong đó không phải phím di chuyển.
+      if (event.target instanceof Element && event.target.closest("[data-encounter-layer]")) return;
       if (event.code === "Escape" && paused && !isTypingTarget(event.target) && inGameArea(event.target)) {
         dispatch({ type: "RESUME" });
         return;
@@ -281,8 +335,10 @@ export function MazeRun({
   const size = parsed.grid.rowCount;
   const view = viewCells(size, overview);
   const origin = cameraOrigin(size, view, game.position);
-  const found = revealedTriggers(parsed, game);
-  const locked = game.paused || game.pendingEncounter !== null || game.completed;
+  // Chế độ có chạm trán: không đánh dấu điểm kích hoạt nào trên bản đồ (kể cả đã gặp) — không vẽ trước, không lộ.
+  const found = saved ? [] : revealedTriggers(parsed, game);
+  const locked = game.paused || game.pendingEncounter !== null || game.completed || hosted?.locked === true;
+  const atTreasure = hosted !== undefined && positionKey(game.position) === positionKey(parsed.treasure);
   const pending = game.pendingEncounter;
 
   return (
@@ -318,13 +374,25 @@ export function MazeRun({
         data-testid="maze-status"
         className="mx-auto mt-3 min-h-7 max-w-[34rem] text-center text-lg font-bold text-ink"
       >
-        {messageFor(game.lastEvent)}
+        {hosted && ["treasure_locked", "encounter_triggered"].includes(game.lastEvent.type)
+          ? ""
+          : messageFor(game.lastEvent)}
       </p>
-      <p className="mx-auto max-w-[34rem] text-center text-sm font-semibold text-ink-soft">
-        {saved
-          ? vi.treasureMazePlay.lockedNote
-          : t.found.replace("{n}", String(game.resolved.length)).replace("{total}", String(ENCOUNTERS_PER_LEVEL))}
+      <p data-testid="maze-progress" className="mx-auto max-w-[34rem] text-center text-sm font-semibold text-ink-soft">
+        {hosted
+          ? hosted.progressText
+          : saved
+            ? vi.treasureMazePlay.lockedNote
+            : t.found.replace("{n}", String(game.resolved.length)).replace("{total}", String(ENCOUNTERS_PER_LEVEL))}
       </p>
+
+      {hosted ? hosted.renderTreasure(atTreasure) : null}
+      {hosted && pending !== null
+        ? hosted.renderEncounter({
+            triggerId: pending,
+            dismiss: () => dispatch({ type: "ENCOUNTER_DISMISSED", triggerId: pending }),
+          })
+        : null}
 
       {!saved && pending !== null && (
         <div

@@ -10,9 +10,9 @@ import type { SendResult } from "./position-saver.ts";
 
 export type StartResult = { ok: true; data: GameRunDto } | { ok: false; code: ErrorCode | "NETWORK" };
 
-type Envelope = { ok: true; data: unknown } | { ok: false; code: ErrorCode };
+export type Envelope = { ok: true; data: unknown } | { ok: false; code: ErrorCode };
 
-async function call(url: string, init: RequestInit): Promise<Envelope | null> {
+export async function call(url: string, init: RequestInit): Promise<Envelope | null> {
   try {
     const response = await fetch(url, {
       ...init,

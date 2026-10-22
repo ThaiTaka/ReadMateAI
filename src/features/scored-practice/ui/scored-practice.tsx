@@ -438,7 +438,7 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
 }
 
 /** "+10" (ngôi sao nhẹ) hoặc "−5" màu TRUNG TÍNH; sai ở 0 điểm → "Điểm giữ nguyên". Không nhấp nháy, không màu đỏ. */
-function PointsChip({ points }: { points: NonNullable<AttemptDto["points"]> }) {
+export function PointsChip({ points }: { points: NonNullable<AttemptDto["points"]> }) {
   const t = vi.scoredPractice;
   if (points.appliedDelta > 0) {
     return (

@@ -50,6 +50,16 @@ beforeEach(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string, init?: RequestInit) => {
+      // R08.4: sau khi mở lượt, màn nạp trạng thái chạm trán của máy chủ; lượt cũ của R07 không có chạm trán (total 0).
+      if (url.endsWith("/encounter") && (init?.method ?? "GET") === "GET") {
+        return {
+          status: 200,
+          json: async () => ({
+            ok: true,
+            data: { runId: RUN, encounter: null, progress: { resolved: 0, total: 0 }, resolvedTriggerKeys: [] },
+          }),
+        } as Response;
+      }
       requests.push({ url, method: init?.method ?? "GET", body: init?.body ? JSON.parse(String(init.body)) : null });
       const reply = replies.shift();
       if (!reply) throw new Error("hết phản hồi giả lập");

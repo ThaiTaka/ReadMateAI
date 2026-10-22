@@ -48,6 +48,11 @@ export type EncounterStateDto = {
   encounter: EncounterDto | null;
   /** Số chạm trán đã kết thúc / tổng (không nói chạm trán nào, ở đâu). */
   progress: { resolved: number; total: number };
+  /**
+   * Mã điểm kích hoạt của các chạm trán ĐÃ KẾT THÚC (đã gặp rồi) để giao diện không dừng nhân vật lại ở đó lần nữa sau khi
+   * tải lại trang. Chỉ có mã — không tọa độ, không chạm trán đang chờ/chưa xuất hiện, không quái vật.
+   */
+  resolvedTriggerKeys: string[];
 };
 
 export type ActivateEncounterDto = { outcome: "activated" | "resumed"; state: EncounterStateDto };
