@@ -131,6 +131,12 @@ async function runActivity(page: Page, activity: DemoActivity) {
 }
 
 test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
+  // WebKit của Playwright trên Windows vẽ bằng CPU (không tăng tốc GPU): luồng nhiều câu chạy chậm gấp ~2 lần
+  // Chromium (đo ở R02: 25–32 s) → nới thời gian chờ cho WebKit, không bỏ bước kiểm tra nào.
+  test.beforeEach(({ browserName }) => {
+    test.slow(browserName === "webkit", "WebKit trên Windows không tăng tốc GPU");
+  });
+
   for (const id of ["khoi-dong", "vung-buoc", "tang-toc"] as const) {
     test(`lộ trình ${PATH_NAMES[id]}: buổi luyện mẫu chạy trọn vẹn tới màn kết quả`, async ({ page, pageErrors }) => {
       await openPath(page, id);
@@ -150,7 +156,15 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
       await expect(page.getByText("Số câu đã làm xong").locator("xpath=following-sibling::dd")).toHaveText(
         `${total} / ${total}`,
       );
-      await expect(page.getByText("Cần GV ghi nhận ở lớp").first()).toBeVisible();
+      // R02 (AD-51): không còn chỉ số "ghi nhận ở lớp" hay phiếu tương đương; có lời nhắc điểm minh họa + về Game World.
+      await expect(page.getByText(/ở lớp|phiếu/u)).toHaveCount(0);
+      await expect(page.getByRole("complementary", { name: "Điểm thưởng ở bản chính thức" })).toContainText(
+        "không tính và không lưu điểm",
+      );
+      await expect(page.getByRole("link", { name: /Về Game World/ }).first()).toHaveAttribute(
+        "href",
+        "/learn#game-world",
+      );
       expect(pageErrors).toEqual([]);
     });
   }
@@ -325,12 +339,15 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
     expect(requests.filter((request) => request.body !== null)).toEqual([]);
     // Làm bài hoàn toàn trong trình duyệt. Sau khi trang tải, chỉ được phép có request GET không có dữ liệu do
     // Next.js tự tải trước các trang được liên kết (prefetch) — không request nào chứa câu trả lời hay kết quả.
-    const appPaths = new Set(["/", "/demo", "/learn", "/teacher", "/join"]);
+    // R03: prefetch /teacher của khách bị proxy chuyển sang /login (GET, không dữ liệu).
+    const appPaths = new Set(["/", "/demo", "/learn", "/teacher", "/join", "/login"]);
     const later = requests.slice(before).filter((request) => request.type === "fetch" || request.type === "xhr");
     expect(
       later.filter((request) => {
         const url = new URL(request.url);
-        const onlyRscParam = [...url.searchParams.keys()].every((key) => key === "_rsc");
+        // Chuyển hướng /teacher → /login chỉ mang lý do + đường quay lại (không có dữ liệu bài làm).
+        const allowed = url.pathname === "/login" ? ["_rsc", "reason", "next"] : ["_rsc"];
+        const onlyRscParam = [...url.searchParams.keys()].every((key) => allowed.includes(key));
         return !(appPaths.has(url.pathname) || url.pathname.startsWith("/_next/")) || !onlyRscParam;
       }),
     ).toEqual([]);
@@ -342,6 +359,8 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
   });
 
   test("trợ năng (axe): không có lỗi mức nghiêm trọng ở các màn của bản chơi thử", async ({ page }) => {
+    // Bốn lượt quét axe trên trang /demo nặng: khi cả bộ E2E chạy song song có thể vượt 30 s (R04 — chỉ tăng thời gian chờ).
+    test.slow();
     const serious = async () => {
       const results = await new AxeBuilder({ page }).analyze();
       return results.violations

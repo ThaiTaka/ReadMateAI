@@ -135,7 +135,14 @@ export function validateContent(files: ReadonlyMap<string, string>): ContentRepo
   const isCurriculumFile = (path: string, dir: string) =>
     path.startsWith(dir) && /^[a-z0-9-]+\.json$/u.test(path.slice(dir.length));
   for (const path of files.keys()) {
-    const known = required.includes(path) || isCurriculumFile(path, SERIES_DIR) || isCurriculumFile(path, PROFILES_DIR);
+    // media/ (danh mục giấy phép asset, R02) có bộ kiểm tra riêng: src/features/media/license-validation.ts.
+    const known =
+      required.includes(path) ||
+      isCurriculumFile(path, SERIES_DIR) ||
+      isCurriculumFile(path, PROFILES_DIR) ||
+      path === "media/licenses.json" ||
+      // games/ (màn Mê cung, R07.3) có bộ kiểm riêng: src/features/game-engine/levels/.
+      path.startsWith("games/");
     if (!known)
       add(
         "error",

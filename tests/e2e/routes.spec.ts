@@ -15,6 +15,13 @@ test.describe("các route nền tảng", () => {
     });
   }
 
+  test("/teacher khi chưa đăng nhập → chuyển tới /login kèm lý do, không hiển thị khu vực GV", async ({ page }) => {
+    await page.goto("/teacher/classes");
+    await expect(page).toHaveURL(/\/login\?reason=required&next=%2Fteacher%2Fclasses$/u);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Đăng nhập giáo viên");
+    await expect(page.getByRole("navigation", { name: "Điều hướng khu vực giáo viên" })).toHaveCount(0);
+  });
+
   test("đường dẫn không tồn tại trả về trang 404 tiếng Việt", async ({ page, pageErrors }) => {
     const response = await page.goto("/khong-ton-tai");
     expect(response?.status()).toBe(404);

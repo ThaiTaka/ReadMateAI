@@ -94,11 +94,13 @@ describe("SessionRunner — bộ chạy bài trên giao diện", () => {
     expect(screen.queryByRole("region", { name: "Cô làm mẫu" })).toBeNull();
   });
 
-  it("H0 (Thử như ở lớp): không có nút Gợi ý, mỗi câu một lượt; H2 có nút Gợi ý", () => {
+  it("H0 (Tự làm): không có nút Gợi ý, mỗi câu một lượt, không nhắc tới phiếu/lớp; H2 có nút Gợi ý", () => {
     const { unmount } = render(<SessionRunner heading="x" blocks={[block(items, 0)]} onExit={() => undefined} />);
+    expect(screen.getAllByText(/H0 – Tự làm/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: /Bắt đầu/ }));
     expect(screen.queryByRole("button", { name: /Gợi ý/ })).toBeNull();
-    expect(screen.getByText(/Giống phiếu ở lớp/)).toBeInTheDocument();
+    expect(screen.getByText(/H0 – Tự làm/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/phiếu|ở lớp|Thử như/i);
     unmount();
     render(<SessionRunner heading="x" blocks={[block(items, 2)]} onExit={() => undefined} />);
     fireEvent.click(screen.getByRole("button", { name: /Bắt đầu/ }));

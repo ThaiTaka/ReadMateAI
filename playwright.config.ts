@@ -25,11 +25,11 @@ export default defineConfig({
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] } },
     { name: "webkit-desktop", use: { ...devices["Desktop Safari"] } },
     { name: "webkit-mobile", use: { ...devices["iPhone 13"] } },
-    // Máy tính bảng (TASKS 4.8): chỉ chạy các spec của bản chơi thử và bố cục, để không nhân đôi thời gian E2E.
+    // Máy tính bảng (TASKS 4.8, R02): chỉ chạy các spec của bản chơi thử, Game World và bố cục, để không nhân đôi thời gian E2E.
     {
       name: "webkit-tablet",
       use: { ...devices["iPad (gen 7)"] },
-      testMatch: /(demo-practice|responsive)\.spec\.ts/,
+      testMatch: /(demo-practice|responsive|game-world|treasure-maze-demo)\.spec\.ts/,
     },
   ],
   webServer: {

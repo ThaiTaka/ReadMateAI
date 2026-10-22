@@ -8,7 +8,7 @@ export type Band = "foundation" | "developing" | "extending";
 /** Lộ trình luyện tập hiển thị cho người lớn (giáo viên, phụ huynh); học sinh không thấy tên lộ trình. */
 export type LearningPathId = "khoi-dong" | "vung-buoc" | "tang-toc";
 
-/** Mức hỗ trợ: 3 = đầy đủ … 0 = tự lực ("Thử như ở lớp"). */
+/** Mức hỗ trợ: 3 = đầy đủ … 0 = "Tự làm" (không gợi ý, một lượt). */
 export type SupportLevel = 0 | 1 | 2 | 3;
 
 /** Sáu dạng bài MVP (PRD §9). */

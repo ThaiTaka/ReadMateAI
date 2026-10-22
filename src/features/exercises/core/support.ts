@@ -9,7 +9,11 @@ import type { SupportLevel } from "../../../types/learning.ts";
  */
 
 export type HintMode = "proactive" | "on_request" | "none";
-export type SupportLayout = "guided" | "paper_like";
+/**
+ * `guided`: khung nhiều màu, có minh họa hướng dẫn (H3, H2); `focused`: khung gọn, ít tín hiệu phụ để trẻ tự
+ * tập trung (H1, H0). Từ R02 không còn bố cục "giống phiếu ở lớp" (AD-51) — chỉ đổi cách trình bày, logic giữ nguyên.
+ */
+export type SupportLayout = "guided" | "focused";
 
 export type SupportPolicy = {
   level: SupportLevel;
@@ -23,12 +27,11 @@ export type SupportPolicy = {
   showWorkedExample: boolean;
   /**
    * `proactive`: sau mỗi lần sai, gợi ý bậc kế tiếp tự hiện (và trẻ vẫn có thể bấm "Gợi ý");
-   * `on_request`: chỉ hiện khi trẻ bấm; `none`: không có gợi ý (giống làm phiếu ở lớp).
+   * `on_request`: chỉ hiện khi trẻ bấm; `none`: không có gợi ý (trẻ tự làm).
    */
   hints: HintMode;
   /** Số lần trả lời tối đa cho một câu; hết lượt thì hiện đáp án (PRD §6.2, quy tắc A5). */
   maxAttempts: number;
-  /** `paper_like`: bố cục gần giống phiếu (biểu tượng + câu lệnh chữ, khung trắng đen). */
   layout: SupportLayout;
 };
 
@@ -64,18 +67,19 @@ export const SUPPORT_POLICIES: Readonly<Record<SupportLevel, SupportPolicy>> = {
     showWorkedExample: false,
     hints: "on_request",
     maxAttempts: 2,
-    layout: "paper_like",
+    layout: "focused",
   },
   0: {
     level: 0,
     code: "H0",
-    name: "Tự lực — Thử như ở lớp",
+    /** Tên hiển thị tạm "Tự làm" (RQ-02 — chờ GV góp ý); thay cho "Thử như ở lớp" từ R02. */
+    name: "Tự làm",
     autoPlayInstruction: false,
     autoPlayStimulus: false,
     showWorkedExample: false,
     hints: "none",
     maxAttempts: 1,
-    layout: "paper_like",
+    layout: "focused",
   },
 };
 

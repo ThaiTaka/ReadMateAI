@@ -1,10 +1,16 @@
-# CI cơ bản của ReadMate AI: format → lint → typecheck → kiểm tra kho tri thức → unit test → build.
-# E2E (Playwright) chạy cục bộ bằng `npm run test:e2e`; sẽ đưa vào CI khi có môi trường Preview.
+# CI của ReadMate AI:
+#   verify   — format → lint → typecheck → kiểm tra kho tri thức → unit test → build → quét bundle không chứa secret.
+#   database — (R03) Supabase LOCAL trong Docker của runner: migration từ CSDL trống → lint CSDL → pgTAP → seed hai lần
+#              → kiểm thử tích hợp RLS/thẻ học/xác thực bằng JWT thật. Chỉ dùng khóa local do CLI tự sinh, KHÔNG dùng
+#              secret nào của GitHub hay dự án Supabase Cloud.
+# E2E (Playwright) chạy cục bộ: `npm run test:e2e` và `npm run test:e2e:db` (cần Supabase local).
+# Chạy khi push lên `main` và nhánh tính năng `feature/**` (R02 — lộ trình tái cấu trúc nằm trên nhánh tính năng),
+# và trên pull request. Workflow chỉ đọc mã (permissions: contents: read), không dùng secret.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
 
 permissions:
@@ -54,3 +60,51 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Bundle không chứa secret
+        run: npm run check:bundle
+
+  database:
+    name: Supabase local — migrations, pgTAP, seed, RLS integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js (phiên bản theo .nvmrc)
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Áp dụng toàn bộ migration lên CSDL trống (chứng minh migration chạy lại được từ đầu).
+      - name: Start Supabase local
+        run: npm run db:start
+
+      - name: Lint CSDL (bảo mật, hiệu năng)
+        run: npm run db:lint
+
+      - name: pgTAP (RLS bật mọi bảng, quyền, ràng buộc, bất biến)
+        run: npm run db:test
+
+      # .env.local chỉ chứa khóa của Supabase local trên runner + pepper/mật khẩu giả sinh ngẫu nhiên; không upload.
+      - name: Seed dữ liệu giả hai lần (không sinh trùng)
+        run: |
+          npm run db:env
+          npm run db:seed
+          npm run db:seed
+
+      - name: Kiểm thử tích hợp (RLS, thẻ học, xác thực, đồng ý)
+        run: npm run test:db
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop --no-backup

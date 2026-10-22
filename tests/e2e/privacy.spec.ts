@@ -31,11 +31,32 @@ test.describe("quyền riêng tư và an toàn", () => {
     });
   }
 
-  test("/join không có cách nào gửi mã đi", async ({ page }) => {
+  // R03: /join nhận mã thật. Luồng thành công có CSDL nằm ở tests/e2e-db; ở đây kiểm cách mã được gửi.
+  test("/join gửi mã qua POST (Server Action) — mã không nằm trong URL, không lưu ở bộ nhớ trình duyệt", async ({
+    page,
+  }) => {
+    const urls: string[] = [];
+    page.on("request", (request) => urls.push(request.url()));
     await page.goto("/join");
-    await expect(page.locator("form")).toHaveCount(0);
-    await expect(page.getByLabel("Mã dự phòng trên thẻ học")).toBeDisabled();
-    await expect(page.getByRole("button", { name: /Liên kết thiết bị/ })).toBeDisabled();
+    await expect(page.locator("form")).toHaveCount(1);
+    await page.getByLabel("Mã dự phòng trên thẻ học").fill("ZZZZ-9999");
+    await page.getByRole("button", { name: /Liên kết thiết bị/ }).click();
+    // Có hay không có máy chủ dữ liệu, kết quả đều là một thông báo chung, không chi tiết kỹ thuật.
+    await expect(
+      page.getByRole("alert").filter({ hasText: /Mã chưa đúng|chưa được cấu hình|quá nhiều lần/u }),
+    ).toBeVisible();
+    expect(urls.some((url) => url.includes("ZZZZ"))).toBe(false);
+    expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
+  });
+
+  test("/join đọc mã QR ở fragment rồi xóa khỏi thanh địa chỉ, không gửi mã trong URL", async ({ page }) => {
+    const urls: string[] = [];
+    page.on("request", (request) => urls.push(request.url()));
+    const token = "Q".repeat(43);
+    await page.goto(`/join#c=${token}`);
+    await expect(page.getByRole("alert").filter({ hasText: /Mã QR|chưa được cấu hình|quá nhiều lần/u })).toBeVisible();
+    expect(page.url()).not.toContain(token);
+    expect(urls.some((url) => url.includes(token))).toBe(false);
   });
 
   test("/learn không có ô nhập văn bản tự do", async ({ page }) => {

@@ -1,8 +1,8 @@
 # ReadMate AI — Kiến trúc kỹ thuật
 
-> **Phiên bản:** 0.4 — cập nhật sau Giai đoạn 4 (Exercise Engine + bản chơi thử: §3.1, AD-32 → AD-39, §5.1, §6.1, §11, §20, §21, §22)
-> **Ngày cập nhật:** 2026-10-15
-> **Trạng thái:** GĐ1–GĐ3 đã được chấp nhận; phần GĐ4 chờ người điều phối đánh giá
+> **Phiên bản:** 0.5 — R01: ghi chú tái thiết kế; quyết định mới AD-40 → AD-53 ở [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md)
+> **Ngày cập nhật:** 2026-10-16
+> **Trạng thái:** GĐ1–GĐ3 đã được chấp nhận; phần GĐ4 chờ người điều phối đánh giá. ⚠️ **Từ R01** (định hướng mới: tự luyện tại nhà + phiêu lưu + thi đua lớp) phần kiến trúc **mới** nằm ở [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md) (PLANNED). Tài liệu này vẫn là nền (AD-01 → AD-39) trừ các điểm thay thế: §6.1 bản đồ route (xem REDESIGN_ARCHITECTURE §4, §6), §6.2 chấm tại máy → chấm ở server cho chế độ có điểm (AD-41), §14 giao bài → buổi luyện + câu phát hành (REDESIGN_ARCHITECTURE §7.1), §15 "không có xếp hạng" chỉ còn áp dụng cho dashboard học tập, §16 sinh phiếu PDF **bỏ khỏi lộ trình** (AD-51), các mốc "GĐ5–GĐ11" → R03–R11 ([REDESIGN_TASKS](../REDESIGN_TASKS.md)).
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -89,6 +89,9 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
 | Kiểu Node | `@types/node` | 24.19.2 (`^24`) | Template mặc định `^20` lệch peer của Vitest 5 |
 | Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`). Từ GĐ4 chỉ dùng ở máy chủ/lúc build — không vào bundle của học sinh (AD-33) |
+| Supabase (R03) | `@supabase/supabase-js` · `@supabase/ssr` · `server-only` | 2.118.0 · 0.12.7 · 0.0.1 (ghim chính xác) | `npm view` ngày 2026-10-20: supabase-js `engines.node >=22`, peer `@opentelemetry/api` tùy chọn; ssr peer `@supabase/supabase-js ^2.114.0`. Không có client trình duyệt (AD-55) — [SUPABASE_SETUP.md](SUPABASE_SETUP.md) |
+| Supabase CLI (R03) | `supabase` (devDependency) | 2.121.0 (ghim) | chạy bằng `npx supabase`; Postgres local 17 |
+| QR thẻ học (R03) | `qrcode-generator` | 2.0.4 (ghim) | MIT, không phụ thuộc; chỉ chạy ở máy chủ (ma trận QR → SVG) |
 | Trợ năng (E2E) | `@axe-core/playwright` (kéo theo `axe-core`) | 4.13.0 (`^4.13.0`) | GĐ4 — devDependency; `npm view @axe-core/playwright version engines peerDependencies license` ngày 2026-10-15: peer `playwright-core >= 1.0.0` (đang có 1.64), MPL-2.0 (chỉ công cụ kiểm thử, không phân phối) |
 
 ### 3.2 Đánh giá công nghệ cho các giai đoạn sau
@@ -158,6 +161,7 @@ Trạng thái: **Chốt** = áp dụng cho MVP · **POC** = cần thử nghiệm
 | AD-36 | Bộ sinh theo quy tắc: ứng viên **hữu hạn** từ ngữ liệu đọc được, RNG có seed (FNV-1a + mulberry32) cho từng ứng viên, phương án nhiễu ưu tiên cặp dễ nhầm của kho tri thức, **mỗi câu qua toàn bộ chuỗi kiểm tra**, thiếu dữ liệu thì trả lý do | Tái lập được; không sinh tổ hợp vô hạn; không nới quy tắc | Sinh ngẫu nhiên rồi lọc | Chốt (GĐ4) |
 | AD-37 | Cặp bài ở nhà – ở lớp = **bài sinh đôi**: cùng nhóm đơn vị trọng tâm, độ khó ước lượng chênh ≤ 1, khác mục tiêu cụ thể; hợp đồng `ExerciseTaskContract` 8 thông tin; độ khó tương đương ghi rõ là ước lượng chưa kiểm chứng | Hiện thực §11.4/§16 ở tầng dữ liệu trước khi có PDF (GĐ8) | Sinh hai bộ độc lập rồi so mục tiêu chung | Chốt (GĐ4) |
 | AD-38 | Hai chế độ nội dung: `demo` (chỉ hồ sơ minh họa, nội dung `pending_review` kèm cảnh báo, không lưu) và `production` (hồ sơ `confirmed` + mọi ngữ liệu, tranh, câu hỏi, âm thanh bắt buộc và **dữ liệu tham chiếu** đều `approved`) | Bản chơi thử dùng được ngay mà không giả vờ nội dung đã duyệt; học thật không bao giờ nới quy tắc | Một chế độ với cờ "bỏ qua kiểm duyệt" | Chốt (GĐ4) |
+| AD-40 → AD-53 | Kiến trúc tái thiết kế R01: sổ cái điểm, chấm ở server cho chế độ có điểm, chống trùng, mùa theo lớp và reset trong giao dịch, bảng xếp hạng qua DTO, vinh danh bất biến, Game Engine (lõi TS + React/SVG, không Phaser), 7 chạm trán phân bổ sẵn, giảm chuyển động, ngừng dùng luồng "ở lớp", cờ bảng xếp hạng mặc định tắt, mở khóa không tiêu điểm | Xem [REDESIGN_ARCHITECTURE §9](REDESIGN_ARCHITECTURE.md#9-quyết-định-kiến-trúc-mới-ad-40--ad-53) | — | PLANNED (R01) |
 | AD-39 | GĐ4 **không phát âm thanh**: nút loa là điểm tích hợp bị khóa ghi "Chưa có âm thanh"; **không dùng Web Speech API** của trình duyệt kể cả ở `/demo` | Giọng tiếng Việt của Chrome có thể là giọng trực tuyến (gửi chữ ra máy chủ bên ngoài); chất lượng chưa xác minh; yêu cầu GĐ4 cấm nút phát giả | Dùng TTS trình duyệt cho `/demo` như PRD §12.2 cho phép | Chốt (GĐ4) — xem lại ở GĐ6 |
 
 ## 5. Cấu trúc thư mục
@@ -534,9 +538,11 @@ Mọi đề xuất đều **giải thích được** cho GV (ví dụ: "Đề xu
 
 - Truy vấn qua **SQL view/hàm** (security invoker, chịu RLS) trên `item_attempts`, `student_unit_mastery`, `student_type_support`, `class_task_observations`; tổng hợp theo tuần.
 - Quy mô MVP nhỏ (một lớp khoảng 40 học sinh) → truy vấn trực tiếp với chỉ mục phù hợp; chỉ thêm bảng tổng hợp/materialized view khi đo thấy chậm (mục tiêu < 1 giây/trang).
-- Không có xếp hạng; không hiển thị dữ liệu lớp khác; xuất dữ liệu (sau MVP) có nhật ký.
+- Không có xếp hạng **trong dashboard học tập**; không hiển thị dữ liệu lớp khác; xuất dữ liệu (sau MVP) có nhật ký. (*R01:* bảng xếp hạng **điểm thưởng** là tính năng riêng, có điều kiện — [LEADERBOARD_SPEC](LEADERBOARD_SPEC.md).)
 
 ## 16. Sinh phiếu PDF
+
+> ⚠️ *R01:* **bỏ khỏi lộ trình** (AD-51) — giữ để tra cứu.
 
 1. GV chọn biến thể bài giao → bộ sinh "bài sinh đôi" (§11.4) tạo phiên bản bài dạng phiếu cùng dạng, cùng mục tiêu, cùng độ khó, **không trùng câu** với bài ở nhà.
 2. Tạo `worksheet_version` (nháp) → GV xem trước → duyệt.

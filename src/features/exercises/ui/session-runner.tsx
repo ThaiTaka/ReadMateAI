@@ -41,14 +41,15 @@ export type RunnerBlock = {
   items: readonly ExerciseItem[];
   example: ExerciseItem | null;
   previewOnly: boolean;
-  classroomLike?: boolean;
+  /** Phần "Thử thách tự làm" (H0) ở cuối buổi luyện. */
+  independent?: boolean;
 };
 
 type SessionRunnerProps = {
   heading: string;
   blocks: readonly RunnerBlock[];
   onExit: () => void;
-  /** Nội dung thêm ở màn kết quả (ví dụ phiếu ở lớp tương đương). */
+  /** Nội dung thêm ở màn kết quả (ví dụ lời nhắc điểm thưởng minh họa, nút về Game World). */
   resultsExtra?: ReactNode;
 };
 
@@ -152,7 +153,7 @@ function IntroScreen({
           </Badge>
         ) : null}
         <LevelChip level={block.supportLevel} />
-        {block.classroomLike ? <Badge tone="coral">{vi.practice.runner.classroomLike}</Badge> : null}
+        {block.independent ? <Badge tone="sun">{vi.practice.runner.independentChallenge}</Badge> : null}
       </div>
       <h3 ref={headingRef} tabIndex={-1} className="text-2xl font-extrabold text-ink">
         {block.title}
@@ -180,7 +181,6 @@ function IntroScreen({
             marks={{}}
             hint={null}
             reveal={exampleModule.reveal(example)}
-            paperLike={false}
             idPrefix={`example-${block.id}`}
           />
           {exampleModule.reveal(example).explanation ? (
@@ -279,7 +279,7 @@ export function SessionRunner({ heading, blocks, onExit, resultsExtra }: Session
   const isLast = state.index === state.entries.length - 1;
   const hints = activeHints(state);
   const stepsTotal = hintSteps(entry).length;
-  const paperLike = policy.layout === "paper_like";
+  const focused = policy.layout === "focused";
   const dots: DotState[] = state.progress.map((item, index) =>
     index === state.index
       ? "current"
@@ -302,7 +302,6 @@ export function SessionRunner({ heading, blocks, onExit, resultsExtra }: Session
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <LevelChip level={entry.supportLevel} />
-        {paperLike ? <Badge tone="neutral">{vi.practice.runner.paperLike}</Badge> : null}
       </div>
       <h3 ref={headingRef} tabIndex={-1} className="sr-only">
         {`${heading} — ${block.title} — ${vi.practice.controls.progress
@@ -313,7 +312,7 @@ export function SessionRunner({ heading, blocks, onExit, resultsExtra }: Session
       <div
         className={cn(
           "flex flex-col gap-6 rounded-card p-4 sm:p-6",
-          paperLike ? "border-[3px] border-ink bg-surface" : "border border-line bg-canvas",
+          focused ? "border-2 border-line-strong bg-surface" : "border border-line bg-canvas",
         )}
       >
         <BlockInstruction block={block} level={entry.supportLevel} withStimulus />
@@ -331,7 +330,6 @@ export function SessionRunner({ heading, blocks, onExit, resultsExtra }: Session
           marks={progress.lastGrade?.marks ?? {}}
           hint={hints.merged}
           reveal={done ? typeModule.reveal(entry.item) : null}
-          paperLike={paperLike}
           idPrefix={entry.item.id}
         />
       </div>
