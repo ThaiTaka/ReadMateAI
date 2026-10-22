@@ -137,10 +137,11 @@ describe("R08.1 — điểm kích hoạt trong CSDL khớp tệp JSON", () => {
     } catch (error) {
       diagnostic = String(error).slice(0, 900);
     }
-    // CLI có thể in thêm dòng khác trước/sau JSON: chỉ lấy mảng "rows".
-    const match = /"rows":\s*(\[[\s\S]*?\])/u.exec(out);
-    expect(match, diagnostic).not.toBeNull();
-    const rows = JSON.parse(match![1]!) as { level_key: string; trigger_key: string; row_no: number; col_no: number }[];
+    // Dạng đầu ra của CLI khác nhau giữa máy local ({"rows": [...]}) và CI (mảng trần): chấp nhận cả hai.
+    type Row = { level_key: string; trigger_key: string; row_no: number; col_no: number };
+    const parsed = JSON.parse(out.slice(out.search(/[[{]/u))) as Row[] | { rows: Row[] };
+    const rows = Array.isArray(parsed) ? parsed : parsed.rows;
+    expect(rows, diagnostic).toHaveLength(21);
     const expected = ["01", "02", "03"].flatMap((n) => {
       const level = levelFile(n);
       return level.triggers.map((t) => ({ level_key: level.id, trigger_key: t.id, row_no: t.row, col_no: t.col }));
