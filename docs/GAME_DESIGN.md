@@ -170,11 +170,11 @@ Sau cả hai kết quả: chuyển cảnh ngược → nhân vật **đứng đ�
 - **Kết thúc** (theo `encounter.status` của máy chủ): `defeated` → quái vật mỉm cười, xoay nhẹ, thu nhỏ thành năm ngôi sao + "Giỏi quá! Bạn ấy biến thành những ngôi sao!"; `undefeated` → vẫy tay, bay đi ngủ "Zzz" + "Hẹn gặp lại nhé!". Tiến độ "Con đã gặp n/7 bạn quái vật!" lấy từ `GET …/encounter`. Trạng thái gốc của mỗi phần tử là trạng thái cuối nên giảm chuyển động (OS hoặc công tắc) vẫn đủ thông tin, không xoay.
 - **Tải lại giữa chạm trán**: trang nạp `GET …/encounter` ngay sau khi mở lượt; có chạm trán đang diễn ra → mở thẳng đúng câu/HP/điểm (không lưu/kích hoạt lại); đứng ở điểm chưa dùng (máy chủ không cho rời) → mở cổng và kích hoạt.
 - **Kho báu**: đứng ở ô rương → lưu vị trí rồi `POST …/treasure/open`; chưa đủ 7/7 → "Rương kho báu đang khóa… còn n bạn đang chờ con"; đủ → hoạt cảnh rương + "Con đã khám phá xong Mê cung kho báu!" + số liệu máy chủ, khóa điều khiển, không cộng điểm; gọi lại → `replayed`.
-- Chưa làm (đúng phạm vi): duyệt tên/hình/lời thoại quái vật và giấy phép (R08.5), chơi lại không tính điểm (R08.6), âm thanh (R10).
+- R08.5: soát kỹ thuật tên/hình/lời thoại và giấy phép xong; **GV duyệt còn chờ** (hồ sơ [reviews/R08_MONSTER_REVIEW.md](reviews/R08_MONSTER_REVIEW.md)). Chưa làm (đúng phạm vi): chơi lại không tính điểm (R08.6), âm thanh (R10).
 
 ## 5. Quái vật thân thiện
 
-- Hình dáng tròn trịa, mắt to, màu pastel, **không răng nhọn, không móng vuốt, không máu**; mỗi quái vật có tên dễ thương và tính cách (ví dụ "Bé Mây Bông" thích vần *ông*).
+- Hình dáng tròn trịa, mắt to, màu pastel, **không răng nhọn, không móng vuốt, không máu**; mỗi quái vật có tên dễ thương và tính cách (ví dụ "Bé Mây Bông" thích vần *ông*). **Từ R08.5**: tên quái vật chạm trán là chuỗi bịa trung tính (Pu Pu, Tum Tum …) và mã là `mon-01`…`mon-10`, để tên/mã/nhãn trợ năng không thể trùng chữ, từ hay con vật mà câu đang hỏi; bộ soát `src/features/game-runs/monster-audit.ts` chạy trong unit test; không gắn quái vật với chủ đề kiến thức (sẽ lộ đáp án).
 - Bảy quái vật mỗi màn **khác nhau**; có thể gắn chủ đề với kiến thức (quái vật vần, quái vật dấu thanh) để tạo liên tưởng.
 - Xuất hiện bằng phép thuật lấp lánh, không nhảy bổ ra, không âm thanh giật mình. Không bao giờ "tấn công" nhân vật; trừ HP chỉ áp dụng cho quái vật.
 - Bản phác thảo nhân vật phải được GV (và nếu được, một nhóm phụ huynh) xem trước khi sản xuất asset — xác nhận không gây sợ cho trẻ 6 tuổi (RQ-M1).

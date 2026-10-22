@@ -17,7 +17,7 @@
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
 | R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ✅ R07.6 xong (CI xanh `8701cfa`) — nghiệm thu R07 về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi; chưa phải mini-game hoàn chỉnh (R08) |
-| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 (database chạm trán + schema 21 câu), R08.2 (phân bổ 7 × 21) và R08.3 (chơi chạm trán + kho báu ở máy chủ) và R08.4 (giao diện quái vật) xong; R08.5–R08.6 chưa làm |
+| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 (database chạm trán + schema 21 câu), R08.2 (phân bổ 7 × 21) và R08.3 (chơi chạm trán + kho báu ở máy chủ) và R08.4 (giao diện quái vật) xong; **R08.5 phần kỹ thuật xong** (soát chống lộ đáp án + giấy phép, hồ sơ GV `docs/reviews/R08_MONSTER_REVIEW.md` đã chuẩn bị; **GV phê duyệt hình/tên/lời thoại: CHỜ XÁC NHẬN THỰC TẾ** — chưa đóng R08.5 hoàn toàn); R08.6 chưa làm |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ **Tạm hoãn sau khi nộp dự án** |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
 | R11 | Kiểm thử tổng thể, bảo mật, responsive, dọn mã cũ, deploy Vercel | R02–R10 | M–L | ⏸ |

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-21",
+  "updatedAt": "2026-10-23",
   "note": "Danh mục nguồn và giấy phép của mọi hình ảnh, nhân vật, phông chữ dùng trong ReadMate AI (CLAUDE.md §7.9, §9.4.7). Asset do dự án tự tạo luôn bắt đầu ở pending_review; KHÔNG tự đặt approved — chỉ giáo viên duyệt (cần reviewedBy, reviewedAt). Kiểm tra bằng npm run content:check. Xem docs/ASSET_MANIFEST.md.",
   "assets": [
     {
@@ -47,14 +47,35 @@
       "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R02, theo chỉ đạo của người điều phối)",
       "source": "Tác phẩm gốc, vẽ trực tiếp bằng mã nguồn SVG trong repo; không dựa trên hình hay nhân vật có bản quyền, không dùng công cụ tạo ảnh",
       "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
-      "usage": "Bảng chi tiết trò chơi, khu duyệt học liệu",
+      "usage": "Bảng chi tiết trò chơi, khu duyệt học liệu; hình dùng chung cho mười quái vật ở màn chạm trán của Mê cung kho báu (R08.4, đổi màu theo mã)",
       "createdAt": "2026-10-20",
       "review": {
         "status": "pending_review",
         "teacherReviewed": false,
         "reviewedBy": null,
         "reviewedAt": null,
-        "notes": "Chờ GV xác nhận không gây sợ cho trẻ 6 tuổi (GAME_DESIGN §5, RQ-M1)."
+        "notes": "Chờ GV xác nhận không gây sợ cho trẻ 6 tuổi (GAME_DESIGN §5, RQ-M1) — phiếu ở docs/reviews/R08_MONSTER_REVIEW.md. Đã soát kỹ thuật R08.5 (2026-10-23): không răng nanh/móng vuốt, mắt to, miệng cười; chưa có xác nhận của GV."
+      }
+    },
+    {
+      "id": "art.animation.monster-encounter",
+      "name": "Hoạt cảnh quái vật ở màn chạm trán (hiện ra, thành sao, bay đi ngủ)",
+      "kind": "scene",
+      "paths": [
+        "src/features/game-engine/ui/encounter/monster-view.tsx#MonsterView",
+        "src/styles/tokens.css#monster-animations"
+      ],
+      "author": "Dự án ReadMate AI — tự vẽ bằng mã SVG (phiên Claude Code R08.4, theo chỉ đạo của người điều phối)",
+      "source": "Tác phẩm gốc: vầng sáng, ngôi sao 4 cánh, chữ \"Zzz\" và ba hoạt cảnh CSS vẽ bằng mã trong repo, kết hợp hình FriendlyMonster đổi màu bằng hue-rotate; không dùng hình, âm thanh hay hoạt cảnh của bên thứ ba, không dùng công cụ tạo ảnh",
+      "license": "Tác phẩm gốc của dự án ReadMate AI — quyền sử dụng thuộc chủ dự án; được dùng trong ứng dụng ReadMate AI",
+      "usage": "Màn chạm trán quái vật của Mê cung kho báu (R08.4): hiện ra ≤ 1 s, mất trái tim thì nhún nhẹ, đoán xong thì thành sao hoặc vẫy tay bay đi ngủ; chạy một lần, không nhấp nháy, dừng khi giảm chuyển động",
+      "createdAt": "2026-10-22",
+      "review": {
+        "status": "pending_review",
+        "teacherReviewed": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "notes": "Chờ GV xác nhận hoạt cảnh nhẹ nhàng, không giật mình (docs/reviews/R08_MONSTER_REVIEW.md)."
       }
     },
     {

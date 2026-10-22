@@ -1,7 +1,7 @@
 import { FriendlyMonster } from "@/components/art/characters";
 import { cn } from "@/lib/cn";
 import { vi } from "@/strings/vi";
-import { monsterHue, monsterName } from "./monster-catalog.ts";
+import { monsterHue, monsterName, publicMonsterKey } from "./monster-catalog.ts";
 
 export type MonsterMood = "idle" | "defeated" | "undefeated";
 
@@ -44,7 +44,7 @@ export function MonsterView({
   return (
     <div
       data-testid="monster-view"
-      data-monster={monsterKey}
+      data-monster={publicMonsterKey(monsterKey)}
       data-mood={mood}
       className={cn("relative mx-auto aspect-square w-40 max-w-full sm:w-48", className)}
     >

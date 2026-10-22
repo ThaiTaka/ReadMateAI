@@ -1,7 +1,7 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-22 — Phiên Claude Code R08.4 (giao diện quái vật, ba trái tim, câu hỏi, hoạt cảnh, kho báu)
+> **Cập nhật lần cuối:** 2026-10-23 — Phiên Claude Code R08.5 (soát chống lộ đáp án quái vật, giấy phép hình, hồ sơ GV; chờ GV duyệt)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
@@ -33,7 +33,7 @@
 | R05 | ✅ Hoàn thành — nghiệm thu bằng CI (§5b), chờ người điều phối duyệt |
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
-| R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (giao diện quái vật/kho báu, §5r) xong; R08.5–R08.6 chưa làm |
+| R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (§5r) + **R08.5 phần kỹ thuật (§5s)** xong; **GV chưa duyệt quái vật (chờ xác nhận thực tế)**; R08.6 chưa làm |
 | R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
@@ -367,6 +367,25 @@ Migration `20261028090000_r08_start_allocation.sql`. **Không** có API kích ho
 - **Kiểm thử (local):** pgTAP 212 (10 tệp; mới `10_game_allocation` 26: chữ ký/quyền, mặc định cờ, 18 ca hình dạng kế hoạch; `08_game_runs` đổi chữ ký), unit mới `game-planner.test.ts` (9), DB integration mới `game-allocation.test.ts` (17: 21 đủ/20 thiếu, trùng vân tay/mã, chưa duyệt/chưa học/Nhóm 3, môi trường kiểm thử tắt, rollback, hai tab, tiếp tục lượt, tiếp tục khi tụt dưới 50, ngưỡng 40/50, đồng ý/thu hồi/lớp khác, hình dạng sai, chống cày điểm, không lộ DTO/RLS, không ghi trực tiếp, reset mùa + song song 3 vòng, hồi quy R07/R08.1). Chạy lại `game-runs`, `game-runs-service`, `game-encounters`, `scoring`, `season-reset` + mới: **100/100**. `db:lint` 0 (đã sửa 3 cảnh báo ép kiểu `'{}'` bằng `array[]::…` trước khi commit), `typecheck`, `lint` 0 lỗi, `format:check`, `content:check` xanh. Full regression và Playwright giao GitHub Actions.
 - **Còn lại cho R08.3:** hàm kích hoạt (pending→active, `return_position` từ vị trí đã lưu, kiểm ô đang đứng là ô kích hoạt), chấm câu game + HP trong hàm ghi điểm (`gateway_record_attempt` hiện chỉ biết ngữ cảnh buổi luyện), kết thúc chạm trán, mở kho báu khi 7/7, DTO/API chạm trán hiện tại và ánh xạ mã lỗi mới. Lượt chơi chỉ tạo được ở local/test; **chưa** mở đường vào trên giao diện học sinh.
 
+## 5s. R08.5 — Soát quái vật: chống lộ đáp án, giấy phép, hồ sơ giáo viên (2026-10-23)
+
+**Kết luận:** phần kỹ thuật xong; **giáo viên CHƯA duyệt** — mọi ô trong `docs/reviews/R08_MONSTER_REVIEW.md` là "Chưa đánh giá", mọi dòng `licenses.json` vẫn `pending_review` / `teacherReviewed:false`. Cơ chế chặn nội dung chưa duyệt không đổi.
+
+**Phát hiện (10 quái vật kiểm kê):**
+1. Tên R08.4 là từ thật: Cá Vàng, Mèo Ngủ, Ốc Sên, Ếch Con, Sao Nhỏ, Nấm Tròn… — có thể là đáp án của bài nhìn tranh/nhận chữ; "Cá Vàng", "Mèo", "Bông", "Bé", "Con" đã có trong kho học liệu minh họa. Hình thì luôn là đám mây nên tên con vật còn lệch hình.
+2. Mã quái vật cũ (`mon-sao-nho`…) nằm ở thuộc tính HTML `data-monster`; test mới chứng minh `mon-sao-nho` chứa "nho" (từ kho học liệu).
+3. Nhãn trợ năng (`aria-label` của SVG) và lời dẫn không lộ đáp án; lời dẫn chung chứa "con/bạn" là chữ giao diện thường, không là đáp án của câu nào.
+
+**Đã sửa:** tên mới bịa trung tính (Pu Pu, Tum Tum, Lu Lu, Pom Pom, Bun Bun, Mum Mum, Nin Nin, Xu Xu, Tin Tin, Gu Gu — `vi.monsters`); mã mới `mon-01`…`mon-10` (`MONSTER_KEYS`), bảng `LEGACY_MONSTER_KEYS` đổi mã cũ của lượt đang dở; DOM chỉ phát mã chuẩn (`publicMonsterKey`, mã lạ → `mon-00`). Hình và hoạt cảnh không đổi.
+
+**Bộ soát:** `src/features/game-runs/monster-audit.ts` (hàm thuần, import tương đối `.ts`): lỗi khi chữ quái vật chứa dạng đáp án bị cấm (`textExposure().forbidden`) của câu nào; cảnh báo cho GV khi tên trùng/chỉ khác thanh với tiếng của kho học liệu; kiểm NFC, tên rỗng/trùng; trả `where` + nguyên nhân. Không kết luận "an toàn tuyệt đối". Test `tests/unit/game-runs/monster-audit.test.tsx` (22 test): danh mục, mã cũ, soát 10 biến thể × 3 nhóm, quét thuộc tính DOM 20 mã × 3 trạng thái, câu mở/đóng trong ngữ cảnh chạm trán, hoạt cảnh một lần + giảm chuyển động, giấy phép, hồ sơ GV chưa duyệt.
+
+**Giấy phép:** thêm `art.animation.monster-encounter`, cập nhật `art.character.friendly-monster` (dùng cho 10 quái vật); cả hai tự vẽ bằng mã, `pending_review`. Không có hình/âm thanh bên thứ ba. 46 tệp Piper thuộc nhánh audio WIP không đụng tới.
+
+**Hồ sơ GV:** `docs/reviews/R08_MONSTER_REVIEW.md` + 3 ảnh dựng từ `MonsterView` bằng dữ liệu giả (`docs/reviews/img/`); phiếu 7 tiêu chí "Chưa đánh giá", chỗ ký để trống.
+
+**Còn tồn đọng:** (1) GV xem và điền phiếu → người điều phối mới cập nhật `licenses.json`; (2) tên bịa có thể bị GV đổi; (3) lượt chơi cũ trong CSDL local còn mã cũ (đã có bảng đổi, RSC payload của lượt cũ còn chứa mã cũ — lượt mới thì không); (4) chạy lại bộ soát mỗi khi thêm học liệu; (5) chưa chạy E2E đầy đủ local (máy thiếu bộ nhớ) — dùng CI.
+
 ## 5r. R08.4 — Giao diện quái vật, ba trái tim, câu hỏi, hoạt cảnh, kho báu (2026-10-22)
 
 **Nghiệm thu R08.3 trước khi làm:** CI xanh trên `e33737b`; E2E push 39807193635 có 1 job đỏ (`E2E database webkit-ipad`, test R05 bảng xếp hạng: chiều rộng thanh = 0 vì `waitForTimeout(900)` cố định dưới tải CI), cùng commit đã xanh ở lượt pull_request 39807200381 và R08.3 không đụng bảng xếp hạng → đã đổi sang `expect.poll` (không nới assertion). Job `webkit-mobile` của lượt push còn chạy lúc kiểm tra; kết quả chính thức xem commit R08.4.
@@ -548,6 +567,8 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 ## 8. Bước tiếp theo
 
+**Cập nhật 2026-10-23 (R08.5):** phần kỹ thuật xong, chờ GV xem hồ sơ; bước tiếp theo vẫn là **R08.6** (chơi lại Mê cung đã hoàn thành không cộng/trừ điểm) — chỉ làm khi được giao; chưa bật hình quái vật cho học sinh thật cho tới khi GV duyệt.
+
 **Cập nhật 2026-10-22 (R08.4):** bước tiếp theo là **R08.5** (soát tên/lời thoại/hình quái vật, giấy phép, hồ sơ cho GV duyệt), rồi R08.6, **R10**, **R11**, nộp dự án (R09 hoãn). Cần quyết định: cho học sinh tiếp tục lượt đang dở khi điểm < 50. Trước đó: **Cập nhật 2026-10-22 (R08.3):** bước tiếp theo là **R08.4** (giao diện quái vật thân thiện, ba trái tim, câu hỏi Tiếng Việt qua Player GĐ4, hoạt cảnh xuất hiện/biến thành sao/bay đi ngủ, quay lại mê cung), rồi R08.5–R08.6, **R10**, **R11**, nộp dự án (R09 hoãn). API R08.3 đã sẵn sàng cho UI: `POST …/encounters/activate`, `GET …/encounter`, `POST …/treasure/open`, nộp bài qua `…/question-instances/{id}/attempts` (kèm `encounter`). Trước đó: **Cập nhật 2026-10-22 (R08.2):** bước tiếp theo là **R08.3** (kích hoạt quái vật, chấm điểm + HP, kết thúc chạm trán, mở kho báu), rồi R08.4–R08.6, **R10**, **R11**, nộp dự án (R09 hoãn sau khi nộp). Rủi ro mới: kho nội dung duyệt phải đủ cho cả luyện tập lẫn 21 câu mỗi màn (21 câu giữ chỗ nội dung trong mùa). Trước đó:
 
 **Đề xuất R05 — Leaderboard kiểu FIFA, avatar hình người, xếp hạng trong lớp** ([REDESIGN_TASKS R05](REDESIGN_TASKS.md#r05--leaderboard-kiểu-fifa-avatar-ranking-m)), dựng trên `season_scores` (chỉ mục `season_id, balance desc`, `balance_updated_at`) của R04. Điều kiện trước: người điều phối duyệt R04; rà soát pháp lý cờ `leaderboard_feature_approved` (Luật 91/2025 Điều 24); bộ avatar hình người có giấy phép (RQ-M1). Song song: R10 (giao diện duyệt học liệu, âm thanh) để có nội dung thật; quyết định tạo Supabase Cloud *dev*. Vẫn chờ RQ-06 (nhánh âm thanh), RQ-G1/G2/G5, RD-27/RD-28 (GV góp ý mức hỗ trợ và gợi ý).
@@ -560,6 +581,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-23 | R08.5 | R08 | Soát tên/mã/nhãn quái vật (đổi sang tên bịa + mã trung tính, bảng mã cũ), bộ soát `monster-audit`, giấy phép hình + hoạt cảnh, hồ sơ GV với 3 ảnh dữ liệu giả; unit +22; **GV chưa duyệt**; CI chờ. Không làm R08.6 |
 | 2026-10-22 | R08.4 | R08 | Nghiệm thu R08.3 (sửa test R05 chập chờn); cổng chạm trán (lưu → kích hoạt), màn quái vật + 3 trái tim + Player GĐ4, hoạt cảnh, tải lại, rương; `resolvedTriggerKeys`; unit 1133, E2E toàn trình xanh local 3 project; demo 226,6 KB/60 FPS. Không làm R08.5 |
 | 2026-10-22 | R08.1 | R08 | Sửa test chập chờn reset mùa (chờ nút bật lại); migration `game_encounters` + `game_level_triggers` + ngữ cảnh game của `question_instances` + chặn lưu vị trí xuyên trigger + reset đóng chạm trán; pgTAP 186, DB 216 local; CI chờ. Không làm R08.2 |
 | 2026-10-22 | R08.2 | R08 | Dựng lại máy mới (Node 24.18 zip cạnh Node 26, Docker, Supabase local, seed); `gateway_start_game_run` phân bổ 1 lượt + 7 chạm trán + 21 câu trong một giao dịch (CSDL kiểm lại kế hoạch của máy chủ), tiếp tục lượt đứng trước ngưỡng điểm, fixture game riêng; pgTAP 212 + DB 100/100 local; CI + E2E xanh `042ab92`. Không làm R08.3 |

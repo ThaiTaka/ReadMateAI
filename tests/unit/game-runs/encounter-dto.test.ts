@@ -33,7 +33,7 @@ describe("R08.3 — lược đồ request chạm trán / kho báu", () => {
 });
 
 describe("R08.3 — dựng DTO từ phản hồi CSDL", () => {
-  const encounter = { id: ID, encounterNo: 3, monsterKey: "mon-sao-nho", status: "active", hpRemaining: 2 };
+  const encounter = { id: ID, encounterNo: 3, monsterKey: "mon-03", status: "active", hpRemaining: 2 };
 
   it("kích hoạt: chỉ giữ kết quả và mã chạm trán, bỏ trường lạ", () => {
     expect(buildActivation({ outcome: "activated", encounter, student_id: ID })).toEqual({

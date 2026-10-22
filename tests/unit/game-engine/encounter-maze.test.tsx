@@ -14,7 +14,7 @@ import level1 from "../../../content/games/treasure-maze/levels/level-01.json";
 const LEVEL: Level = { id: level1.id, rows: level1.rows, triggers: level1.triggers };
 const STUDENT = "5b1c3a52-7a43-4c43-9a3e-0d8f6a1d2e11";
 const RUN = "6c2d4b63-8b54-4d54-8b4f-1e9a7b2e3f22";
-const MONSTER = "mon-sao-nho";
+const MONSTER = "mon-03";
 const TRIGGER_IDS = LEVEL.triggers.map((trigger) => trigger.id);
 const t = strings.encounter;
 
