@@ -296,9 +296,17 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     pos: "centre",
     alt: "Bạn nhỏ thám hiểm và Cú Bông trong thế giới phiêu lưu",
   });
-  s.addNotes(
-    "Giới thiệu tên dự án và định hướng: một nền tảng giúp học sinh lớp 1 tự luyện Tiếng Việt tại nhà, kết hợp hành trình khám phá. Hình trên là giao diện thật của bản chơi thử.",
-  );
+  s.addText("Báo cáo tiến độ dự án  ·  Tháng 10/2026", {
+    x: 0.7,
+    y: 4.85,
+    w: 4.8,
+    h: 0.3,
+    fontFace: BODY,
+    fontSize: 11,
+    color: "8FA3C4",
+    margin: 0,
+    isTextBox: true,
+  });
 }
 
 // 2. Vì sao
@@ -361,9 +369,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     margin: 0,
     isTextBox: true,
   });
-  s.addNotes(
-    "Nêu các khó khăn thường gặp theo giọng tích cực: không phê phán học sinh, chỉ nói về nhu cầu cần được đồng hành.",
-  );
 }
 
 // 3. Ba giá trị
@@ -404,7 +409,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
       isTextBox: true,
     });
   }
-  s.addNotes("Ba giá trị: học dễ hiểu, luyện tập thú vị, tiến bộ từng ngày. Ảnh là giao diện bản chơi thử.");
 }
 
 // 4. Ai sử dụng
@@ -413,7 +417,7 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   header(s, "Người dùng", "Ai sử dụng ReadMate AI?");
   const who = [
     ["Học sinh lớp 1", "Luyện chữ, vần, đọc trơn qua trò chơi và phần thưởng — ngay tại nhà."],
-    ["Giáo viên", "Quản lý lớp, chuẩn bị học liệu, theo dõi và động viên học sinh."],
+    ["Giáo viên", "Quản lý lớp, chuẩn bị học liệu và động viên học sinh."],
     ["Phụ huynh", "Đồng hành, nhắc nhở và chia sẻ niềm vui tiến bộ cùng con."],
   ];
   for (let i = 0; i < 3; i++) {
@@ -484,27 +488,35 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
       isTextBox: true,
     });
   }
-  s.addNotes("Ba nhóm cùng tham gia. Góc phụ huynh chi tiết còn trong kế hoạch phát triển.");
 }
 
 // 5. Hành trình
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
-  header(s, "Hành trình học tập", "Một ngày luyện tập của học sinh");
-  const steps = ["Vào trang học", "Chọn bài luyện", "Làm bài", "Nhận phản hồi", "Tích điểm", "Khám phá thế giới"];
-  const w = 1.3;
-  const gap = 0.2;
-  for (let i = 0; i < 6; i++) {
+  header(s, "Hành trình học tập", "Một lần luyện tập của học sinh");
+  const steps = [
+    "Mở thẻ học",
+    "Vào trang của con",
+    "Làm bài",
+    "Nhận phản hồi",
+    "Tích điểm",
+    "Khám phá bản đồ",
+    "Chơi Mê cung",
+  ];
+  const w = 1.137;
+  const gap = 0.14;
+  for (let i = 0; i < 7; i++) {
     const x = 0.6 + i * (w + gap);
-    card(s, x, 1.45, w, 1.45, i === 5 ? GOLD_L : WHITE);
-    numDot(s, i + 1, x + (w - 0.42) / 2, 1.6, 0.42, i === 5 ? GOLD : TEAL);
+    const last = i === 6;
+    card(s, x, 1.4, w, 1.7, last ? GOLD_L : WHITE);
+    numDot(s, i + 1, x + (w - 0.4) / 2, 1.52, 0.4, last ? GOLD : TEAL);
     s.addText(steps[i], {
-      x: x + 0.06,
-      y: 2.1,
-      w: w - 0.12,
+      x: x + 0.05,
+      y: 2.0,
+      w: w - 0.1,
       h: 0.7,
       fontFace: HEAD,
-      fontSize: 14,
+      fontSize: 13,
       bold: true,
       color: NAVY,
       align: "center",
@@ -512,44 +524,55 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
       margin: 0,
       isTextBox: true,
     });
-    if (i < 5)
+    s.addText(last ? "BẢN CHƠI THỬ" : "ĐÃ CÓ", {
+      x: x + 0.03,
+      y: 2.75,
+      w: w - 0.06,
+      h: 0.25,
+      fontFace: BODY,
+      fontSize: 10,
+      bold: true,
+      color: last ? "9A7416" : TEAL,
+      align: "center",
+      margin: 0,
+      isTextBox: true,
+    });
+    if (i < 6)
       s.addShape(pres.ShapeType.triangle, {
-        x: x + w + 0.03,
-        y: 2.05,
-        w: 0.14,
-        h: 0.2,
+        x: x + w + 0.02,
+        y: 2.1,
+        w: 0.1,
+        h: 0.16,
         rotate: 90,
         fill: { color: GOLD },
       });
   }
-  await addPic(s, "crop-worldmap.jpg", 0.6, 3.15, 3.0, 1.82, { radius: 0.1, alt: "Bản đồ thế giới phiêu lưu" });
-  await addPic(s, "crop-milestones.jpg", 3.75, 3.15, 5.65, 0.93, {
+  await addPic(s, "crop-worldmap.jpg", 0.6, 3.3, 3.0, 1.7, { radius: 0.1, alt: "Bản đồ thế giới phiêu lưu" });
+  await addPic(s, "crop-milestones.jpg", 3.75, 3.3, 5.65, 0.93, {
     radius: 0.1,
     pos: "centre",
     alt: "Các mốc khám phá",
   });
   s.addShape(pres.ShapeType.roundRect, {
     x: 3.75,
-    y: 4.22,
+    y: 4.38,
     w: 5.65,
-    h: 0.75,
+    h: 0.62,
     rectRadius: 0.1,
     fill: { color: GOLD_L },
   });
-  s.addText("Mỗi 30 điểm tích lũy mở thêm một mốc khám phá mới.", {
+  s.addText("Đã chạy thử với nội dung mẫu; học liệu thật chờ giáo viên duyệt.", {
     x: 3.95,
-    y: 4.22,
+    y: 4.38,
     w: 5.3,
-    h: 0.75,
+    h: 0.62,
     fontFace: BODY,
-    fontSize: 14,
+    fontSize: 13,
     color: INK,
     valign: "middle",
     margin: 0,
     isTextBox: true,
   });
-  caption(s, "Ảnh chụp bản chơi thử — dữ liệu minh họa", 0.6, 4.98, 5);
-  s.addNotes("Đây là slide quan trọng: toàn bộ vòng lặp một lần luyện tập, từ vào trang học đến khám phá thế giới.");
 }
 
 // 6. Bước 1
@@ -557,8 +580,8 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   const s = pres.addSlide({ masterName: "LIGHT" });
   header(s, "Bước 1", "Học sinh bắt đầu như thế nào?");
   const st = [
-    ["Mở ReadMate AI", "Dùng thẻ học do giáo viên cấp để vào đúng trang của con."],
-    ["Vào trang của mình", "Con thấy tên, ảnh đại diện và điểm thưởng của riêng mình."],
+    ["Mở thẻ học", "Quét mã QR (hoặc nhập mã dự phòng) trên thẻ học do giáo viên cấp."],
+    ["Vào đúng trang của con", "Thiết bị liên kết với hồ sơ của con: tên, ảnh đại diện, điểm thưởng riêng."],
     ["Chạm vào khu vực học tập", "Chọn “Luyện bài” hoặc “Khám phá Game World”."],
   ];
   st.forEach((t, i) => {
@@ -592,7 +615,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   await browser(s, "learn.jpg", 4.95, 1.45, 4.55, 3.1);
   chip(s, "demo", 4.95, 4.7);
   caption(s, "Ảnh chụp trang của học sinh — tên và điểm là dữ liệu minh họa", 6.55, 4.74, 3);
-  s.addNotes("Ảnh là trang chủ của học sinh trong bản chơi thử. Tên “Mây” và điểm 135 là dữ liệu minh họa hư cấu.");
 }
 
 // 7. Bước 2
@@ -659,9 +681,93 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   }
   chip(s, "demo", 0.6, 4.88);
   caption(s, "Ví dụ minh họa. Học liệu thật sẽ do giáo viên duyệt trước khi đến tay học sinh.", 2.4, 4.92, 6.9);
-  s.addNotes(
-    "Sáu dạng bài, mỗi dạng một khuôn quen thuộc. Các ví dụ trên chỉ là minh họa; nội dung thật cần giáo viên duyệt.",
-  );
+}
+
+// 7. (bổ sung) Hỗ trợ giảm dần
+{
+  const s = pres.addSlide({ masterName: "LIGHT" });
+  header(s, "Phương pháp", "Hỗ trợ giảm dần, từng bước tự lập");
+  const lv = [
+    ["Hỗ trợ đầy đủ", "Có bài mẫu; gợi ý hiện ngay khi sai", 0.95, TEAL_L, NAVY],
+    ["Hỗ trợ một phần", "Gợi ý khi con bấm", 1.45, "9ED5CC", NAVY],
+    ["Gợi ý tối thiểu", "Ít gợi ý, ít lượt thử", 1.95, TEAL, WHITE],
+    ["Tự làm", "Con tự hoàn thành, không gợi ý", 2.45, NAVY, WHITE],
+  ];
+  const baseY = 4.1;
+  lv.forEach((t, i) => {
+    const x = 0.6 + i * 1.3;
+    s.addShape(pres.ShapeType.roundRect, {
+      x,
+      y: baseY - t[2],
+      w: 1.2,
+      h: t[2],
+      rectRadius: 0.08,
+      fill: { color: t[3] },
+    });
+    s.addText(t[0], {
+      x: x + 0.05,
+      y: baseY - t[2] + 0.08,
+      w: 1.1,
+      h: 0.62,
+      fontFace: HEAD,
+      fontSize: 12,
+      bold: true,
+      color: t[4],
+      align: "center",
+      valign: "top",
+      margin: 0,
+      isTextBox: true,
+    });
+    s.addText(t[1], {
+      x: x - 0.02,
+      y: baseY + 0.08,
+      w: 1.24,
+      h: 0.8,
+      fontFace: BODY,
+      fontSize: 11,
+      color: MUTED,
+      align: "center",
+      valign: "top",
+      margin: 0,
+      isTextBox: true,
+    });
+  });
+  const pts = [
+    ["Một buổi luyện có ba phần", "Ôn bài cũ, luyện tập, rồi thử thách tự làm."],
+    ["Chỉ dùng chữ, âm, vần đã học", "Theo đúng vị trí bài học của lớp."],
+    ["Không làm lộ đáp án", "Câu lệnh, hình ảnh và lời đọc không nói thay con."],
+  ];
+  pts.forEach((t, i) => {
+    const y = 1.85 + i * 1.05;
+    card(s, 6.05, y, 3.45, 0.9);
+    s.addShape(pres.ShapeType.ellipse, { x: 6.2, y: y + 0.3, w: 0.28, h: 0.28, fill: { color: GOLD } });
+    s.addText(t[0], {
+      x: 6.6,
+      y: y + 0.08,
+      w: 2.8,
+      h: 0.3,
+      fontFace: HEAD,
+      fontSize: 13,
+      bold: true,
+      color: NAVY,
+      margin: 0,
+      isTextBox: true,
+    });
+    s.addText(t[1], {
+      x: 6.6,
+      y: y + 0.4,
+      w: 2.8,
+      h: 0.45,
+      fontFace: BODY,
+      fontSize: 11,
+      color: MUTED,
+      margin: 0,
+      valign: "top",
+      isTextBox: true,
+    });
+  });
+  chip(s, "demo", 6.05, 1.45);
+  caption(s, "Hiện mức hỗ trợ do người lớn chọn; tự động tăng giảm mức là hướng phát triển.", 0.6, 4.98, 8.9);
 }
 
 // 8. Bước 3 — phone annotated
@@ -675,7 +781,7 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   const k = A1.sh / 1560;
   const bx = (sx, fx) => sx + fx * A1.sw - 0.14;
   const by = (sy, py_) => sy + py_ * k - 0.14;
-  numDot(s, 1, bx(A1.sx, 0.07), by(A1.sy, 330), 0.28, ORANGE);
+  numDot(s, 1, bx(A1.sx, 0.02), by(A1.sy, 330), 0.28, ORANGE);
   numDot(s, 2, bx(A1.sx, 0.52), by(A1.sy, 1190), 0.28, ORANGE);
   numDot(s, 3, bx(A1.sx, 0.56), by(A1.sy, 1450), 0.28, ORANGE);
   numDot(s, 4, bx(B1.sx, 0.07), by(B1.sy, 828), 0.28, ORANGE);
@@ -743,9 +849,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
       isTextBox: true,
     });
   });
-  s.addNotes(
-    "Hướng dẫn trực quan trên ảnh điện thoại: xem câu hỏi, chọn đáp án, bấm Kiểm tra, xem kết quả. Âm thanh đọc câu lệnh đang chờ triển khai nên các nút loa hiện ghi “Chưa có âm thanh”.",
-  );
 }
 
 // 9. Khi trả lời sai
@@ -799,7 +902,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
       isTextBox: true,
     });
   });
-  s.addNotes("Triết lý: sai là cơ hội để học. Ảnh là màn hình thật của bản chơi thử khi chọn chưa đúng.");
 }
 
 // 10. Điểm thưởng
@@ -855,9 +957,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     ],
     { x: 0.85, y: 3.78, w: 8.4, h: 1.1, fontFace: BODY, fontSize: 14, valign: "middle", margin: 0, isTextBox: true },
   );
-  s.addNotes(
-    "Nhấn mạnh: điểm chỉ để khuyến khích. Không đưa ra số liệu thành tích học tập vì chưa có dữ liệu nghiên cứu thực tế.",
-  );
 }
 
 // 11. Bản đồ
@@ -869,8 +968,9 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   bullets(
     s,
     [
-      "Mỗi khu vực là một điểm đến: Mê cung kho báu, Rừng chữ kỳ diệu, Đảo dấu thanh, Lâu đài ghép vần.",
+      "Bốn khu vực: Mê cung kho báu, Rừng chữ kỳ diệu, Đảo dấu thanh, Lâu đài ghép vần.",
       "Luyện tập giúp mở thêm những trải nghiệm mới.",
+      "Hiện chỉ Mê cung đang được xây dựng.",
       "Trẻ nhìn thấy hành trình của mình qua hình ảnh, không chỉ qua con số.",
     ],
     6.6,
@@ -879,9 +979,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     { size: 14, gap: 10 },
   );
   caption(s, "Ảnh chụp bản chơi thử", 0.6, 4.9, 4);
-  s.addNotes(
-    "Bản đồ là hình vẽ riêng của dự án. Mỗi mốc 30 điểm tích lũy mở một thẻ khám phá. Chỉ Mê cung kho báu đang được xây dựng; các khu vực khác ghi rõ “Sắp ra mắt”.",
-  );
 }
 
 // 12. Mê cung
@@ -924,9 +1021,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     });
   });
   caption(s, "Ảnh chụp bản chơi thử: chưa có câu hỏi, chưa tính điểm.", 4.8, 5.0, 4.7);
-  s.addNotes(
-    "Ảnh lấy từ bản chơi thử của Mê cung kho báu. Bản thử nghiệm giúp làm quen cách đi; phần câu hỏi học tập trong mê cung đang được hoàn thiện.",
-  );
 }
 
 // 13. Điều khiển
@@ -1081,9 +1175,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     isTextBox: true,
   });
   chip(s, "demo", 3.0, 4.6);
-  s.addNotes(
-    "Hướng dẫn điều khiển: bốn nút mũi tên trên điện thoại, phím mũi tên trên máy tính, nút Tạm dừng và Chơi tiếp. Tự lưu vị trí hoạt động ở chế độ học của học sinh đã liên kết thẻ học.",
-  );
 }
 
 // 14. Quái vật
@@ -1160,99 +1251,39 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     margin: 0,
     isTextBox: true,
   });
-  s.addNotes(
-    "Đây là ý tưởng đang được hoàn thiện, KHÔNG phải tính năng đã chạy hoàn chỉnh. Đã xong: cơ chế chuẩn bị 7 cuộc chạm trán và 21 câu hỏi mỗi màn (R08.2). Chưa xong: kích hoạt chạm trán, chấm điểm trong game, kho báu (R08.3 trở đi). Hình quái vật là bản phác thảo tự vẽ, chờ giáo viên duyệt.",
-  );
 }
 
 // 15. Giáo viên
 {
   const s = pres.addSlide({ masterName: "LIGHT" });
   header(s, "Giáo viên", "Giáo viên đồng hành ra sao?");
-  // hình minh họa bảng điều khiển (vẽ bằng hình dạng)
-  s.addShape(pres.ShapeType.roundRect, {
-    x: 0.6,
-    y: 1.4,
-    w: 4.2,
-    h: 3.2,
-    rectRadius: 0.12,
-    fill: { color: WHITE },
-    line: { color: "D9CDB2", width: 1 },
-    shadow: shadow(),
-  });
-  s.addShape(pres.ShapeType.rect, { x: 0.7, y: 1.5, w: 1.0, h: 3.0, fill: { color: NAVY } });
-  ["Lớp học", "Học sinh", "Học liệu", "Mùa thi đua"].forEach((t, i) =>
-    s.addText(t, {
-      x: 0.78,
-      y: 1.65 + i * 0.5,
-      w: 0.9,
-      h: 0.3,
-      fontFace: BODY,
-      fontSize: 10,
-      color: WHITE,
-      margin: 0,
-      isTextBox: true,
-    }),
-  );
-  s.addText("Lớp 1A2 (minh họa)", {
-    x: 1.9,
-    y: 1.55,
-    w: 2.8,
-    h: 0.3,
-    fontFace: HEAD,
-    fontSize: 13,
-    bold: true,
-    color: NAVY,
-    margin: 0,
-    isTextBox: true,
-  });
-  for (let r = 0; r < 5; r++) {
-    const y = 2.0 + r * 0.5;
-    s.addShape(pres.ShapeType.roundRect, {
-      x: 1.9,
-      y,
-      w: 2.8,
-      h: 0.4,
-      rectRadius: 0.06,
-      fill: { color: r % 2 ? "F4F0E6" : TEAL_L },
-    });
-    s.addShape(pres.ShapeType.ellipse, { x: 1.98, y: y + 0.07, w: 0.26, h: 0.26, fill: { color: GOLD } });
-    s.addShape(pres.ShapeType.rect, {
-      x: 2.35,
-      y: y + 0.15,
-      w: 0.9 + (r % 3) * 0.2,
-      h: 0.1,
-      fill: { color: "9AA5B8" },
-    });
-    s.addShape(pres.ShapeType.rect, { x: 3.9, y: y + 0.15, w: 0.6, h: 0.1, fill: { color: TEAL } });
-  }
-  chip(s, "plan", 0.6, 4.7, "HÌNH MINH HỌA Ý TƯỞNG");
+  await browser(s, "crop-t-students.jpg", 0.6, 1.4, 5.1, 2.95);
+  chip(s, "demo", 0.6, 4.5, "ẢNH CHỤP · DỮ LIỆU GIẢ");
+  caption(s, "Danh sách học sinh với biệt danh hư cấu; chỉ giáo viên xem được nhóm năng lực.", 0.6, 4.85, 5.1);
   const f = [
-    ["Quản lý lớp học và hồ sơ học sinh", "done"],
-    ["Theo dõi hoạt động luyện tập", "wip"],
-    ["Chuẩn bị và kiểm tra học liệu", "wip"],
-    ["Động viên, vinh danh khi được cho phép", "wip"],
+    ["Quản lý lớp, học sinh, thẻ học", "done", undefined],
+    ["Bảng điểm lớp, chế độ trình chiếu", "done", "ĐÃ CÓ · MẶC ĐỊNH TẮT"],
+    ["Vinh danh TOP 3, mùa thi đua", "wip", undefined],
+    ["Duyệt học liệu, theo dõi tiến bộ", "plan", undefined],
   ];
   f.forEach((t, i) => {
-    const y = 1.45 + i * 0.85;
-    card(s, 5.1, y, 4.4, 0.72);
+    const y = 1.4 + i * 0.85;
+    card(s, 5.95, y, 3.55, 0.72);
     s.addText(t[0], {
-      x: 5.25,
+      x: 6.1,
       y: y + 0.04,
-      w: 4.1,
+      w: 3.3,
       h: 0.3,
       fontFace: HEAD,
-      fontSize: 13,
+      fontSize: 12,
       bold: true,
       color: NAVY,
       margin: 0,
       isTextBox: true,
     });
-    chip(s, t[1], 5.25, y + 0.38, t[1] === "wip" && i === 3 ? "CHƯA BẬT CHO HỌC SINH" : undefined);
+    chip(s, t[1], 6.1, y + 0.38, t[2]);
   });
-  s.addNotes(
-    "Màn hình bên trái là hình minh họa ý tưởng vẽ riêng, không phải ảnh chụp dữ liệu thật. Quản lý lớp và hồ sơ học sinh đã có; theo dõi, duyệt học liệu và vinh danh vẫn đang hoàn thiện. Bảng xếp hạng chưa được bật cho học sinh.",
-  );
+  caption(s, "Gồm cả ghi nhận đồng ý của phụ huynh.", 5.95, 4.85, 3.55);
 }
 
 // 16. Phụ huynh
@@ -1325,9 +1356,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     isTextBox: true,
   });
   chip(s, "plan", 7.2, 4.35, "GÓC PHỤ HUYNH: DỰ KIẾN");
-  s.addNotes(
-    "Phần góc phụ huynh chi tiết (xem tiến bộ của con) thuộc kế hoạch phát triển giai đoạn sau, chưa có trong bản hiện tại.",
-  );
 }
 
 // 17. An toàn
@@ -1336,9 +1364,12 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   header(s, "An toàn", "An toàn và phù hợp với học sinh nhỏ tuổi");
   const it = [
     ["Giao diện thân thiện", "Nút bấm lớn, mỗi màn hình một nhiệm vụ, chữ to rõ."],
-    ["Hình ảnh hiền hòa", "Không có hình ảnh gây sợ hãi; lời phản hồi luôn tích cực."],
-    ["Tôn trọng thông tin của con", "Chỉ dùng biệt danh. Không thu thập ảnh thật, giọng nói, địa chỉ."],
-    ["Đồng ý và kiểm soát", "Chỉ ghi nhận việc học khi có sự đồng ý; bảng xếp hạng mặc định tắt."],
+    ["Phản hồi tích cực", "Không gây sợ hãi. Không quảng cáo, không liên kết ra ngoài, không ô gõ tự do."],
+    [
+      "Tôn trọng thông tin của con",
+      "Chỉ dùng biệt danh; không thu thập họ tên, ảnh thật, giọng nói. Học sinh không trò chuyện với AI.",
+    ],
+    ["Đồng ý và kiểm soát", "Chỉ ghi dữ liệu khi phụ huynh đồng ý. Bảng xếp hạng chỉ trong lớp, mặc định tắt."],
   ];
   const shp = [pres.ShapeType.roundRect, pres.ShapeType.star5, pres.ShapeType.heart, pres.ShapeType.hexagon];
   for (let i = 0; i < 4; i++) {
@@ -1394,7 +1425,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     margin: 0,
     isTextBox: true,
   });
-  s.addNotes("Nói ngắn gọn, không đi vào kỹ thuật: dữ liệu tối thiểu, có đồng ý, giao diện nhẹ nhàng.");
 }
 
 // 18. Đã thực hiện
@@ -1403,16 +1433,21 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   header(s, "Kết quả", "Những gì dự án đã thực hiện");
   card(s, 0.6, 1.4, 5.0, 2.8);
   chip(s, "done", 0.8, 1.52);
-  const done = [
-    "Hệ thống học và luyện Tiếng Việt cho lớp 1",
-    "Giao diện cho học sinh và giáo viên",
-    "Điểm thưởng và bản đồ khám phá",
-    "Bản chơi thử Mê cung kho báu",
-    "Điều khiển, tạm dừng, lưu tiến độ",
-    "Nền tảng 7 chạm trán và 21 câu hỏi mỗi màn",
-    "Các đợt kiểm thử chức năng và giao diện",
-  ];
-  bullets(s, done, 0.85, 1.92, 4.6, { size: 13, gap: 4 });
+  bullets(
+    s,
+    [
+      "Bài luyện sáu dạng với hỗ trợ giảm dần",
+      "Giao diện học sinh; khu giáo viên (lớp, học sinh, thẻ học)",
+      "Điểm thưởng chấm trên máy chủ, bản đồ khám phá",
+      "Bản chơi thử Mê cung: điều khiển, tạm dừng, lưu tiến độ",
+      "Nền tảng 7 chạm trán và 21 câu hỏi mỗi màn",
+      "Các đợt kiểm thử tự động chức năng và giao diện",
+    ],
+    0.85,
+    1.92,
+    4.6,
+    { size: 13, gap: 4 },
+  );
   card(s, 5.8, 1.4, 3.7, 2.8, "FDF6EC");
   chip(s, "wip", 6.0, 1.52, "ĐANG HOÀN THIỆN / CHỜ DUYỆT");
   bullets(
@@ -1428,22 +1463,26 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     3.3,
     { size: 13, gap: 6 },
   );
-  s.addText("Chưa triển khai chính thức và chưa thí điểm với học sinh.", {
-    x: 0.6,
-    y: 4.35,
-    w: 8.9,
-    h: 0.4,
-    fontFace: BODY,
-    fontSize: 14,
-    bold: true,
-    italic: true,
-    color: NAVY,
-    margin: 0,
-    isTextBox: true,
-  });
+  s.addText(
+    "Đang chạy thử trên máy phát triển với dữ liệu giả. Chưa triển khai chính thức, chưa thí điểm với học sinh.",
+    {
+      x: 0.6,
+      y: 4.3,
+      w: 8.9,
+      h: 0.45,
+      fontFace: BODY,
+      fontSize: 14,
+      bold: true,
+      italic: true,
+      color: NAVY,
+      margin: 0,
+      valign: "middle",
+      isTextBox: true,
+    },
+  );
   s.addText("Cách đọc nhãn:", {
     x: 0.6,
-    y: 4.8,
+    y: 4.85,
     w: 1.2,
     h: 0.28,
     fontFace: BODY,
@@ -1454,10 +1493,7 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     isTextBox: true,
   });
   let lx = 1.8;
-  for (const k of ["done", "demo", "wip", "plan"]) lx += chip(s, k, lx, 4.8) + 0.15;
-  s.addNotes(
-    "Chỉ nêu những kết quả có thật. Không khẳng định đã thí điểm với học sinh. Tiến độ hiện tại: đã hoàn thành R01–R07 và R08.1, R08.2; chưa làm R08.3–R08.6.",
-  );
+  for (const k of ["done", "demo", "wip", "plan"]) lx += chip(s, k, lx, 4.85) + 0.15;
 }
 
 // 19. Hướng phát triển
@@ -1466,7 +1502,7 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
   header(s, "Lộ trình", "Hướng phát triển tiếp theo");
   const steps = [
     ["Hoàn thiện Mê cung", "Chạm trán, chấm điểm, kho báu"],
-    ["Âm thanh và học liệu", "Bổ sung âm thanh; giáo viên duyệt nội dung"],
+    ["Âm thanh và học liệu", "Âm thanh, duyệt học liệu, góc phụ huynh"],
     ["Kiểm thử tổng thể", "Rà soát an toàn, giao diện, thiết bị"],
     ["Đưa vào sử dụng", "Theo kế hoạch, từng bước"],
   ];
@@ -1541,7 +1577,6 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     });
   });
   chip(s, "plan", 3.55, 3.69, "SAU KHI NỘP DỰ ÁN");
-  s.addNotes("Ba mini-game còn lại được hoãn sau khi nộp dự án, không phải một phần của bản nộp.");
 }
 
 // 20. Kết luận
@@ -1602,8 +1637,11 @@ function bullets(s, items, x, y, w, { size = 16, gap = 8, color = INK } = {}) {
     margin: 0,
     isTextBox: true,
   });
-  s.addNotes("Kết thúc bằng thông điệp tích cực và lời cảm ơn.");
 }
 
+const { SPEECH } = await import("./speech.mjs");
+if (pres.slides.length !== SPEECH.length)
+  throw new Error(`Số slide ${pres.slides.length} != số lời dẫn ${SPEECH.length}`);
+pres.slides.forEach((sl, i) => sl.addNotes(SPEECH[i].text));
 await pres.writeFile({ fileName: OUT });
 console.log("Đã ghi", OUT);

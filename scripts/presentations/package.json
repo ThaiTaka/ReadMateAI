@@ -3,6 +3,11 @@
   "private": true,
   "description": "Công cụ tạo bài trình chiếu PowerPoint; tách khỏi phụ thuộc chính của ReadMate AI",
   "type": "module",
-  "scripts": { "build": "node build-deck.mjs" },
-  "dependencies": { "pptxgenjs": "4.0.1", "sharp": "^0.34.0" }
+  "scripts": {
+    "build": "node build-deck.mjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "4.0.1",
+    "sharp": "^0.34.0"
+  }
 }
