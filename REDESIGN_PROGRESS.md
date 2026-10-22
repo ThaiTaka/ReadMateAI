@@ -6,7 +6,7 @@
 
 ## 1. Trạng thái hiện tại
 
-- **R08.2 xong ở local (chờ CI): bắt đầu lượt phân bổ 7 chạm trán + 21 câu trong một giao dịch, thiếu nội dung → `INSUFFICIENT_CONTENT` — §5p (kèm thiết lập máy mới).** Production chưa có học liệu duyệt nên chưa tạo được lượt thật. Bước tiếp: R08.3 (kích hoạt, chấm điểm + HP, kết thúc chạm trán, kho báu).
+- **R08.2 xong (CI xanh `042ab92`: CI 39767413174 + 39767403593, E2E 39767413264 + 39767403637 — job `E2E database webkit-mobile` của run push treo 30 phút, đã hủy và chạy lại thì xanh): bắt đầu lượt phân bổ 7 chạm trán + 21 câu trong một giao dịch, thiếu nội dung → `INSUFFICIENT_CONTENT` — §5p (kèm thiết lập máy mới).** Production chưa có học liệu duyệt nên chưa tạo được lượt thật. Bước tiếp: R08.3 (kích hoạt, chấm điểm + HP, kết thúc chạm trán, kho báu).
 - **R08.1 xong (CI xanh `24d8007`: CI 39726933304, E2E 39726933408): migration `game_encounters` + `game_level_triggers` + ngữ cảnh `game_encounter` của `question_instances` + chặn lưu vị trí xuyên điểm kích hoạt + reset mùa đóng chạm trán — §5o.** Chưa phân bổ thật (R08.2). Bước tiếp: R08.2.
 - **R07.6 xong (CI xanh `8701cfa`): lớp phủ tạm dừng, rời màn chờ xác nhận lưu, hoạt cảnh quay mặt mượt, đo lại FPS/bundle — R07 nghiệm thu về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi (chưa phải mini-game hoàn chỉnh, xem §5n).** Bước tiếp: R08.1 (migration `game_encounters`).
 - **R07.5b2 xong (chờ CI): trang `/learn/me/games/treasure-maze` nối API lượt chơi — tự lưu vị trí, khôi phục sau tải lại, xử lý `STATE_CONFLICT`/`SEASON_CLOSED`/mất mạng — §5m. R07.5b1 đã nghiệm thu (CI + E2E xanh `65328eb`). **Lộ trình nộp dự án: R07 → R08 → R10 → R11 → NỘP; R09 tạm hoãn sau khi nộp (không bắt đầu trước ngày nộp).**
@@ -507,7 +507,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
 | 2026-10-22 | R08.1 | R08 | Sửa test chập chờn reset mùa (chờ nút bật lại); migration `game_encounters` + `game_level_triggers` + ngữ cảnh game của `question_instances` + chặn lưu vị trí xuyên trigger + reset đóng chạm trán; pgTAP 186, DB 216 local; CI chờ. Không làm R08.2 |
-| 2026-10-22 | R08.2 | R08 | Dựng lại máy mới (Node 24.18 zip cạnh Node 26, Docker, Supabase local, seed); `gateway_start_game_run` phân bổ 1 lượt + 7 chạm trán + 21 câu trong một giao dịch (CSDL kiểm lại kế hoạch của máy chủ), tiếp tục lượt đứng trước ngưỡng điểm, fixture game riêng; pgTAP 212 + DB 100/100 local; CI chờ. Không làm R08.3 |
+| 2026-10-22 | R08.2 | R08 | Dựng lại máy mới (Node 24.18 zip cạnh Node 26, Docker, Supabase local, seed); `gateway_start_game_run` phân bổ 1 lượt + 7 chạm trán + 21 câu trong một giao dịch (CSDL kiểm lại kế hoạch của máy chủ), tiếp tục lượt đứng trước ngưỡng điểm, fixture game riêng; pgTAP 212 + DB 100/100 local; CI + E2E xanh `042ab92`. Không làm R08.3 |
 | 2026-10-22 | R07.6 | R07 | Lớp phủ tạm dừng (Chơi tiếp/Về bản đồ, focus, Esc), `flushAndWait` khi rời màn, quay mặt mượt; FPS 60 (CPU 4× vẫn 60), bundle 224,5 KB gzip; unit 83, E2E chromium 26/26 local; CI chờ. Không làm R08 |
 | 2026-10-21 | R07.5a | R07 | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí (ngưỡng 50, optimistic concurrency, kiểm tường), reset mùa đóng lượt dở; pgTAP 23 + DB 16 local. Không làm R07.5b |
 | 2026-10-21 | R07.5b2 | R07 | Nghiệm thu R07.5b1 (CI + E2E xanh `65328eb`); trang `/learn/me/games/treasure-maze` + `PositionSaver` + khôi phục + xử lý lỗi; lộ trình nộp dự án (R09 hoãn); unit 20 mới, E2E có CSDL 7 kịch bản local. Không làm R07.6/R08 |
