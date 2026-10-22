@@ -128,11 +128,10 @@ describe("R08.1 — điểm kích hoạt trong CSDL khớp tệp JSON", () => {
       'npx supabase db query --local -o json "select level_key, trigger_key, row_no, col_no from private.game_level_triggers t join private.game_levels l using (game_key, level_key, level_version) where l.is_current order by 1, 2"',
       { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
     );
-    const rows = (
-      JSON.parse(out.slice(out.indexOf("{"))) as {
-        rows: { level_key: string; trigger_key: string; row_no: number; col_no: number }[];
-      }
-    ).rows;
+    // CLI có thể in thêm dòng khác trước/sau JSON: chỉ lấy mảng "rows".
+    const match = /"rows":\s*(\[[\s\S]*?\])/u.exec(out);
+    expect(match).not.toBeNull();
+    const rows = JSON.parse(match![1]!) as { level_key: string; trigger_key: string; row_no: number; col_no: number }[];
     const expected = ["01", "02", "03"].flatMap((n) => {
       const level = levelFile(n);
       return level.triggers.map((t) => ({ level_key: level.id, trigger_key: t.id, row_no: t.row, col_no: t.col }));
