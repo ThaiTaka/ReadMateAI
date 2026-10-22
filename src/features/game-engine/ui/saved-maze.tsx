@@ -92,7 +92,8 @@ export function SavedMaze({
       phase: "ready",
       run: result.data.run,
       epoch: epoch.current,
-      encounters: state.data.progress.total > 0 ? state.data : null,
+      // Lượt không tính điểm (fixture local R07) không có chạm trán: giữ hành vi lưu vị trí thuần.
+      encounters: result.data.run.scored && state.data.progress.total > 0 ? state.data : null,
     };
   }, [studentId, levelKey]);
 
