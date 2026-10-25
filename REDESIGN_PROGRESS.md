@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
+> **Cập nhật lần cuối:** 2026-10-26 — Phiên Claude Code R10.1 (Audio Engine, thiết kế); trước đó 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R10.1 xong về thiết kế/mã (CI chờ): [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) (so sánh Google/Azure/FPT.AI theo tài liệu chính thức 2026-10-26), [docs/AUDIO_RECORDING_PLAN.md](docs/AUDIO_RECORDING_PLAN.md) (DỰ KIẾN: 38 âm P0 + 143 vần nhiều chữ, ≈ 60 phút ghi, 4–5 buổi 15–20 phút), adapter `TtsProvider` (`src/server/tts/`: none/mock/google-skeleton, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy`+`checkAudioLeaks`) + 21 unit test. KHÔNG gọi API thật (chưa có khóa được cấp phép — POC BLOCKED), KHÔNG nghe thử giọng, `AudioSlot` vẫn khóa, không route/migration/gọi hàng loạt. Đề xuất POC: Google Neural2 (chưa chọn/mua). Chờ chủ dự án D1–D6 (AUDIO_ENGINE §10). R10.2 chưa làm.**
 - **R08.6 xong (CI chờ): chơi lại Mê cung đã hoàn thành — vẫn 7 quái vật × 21 câu, 3 trái tim, kho báu, tự lưu, nhưng KHÔNG cộng/trừ điểm; nhãn "Chơi lại — không tính điểm" — §5t.** R08 xong **về kỹ thuật**; **chưa được phê duyệt dùng thật**: GV chưa duyệt hình/tên/lời thoại quái vật (R08.5 chỉ xong phần kỹ thuật) và kho học liệu thật 0 mục đã duyệt. R09 tiếp tục hoãn; bước tiếp theo theo lộ trình là R10 (chỉ làm khi được giao).
 - **R08.4 xong (CI chờ): giao diện chạm trán — lưu trước rồi kích hoạt, màn quái vật (3 trái tim, Player GĐ4, điểm/HP của máy chủ), hoạt cảnh defeated/undefeated, quay lại mê cung, tải lại giữa chạm trán, mở kho báu sau 7/7 — §5r.** E2E toàn trình 7 chạm trán xanh local (chromium desktop/mobile, webkit mobile). Bước tiếp: R08.5 (kiểm tên/lời thoại/hình quái vật, giấy phép, hồ sơ cho GV duyệt).
 - **R08.3 xong (database + API + nghiệp vụ máy chủ, chưa có UI; CI chờ): kích hoạt chạm trán theo vị trí lưu ở CSDL, chấm điểm + HP quái vật trong một giao dịch, kết thúc defeated/undefeated, mở kho báu, mã lỗi tiếng Việt — §5q.** Bước tiếp: R08.4 (giao diện quái vật, ba trái tim, câu hỏi, hoạt cảnh, quay lại mê cung).
@@ -35,7 +36,8 @@
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (§5r) + **R08.5 phần kỹ thuật (§5s)** xong; **GV chưa duyệt quái vật (chờ xác nhận thực tế)**; R08.6 chưa làm |
-| R10, R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
+| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); R10.2–R10.7 chưa bắt đầu |
+| R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
 ### 1.1 Trạng thái khi bắt đầu R02 (kiểm tra thật, 2026-10-20)

@@ -511,6 +511,8 @@ Mọi đề xuất đều **giải thích được** cho GV (ví dụ: "Đề xu
 
 ## 13. Hệ thống âm thanh
 
+> **R10.1 (2026-10-26):** thiết kế chi tiết, so sánh nhà cung cấp và adapter `TtsProvider` (`src/server/tts/`) nằm ở [AUDIO_ENGINE.md](AUDIO_ENGINE.md); kế hoạch bản ghi GV ở [AUDIO_RECORDING_PLAN.md](AUDIO_RECORDING_PLAN.md). Mới có adapter + mock + kế hoạch; **chưa** có âm thanh, thư viện, migration hay phát trong Player (R10.2–R10.3). Bảng AD-09 vẫn: nhà cung cấp chưa chốt.
+
 | Vai trò | Ví dụ | Nguồn ưu tiên |
 |---|---|---|
 | `instruction` | "Con nhìn hình rồi chọn chữ ghi âm đầu." | Ghi âm GV hoặc TTS (câu lệnh chuẩn theo dạng bài) |

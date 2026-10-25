@@ -91,7 +91,8 @@ describe("vệ sinh repo", () => {
   it("mã nguồn giao diện không tải tài nguyên từ tên miền bên ngoài", () => {
     const allowed = ["http://www.w3.org/2000/svg"];
     const findings = textFiles
-      .filter((file) => file.path.startsWith("src/"))
+      // Adapter TTS chạy ở máy chủ (R10.1) nên được khai báo điểm cuối nhà cung cấp; giao diện thì không.
+      .filter((file) => file.path.startsWith("src/") && !file.path.startsWith("src/server/tts/"))
       .flatMap((file) =>
         (file.content.match(/https?:\/\/[^\s"'`)]+/g) ?? [])
           .filter((url) => !allowed.includes(url))

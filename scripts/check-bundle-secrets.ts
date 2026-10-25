@@ -28,6 +28,7 @@ const SECRET_VARS = [
   "CRON_SECRET",
   "TURNSTILE_SECRET_KEY",
   "ANTHROPIC_API_KEY",
+  "TTS_GOOGLE_API_KEY",
 ];
 const secretValues = SECRET_VARS.map((name) => [name, process.env[name]?.trim() ?? ""] as const).filter(
   ([, value]) => value.length >= 8,
