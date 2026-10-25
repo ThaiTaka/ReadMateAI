@@ -56,6 +56,29 @@ describe("bộ lập kế hoạch lượt Mê cung (R08.2)", () => {
     expect(ids).not.toContain(candidate(1).exerciseItemId);
   });
 
+  it("R08.6 chơi lại: dùng lại được câu đã tính điểm, vẫn bỏ trùng vân tay và đòi đủ 21 câu khác nhau", () => {
+    const allScored = pool(21, () => ({ scoredInSeason: true }));
+    expect(planGameRun(allScored, { band: "developing", seed: "s" })).toBeNull();
+    const plan = planGameRun(allScored, { band: "developing", seed: "s", replay: true })!;
+    const ids = plan.encounters.flatMap((e) => e.questions.map((q) => q.exerciseItemId));
+    expect(plan.encounters).toHaveLength(7);
+    expect(new Set(ids).size).toBe(21);
+    expect(new Set(plan.encounters.map((e) => e.monsterKey)).size).toBe(7);
+    // Không nhân bản để đủ số lượng: 20 nội dung khác nhau (kể cả khi có bản sao) thì không có kế hoạch.
+    const twenty = [
+      ...pool(20, () => ({ scoredInSeason: true })),
+      candidate(99, { fingerprint: "fp-0", scoredInSeason: true }),
+    ];
+    expect(planGameRun(twenty, { band: "developing", seed: "s", replay: true })).toBeNull();
+  });
+
+  it("R08.6 chơi lại: cùng seed → cùng kế hoạch; khác seed → thứ tự khác (mỗi lần chơi lại không giống hệt)", () => {
+    const items = pool(30, () => ({ scoredInSeason: true }));
+    const a = planGameRun(items, { band: "developing", seed: "x:replay0", replay: true });
+    expect(planGameRun(items, { band: "developing", seed: "x:replay0", replay: true })).toEqual(a);
+    expect(planGameRun(items, { band: "developing", seed: "x:replay1", replay: true })).not.toEqual(a);
+  });
+
   it("mức hỗ trợ và số lượt theo nhóm: Nhóm 3 → H3, Nhóm 2 → H2, Nhóm 1 → H1 với số lượt của chính sách GĐ4", () => {
     for (const [band, level] of [
       ["foundation", 3],

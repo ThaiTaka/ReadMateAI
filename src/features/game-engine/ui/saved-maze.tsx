@@ -69,7 +69,9 @@ export function SavedMaze({
 }) {
   type Load =
     | { phase: "loading" }
-    | { phase: "failed"; result: Extract<StartResult, { ok: false }> }
+    | { phase: "failed"; result: Extract<StartResult, { ok: false }>; replay: boolean }
+    /** Lượt tính điểm của màn này trong mùa đã xong: mời "Chơi lại cho vui" (máy chủ vẫn kiểm điều kiện khi bấm). */
+    | { phase: "offer" }
     | {
         phase: "ready";
         run: GameRunDto["run"];
@@ -82,25 +84,36 @@ export function SavedMaze({
   const home = homeHref(studentId, multipleProfiles);
 
   /** Bắt đầu/tiếp tục lượt rồi nạp trạng thái chạm trán của MÁY CHỦ (không suy từ trình duyệt). */
-  const fetchRun = useCallback(async (): Promise<Load> => {
-    const result = await startRun(studentId, levelKey);
-    if (!result.ok) return { phase: "failed", result };
-    const state = await fetchEncounterState(result.data.run.id);
-    if (!state.ok) return { phase: "failed", result: { ok: false, code: state.code } };
-    epoch.current += 1;
-    return {
-      phase: "ready",
-      run: result.data.run,
-      epoch: epoch.current,
-      // Lượt không tính điểm (fixture local R07) không có chạm trán: giữ hành vi lưu vị trí thuần.
-      encounters: result.data.run.scored && state.data.progress.total > 0 ? state.data : null,
-    };
-  }, [studentId, levelKey]);
+  const fetchRun = useCallback(
+    async (replay = false): Promise<Load> => {
+      const result = await startRun(studentId, levelKey, replay);
+      if (!result.ok) {
+        // Lượt tính điểm đã xong trong mùa này (CSDL trả RUN_NOT_ACTIVE) → chỉ còn đường chơi lại không tính điểm.
+        if (!replay && result.code === "RUN_NOT_ACTIVE") return { phase: "offer" };
+        return { phase: "failed", result, replay };
+      }
+      const state = await fetchEncounterState(result.data.run.id);
+      if (!state.ok) return { phase: "failed", result: { ok: false, code: state.code }, replay };
+      epoch.current += 1;
+      return {
+        phase: "ready",
+        run: result.data.run,
+        epoch: epoch.current,
+        // Lượt fixture local (R07: không tính điểm, không chơi lại) không có chạm trán: giữ hành vi lưu vị trí thuần.
+        encounters:
+          (result.data.run.scored || result.data.run.replay) && state.data.progress.total > 0 ? state.data : null,
+      };
+    },
+    [studentId, levelKey],
+  );
 
-  const open = useCallback(async () => {
-    setLoad({ phase: "loading" });
-    setLoad(await fetchRun());
-  }, [fetchRun]);
+  const open = useCallback(
+    async (replay = false) => {
+      setLoad({ phase: "loading" });
+      setLoad(await fetchRun(replay));
+    },
+    [fetchRun],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -121,6 +134,26 @@ export function SavedMaze({
       >
         {t.loading}
       </p>
+    );
+  }
+  if (load.phase === "offer") {
+    return (
+      <Panel
+        testId="maze-replay-offer"
+        title={t.replay.offerTitle}
+        actions={
+          <>
+            <button type="button" onClick={() => void open(true)} className={BUTTON} data-testid="replay-start">
+              {t.replay.cta}
+            </button>
+            <Link href={home} className={BUTTON}>
+              {t.back}
+            </Link>
+          </>
+        }
+      >
+        {t.replay.offerText}
+      </Panel>
     );
   }
   if (load.phase === "failed") {
@@ -161,7 +194,7 @@ export function SavedMaze({
         actions={
           <>
             {retryable ? (
-              <button type="button" onClick={() => void open()} className={BUTTON}>
+              <button type="button" onClick={() => void open(load.replay)} className={BUTTON}>
                 {t.retryLoad}
               </button>
             ) : null}
@@ -185,6 +218,7 @@ export function SavedMaze({
       level={level}
       home={home}
       onReload={() => void open()}
+      onPlayAgain={() => void open(true)}
     />
   );
 }
@@ -206,6 +240,7 @@ function ReadyMaze({
   level,
   home,
   onReload,
+  onPlayAgain,
 }: {
   studentId: string;
   run: GameRunDto["run"];
@@ -214,6 +249,7 @@ function ReadyMaze({
   level: Level;
   home: Route;
   onReload: () => void;
+  onPlayAgain: () => void;
 }) {
   const saver = useMemo(
     () =>
@@ -253,6 +289,7 @@ function ReadyMaze({
                 resume={resume}
                 balance={liveBalance}
                 onScore={setLiveBalance}
+                replay={run.replay}
                 home={home}
                 onDismiss={() => {
                   setResume(null);
@@ -276,6 +313,8 @@ function ReadyMaze({
                 progress={progress}
                 home={home}
                 onOpened={() => setTreasureOpened(true)}
+                replay={run.replay}
+                onPlayAgain={onPlayAgain}
               />
             ),
           }
@@ -293,6 +332,8 @@ function ReadyMaze({
       liveBalance,
       home,
       refreshProgress,
+      run.replay,
+      onPlayAgain,
     ],
   );
   const snapshot = useSyncExternalStore(saver.subscribe, saver.getSnapshot, saver.getSnapshot);
@@ -319,9 +360,9 @@ function ReadyMaze({
   }, [saver]);
 
   const { status, unsaved } = snapshot;
-  const ribbon = run.scored ? t.scoredRibbon : t.tryRibbon;
+  const ribbon = run.replay ? t.replay.ribbon : run.scored ? t.scoredRibbon : t.tryRibbon;
   return (
-    <div ref={rootRef} data-testid="saved-maze" data-run-id={run.id} data-scored={run.scored}>
+    <div ref={rootRef} data-testid="saved-maze" data-run-id={run.id} data-scored={run.scored} data-replay={run.replay}>
       <p
         role="note"
         data-testid="maze-ribbon"
@@ -329,7 +370,13 @@ function ReadyMaze({
       >
         {ribbon}
       </p>
-      {!run.scored ? <p className="mt-2 mb-4 max-w-prose text-ink-soft">{t.tryNote}</p> : <div className="mb-4" />}
+      {run.replay ? (
+        <p className="mt-2 mb-4 max-w-prose text-ink-soft">{t.replay.offerText}</p>
+      ) : !run.scored ? (
+        <p className="mt-2 mb-4 max-w-prose text-ink-soft">{t.tryNote}</p>
+      ) : (
+        <div className="mb-4" />
+      )}
 
       {status === "conflict" ? (
         <Panel

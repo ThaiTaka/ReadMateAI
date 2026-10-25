@@ -41,6 +41,7 @@ export function EncounterGate({
   home,
   onDismiss,
   onFinished,
+  replay = false,
 }: {
   studentId: string;
   runId: string;
@@ -52,6 +53,7 @@ export function EncounterGate({
   home: Route;
   onDismiss: () => void;
   onFinished: (progress: { resolved: number; total: number } | null) => void;
+  replay?: boolean;
 }) {
   const [phase, setPhase] = useState<Phase>(() =>
     resume?.encounter ? { kind: "play", encounter: resume.encounter } : { kind: "saving" },
@@ -147,6 +149,7 @@ export function EncounterGate({
             onFinished={onFinished}
             onDismiss={() => dismissRef.current()}
             onStopped={(stop) => setPhase({ kind: "stopped", stop })}
+            replay={replay}
           />
         </div>
       );

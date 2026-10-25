@@ -23,6 +23,8 @@ type Server = {
   position: { row: number; col: number };
   version: number;
   balance: number;
+  /** R08.6: lượt chơi lại không tính điểm (máy chủ trả scored=false, replay=true; câu scorable=false). */
+  replay: boolean;
   maxAttempts: number;
   resolved: Set<string>;
   active: null | { key: string; hp: number; questions: Question[] };
@@ -58,7 +60,7 @@ function publicQuestion(question: Question, index: number) {
     attemptsUsed: question.attemptsUsed,
     maxAttempts: server.maxAttempts,
     supportLevel: 3,
-    scorable: true,
+    scorable: !server.replay,
     lastResponse: question.last ? { kind: "choice", optionId: question.last } : null,
     marks: question.last ? { [question.last]: question.last === "o3" ? "correct" : "incorrect" } : {},
     feedback: null,
@@ -101,7 +103,8 @@ function route(url: string, method: string, body: Record<string, unknown> | null
         position: server.position,
         stateVersion: server.version,
         status: "in_progress",
-        scored: true,
+        scored: !server.replay,
+        replay: server.replay,
       },
     });
   }
@@ -154,9 +157,9 @@ function route(url: string, method: string, body: Record<string, unknown> | null
     if (correct) {
       question.status = "correct";
       active.hp -= 1;
-      applied = 10;
+      applied = server.replay ? 0 : 10;
     } else {
-      applied = Math.max(-5, -server.balance);
+      applied = server.replay ? 0 : Math.max(-5, -server.balance);
       if (question.attemptsUsed >= server.maxAttempts) question.status = "exhausted";
     }
     server.balance += applied;
@@ -168,7 +171,7 @@ function route(url: string, method: string, body: Record<string, unknown> | null
     }
     const result = {
       question: publicQuestion(question, index),
-      points: { nominalDelta: correct ? 10 : -5, appliedDelta: applied },
+      points: server.replay ? null : { nominalDelta: correct ? 10 : -5, appliedDelta: applied },
       score: { balance: server.balance, earnedTotal: server.balance },
       tilesAvailable: 0,
       newlyUnlockedGames: [],
@@ -203,6 +206,7 @@ beforeEach(() => {
     position: { row: 1, col: 3 },
     version: 1,
     balance: 100,
+    replay: false,
     maxAttempts: 3,
     resolved: new Set(),
     active: null,
@@ -532,5 +536,47 @@ describe("Mê cung có chạm trán — tải lại và kho báu", () => {
     step("ArrowLeft");
     await screen.findByTestId("treasure-locked");
     expect(server.log).toContain("treasure");
+  });
+});
+
+describe("R08.6 — Mê cung chơi lại không tính điểm", () => {
+  it("nhãn cố định, không hiện điểm hay +10/−5; đúng vẫn giảm trái tim, sai giữ nguyên; điểm máy chủ không đổi", async () => {
+    server.replay = true;
+    await meetFirstMonster();
+    expect(screen.getByTestId("maze-ribbon").textContent).toBe(strings.treasureMazePlay.replay.ribbon);
+    expect(screen.getByTestId("encounter-replay").textContent).toBe(t.replayBadge);
+    expect(screen.queryByTestId("encounter-score")).toBeNull();
+    expect(hp()).toBe(3);
+
+    await answer("ua");
+    expect(hp()).toBe(3); // sai: trái tim giữ nguyên
+    await answer("oe");
+    expect(hp()).toBe(2); // đúng: mất một trái tim
+    expect(screen.getByTestId("encounter-replay")).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/\+10|−5|\d+ điểm/u);
+    expect(server.balance).toBe(100);
+  });
+
+  it("tải lại giữa chạm trán chơi lại: nhãn vẫn còn, quay lại đúng câu và HP, không kích hoạt lại", async () => {
+    server.replay = true;
+    await meetFirstMonster();
+    await answer("oe");
+    await nextQuestion();
+    expect(screen.getByTestId("encounter-step").textContent).toBe("Câu hỏi 2 / 3");
+    cleanup();
+    mount();
+    await screen.findByTestId("encounter-question");
+    expect(screen.getByTestId("encounter-step").textContent).toBe("Câu hỏi 2 / 3");
+    expect(screen.getByTestId("encounter-replay")).toBeTruthy();
+    expect(hp()).toBe(2);
+    expect(server.log.filter((entry) => entry === "activate")).toHaveLength(1);
+    expect(server.balance).toBe(100);
+  });
+
+  it("lượt tính điểm giữ nguyên: không có nhãn chơi lại, vẫn hiện điểm", async () => {
+    await meetFirstMonster();
+    expect(screen.queryByTestId("encounter-replay")).toBeNull();
+    expect(screen.getByTestId("maze-ribbon").textContent).toBe(strings.treasureMazePlay.scoredRibbon);
+    expect(screen.getByTestId("encounter-score")).toBeTruthy();
   });
 });

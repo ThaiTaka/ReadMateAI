@@ -10,6 +10,7 @@ import { Notice } from "@/components/ui/notice";
 import { BUNDLED_LEVEL_FILES, BUNDLED_LEVELS } from "@/features/game-engine/levels/bundled";
 import { SavedMaze } from "@/features/game-engine/ui/saved-maze";
 import { GAME_MIN_BALANCE } from "@/features/gamification/rules";
+import { hasLevelProgress } from "@/server/game-runs/student";
 import { getStudentHome } from "@/server/scoring/home";
 import { studentContext } from "@/server/student-gateway/context";
 import { getDeviceSession } from "@/server/student-gateway/session";
@@ -91,13 +92,18 @@ async function Content({ searchParams }: Pick<PageProps<"/learn/me/games/treasur
   const context = await studentContext();
   const home = context.ok ? await getStudentHome(context.data, student) : context;
   const min = GAME_MIN_BALANCE.treasure_maze;
+  // Điểm dưới ngưỡng nhưng đã có lượt dở / đã hoàn thành màn này trong mùa: vẫn mở bàn (tiếp tục hoặc chơi lại không điểm).
+  const keepsAccess =
+    home.ok && context.ok && home.data.score.balance < min
+      ? await hasLevelProgress(context.data, student.id, levelFile.id)
+      : false;
 
   let body;
   if (!home.ok) {
     body = <Notice title={vi.status.inDevelopment}>{vi.errors[home.code]}</Notice>;
   } else if (!home.data.learningDataConsent) {
     body = <Notice title={vi.learnMe.practice.title}>{vi.learnMe.practice.blocked.CONSENT_REQUIRED}</Notice>;
-  } else if (home.data.score.balance < min) {
+  } else if (home.data.score.balance < min && !keepsAccess) {
     body = (
       <Card className="mx-auto max-w-xl p-6 text-center sm:p-8" data-testid="maze-needs-points">
         <p className="text-lg font-semibold text-ink">

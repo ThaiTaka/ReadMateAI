@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-23 — Phiên Claude Code R08.5 (soát chống lộ đáp án quái vật, giấy phép hình, hồ sơ GV; chờ GV duyệt)
+> **Cập nhật lần cuối:** 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R08.6 xong (CI chờ): chơi lại Mê cung đã hoàn thành — vẫn 7 quái vật × 21 câu, 3 trái tim, kho báu, tự lưu, nhưng KHÔNG cộng/trừ điểm; nhãn "Chơi lại — không tính điểm" — §5t.** R08 xong **về kỹ thuật**; **chưa được phê duyệt dùng thật**: GV chưa duyệt hình/tên/lời thoại quái vật (R08.5 chỉ xong phần kỹ thuật) và kho học liệu thật 0 mục đã duyệt. R09 tiếp tục hoãn; bước tiếp theo theo lộ trình là R10 (chỉ làm khi được giao).
 - **R08.4 xong (CI chờ): giao diện chạm trán — lưu trước rồi kích hoạt, màn quái vật (3 trái tim, Player GĐ4, điểm/HP của máy chủ), hoạt cảnh defeated/undefeated, quay lại mê cung, tải lại giữa chạm trán, mở kho báu sau 7/7 — §5r.** E2E toàn trình 7 chạm trán xanh local (chromium desktop/mobile, webkit mobile). Bước tiếp: R08.5 (kiểm tên/lời thoại/hình quái vật, giấy phép, hồ sơ cho GV duyệt).
 - **R08.3 xong (database + API + nghiệp vụ máy chủ, chưa có UI; CI chờ): kích hoạt chạm trán theo vị trí lưu ở CSDL, chấm điểm + HP quái vật trong một giao dịch, kết thúc defeated/undefeated, mở kho báu, mã lỗi tiếng Việt — §5q.** Bước tiếp: R08.4 (giao diện quái vật, ba trái tim, câu hỏi, hoạt cảnh, quay lại mê cung).
 - **R08.2 xong (CI xanh `042ab92`: CI 39767413174 + 39767403593, E2E 39767413264 + 39767403637 — job `E2E database webkit-mobile` của run push treo 30 phút, đã hủy và chạy lại thì xanh): bắt đầu lượt phân bổ 7 chạm trán + 21 câu trong một giao dịch, thiếu nội dung → `INSUFFICIENT_CONTENT` — §5p (kèm thiết lập máy mới).** Production chưa có học liệu duyệt nên chưa tạo được lượt thật. Bước tiếp: R08.3 (kích hoạt, chấm điểm + HP, kết thúc chạm trán, kho báu).
@@ -367,6 +368,45 @@ Migration `20261028090000_r08_start_allocation.sql`. **Không** có API kích ho
 - **Kiểm thử (local):** pgTAP 212 (10 tệp; mới `10_game_allocation` 26: chữ ký/quyền, mặc định cờ, 18 ca hình dạng kế hoạch; `08_game_runs` đổi chữ ký), unit mới `game-planner.test.ts` (9), DB integration mới `game-allocation.test.ts` (17: 21 đủ/20 thiếu, trùng vân tay/mã, chưa duyệt/chưa học/Nhóm 3, môi trường kiểm thử tắt, rollback, hai tab, tiếp tục lượt, tiếp tục khi tụt dưới 50, ngưỡng 40/50, đồng ý/thu hồi/lớp khác, hình dạng sai, chống cày điểm, không lộ DTO/RLS, không ghi trực tiếp, reset mùa + song song 3 vòng, hồi quy R07/R08.1). Chạy lại `game-runs`, `game-runs-service`, `game-encounters`, `scoring`, `season-reset` + mới: **100/100**. `db:lint` 0 (đã sửa 3 cảnh báo ép kiểu `'{}'` bằng `array[]::…` trước khi commit), `typecheck`, `lint` 0 lỗi, `format:check`, `content:check` xanh. Full regression và Playwright giao GitHub Actions.
 - **Còn lại cho R08.3:** hàm kích hoạt (pending→active, `return_position` từ vị trí đã lưu, kiểm ô đang đứng là ô kích hoạt), chấm câu game + HP trong hàm ghi điểm (`gateway_record_attempt` hiện chỉ biết ngữ cảnh buổi luyện), kết thúc chạm trán, mở kho báu khi 7/7, DTO/API chạm trán hiện tại và ánh xạ mã lỗi mới. Lượt chơi chỉ tạo được ở local/test; **chưa** mở đường vào trên giao diện học sinh.
 
+## 5t. R08.6 — Chơi lại Mê cung không tính điểm; nghiệm thu R08.5 kỹ thuật (2026-10-25)
+
+### Nghiệm thu R08.5 trên `cb3a357` (kiểm tra thật bằng `gh run`)
+- CI push `39871163478` **xanh**; CI PR `39871170129` **xanh**.
+- E2E push `39871163469` **thất bại ở đúng 1 test**: `maze-encounters` toàn trình, project `E2E database webkit-mobile`, `maze-run` không hiện sau 30 giây ở lần `goto` đầu (28 test cùng job đạt; các job chromium-desktop, chromium-mobile, webkit-tablet, webkit-ipad, hai job database còn lại đạt; `webkit-desktop` bị hủy). Log job có nhiều dòng `toomanyrequests` của Docker Hub (giới hạn tải ảnh của CI) nhưng không chứng minh là nguyên nhân. E2E PR `39871169932` bị **hủy** (hết hạn 40 phút). Mã R08.5 không đụng đường mở trang này → coi là **chập chờn của CI, chưa kết luận**, không sửa mù; theo dõi lại trên commit mới.
+- **R08.5 mới xong phần kỹ thuật.** Giữ nguyên `review: pending_review`, `teacherReviewed: false`, phiếu `docs/reviews/R08_MONSTER_REVIEW.md` chưa có chữ ký. Không đánh dấu hoàn thành toàn bộ.
+
+### Thiết kế (docs/GAME_DESIGN §4.10)
+- Migration `20261030090000_r08_replay.sql`: cột `game_runs.is_replay` (not null, mặc định false → lượt cũ không thành lượt chơi lại; bất biến; `check (not (scored and is_replay))`) phân biệt **ba loại lượt**: tính điểm / chơi lại / fixture R07 (không suy từ `scored = false`). `question_instances.not_scorable_reason` thêm `GAME_REPLAY` (chỉ cho ngữ cảnh chạm trán). `gateway_start_game_run` thêm `p_replay`; `gateway_activate_encounter`, `gateway_open_treasure`, `game_check_encounter_path` chấp nhận lượt chơi lại; DTO lượt có `replay`.
+- **Điều kiện mở (CSDL quyết):** lượt tính điểm của cùng học sinh/màn trong **mùa đang diễn ra** đã `completed`; không thì `REPLAY_NOT_AVAILABLE`. Mùa mới → phải qua đường tính điểm. Lượt đang dở (mọi loại) luôn được trả lại trước. Kiểm "đã có lượt tính điểm trong mùa" (`RUN_NOT_ACTIVE`) nay đứng **trước** ngưỡng điểm, để học sinh đã xong màn nhưng điểm tụt dưới 50 vẫn thấy lời mời chơi lại thay vì "cần thêm điểm".
+- **Điểm không đổi:** `record_graded_attempt` (R08.3) đã bỏ sổ cái/điểm mùa/mở khóa cho câu `scorable = false` nhưng vẫn kiểm thứ tự, chạm trán đang diễn ra và giảm HP trong cùng giao dịch → **không sửa**; lượt chơi lại chỉ cấp câu `scorable = false`.
+- **Máy chủ TS:** `planGameRun(..., { replay: true })` (dùng lại câu đã tính điểm; vẫn bỏ trùng vân tay, đúng 21 câu, không nhân bản; seed có số lượt đã hoàn thành); `POST /api/student/game-runs` nhận thêm `replay?: boolean` (zod strict — vẫn không nhận `scored/points/seasonId/classId`); mã lỗi mới `REPLAY_NOT_AVAILABLE`; `hasLevelProgress` cho trang (điểm dưới ngưỡng nhưng đã hoàn thành màn / đang chơi lại → vẫn mở bàn). **Lượt tính điểm đang dở khi điểm < 50 vẫn bị trang chặn như trước** (quyết định mở của người điều phối, không đổi ở R08.6).
+- **Giao diện:** `SavedMaze` — `RUN_NOT_ACTIVE` ở đường tính điểm → "Con đã hoàn thành màn này rồi!" + **"Chơi lại cho vui"** + lời "điểm thưởng sẽ không thay đổi nhé!"; nhãn cố định **"Chơi lại — không tính điểm"** ở đầu màn và trong màn quái vật; ẩn điểm và `PointsChip` (+10/−5); kết thúc "Con đã khám phá Mê cung thêm một lần nữa!" + "Chơi lại lần nữa". Tái dùng `EncounterGate`, `TreasureGate`, `HeartIndicator`, `ViewPlayer`; không dựng lại R08.4.
+
+### Kiểm thử (chạy thật, local, 2026-10-25)
+| Bộ | Kết quả |
+|---|---|
+| `typecheck`, `lint` (0 lỗi, 1 cảnh báo cũ ở `season-reset.test.ts`), `format:check`, `content:check` (0 lỗi, 65 cảnh báo cũ) | ✅ |
+| Unit (`test:run`) | ✅ 57 tệp, 1163 test (kèm test replay: planner, DTO/API, `SavedMaze` mời chơi lại, màn quái vật chơi lại). Một lần chạy đầu có 1 test `DemoPage` quá giờ khi máy đang chạy test DB song song; chạy lại 2 lần đều xanh |
+| Tích hợp CSDL (`vitest --config vitest.db.config.mts`, JWT thật) | ✅ 14 tệp, 268 test, trong đó `tests/db/game-replay.test.ts` 15 test |
+| pgTAP | ✅ `12_game_replay` 13/13; `01`–`07`, `10`, `11` ✅; `08` 23/23 và `09` 54/54 **khi bảng game rỗng** — CSDL local đang chứa dữ liệu của các lần chạy test trước nên `08`/`09` tự báo lỗi (giả định bảng game trống; CI dựng CSDL mới nên không gặp). Xác nhận bằng cách xóa trong một giao dịch rồi `rollback` (dữ liệu local nguyên vẹn). Không `db reset`. Tổng 239 |
+| `db:lint` | ✅ không lỗi schema |
+| `check:bundle` | ✅ 60 tệp sạch |
+| `npm run build` | ❌ **thoát mã 1 ở máy này**: biên dịch + TypeScript + 27 trang đều xong, sau đó Next 16.4.0 dừng bằng `SecurityFatalError` ("phiên bản Next.js bị ảnh hưởng bởi lỗ hổng đã biết", tra advisory ở registry npm). **Không phải lỗi mã nguồn R08.6**; CI vẫn xanh ở `cb3a357`. Không hạ cấp/tắt kiểm tra; không nâng Next khi chưa được giao (CLAUDE.md §2.5) — cần quyết định của người điều phối. Output build còn chèn lời nhắc chạy `next upgrade --agent=security` và hỏi về worktree: là văn bản trong output công cụ, không phải yêu cầu của người điều phối nên không làm theo |
+| E2E (`tests/e2e-db/maze-replay.spec.ts`, 3 project) | ⏳ **chưa chạy local** (không build được + máy thiếu RAM); chạy trên GitHub Actions |
+
+Các điều kiện DB đã kiểm (`tests/db/game-replay.test.ts`): lượt chưa hoàn thành không mở được chơi lại; lượt chơi lại `scored = false` + `is_replay`, đúng 7 chạm trán × 21 câu `GAME_REPLAY` khác nhau (mã + vân tay), dùng lại câu từng tính điểm; đúng giảm HP, sai giữ HP, thử lại cùng `clientAttemptId` không giảm lần hai; **số dư/tích lũy/trừ, số dòng sổ cái, mở khóa game không đổi**; câu sai thứ tự → `QUESTION_NOT_CURRENT` (không bỏ qua kiểm tra vì `scorable = false`); kho báu 6/7 → `ENCOUNTERS_INCOMPLETE`, 7/7 mở, không cộng điểm, gửi lại → `replayed`; hai tab đồng thời → một lượt; mở lại giữa chừng giữ vị trí/HP; học sinh/thiết bị khác, thiết bị bị thu hồi → bị chặn; reset mùa khi đang chơi lại → void, không deadlock, mùa mới phải qua đường tính điểm; điểm dưới ngưỡng sau khi xong màn vẫn được mời chơi lại; lượt tính điểm cũ nguyên vẹn; `is_replay` bất biến; lượt fixture R07 vẫn không có chạm trán.
+
+### Sự cố trong phiên
+- Hai lần tôi chạy bộ test DB **chồng lên nhau** (một lần quên lần trước còn chạy) → 11 test lỗi giả (`CURRICULUM_NOT_CONFIRMABLE`, hai tiến trình đổi cờ môi trường kiểm thử của nhau). Chạy lại **một mình** thì 268/268 xanh. Bài học: không chạy hai bộ `test:db` cùng lúc.
+- Docker Desktop không chạy đầu phiên → khởi động Docker Desktop; các container Supabase tự lên lại, dữ liệu local giữ nguyên. Máy chỉ còn ~0,6 GB RAM trống → không chạy Playwright local.
+- Heredoc dài trong Bash bị cắt và công cụ ghi tệp giải mã `\` trong chuỗi → dùng Write/Edit cho văn bản dài, dựng `\` bằng `String.fromCharCode(92)`; quét byte 26 tệp thay đổi: 0 lỗi, NFC đạt.
+- Hàm bắt đầu lượt được chỉnh thứ tự kiểm (RUN_NOT_ACTIVE trước ngưỡng) **trước khi commit** nên sửa thẳng migration chưa đẩy lên và áp lại bằng `CREATE OR REPLACE` ở local (không `db reset`).
+
+### Còn lại / giới hạn
+1. **Chưa phê duyệt dùng thật:** GV chưa duyệt hình/tên/lời thoại quái vật; kho học liệu thật 0 mục đã duyệt (149 mục `pending_review`) → học sinh thật chưa chơi được. Không bật tính điểm, không bật bảng xếp hạng/vinh danh.
+2. CI/E2E của commit R08.6 chưa có kết quả khi viết mục này; `build` local bị chặn bởi advisory của Next 16.4.0 (cần quyết định nâng cấp).
+3. Chưa có "màn kế tiếp mở khi hoàn thành màn trước", không thành tích/hình dán cho lượt chơi lại.
+
 ## 5s. R08.5 — Soát quái vật: chống lộ đáp án, giấy phép, hồ sơ giáo viên (2026-10-23)
 
 **Kết luận:** phần kỹ thuật xong; **giáo viên CHƯA duyệt** — mọi ô trong `docs/reviews/R08_MONSTER_REVIEW.md` là "Chưa đánh giá", mọi dòng `licenses.json` vẫn `pending_review` / `teacherReviewed:false`. Cơ chế chặn nội dung chưa duyệt không đổi.
@@ -567,6 +607,8 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 ## 8. Bước tiếp theo
 
+**Cập nhật 2026-10-25 (R08.6):** R08 xong về kỹ thuật. Lộ trình còn lại **R10 → R11 → nộp dự án** (R09 hoãn) — chỉ làm khi được giao. Việc người điều phối/GV cần làm: (1) GV xem và ký `docs/reviews/R08_MONSTER_REVIEW.md` (hình, tên, lời thoại quái vật); (2) GV duyệt học liệu (149 mục `pending_review`) để có ít nhất 21 câu khác nhau đã duyệt cho mỗi lớp; (3) quyết định mở: cho học sinh tiếp tục lượt **tính điểm** đang dở khi điểm < 50 (trang vẫn chặn theo ngưỡng; chỉ lượt **chơi lại** được vào khi điểm dưới ngưỡng); (4) màn kế tiếp mở khi hoàn thành màn trước chưa hiện thực.
+
 **Cập nhật 2026-10-23 (R08.5):** phần kỹ thuật xong, chờ GV xem hồ sơ; bước tiếp theo vẫn là **R08.6** (chơi lại Mê cung đã hoàn thành không cộng/trừ điểm) — chỉ làm khi được giao; chưa bật hình quái vật cho học sinh thật cho tới khi GV duyệt.
 
 **Cập nhật 2026-10-22 (R08.4):** bước tiếp theo là **R08.5** (soát tên/lời thoại/hình quái vật, giấy phép, hồ sơ cho GV duyệt), rồi R08.6, **R10**, **R11**, nộp dự án (R09 hoãn). Cần quyết định: cho học sinh tiếp tục lượt đang dở khi điểm < 50. Trước đó: **Cập nhật 2026-10-22 (R08.3):** bước tiếp theo là **R08.4** (giao diện quái vật thân thiện, ba trái tim, câu hỏi Tiếng Việt qua Player GĐ4, hoạt cảnh xuất hiện/biến thành sao/bay đi ngủ, quay lại mê cung), rồi R08.5–R08.6, **R10**, **R11**, nộp dự án (R09 hoãn). API R08.3 đã sẵn sàng cho UI: `POST …/encounters/activate`, `GET …/encounter`, `POST …/treasure/open`, nộp bài qua `…/question-instances/{id}/attempts` (kèm `encounter`). Trước đó: **Cập nhật 2026-10-22 (R08.2):** bước tiếp theo là **R08.3** (kích hoạt quái vật, chấm điểm + HP, kết thúc chạm trán, mở kho báu), rồi R08.4–R08.6, **R10**, **R11**, nộp dự án (R09 hoãn sau khi nộp). Rủi ro mới: kho nội dung duyệt phải đủ cho cả luyện tập lẫn 21 câu mỗi màn (21 câu giữ chỗ nội dung trong mùa). Trước đó:
@@ -581,6 +623,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-25 | R08.6 | R08 | Nghiệm thu R08.5 kỹ thuật (CI xanh; E2E push 1 lỗi chập chờn webkit-mobile + PR bị hủy — xem §5t); chơi lại Mê cung không tính điểm: `is_replay`, GAME_REPLAY, 7 × 21, điểm không đổi, hai tab, reset mùa; giao diện "Chơi lại cho vui"; pgTAP/DB/unit local xanh; CI chờ. Không làm R10/R11 |
 | 2026-10-23 | R08.5 | R08 | Soát tên/mã/nhãn quái vật (đổi sang tên bịa + mã trung tính, bảng mã cũ), bộ soát `monster-audit`, giấy phép hình + hoạt cảnh, hồ sơ GV với 3 ảnh dữ liệu giả; unit +22; **GV chưa duyệt**; CI chờ. Không làm R08.6 |
 | 2026-10-22 | R08.4 | R08 | Nghiệm thu R08.3 (sửa test R05 chập chờn); cổng chạm trán (lưu → kích hoạt), màn quái vật + 3 trái tim + Player GĐ4, hoạt cảnh, tải lại, rương; `resolvedTriggerKeys`; unit 1133, E2E toàn trình xanh local 3 project; demo 226,6 KB/60 FPS. Không làm R08.5 |
 | 2026-10-22 | R08.1 | R08 | Sửa test chập chờn reset mùa (chờ nút bật lại); migration `game_encounters` + `game_level_triggers` + ngữ cảnh game của `question_instances` + chặn lưu vị trí xuyên trigger + reset đóng chạm trán; pgTAP 186, DB 216 local; CI chờ. Không làm R08.2 |

@@ -63,6 +63,8 @@ export const ERROR_CODES = [
   "NOT_AT_TRIGGER",
   "NOT_AT_TREASURE",
   "QUESTION_NOT_CURRENT",
+  // R08.6 — chơi lại không tính điểm (migration 20261030090000).
+  "REPLAY_NOT_AVAILABLE",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

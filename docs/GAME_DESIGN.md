@@ -161,6 +161,7 @@ Sau cả hai kết quả: chuyển cảnh ngược → nhân vật **đứng đ�
 
 - Mỗi màn có **một lượt chơi tính điểm mỗi mùa**. Sau khi hoàn thành (hoặc khi mùa mới bắt đầu), học sinh có thể **chơi lại để vui**: câu hỏi vẫn chấm và có phản hồi nhưng **không tính điểm** ("Chơi lại — không tính điểm" hiển thị rõ trước khi vào).
 - Màn kế tiếp mở khi hoàn thành màn trước (đề xuất 3 màn mỗi game ở bản đầu).
+- **Hiện thực (R08.6, migration `20261030090000_r08_replay.sql`):** xem §4.10.
 
 ### 4.9 Hiện thực giao diện (R08.4)
 
@@ -171,6 +172,16 @@ Sau cả hai kết quả: chuyển cảnh ngược → nhân vật **đứng đ�
 - **Tải lại giữa chạm trán**: trang nạp `GET …/encounter` ngay sau khi mở lượt; có chạm trán đang diễn ra → mở thẳng đúng câu/HP/điểm (không lưu/kích hoạt lại); đứng ở điểm chưa dùng (máy chủ không cho rời) → mở cổng và kích hoạt.
 - **Kho báu**: đứng ở ô rương → lưu vị trí rồi `POST …/treasure/open`; chưa đủ 7/7 → "Rương kho báu đang khóa… còn n bạn đang chờ con"; đủ → hoạt cảnh rương + "Con đã khám phá xong Mê cung kho báu!" + số liệu máy chủ, khóa điều khiển, không cộng điểm; gọi lại → `replayed`.
 - R08.5: soát kỹ thuật tên/hình/lời thoại và giấy phép xong; **GV duyệt còn chờ** (hồ sơ [reviews/R08_MONSTER_REVIEW.md](reviews/R08_MONSTER_REVIEW.md)). Chưa làm (đúng phạm vi): chơi lại không tính điểm (R08.6), âm thanh (R10).
+
+### 4.10 Chơi lại không tính điểm (R08.6)
+
+- **Ba loại lượt, phân biệt bằng cột riêng** (không suy từ `scored = false`): *tính điểm* (`scored = true`), *chơi lại* (`scored = false`, `is_replay = true`, đủ 7 chạm trán + 21 câu), *fixture LOCAL của R07* (`scored = false`, `is_replay = false`, không chạm trán). `is_replay` bất biến; `scored` và `is_replay` không đi cùng (check CSDL).
+- **Điều kiện mở (CSDL quyết, trình duyệt chỉ gửi ý định `replay: true`):** lượt *tính điểm* của đúng học sinh, đúng màn, **trong mùa đang diễn ra** đã `completed`. Mùa mới (sau reset) = chưa có lượt hoàn thành trong mùa → vào lại theo đường tính điểm (cần ngưỡng điểm); chơi lại không xét ngưỡng vì không đổi điểm và không mở khóa gì. Không có đường nào biến lượt chơi lại thành lượt tính điểm; lượt tính điểm đã xong không mở lại (`RUN_NOT_ACTIVE`). Chưa đủ điều kiện → `REPLAY_NOT_AVAILABLE`.
+- **Lượt đang dở luôn được trả lại trước** (mọi loại, kể cả khi bấm "Chơi lại" hoặc mở trang): một lượt đang hoạt động mỗi học sinh/màn (`game_runs_one_in_progress`); hai tab cùng bấm chỉ tạo một lượt.
+- **Phân bổ:** máy chủ lập kế hoạch bằng `planGameRun(..., { replay: true })` (được dùng lại câu từng tính điểm; vẫn bỏ trùng vân tay, đúng 21 câu khác nhau, không nhân bản; thiếu → `INSUFFICIENT_CONTENT`; seed có số lượt đã hoàn thành nên mỗi lần chơi lại có thứ tự khác). CSDL kiểm lại từng câu (đã duyệt, đã học, hợp nhóm) và tạo lượt + 7 chạm trán + 21 câu trong một giao dịch; câu có `scorable = false`, `not_scorable_reason = 'GAME_REPLAY'`. Không có đường fixture cho chơi lại.
+- **Chấm:** dùng nguyên `record_graded_attempt` (R08.3): câu không tính điểm bỏ sổ cái/điểm mùa/mở khóa nhưng **vẫn** kiểm lượt đang chơi, chạm trán đang diễn ra, đúng thứ tự câu, khóa ý định (gửi lại cùng `clientAttemptId` → kết quả cũ, HP không giảm hai lần); đúng → HP −1, sai → HP giữ; hết 3 câu → `defeated`/`undefeated`. Kích hoạt chạm trán, kiểm đường đi (chặn xuyên điểm chưa xử lý) và mở kho báu (7/7, không cộng điểm) dùng chung với lượt tính điểm.
+- **Giao diện:** mở trang khi lượt tính điểm đã xong → "Con đã hoàn thành màn này rồi!" + nút **"Chơi lại cho vui"** + lời nói rõ "Lần này con vẫn được gặp các bạn quái vật và làm câu hỏi, nhưng điểm thưởng sẽ không thay đổi nhé!". Trong lúc chơi: nhãn cố định **"Chơi lại — không tính điểm"** (đầu màn và trong màn quái vật), không hiện điểm, không "+10/−5". Kết thúc: "Con đã khám phá Mê cung thêm một lần nữa!" + nút "Chơi lại lần nữa" (máy chủ vẫn kiểm điều kiện). Tái dùng `SavedMaze`, `EncounterGate`, `TreasureGate`, `HeartIndicator`, `ViewPlayer`. Điểm dưới ngưỡng nhưng đã hoàn thành màn → trang vẫn mở bàn chơi lại.
+- **Chưa làm/để ngỏ:** màn kế tiếp mở khi hoàn thành màn trước (chưa hiện thực); không có thành tích/hình dán cho lượt chơi lại; học liệu và hình quái vật vẫn chờ GV duyệt (R08.5) nên chưa dùng cho học sinh thật.
 
 ## 5. Quái vật thân thiện
 

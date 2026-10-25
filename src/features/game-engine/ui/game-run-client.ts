@@ -35,14 +35,16 @@ function isRun(data: unknown): data is GameRunDto {
     typeof run.stateVersion === "number" &&
     typeof run.position?.row === "number" &&
     typeof run.position.col === "number" &&
-    typeof run.scored === "boolean"
+    typeof run.scored === "boolean" &&
+    typeof run.replay === "boolean"
   );
 }
 
-export async function startRun(studentId: string, levelKey: string): Promise<StartResult> {
+/** `replay` chỉ là ý định "Chơi lại cho vui"; máy chủ/CSDL quyết định có cho phép và luôn là lượt không tính điểm. */
+export async function startRun(studentId: string, levelKey: string, replay = false): Promise<StartResult> {
   const result = await call("/api/student/game-runs", {
     method: "POST",
-    body: JSON.stringify({ studentId, gameKey: "treasure_maze", levelKey }),
+    body: JSON.stringify({ studentId, gameKey: "treasure_maze", levelKey, ...(replay ? { replay: true } : {}) }),
   });
   if (!result) return { ok: false, code: "NETWORK" };
   if (!result.ok) return { ok: false, code: result.code };

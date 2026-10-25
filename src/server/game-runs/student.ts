@@ -27,6 +27,7 @@ export async function startGameRun(
   context: StudentContext,
   studentId: string,
   levelKey: string,
+  replay = false,
   now: Date = new Date(),
 ): Promise<Result<GameRunDto>> {
   if (!ownsStudent(context, studentId)) return fail("FORBIDDEN");
@@ -48,7 +49,23 @@ export async function startGameRun(
     if (candidates.error) return fail(mapDbError(candidates.error));
     const parsed = parseGameCandidates(candidates.data);
     if (!parsed) return fail("UNKNOWN");
-    plan = planGameRun(parsed.items, { band: parsed.band, seed: `${studentId}:${levelKey}:${vietnamDateKey(now)}` });
+    // Chơi lại: thêm số lượt đã hoàn thành vào seed để mỗi lần chơi lại có thứ tự câu/quái vật khác nhau.
+    const finished = replay
+      ? ((
+          await context.admin
+            .from("game_runs")
+            .select("id", { count: "exact", head: true })
+            .eq("student_id", studentId)
+            .eq("game_key", TREASURE_MAZE_KEY)
+            .eq("level_key", levelKey)
+            .eq("status", "completed")
+        ).count ?? 0)
+      : 0;
+    plan = planGameRun(parsed.items, {
+      band: parsed.band,
+      seed: `${studentId}:${levelKey}:${vietnamDateKey(now)}${replay ? `:replay${finished}` : ""}`,
+      replay,
+    });
   }
 
   const { data, error } = await context.admin.rpc("gateway_start_game_run", {
@@ -57,10 +74,38 @@ export async function startGameRun(
     p_game_key: TREASURE_MAZE_KEY,
     p_level_key: levelKey,
     ...(plan ? { p_plan: plan as unknown as Json } : {}),
+    ...(replay ? { p_replay: true } : {}),
   });
   if (error) return fail(mapDbError(error));
   const dto = buildGameRun(data);
   return dto ? ok(dto) : fail("UNKNOWN");
+}
+
+/**
+ * Học sinh có quyền chơi LẠI ở màn này trong mùa đang diễn ra (lượt chơi lại đang dở, hoặc lượt tính điểm đã xong) → trang vẫn
+ * mở bàn chơi khi điểm hiện tại dưới ngưỡng: chơi lại không đổi điểm nên không cần điểm. Lượt TÍNH ĐIỂM đang dở không nằm ở
+ * đây (câu hỏi mở về ngưỡng cho lượt dở là quyết định của người điều phối, R08.2). Chỉ để chọn giao diện; CSDL vẫn là nơi
+ * quyết định (ngưỡng, điều kiện chơi lại) khi bắt đầu lượt.
+ */
+export async function hasLevelProgress(context: StudentContext, studentId: string, levelKey: string): Promise<boolean> {
+  if (!ownsStudent(context, studentId)) return false;
+  const { data: runs } = await context.admin
+    .from("game_runs")
+    .select("season_id, status, scored, is_replay")
+    .eq("student_id", studentId)
+    .eq("game_key", TREASURE_MAZE_KEY)
+    .eq("level_key", levelKey)
+    .in("status", ["in_progress", "completed"]);
+  const seasonIds = [
+    ...new Set(
+      (runs ?? [])
+        .filter((run) => (run.status === "in_progress" ? run.is_replay : run.scored))
+        .map((run) => run.season_id),
+    ),
+  ];
+  if (seasonIds.length === 0) return false;
+  const { data: seasons } = await context.admin.from("seasons").select("id").in("id", seasonIds).eq("status", "active");
+  return (seasons ?? []).length > 0;
 }
 
 export async function saveGamePosition(

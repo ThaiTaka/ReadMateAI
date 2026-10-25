@@ -16,5 +16,5 @@ export async function POST(request: Request) {
   if (!limited.ok) return json(limited);
   const student = pickStudent(context.data, body.data.studentId);
   if (!student.ok) return json(student);
-  return json(await startGameRun(context.data, student.data.id, body.data.levelKey));
+  return json(await startGameRun(context.data, student.data.id, body.data.levelKey, body.data.replay === true));
 }

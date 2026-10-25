@@ -17,7 +17,10 @@ describe("R07.5b1 — lược đồ request", () => {
     expect(startGameRunRequestSchema.safeParse(ok).success).toBe(true);
     expect(startGameRunRequestSchema.safeParse({ ...ok, levelKey: "treasure-maze-04" }).success).toBe(false);
     expect(startGameRunRequestSchema.safeParse({ ...ok, gameKey: "wonder_forest" }).success).toBe(false);
-    for (const extra of ["classId", "seasonId", "points", "scored", "fixture", "student_id"]) {
+    // R08.6: chỉ có ý định "replay" (boolean); điểm/mùa/lớp/scored/loại lượt vẫn không nhận từ trình duyệt.
+    expect(startGameRunRequestSchema.safeParse({ ...ok, replay: true }).success).toBe(true);
+    expect(startGameRunRequestSchema.safeParse({ ...ok, replay: "yes" }).success).toBe(false);
+    for (const extra of ["classId", "seasonId", "points", "scored", "fixture", "student_id", "isReplay", "runKind"]) {
       expect(startGameRunRequestSchema.safeParse({ ...ok, [extra]: "x" }).success).toBe(false);
     }
   });
@@ -45,6 +48,7 @@ describe("R07.5b1 — DTO", () => {
     level_version: "v",
     status: "in_progress",
     scored: false,
+    replay: false,
     position: { row: 1, col: 1 },
     state_version: 1,
     encounter_count: 7,
@@ -65,8 +69,14 @@ describe("R07.5b1 — DTO", () => {
         stateVersion: 1,
         status: "in_progress",
         scored: false,
+        replay: false,
       },
     });
+    expect(buildGameRun({ outcome: "created", run: { ...row, replay: true } })?.run).toMatchObject({
+      scored: false,
+      replay: true,
+    });
+    expect(buildGameRun({ outcome: "created", run: { ...row, replay: undefined } })).toBeNull();
     expect(JSON.stringify(dto)).not.toMatch(/student|class|season/u);
   });
 
@@ -84,7 +94,13 @@ describe("R07.5b1 — DTO", () => {
 
 describe("R07.5b1 — mã lỗi", () => {
   it("bốn mã mới có trong danh mục, có câu chữ, mapDbError nhận đúng và HTTP phù hợp", () => {
-    for (const code of ["INSUFFICIENT_POINTS", "STATE_CONFLICT", "INVALID_POSITION", "RUN_NOT_ACTIVE"] as const) {
+    for (const code of [
+      "INSUFFICIENT_POINTS",
+      "STATE_CONFLICT",
+      "INVALID_POSITION",
+      "RUN_NOT_ACTIVE",
+      "REPLAY_NOT_AVAILABLE",
+    ] as const) {
       expect(ERROR_CODES).toContain(code);
       expect(vi.errors[code].length).toBeGreaterThan(10);
       expect(mapDbError({ code: "22023", message: code })).toBe(code);

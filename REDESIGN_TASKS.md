@@ -17,7 +17,7 @@
 | R05 | Leaderboard kiểu FIFA, avatar, ranking | R04 | M | ✅ |
 | R06 | Vinh danh TOP 3, reset mùa giải | R05 | M | ✅ |
 | R07 | Mê cung kho báu, điều khiển nhân vật (Game Engine) | R02 (lõi), R04 (lưu tiến độ) | L | ✅ R07.6 xong (CI xanh `8701cfa`) — nghiệm thu R07 về engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt chơi; chưa phải mini-game hoàn chỉnh (R08) |
-| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 (database chạm trán + schema 21 câu), R08.2 (phân bổ 7 × 21) và R08.3 (chơi chạm trán + kho báu ở máy chủ) và R08.4 (giao diện quái vật) xong; **R08.5 phần kỹ thuật xong** (soát chống lộ đáp án + giấy phép, hồ sơ GV `docs/reviews/R08_MONSTER_REVIEW.md` đã chuẩn bị; **GV phê duyệt hình/tên/lời thoại: CHỜ XÁC NHẬN THỰC TẾ** — chưa đóng R08.5 hoàn toàn); R08.6 chưa làm |
+| R08 | Quái vật, chạm trán bằng câu hỏi, giới hạn 7 encounters | R07, R04 | L | 🔄 R08.1 (database chạm trán + schema 21 câu), R08.2 (phân bổ 7 × 21) và R08.3 (chơi chạm trán + kho báu ở máy chủ) và R08.4 (giao diện quái vật) xong; **R08.5 phần kỹ thuật xong** (soát chống lộ đáp án + giấy phép, hồ sơ GV `docs/reviews/R08_MONSTER_REVIEW.md` đã chuẩn bị; **GV phê duyệt hình/tên/lời thoại: CHỜ XÁC NHẬN THỰC TẾ** — chưa đóng R08.5 hoàn toàn); **R08.6 xong** (chơi lại màn đã hoàn thành không cộng/trừ điểm — migration `20261030090000`, REDESIGN_PROGRESS §5t) → **R08 xong về kỹ thuật**, nhưng **chưa được phê duyệt dùng thật** (GV chưa duyệt hình quái vật R08.5; kho học liệu 0 mục đã duyệt) |
 | R09 | Ba mini-game còn lại | R08 | L | ⏸ **Tạm hoãn sau khi nộp dự án** |
 | R10 | Audio Engine, giao diện kiểm duyệt học liệu, trải nghiệm học tại nhà | R03, R04 (có thể song song từ R04) | L | ⏸ |
 | R11 | Kiểm thử tổng thể, bảo mật, responsive, dọn mã cũ, deploy Vercel | R02–R10 | M–L | ⏸ |
@@ -254,8 +254,8 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 - [x] 8.2 Bắt đầu lượt chơi phân bổ 7 chạm trán + 21 câu khác nhau từ bộ máy bài tập (`production`); thiếu → `INSUFFICIENT_CONTENT` — 2026-10-22: một giao dịch, CSDL kiểm lại kế hoạch của máy chủ, fixture riêng; production chưa có nội dung duyệt nên chưa tạo lượt thật (REDESIGN_PROGRESS §5p)
 - [x] 8.3 API kích hoạt chạm trán, mở kho báu; HP trong `record_graded_attempt` — 2026-10-22: `gateway_activate_encounter`, nhánh `game_encounter` của `record_graded_attempt`, `gateway_open_treasure`, 3 API; chưa có UI (8.4)
 - [x] 8.4 (2026-10-22, REDESIGN_PROGRESS §5r) Màn thử thách: quái vật thân thiện, 3 trái tim có nhãn chữ, Player GĐ4 nhúng; hoạt cảnh xuất hiện phép thuật, biến thành sao, bay đi ngủ; quay lại đúng vị trí
-- [ ] 8.5 Bộ soát lộ đáp án cho tên/lời thoại quái vật; asset quái vật có giấy phép, GV đã xem phác thảo
-- [ ] 8.6 Chơi lại màn không tính điểm
+- [x] 8.5 (phần kỹ thuật, 2026-10-23, REDESIGN_PROGRESS §5s) Bộ soát lộ đáp án cho tên/lời thoại quái vật; asset quái vật có giấy phép — **GV CHƯA duyệt/xem phác thảo**: `review: pending_review`, `teacherReviewed: false`, phiếu `docs/reviews/R08_MONSTER_REVIEW.md` chưa có chữ ký. Ô này đánh dấu phần kỹ thuật; **đóng hoàn toàn khi GV xác nhận**
+- [x] 8.6 (2026-10-25, REDESIGN_PROGRESS §5t) Chơi lại màn đã hoàn thành không tính điểm: `game_runs.is_replay`, 7 chạm trán + 21 câu `GAME_REPLAY`, điểm/sổ cái/mở khóa không đổi, HP đúng/sai, khôi phục, kho báu, hai tab, reset mùa
 
 **Tiêu chí nghiệm thu:** không thể tạo chạm trán thứ 8 (kiểm thử CSDL); đúng 3 câu riêng biệt mỗi chạm trán; đúng → +10 & HP−1, sai → −5 & HP giữ; hết câu → `undefeated`, không câu thay thế; kho báu chỉ mở khi 7/7; tạm dừng/thoát không trừ điểm.
 **Kiểm thử bắt buộc:** bộ đầy đủ + RLS + tích hợp + test:e2e + axe.

@@ -16,7 +16,7 @@ type Reply = { status?: number; body: unknown } | Error;
 let replies: Reply[];
 let requests: { url: string; method: string; body: unknown }[];
 
-function run(row: number, col: number, version: number, scored = false) {
+function run(row: number, col: number, version: number, scored = false, replay = false) {
   return {
     ok: true,
     data: {
@@ -29,6 +29,7 @@ function run(row: number, col: number, version: number, scored = false) {
         stateVersion: version,
         status: "in_progress",
         scored,
+        replay,
       },
     },
   };
@@ -102,6 +103,43 @@ describe("SavedMaze", () => {
     );
     expect(screen.queryByTestId("maze-run")).toBeNull();
     expect(screen.queryByTestId("maze-ribbon")).toBeNull();
+  });
+
+  it("R08.6: lượt tính điểm đã xong (RUN_NOT_ACTIVE) → mời 'Chơi lại cho vui' kèm lời nói rõ không đổi điểm; chưa dựng bàn chơi", async () => {
+    replies = [failure(409, "RUN_NOT_ACTIVE")];
+    mount();
+    const offer = await screen.findByTestId("maze-replay-offer");
+    expect(offer.textContent).toContain(strings.treasureMazePlay.replay.offerTitle);
+    expect(offer.textContent).toContain(strings.treasureMazePlay.replay.offerText);
+    expect(offer.textContent).toContain("điểm thưởng sẽ không thay đổi");
+    expect(screen.getByRole("button", { name: strings.treasureMazePlay.replay.cta })).toBeTruthy();
+    expect(screen.queryByTestId("maze-run")).toBeNull();
+    expect(Object.keys(requests[0]!.body as object).sort()).toEqual(["gameKey", "levelKey", "studentId"]);
+  });
+
+  it("R08.6: bấm 'Chơi lại cho vui' chỉ gửi ý định replay (không điểm/mùa/lớp/scored); nhãn cố định 'Chơi lại — không tính điểm'", async () => {
+    replies = [failure(409, "RUN_NOT_ACTIVE"), { body: run(1, 1, 1, false, true) }];
+    mount();
+    fireEvent.click(await screen.findByTestId("replay-start"));
+    await ready();
+    expect(requests).toHaveLength(2);
+    expect(requests[1]).toMatchObject({ url: "/api/student/game-runs", method: "POST" });
+    expect(Object.keys(requests[1]!.body as object).sort()).toEqual(["gameKey", "levelKey", "replay", "studentId"]);
+    expect((requests[1]!.body as { replay: boolean }).replay).toBe(true);
+    expect(screen.getByTestId("maze-ribbon").textContent).toBe(strings.treasureMazePlay.replay.ribbon);
+    expect(screen.getByTestId("saved-maze").getAttribute("data-replay")).toBe("true");
+    expect(screen.getByTestId("saved-maze").getAttribute("data-scored")).toBe("false");
+    expect(document.body.textContent).not.toMatch(/\+10|−5/u);
+  });
+
+  it("R08.6: máy chủ từ chối chơi lại (REPLAY_NOT_AVAILABLE) → thông báo, không dựng bàn chơi, không nút thử lại vô ích", async () => {
+    replies = [failure(409, "RUN_NOT_ACTIVE"), failure(409, "REPLAY_NOT_AVAILABLE")];
+    mount();
+    fireEvent.click(await screen.findByTestId("replay-start"));
+    expect(await screen.findByText(strings.errors.REPLAY_NOT_AVAILABLE)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: strings.treasureMazePlay.retryLoad })).toBeNull();
+    expect(screen.queryByTestId("maze-run")).toBeNull();
+    expect((requests[1]!.body as { replay?: boolean }).replay).toBe(true);
   });
 
   it("chỉ gửi studentId + gameKey + levelKey (không điểm/mùa/lớp/scored)", async () => {

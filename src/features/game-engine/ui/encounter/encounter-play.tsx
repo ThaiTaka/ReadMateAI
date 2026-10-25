@@ -59,6 +59,7 @@ export function EncounterPlay({
   onFinished,
   onDismiss,
   onStopped,
+  replay = false,
 }: {
   initial: EncounterDto;
   runId: string;
@@ -72,6 +73,8 @@ export function EncounterPlay({
   /** Chạm trán đã kết thúc ở nơi khác (tab khác): bỏ màn này, máy chủ là nguồn sự thật. */
   onDismiss: () => void;
   onStopped: (kind: StopKind) => void;
+  /** Lượt chơi lại (R08.6): luôn hiện nhãn "không tính điểm", không hiện điểm hay "+10/−5". */
+  replay?: boolean;
 }) {
   const [questions, setQuestions] = useState(initial.questions);
   const [question, setQuestion] = useState<PublicQuestion | null>(initial.current);
@@ -204,7 +207,14 @@ export function EncounterPlay({
       <div data-testid="encounter-hp" data-hp={hp}>
         <HeartIndicator remaining={hp} total={3} label={t.hearts} />
       </div>
-      {score !== null ? (
+      {replay ? (
+        <p
+          data-testid="encounter-replay"
+          className="rounded-full border-2 border-dashed border-sun-400 bg-sun-50 px-4 py-2 text-sm font-extrabold tracking-wide text-sun-800 uppercase"
+        >
+          {t.replayBadge}
+        </p>
+      ) : score !== null ? (
         <p className="flex items-center gap-2 rounded-full bg-sun-50 px-4 py-2 font-extrabold text-ink ring-2 ring-sun-200">
           <StarMark className="size-7" />
           <span aria-live="polite" data-testid="encounter-score" data-score={score}>
@@ -356,7 +366,7 @@ export function EncounterPlay({
         {checking ? <p className="text-lg font-bold text-ink-soft">{t.checking}</p> : null}
         {notice ? <p className="font-semibold text-ink">{notice}</p> : null}
         {showMarks || !open ? <FeedbackBanner feedback={question.feedback} /> : null}
-        {points && (showMarks || !open) ? <PointsChip points={points} /> : null}
+        {!replay && points && (showMarks || !open) ? <PointsChip points={points} /> : null}
       </div>
 
       {networkError ? (

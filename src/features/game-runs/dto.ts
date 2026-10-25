@@ -13,6 +13,8 @@ export const startGameRunRequestSchema = z.strictObject({
   studentId: z.uuid().optional(),
   gameKey: z.literal(TREASURE_MAZE_KEY),
   levelKey: z.enum(TREASURE_MAZE_LEVEL_KEYS),
+  /** Ý định "Chơi lại cho vui" (R08.6); máy chủ/CSDL quyết định có cho phép hay không. */
+  replay: z.boolean().optional(),
 });
 
 const coordinate = z.number().int().min(0).max(1000);
@@ -30,6 +32,7 @@ const runRowSchema = z.object({
   level_version: z.string().min(1),
   status: z.enum(["in_progress", "completed", "abandoned", "void_season_reset"]),
   scored: z.boolean(),
+  replay: z.boolean(),
   position: positionSchema,
   state_version: z.number().int().min(1),
 });
@@ -50,6 +53,8 @@ export type GameRunDto = {
     stateVersion: number;
     status: string;
     scored: boolean;
+    /** Lượt chơi lại không tính điểm (R08.6); khác lượt fixture LOCAL (scored = false, replay = false). */
+    replay: boolean;
   };
 };
 export type GamePositionDto = {
@@ -92,6 +97,7 @@ export function buildGameRun(raw: unknown): GameRunDto | null {
       stateVersion: run.state_version,
       status: run.status,
       scored: run.scored,
+      replay: run.replay,
     },
   };
 }

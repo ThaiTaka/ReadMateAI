@@ -26,18 +26,18 @@ select ok(not has_table_privilege('authenticated', 'public.game_runs', 'INSERT')
   and not has_table_privilege('authenticated', 'public.game_runs', 'DELETE'), 'authenticated không ghi trực tiếp');
 select ok(not has_table_privilege('anon', 'public.game_runs', 'SELECT'), 'anon không có quyền');
 
-select ok(has_function_privilege('service_role', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE')
+select ok(has_function_privilege('service_role', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE')
   and has_function_privilege('service_role', 'public.gateway_save_game_position(uuid, uuid, uuid, jsonb, int)', 'EXECUTE'),
   'service_role gọi được gateway game');
-select ok(not has_function_privilege('authenticated', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE')
-  and not has_function_privilege('anon', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE')
+select ok(not has_function_privilege('authenticated', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.gateway_save_game_position(uuid, uuid, uuid, jsonb, int)', 'EXECUTE')
   and not has_function_privilege('anon', 'public.gateway_save_game_position(uuid, uuid, uuid, jsonb, int)', 'EXECUTE'),
   'client không gọi được gateway game');
 select ok(not has_function_privilege('authenticated', 'private.game_walk(text, text, text, jsonb, jsonb)', 'EXECUTE')
   and not has_table_privilege('authenticated', 'private.game_levels', 'SELECT'), 'hàm/bảng nội bộ không cấp cho client');
 select ok((select bool_and(prosecdef and proconfig @> array['search_path=""']) from pg_proc
-           where oid in ('public.gateway_start_game_run(uuid, uuid, text, text, jsonb)'::regprocedure,
+           where oid in ('public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)'::regprocedure,
                          'public.gateway_save_game_position(uuid, uuid, uuid, jsonb, int)'::regprocedure,
                          'private.guard_game_run()'::regprocedure)), 'hàm game: security definer + search_path rỗng');
 

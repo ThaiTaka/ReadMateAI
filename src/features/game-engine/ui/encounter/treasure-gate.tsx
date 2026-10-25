@@ -35,6 +35,8 @@ export function TreasureGate({
   progress,
   home,
   onOpened,
+  replay = false,
+  onPlayAgain,
 }: {
   studentId: string;
   runId: string;
@@ -44,6 +46,10 @@ export function TreasureGate({
   progress: { resolved: number; total: number } | null;
   home: Route;
   onOpened: () => void;
+  /** Lượt chơi lại (R08.6): lời chúc riêng, không nhắc điểm. */
+  replay?: boolean;
+  /** Nút "Chơi lại" sau khi mở rương (máy chủ vẫn quyết định có cho phép). */
+  onPlayAgain?: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const token = useRef(0);
@@ -149,18 +155,25 @@ export function TreasureGate({
         ref={(element) => element?.focus({ preventScroll: true })}
         className="text-2xl font-extrabold text-ink outline-none"
       >
-        {t.openedTitle}
+        {replay ? vi.treasureMazePlay.replay.doneTitle : t.openedTitle}
       </h2>
       <p className="text-lg font-semibold text-ink-soft">
-        {t.openedText
+        {(replay ? vi.treasureMazePlay.replay.doneText : t.openedText)
           .replace("{total}", String(defeated + undefeated))
           .replace("{defeated}", String(defeated))
           .replace("{undefeated}", String(undefeated))}
       </p>
-      <p className="text-base text-ink-soft">{t.openedNote}</p>
-      <Link href={home} className={buttonClasses("secondary", "kid")}>
-        {vi.encounter.toHome}
-      </Link>
+      {replay ? null : <p className="text-base text-ink-soft">{t.openedNote}</p>}
+      <div className="flex flex-wrap justify-center gap-3">
+        <Link href={home} className={buttonClasses("secondary", "kid")}>
+          {vi.encounter.toHome}
+        </Link>
+        {onPlayAgain ? (
+          <Button size="kid" onClick={onPlayAgain} data-testid="replay-again">
+            {replay ? vi.treasureMazePlay.replay.again : vi.treasureMazePlay.replay.cta}
+          </Button>
+        ) : null}
+      </div>
     </section>
   );
 }

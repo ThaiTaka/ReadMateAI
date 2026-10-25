@@ -630,6 +630,7 @@ export type Database = {
           ended_at: string | null;
           game_key: string;
           id: string;
+          is_replay: boolean;
           last_active_at: string;
           level_key: string;
           level_version: string;
@@ -650,6 +651,7 @@ export type Database = {
           ended_at?: string | null;
           game_key: string;
           id?: string;
+          is_replay?: boolean;
           last_active_at?: string;
           level_key: string;
           level_version: string;
@@ -669,6 +671,7 @@ export type Database = {
           ended_at?: string | null;
           game_key?: string;
           id?: string;
+          is_replay?: boolean;
           last_active_at?: string;
           level_key?: string;
           level_version?: string;
@@ -2000,7 +2003,14 @@ export type Database = {
       };
       gateway_scoring_rules: { Args: { p_version: string }; Returns: Json };
       gateway_start_game_run: {
-        Args: { p_auth_user_id: string; p_game_key: string; p_level_key: string; p_plan?: Json; p_student_id: string };
+        Args: {
+          p_auth_user_id: string;
+          p_game_key: string;
+          p_level_key: string;
+          p_plan?: Json;
+          p_replay?: boolean;
+          p_student_id: string;
+        };
         Returns: Json;
       };
       gateway_start_practice_session: {

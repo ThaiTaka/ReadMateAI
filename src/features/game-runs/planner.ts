@@ -15,6 +15,9 @@ import { MONSTER_KEYS } from "./monsters.ts";
  *   3. ưu tiên bài gần nhất, chia đúng 7 nhóm × 3 câu, gán 7 mã quái vật khác nhau;
  *   4. không đủ 21 câu khác nhau → `null` (máy chủ trả INSUFFICIENT_CONTENT). KHÔNG nhân bản câu, KHÔNG nới quy tắc.
  * CSDL kiểm lại toàn bộ (gateway_start_game_run) và là bảo đảm cuối cùng.
+ *
+ * Chơi lại không tính điểm (R08.6, `replay: true`): bước 2 bỏ qua — câu từng tính điểm trong mùa được dùng lại (không tính
+ * điểm nữa); mọi quy tắc còn lại (bỏ trùng vân tay, đúng 21 câu khác nhau, không nhân bản) giữ nguyên.
  */
 
 export const GAME_PLANNER_VERSION = "r08.2";
@@ -30,7 +33,7 @@ function order(seed: string, salt: string, key: string): number {
 
 export function planGameRun(
   candidates: readonly PracticeCandidate[],
-  options: { band: Band; seed: string },
+  options: { band: Band; seed: string; replay?: boolean },
 ): GameRunPlan | null {
   const unique = new Map<string, PracticeCandidate>();
   for (const candidate of [...candidates].sort((a, b) => a.exerciseItemId.localeCompare(b.exerciseItemId))) {
@@ -41,7 +44,7 @@ export function planGameRun(
     }
   }
   const fresh = [...unique.values()]
-    .filter((candidate) => !candidate.scoredInSeason)
+    .filter((candidate) => options.replay === true || !candidate.scoredInSeason)
     .sort(
       (a, b) =>
         b.lessonOrdinal - a.lessonOrdinal ||

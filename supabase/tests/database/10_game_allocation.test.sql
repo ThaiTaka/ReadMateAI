@@ -8,16 +8,16 @@ select plan(26);
 
 -- Chữ ký và quyền: bản cũ 4 tham số đã bị thay, hàm mới chỉ service_role gọi được.
 select is(to_regprocedure('public.gateway_start_game_run(uuid, uuid, text, text)'), null, 'chữ ký 4 tham số đã bị thay thế');
-select isnt(to_regprocedure('public.gateway_start_game_run(uuid, uuid, text, text, jsonb)'), null, 'có chữ ký 5 tham số (kế hoạch)');
-select ok(has_function_privilege('service_role', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE'),
+select isnt(to_regprocedure('public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)'), null, 'có chữ ký 6 tham số (kế hoạch + ý định chơi lại, R08.6)');
+select ok(has_function_privilege('service_role', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE'),
   'service_role gọi được gateway_start_game_run');
-select ok(not has_function_privilege('authenticated', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE')
-  and not has_function_privilege('anon', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb)', 'EXECUTE')
+select ok(not has_function_privilege('authenticated', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'private.game_plan_shape_ok(jsonb)', 'EXECUTE')
   and not has_function_privilege('anon', 'private.game_plan_shape_ok(jsonb)', 'EXECUTE'),
   'client không gọi được hàm bắt đầu lượt/kiểm kế hoạch');
 select ok((select bool_and(prosecdef and proconfig @> array['search_path=""']) from pg_proc
-           where oid in ('public.gateway_start_game_run(uuid, uuid, text, text, jsonb)'::regprocedure)),
+           where oid in ('public.gateway_start_game_run(uuid, uuid, text, text, jsonb, boolean)'::regprocedure)),
   'gateway_start_game_run: security definer + search_path rỗng');
 select ok((select proconfig @> array['search_path=""'] from pg_proc where oid = 'private.game_plan_shape_ok(jsonb)'::regprocedure),
   'game_plan_shape_ok: search_path rỗng');

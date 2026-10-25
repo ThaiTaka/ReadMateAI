@@ -135,6 +135,19 @@ export const vi = {
       title: "Chưa lưu được",
       text: "Thiết bị này không còn được liên kết hoặc phiên đã hết hạn, nên vị trí chưa được lưu. Hãy quay về trang của con.",
     },
+    /** Chơi lại màn đã hoàn thành, không cộng/trừ điểm (R08.6). Luôn nói rõ "không tính điểm" trước và trong lúc chơi. */
+    replay: {
+      ribbon: "Chơi lại — không tính điểm",
+      offerTitle: "Con đã hoàn thành màn này rồi!",
+      offerText: "Lần này con vẫn được gặp các bạn quái vật và làm câu hỏi, nhưng điểm thưởng sẽ không thay đổi nhé!",
+      cta: "Chơi lại cho vui",
+      starting: "Đang chuẩn bị lượt chơi lại…",
+      again: "Chơi lại lần nữa",
+      doneTitle: "Con đã khám phá Mê cung thêm một lần nữa!",
+      doneText:
+        "Con đã gặp {total} bạn quái vật: {defeated} bạn biến thành sao, {undefeated} bạn bay đi ngủ. Điểm thưởng của con vẫn giữ nguyên.",
+      failed: "Chưa bắt đầu được lượt chơi lại. Con kiểm tra mạng rồi bấm Thử lại nhé.",
+    },
     comingSoon: "Sắp ra mắt: {names}.",
     entry: "Vào Mê cung kho báu",
     entryText: "Cần {min} điểm thưởng. Vị trí của con được lưu lại, lần sau đi tiếp được.",
@@ -154,6 +167,7 @@ export const vi = {
     pauseText: "Mọi thứ vẫn được giữ nguyên, không bị trừ điểm. Con bấm Chơi tiếp khi sẵn sàng nhé!",
     resume: "Chơi tiếp",
     toHome: "Về trang của con",
+    replayBadge: "Chơi lại — không tính điểm",
     question: "Câu hỏi {n} / {total}",
     hearts: "Bạn quái vật còn {n} trong {total} trái tim.",
     score: "{n} điểm",
@@ -1273,6 +1287,7 @@ export const vi = {
     NOT_AT_TRIGGER: "Ở đây chưa có bạn quái vật nào. Con đi tiếp nhé!",
     NOT_AT_TREASURE: "Con cần đến chỗ có rương kho báu để mở nhé!",
     QUESTION_NOT_CURRENT: "Mình làm lần lượt từng câu nhé. Con tải lại màn chơi để tiếp tục.",
+    REPLAY_NOT_AVAILABLE: "Con cần hoàn thành màn này một lần trước khi chơi lại cho vui nhé!",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 
