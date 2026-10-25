@@ -189,9 +189,16 @@ test("R08.6 chơi lại không tính điểm: mời chơi lại, 7 quái vật, 
   });
 
   await resetRateLimits();
-  await page.goto(PAGE);
   // Lượt tính điểm đã xong: chỉ còn lời mời chơi lại, nói rõ điểm không đổi; chưa dựng bàn chơi.
   const offer = page.getByTestId("maze-replay-offer");
+  await page.goto(PAGE);
+  // Trên CI, WebKit mobile thỉnh thoảng không tải script của trang ở lần mở đầu (trace: sau tài liệu không có yêu cầu nào, kể cả
+  // POST bắt đầu lượt; lỗi chập chờn cũng gặp ở E2E R08.4 trên cb3a357). Mở lại một lần, không nới thời gian chờ của các bước sau.
+  const shown = await offer.waitFor({ state: "visible", timeout: 15_000 }).then(
+    () => true,
+    () => false,
+  );
+  if (!shown) await page.reload();
   await expect(offer).toBeVisible({ timeout: 30_000 });
   await expect(offer).toContainText("Lần này con vẫn được gặp các bạn quái vật và làm câu hỏi");
   await expect(offer).toContainText("điểm thưởng sẽ không thay đổi nhé!");
@@ -233,6 +240,7 @@ test("R08.6 chơi lại không tính điểm: mời chơi lại, 7 quái vật, 
         await expectHp(page, 2);
       } else if (index === 1 && n === 1) {
         // Mất mạng lúc nộp: giữ đáp án, "Gửi lại" dùng đúng lượt cũ; HP chỉ giảm một lần.
+        const heartsBefore = Number(await hp(page).getAttribute("data-hp"));
         await choose(page, question, sample);
         await context.setOffline(true);
         await page.getByRole("button", { name: "Kiểm tra" }).click();
@@ -241,7 +249,7 @@ test("R08.6 chơi lại không tính điểm: mời chơi lại, 7 quái vật, 
         const waiting = page.waitForResponse((r) => r.url().includes("/attempts") && r.request().method() === "POST");
         await page.getByRole("button", { name: "Gửi lại" }).click();
         expect((await waiting).status()).toBe(200);
-        await expectHp(page, 2);
+        await expectHp(page, heartsBefore - 1);
       } else {
         await choose(page, question, sample);
         await check(page);
