@@ -79,11 +79,11 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 
 | Nhóm | Gói | Phiên bản cài | Ghi chú |
 |---|---|---|---|
-| Framework | `next` · `react` · `react-dom` | 16.4.0 · 19.3.0 · 19.3.0 | Ghim chính xác như template `create-next-app@16.4.0` |
+| Framework | `next` · `react` · `react-dom` | 16.4.3 · 19.3.0 · 19.3.0 | Ghim chính xác; nâng 16.4.0 → 16.4.3 (2026-10-25) để vá advisory GHSA-673q-mjm6-r5xr (RCE `use cache`, vá từ 16.4.1) |
 | Ngôn ngữ | `typescript` | 5.9.3 (`^5`) | `typescript-eslint` 8.71.1 chỉ hỗ trợ TypeScript `<6.1` → chưa thể dùng TS 7 |
 | CSS | `tailwindcss` · `@tailwindcss/turbopack` | 4.3.3 · 4.3.3 | Tailwind chạy qua loader Turbopack (không có `postcss.config`) — mặc định của template |
 | Biểu tượng | `lucide-react` | 1.55.0 | Giấy phép ISC |
-| Lint/format | `eslint` · `eslint-config-next` · `prettier` | 9.39.5 · 16.4.0 · 3.9.10 | npm báo ESLint 9 hết hỗ trợ, nhưng `eslint-plugin-react`/`import`/`jsx-a11y` trong `eslint-config-next` chưa khai báo hỗ trợ ESLint 10 |
+| Lint/format | `eslint` · `eslint-config-next` · `prettier` | 9.39.5 · 16.4.3 · 3.9.10 | npm báo ESLint 9 hết hỗ trợ, nhưng `eslint-plugin-react`/`import`/`jsx-a11y` trong `eslint-config-next` chưa khai báo hỗ trợ ESLint 10 |
 | Unit test | `vitest` · `vite` · `@vitejs/plugin-react` · `jsdom` | 5.0.3 · 8.3.4 · 6.1.2 · 30.1.2 | `vite` là peer bắt buộc của Vitest 5; `jsdom` 30 yêu cầu Node `^24.15` |
 | Testing Library | `@testing-library/react` · `dom` · `jest-dom` | 16.3.3 · 10.4.2 · 7.0.1 | |
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
@@ -101,7 +101,7 @@ Phiên bản được kiểm tra ngày **2026-10-12** bằng `npm view` (npm reg
 | Thành phần | Lựa chọn | Phiên bản | Ghi chú xác minh |
 |---|---|---|---|
 | Runtime | Node.js | Máy: 24.18.0 · Vercel: **24.x** (mặc định), 22.x | `@supabase/supabase-js`, `ai`, Vitest yêu cầu Node ≥ 22; Vercel ngừng hỗ trợ Node 20 từ 2026-10-01 → đặt `engines.node: "24.x"` |
-| Framework | Next.js (App Router) | 16.4.0 | `engines.node >= 20.9.0`; từ v16 **`middleware.ts` đổi thành `proxy.ts`**, chạy Node.js runtime |
+| Framework | Next.js (App Router) | 16.4.3 | `engines.node >= 20.9.0`; từ v16 **`middleware.ts` đổi thành `proxy.ts`**, chạy Node.js runtime |
 | UI | React, React DOM | 19.3.0 | |
 | Ngôn ngữ | TypeScript | **^5 (5.9.3)** | npm `latest` là 7.0.2 (bản native) nhưng `create-next-app` 16.4 vẫn ghim `typescript: "^5"` → dùng 5.9.x, đánh giá TS 7 sau |
 | CSS | Tailwind CSS | 4.3.3 | Kèm `@tailwindcss/postcss` hoặc `@tailwindcss/turbopack` 4.3.3 (template chọn theo bundler) |
@@ -109,7 +109,7 @@ Phiên bản được kiểm tra ngày **2026-10-12** bằng `npm view` (npm reg
 | Supabase | `@supabase/supabase-js` 2.117.3 · `@supabase/ssr` 0.12.7 · CLI `supabase` 2.120.0 | | Dùng khóa mới `sb_publishable_…` / `sb_secret_…`; khóa `anon`/`service_role` cũ bị khai tử **cuối 2026** |
 | PDF | `@react-pdf/renderer` | 4.9.0 | peer `react ^19` hợp lệ |
 | Kiểm thử | Vitest 5.0.3 · Playwright 1.64.0 | | Vitest yêu cầu `@types/node ^22 \|\| >=24` → dùng `@types/node@^24` (template mặc định `^20` sẽ lệch) |
-| Lint/format | ESLint **^9** (9.39.5) + `eslint-config-next` 16.4.0 · Prettier 3.9.10 | | ESLint 10.12 đã phát hành nhưng template Next ghim `^9` |
+| Lint/format | ESLint **^9** (9.39.5) + `eslint-config-next` 16.4.3 · Prettier 3.9.10 | | ESLint 10.12 đã phát hành nhưng template Next ghim `^9` |
 | PWA (ứng viên) | `@serwist/next` | 9.5.13 | Cần POC với Turbopack; phương án dự phòng: service worker viết tay |
 | AI (sau MVP) | `@anthropic-ai/sdk` 0.133.0 (adapter đầu tiên) · `ai` 7.0.137 (phương án đa nhà cung cấp) | | Chọn cách hiện thực adapter khi bắt đầu GĐ11 |
 | TTS (ứng viên) | `@google-cloud/text-to-speech` 7.1.1 · `microsoft-cognitiveservices-speech-sdk` 1.52.0 · nhà cung cấp Việt Nam | | Google Cloud TTS có nhiều giọng `vi-VN` (Standard, WaveNet, Neural2, Chirp3-HD) — đã xác minh; các nhà cung cấp khác cần POC |
