@@ -82,27 +82,28 @@ export async function startGameRun(
 }
 
 /**
- * Học sinh có quyền chơi LẠI ở màn này trong mùa đang diễn ra (lượt chơi lại đang dở, hoặc lượt tính điểm đã xong) → trang vẫn
- * mở bàn chơi khi điểm hiện tại dưới ngưỡng: chơi lại không đổi điểm nên không cần điểm. Lượt TÍNH ĐIỂM đang dở không nằm ở
- * đây (câu hỏi mở về ngưỡng cho lượt dở là quyết định của người điều phối, R08.2). Chỉ để chọn giao diện; CSDL vẫn là nơi
- * quyết định (ngưỡng, điều kiện chơi lại) khi bắt đầu lượt.
+ * Lượt nào cho phép vào trang khi điểm dưới ngưỡng. Quyết định của chủ dự án (R08.7): ngưỡng chỉ áp dụng khi BẮT ĐẦU lượt tính
+ * điểm mới → lượt đang dở (tính điểm hoặc chơi lại) luôn được tiếp tục; lượt tính điểm đã xong cho vào để chọn chơi lại.
+ */
+export function runKeepsAccess(run: { status: string; scored: boolean }): boolean {
+  return run.status === "in_progress" || (run.status === "completed" && run.scored);
+}
+
+/**
+ * Học sinh có quyền tiếp tục / chơi LẠI ở màn này trong mùa đang diễn ra → trang vẫn mở bàn chơi khi điểm hiện tại dưới
+ * ngưỡng (xem `runKeepsAccess`). Chỉ để chọn giao diện; CSDL vẫn là nơi quyết định (gateway_start_game_run trả lượt dở trước
+ * khi xét ngưỡng; ngưỡng vẫn chặn lượt tính điểm mới).
  */
 export async function hasLevelProgress(context: StudentContext, studentId: string, levelKey: string): Promise<boolean> {
   if (!ownsStudent(context, studentId)) return false;
   const { data: runs } = await context.admin
     .from("game_runs")
-    .select("season_id, status, scored, is_replay")
+    .select("season_id, status, scored")
     .eq("student_id", studentId)
     .eq("game_key", TREASURE_MAZE_KEY)
     .eq("level_key", levelKey)
     .in("status", ["in_progress", "completed"]);
-  const seasonIds = [
-    ...new Set(
-      (runs ?? [])
-        .filter((run) => (run.status === "in_progress" ? run.is_replay : run.scored))
-        .map((run) => run.season_id),
-    ),
-  ];
+  const seasonIds = [...new Set((runs ?? []).filter(runKeepsAccess).map((run) => run.season_id))];
   if (seasonIds.length === 0) return false;
   const { data: seasons } = await context.admin.from("seasons").select("id").in("id", seasonIds).eq("status", "active");
   return (seasons ?? []).length > 0;

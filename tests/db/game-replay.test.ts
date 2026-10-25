@@ -550,12 +550,14 @@ describe("R08.6 — điểm dưới ngưỡng sau khi hoàn thành màn", () => 
     const replay = await newReplay(scored, "r86-duoi-nguong");
     expect(await hasLevelProgress(ctx(scored.mem), scored.mem.studentId, LEVEL)).toBe(true);
     expect(await snapshot(scored.mem)).toEqual(before);
-    // Lượt tính điểm CHƯA hoàn thành thì không có quyền chơi lại → trang vẫn chặn theo ngưỡng.
+    // Học sinh chưa có lượt nào ở màn này thì trang vẫn chặn theo ngưỡng.
     const t = world.teacherA.client;
     const cls = await newGameClass(t);
     const fresh = await gameMember(t, cls.id, { burn: 11 });
-    await startWith(fresh, await realPlan(fresh, "dang-do-duoi"));
+    // R08.7: chưa có lượt nào → không có quyền; có lượt tính điểm đang dở → có quyền tiếp tục dù điểm dưới ngưỡng.
     expect(await hasLevelProgress(ctx(fresh), fresh.studentId, LEVEL)).toBe(false);
+    await startWith(fresh, await realPlan(fresh, "dang-do-duoi"));
+    expect(await hasLevelProgress(ctx(fresh), fresh.studentId, LEVEL)).toBe(true);
     expect(await hasLevelProgress(ctx(scored.mem), scored.mem.studentId, "treasure-maze-02")).toBe(false);
     expect(replay.runId).toBeTruthy();
   }, 360_000);
@@ -575,5 +577,81 @@ describe("R08.6 — điểm dưới ngưỡng sau khi hoàn thành màn", () => 
       }),
     );
     expect(await hasLevelProgress(ctx(scored.mem), scored.mem.studentId, LEVEL)).toBe(false);
+  }, 360_000);
+});
+
+const setBalance = async (mem: Mem, balance: number) => {
+  const row = (await scoreRow(mem.studentId))[0]!;
+  const r = await admin
+    .from("season_scores")
+    .update({ balance, deducted_total: row.earned_total - balance })
+    .eq("student_id", mem.studentId);
+  expect(r.error).toBeNull();
+};
+
+describe("R08.7 — tiếp tục lượt tính điểm đang dở khi điểm dưới ngưỡng", () => {
+  it("đủ ngưỡng → bắt đầu; điểm giảm xuống 45 rồi 0 → vào lại đúng lượt, vị trí/HP/câu giữ nguyên, không tạo lượt mới, điểm không đổi", async () => {
+    const g = await newScored();
+    await go(g, ROUTE.t1);
+    expect(errorMessage(await activate(g))).toBeNull();
+    const [q1, q2] = (await threeOf(g.runId, 1)) as [string, string, string];
+    await answer(g, q1, "correct");
+    for (const balance of [45, 0]) {
+      await setBalance(g.mem, balance);
+      expect(await hasLevelProgress(ctx(g.mem), g.mem.studentId, LEVEL)).toBe(true);
+      const before = await snapshot(g.mem);
+      const resumed = await startWith(g.mem, await realPlan(g.mem, `r87-${balance}`));
+      expect(resumed.data).toMatchObject({ outcome: "resumed", run: { id: g.runId, scored: true, replay: false } });
+      expect((await activate(g)).data).toMatchObject({ outcome: "resumed", encounter: { hpRemaining: 2 } });
+      const state = await getEncounterState(ctx(g.mem), g.runId);
+      expect(state.ok && state.data.encounter?.hpRemaining).toBe(2);
+      expect(await snapshot(g.mem)).toEqual(before);
+      const runs = (await admin.from("game_runs").select("id").eq("student_id", g.mem.studentId)).data!;
+      expect(runs).toHaveLength(1);
+    }
+    // Câu đang làm vẫn là câu thứ hai, không lộ đáp án.
+    expect((await getQuestion(ctx(g.mem), q2)).ok).toBe(true);
+  }, 360_000);
+
+  it("dưới ngưỡng và chưa có lượt → không được bắt đầu lượt tính điểm mới, không có quyền vào lại", async () => {
+    const t = world.teacherA.client;
+    const cls = await newGameClass(t);
+    const poor = await gameMember(t, cls.id, { burn: 2 });
+    expect(await hasLevelProgress(ctx(poor), poor.studentId, LEVEL)).toBe(false);
+    expect(errorMessage(await startWith(poor, await realPlan(poor, "r87-nghe")))).toBe("INSUFFICIENT_POINTS");
+    expect((await admin.from("game_runs").select("id").eq("student_id", poor.studentId)).data).toHaveLength(0);
+  }, 240_000);
+
+  it("lượt chơi lại đang dở vẫn tiếp tục được khi điểm dưới ngưỡng", async () => {
+    const scored = await newScored();
+    await finish(scored);
+    const replay = await newReplay(scored, "r87-replay");
+    await setBalance(scored.mem, 10);
+    const before = await snapshot(scored.mem);
+    expect(await hasLevelProgress(ctx(scored.mem), scored.mem.studentId, LEVEL)).toBe(true);
+    const again = await startReplay(scored.mem, await replayPlan(scored.mem, "r87-replay-2"));
+    expect(again.data).toMatchObject({ outcome: "resumed", run: { id: replay.runId, replay: true, scored: false } });
+    expect(await snapshot(scored.mem)).toEqual(before);
+  }, 360_000);
+
+  it("lượt của học sinh khác hoặc của mùa cũ không cấp quyền; reset mùa chặn đúng (thu hồi thiết bị, rút đồng ý đã có test riêng)", async () => {
+    const t = world.teacherA.client;
+    const g = await newScored();
+    const other = await gameMember(t, g.classId, { burn: 2 });
+    expect(await hasLevelProgress(ctx(other), other.studentId, LEVEL)).toBe(false);
+    // Thiết bị của bạn khác không tiếp tục được lượt của g.
+    expect(errorMessage(await savePath({ ...g, mem: other }, ROUTE.t1))).not.toBeNull();
+    await setBalance(g.mem, 0);
+    const season = await seasonOf(g.classId);
+    await rpcOk(
+      t.rpc("teacher_reset_season", {
+        p_class_id: g.classId,
+        p_request_id: randomUUID(),
+        p_expected_season_id: season,
+        p_confirmation: g.className,
+      }),
+    );
+    expect(await hasLevelProgress(ctx(g.mem), g.mem.studentId, LEVEL)).toBe(false);
+    expect(errorMessage(await startWith(g.mem, await realPlan(g.mem, "r87-mua-moi")))).toBe("INSUFFICIENT_POINTS");
   }, 360_000);
 });
