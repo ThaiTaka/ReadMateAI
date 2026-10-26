@@ -224,19 +224,34 @@ test.describe("giáo viên", () => {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 
-  test("tệp giả MIME bị từ chối với câu chữ dễ hiểu và không tạo bản ghi", async ({ page }, testInfo) => {
+  test("tệp giả MIME bị từ chối, không tạo bản ghi (API) và hiện câu chữ dễ hiểu (giao diện, Chromium)", async ({
+    page,
+    browserName,
+  }, testInfo) => {
     const units = UNIT_BY_PROJECT[testInfo.project.name];
     test.skip(!units, "Chạy ở ba project trình duyệt chính.");
     await login(page);
-    await page.goto("/teacher/audio");
     const unit = units!.reject;
     const before = (await versionsOf(unit)).length;
-    await openUnit(page, unit);
-    await page.locator('input[type="file"]').setInputFiles({
-      name: "gia.mp3",
-      mimeType: "audio/mpeg",
-      buffer: Buffer.from("<html><body>không phải âm thanh</body></html>"),
+    const fake = Buffer.from("<html><body>không phải âm thanh</body></html>");
+
+    // Tầng API (cùng cookie phiên GV): máy chủ kiểm tra theo nội dung, bỏ qua loại tệp khai báo.
+    const response = await page.request.post("/api/teacher/audio/versions", {
+      multipart: {
+        unitKind: "phoneme",
+        unitText: unit,
+        file: { name: "gia.mp3", mimeType: "audio/mpeg", buffer: fake },
+      },
     });
+    expect(response.status()).toBe(415);
+    expect(await response.json()).toEqual({ ok: false, code: "AUDIO_UNSUPPORTED" });
+    expect((await versionsOf(unit)).length).toBe(before);
+
+    // Giao diện (WebKit mobile không đáng tin khi nạp tệp tự động; tầng API ở trên đã kiểm chứng cho mọi project).
+    test.skip(browserName !== "chromium", "Phần giao diện chạy ở Chromium.");
+    await page.goto("/teacher/audio");
+    await openUnit(page, unit);
+    await page.locator('input[type="file"]').setInputFiles({ name: "gia.mp3", mimeType: "audio/mpeg", buffer: fake });
     await clickUploadSave(page);
     await expect(page.getByRole("alert").filter({ hasText: vi.errors.AUDIO_UNSUPPORTED })).toBeVisible({
       timeout: 20_000,
