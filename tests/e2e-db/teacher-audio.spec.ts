@@ -56,7 +56,8 @@ async function versionsOf(unit: string) {
 }
 
 async function openUnit(page: Page, unit: string) {
-  await page.getByRole("button", { name: t.unit.openLabel.replace("{unit}", unit) }).click();
+  // exact: tên "g" không được khớp lẫn "gh", "gi".
+  await page.getByRole("button", { name: t.unit.openLabel.replace("{unit}", unit), exact: true }).click();
 }
 
 async function uploadFile(page: Page) {
@@ -175,7 +176,7 @@ test.describe("giáo viên", () => {
     expect(tamper.error?.message).toContain("AUDIO_VERSION_IMMUTABLE");
 
     // --- Luồng yêu cầu ghi lại ---
-    await page.getByRole("button", { name: t.unit.openLabel.replace("{unit}", approve) }).click(); // đóng
+    await page.getByRole("button", { name: t.unit.openLabel.replace("{unit}", approve), exact: true }).click(); // đóng
     await openUnit(page, reject);
     await page.getByRole("button", { name: t.pronunciation.confirm }).click();
     await expect(page.getByText(t.pronunciation.saved)).toBeVisible({ timeout: 20_000 });
