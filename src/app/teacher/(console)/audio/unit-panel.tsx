@@ -64,7 +64,7 @@ export function UnitPanel({ unit, asset, context }: Props) {
   return (
     <div className="mt-4 grid gap-6 border-t border-line pt-5">
       <PronunciationForm
-        key={`${unit.key}-${asset?.confirmedLabel ?? ""}`}
+        key={unit.key}
         unit={unit}
         asset={asset}
         context={context}
@@ -73,7 +73,7 @@ export function UnitPanel({ unit, asset, context }: Props) {
       <FileUpload key={fileKey} blockedReason={blockedReason} saving={uploading} onSave={upload} />
       <ActionNoteView note={uploadNote} />
       <VersionList unitLabel={unit.displayText} asset={asset} context={context} />
-      <NoteForm key={`${unit.key}-note-${asset?.note ?? ""}`} unit={unit} asset={asset} context={context} />
+      <NoteForm key={`${unit.key}-note`} unit={unit} asset={asset} context={context} />
     </div>
   );
 }
