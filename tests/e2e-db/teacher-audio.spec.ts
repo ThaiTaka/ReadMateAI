@@ -62,7 +62,7 @@ async function openUnit(page: Page, unit: string) {
 
 /** Đợi giao diện nhận tệp đã chọn (React xử lý onChange) rồi mới bấm lưu — tránh bấm khi nút chưa được dựng/bật (WebKit mobile). */
 async function clickUploadSave(page: Page) {
-  await expect(page.getByText(/^Đã chọn tệp (/u)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText("Đã chọn tệp (")).toBeVisible({ timeout: 15_000 });
   const save = page.getByRole("button", { name: t.upload.save, exact: true });
   await save.scrollIntoViewIfNeeded();
   await expect(save).toBeEnabled();
