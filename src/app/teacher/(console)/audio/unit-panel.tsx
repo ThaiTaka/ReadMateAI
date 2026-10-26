@@ -63,12 +63,7 @@ export function UnitPanel({ unit, asset, context }: Props) {
 
   return (
     <div className="mt-4 grid gap-6 border-t border-line pt-5">
-      <PronunciationForm
-        key={unit.key}
-        unit={unit}
-        asset={asset}
-        context={context}
-      />
+      <PronunciationForm key={unit.key} unit={unit} asset={asset} context={context} />
       <Recorder key={recorderKey} blockedReason={blockedReason} saving={uploading} onSave={upload} />
       <FileUpload key={fileKey} blockedReason={blockedReason} saving={uploading} onSave={upload} />
       <ActionNoteView note={uploadNote} />
