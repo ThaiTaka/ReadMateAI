@@ -60,11 +60,20 @@ async function openUnit(page: Page, unit: string) {
   await page.getByRole("button", { name: t.unit.openLabel.replace("{unit}", unit), exact: true }).click();
 }
 
+/** Đợi giao diện nhận tệp đã chọn (React xử lý onChange) rồi mới bấm lưu — tránh bấm khi nút chưa được dựng/bật (WebKit mobile). */
+async function clickUploadSave(page: Page) {
+  await expect(page.getByText(/^Đã chọn tệp (/u)).toBeVisible({ timeout: 15_000 });
+  const save = page.getByRole("button", { name: t.upload.save, exact: true });
+  await save.scrollIntoViewIfNeeded();
+  await expect(save).toBeEnabled();
+  await save.click();
+}
+
 async function uploadFile(page: Page) {
   await page
     .locator('input[type="file"]')
     .setInputFiles({ name: "thu.wav", mimeType: "audio/wav", buffer: uniqueWav() });
-  await page.getByRole("button", { name: t.upload.save }).click();
+  await clickUploadSave(page);
   await expect(page.getByText(t.upload.saved)).toBeVisible({ timeout: 20_000 });
 }
 
@@ -228,7 +237,7 @@ test.describe("giáo viên", () => {
       mimeType: "audio/mpeg",
       buffer: Buffer.from("<html><body>không phải âm thanh</body></html>"),
     });
-    await page.getByRole("button", { name: t.upload.save }).click();
+    await clickUploadSave(page);
     await expect(page.getByRole("alert").filter({ hasText: vi.errors.AUDIO_UNSUPPORTED })).toBeVisible({
       timeout: 20_000,
     });
