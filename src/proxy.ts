@@ -27,6 +27,14 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // /api/student: làm mới phiên thiết bị trước Route Handler (handler vẫn tự xác minh bằng getClaims).
-  matcher: ["/teacher", "/teacher/:path*", "/learn/:path*", "/join", "/login", "/api/student/:path*"],
+  // /api/student, /api/teacher: làm mới phiên trước Route Handler (handler vẫn tự xác minh bằng getClaims).
+  matcher: [
+    "/teacher",
+    "/teacher/:path*",
+    "/learn/:path*",
+    "/join",
+    "/login",
+    "/api/student/:path*",
+    "/api/teacher/:path*",
+  ],
 };

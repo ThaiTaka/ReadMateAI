@@ -177,3 +177,12 @@ Reset mùa **không phải** là xóa dữ liệu: dữ liệu mùa cũ vẫn t�
 | RQ-P1 | Nhà trường có chấp thuận bảng xếp hạng nội bộ lớp và vinh danh trên máy chiếu không? |
 | RQ-P2 | Ghi nhận đồng ý của trẻ ≥ 7 tuổi (Điều 24) bằng cách nào phù hợp lứa tuổi? |
 | RQ-P3 | Thời hạn lưu giữ dữ liệu điểm và ảnh chụp vinh danh? |
+
+## 13. Giọng giáo viên (R10.2)
+
+- **Dữ liệu cá nhân mới:** bản ghi giọng của giáo viên (không phải của trẻ) — lưu ở bucket riêng tư `teacher-audio`; metadata ở `audio_*`. Chỉ dùng để hỗ trợ học sinh học Tiếng Việt trong ứng dụng, theo phạm vi GV đồng ý (`teacher_voice_in_app`).
+- **Đồng ý** bằng thao tác rõ ràng (ô không chọn sẵn), chứng từ bất biến (phiên bản thông báo, thời điểm); rút đồng ý thu hồi mọi bản ghi của GV. **Hiện chưa có đồng ý thật nào.**
+- **Micro:** chỉ `/teacher/audio` (`microphone=(self)`); mọi route học sinh `microphone=()`. Không ghi âm trẻ em; không có đường tải âm thanh từ khu vực học sinh.
+- **Truy cập:** phạm vi trường + RLS; bản nháp riêng người tạo; thiết bị học sinh bị từ chối; tệp chỉ phát qua proxy có đăng nhập, `no-store`; không URL công khai/ký.
+- **Nhật ký** chỉ UUID/mã. **Không** gửi bản ghi tới dịch vụ bên thứ ba. Cờ `teacher_audio_recording_approved` TẮT cho tới khi GV đồng ý và chủ dự án cho phép.
+- **Xóa:** theo yêu cầu qua quản trị viên (chưa tự động hóa); tệp mồ côi đối soát bằng `npm run audio:reconcile`.

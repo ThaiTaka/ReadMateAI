@@ -37,3 +37,27 @@ test.describe("header bảo mật trong production", () => {
     expect(response.headers()["content-security-policy"]).toContain("default-src 'self'");
   });
 });
+
+/** R10.2: micro chỉ mở cho trang ghi âm của giáo viên; mọi route học sinh/công khai vẫn microphone=(). */
+test.describe("Permissions-Policy micro (R10.2)", () => {
+  test.beforeEach(({ browserName, isMobile }) => {
+    test.skip(browserName !== "chromium" || isMobile, "Kiểm tra ở tầng HTTP — chạy một lần là đủ.");
+  });
+
+  test("/teacher/audio có microphone=(self), các quyền khác vẫn tắt", async ({ request }) => {
+    const response = await request.get("/teacher/audio", { maxRedirects: 0 });
+    const policy = response.headers()["permissions-policy"] ?? "";
+    expect(policy).toContain("microphone=(self)");
+    expect(policy).toContain("camera=()");
+    expect(policy).toContain("geolocation=()");
+  });
+
+  for (const path of ["/", "/demo", "/learn", "/join", "/login", "/teacher"]) {
+    test(`${path} không mở micro`, async ({ request }) => {
+      const response = await request.get(path, { maxRedirects: 0 });
+      const policy = response.headers()["permissions-policy"] ?? "";
+      expect(policy).toContain("microphone=()");
+      expect(policy).not.toContain("microphone=(self)");
+    });
+  }
+});

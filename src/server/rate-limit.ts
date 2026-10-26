@@ -18,6 +18,8 @@ export const RATE_LIMITS = {
   joinByAddress: { purpose: "join.address", windowSeconds: 900, limit: 10 },
   /** Toàn hệ thống: 300 lần nhập mã / giờ (chặn dò mã phân tán). */
   joinGlobal: { purpose: "join.global", windowSeconds: 3600, limit: 300 },
+  /** Tải bản ghi giáo viên lên (R10.2): 60 lần / giờ / tài khoản — chặn lặp vô tình và làm đầy kho lưu. */
+  audioUpload: { purpose: "audio.upload", windowSeconds: 3600, limit: 60 },
 } as const satisfies Record<string, RateLimitRule>;
 
 export type RateLimitOutcome = "allowed" | "limited" | "unavailable";

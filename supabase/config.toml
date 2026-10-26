@@ -116,17 +116,17 @@ port = 54324
 # sender_name = "Admin"
 
 [storage]
-# ReadMate AI: chưa dùng Storage ở R03 (âm thanh/hình đã duyệt: R10).
-enabled = false
+# ReadMate AI (R10.2): bật để kiểm thử bản ghi giáo viên ở local/CI. Bucket dưới đây luôn RIÊNG TƯ; không có policy
+# storage.objects nào cho anon/authenticated — chỉ máy chủ (khóa secret) đọc/ghi. Máy ít RAM: dùng npm run db:start:lite.
+enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "50MiB"
+file_size_limit = "2MiB"
 
-# Uncomment to configure local storage buckets
-# [storage.buckets.images]
-# public = false
-# file_size_limit = "50MiB"
-# allowed_mime_types = ["image/png", "image/jpeg"]
-# objects_path = "./images"
+# Bản ghi giọng giáo viên (R10.2): riêng tư, tối đa 2 MiB, chỉ các định dạng âm thanh máy chủ đã kiểm tra chữ ký tệp.
+[storage.buckets.teacher-audio]
+public = false
+file_size_limit = "2MiB"
+allowed_mime_types = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav"]
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]

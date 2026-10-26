@@ -22,6 +22,16 @@ export type SecurityHeaderOptions = {
 /** Tắt các quyền thiết bị nhạy cảm ở mọi trang (không ghi âm/quay phim/định vị trẻ). */
 export const PERMISSIONS_POLICY = ["camera=()", "microphone=()", "geolocation=()", "payment=()", "usb=()"].join(", ");
 
+/**
+ * Ngoại lệ DUY NHẤT cho micro (R10.2): trang giáo viên ghi âm giọng đọc. Chỉ `microphone=(self)`; camera, định vị,
+ * thanh toán, USB vẫn tắt. Không route học sinh (/learn, /demo, /join, /api/student) nào được mở micro.
+ */
+export const AUDIO_STUDIO_PATH = "/teacher/audio";
+export const AUDIO_STUDIO_PERMISSIONS_POLICY = PERMISSIONS_POLICY.replace("microphone=()", "microphone=(self)");
+export const AUDIO_STUDIO_HEADERS: HttpHeader[] = [
+  { key: "Permissions-Policy", value: AUDIO_STUDIO_PERMISSIONS_POLICY },
+];
+
 export function buildContentSecurityPolicy({ isDev }: SecurityHeaderOptions): string {
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],

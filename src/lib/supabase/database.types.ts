@@ -3,6 +3,177 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      audio_asset_versions: {
+        Row: {
+          asset_id: string;
+          content_hash: string;
+          consent_id: string;
+          created_at: string;
+          created_by: string;
+          duration_ms: number;
+          id: string;
+          mime_type: string;
+          review_listened: boolean;
+          review_note: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          revoke_reason: string | null;
+          revoked_at: string | null;
+          revoked_by: string | null;
+          school_id: string;
+          size_bytes: number;
+          spoken_label: string;
+          status: string;
+          storage_bucket: string;
+          storage_key: string;
+          submitted_at: string | null;
+          submitted_by: string | null;
+          version_no: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          asset_id: string;
+          content_hash: string;
+          consent_id: string;
+          created_at?: string;
+          created_by: string;
+          duration_ms: number;
+          id: string;
+          mime_type: string;
+          review_listened?: boolean;
+          review_note?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+          school_id: string;
+          size_bytes: number;
+          spoken_label: string;
+          status?: string;
+          storage_bucket?: string;
+          storage_key: string;
+          submitted_at?: string | null;
+          submitted_by?: string | null;
+          version_no: number;
+        };
+        Update: {
+          asset_id?: string;
+          content_hash?: string;
+          consent_id?: string;
+          created_at?: string;
+          created_by?: string;
+          duration_ms?: number;
+          id?: string;
+          mime_type?: string;
+          review_listened?: boolean;
+          review_note?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+          school_id?: string;
+          size_bytes?: number;
+          spoken_label?: string;
+          status?: string;
+          storage_bucket?: string;
+          storage_key?: string;
+          submitted_at?: string | null;
+          submitted_by?: string | null;
+          version_no?: number;
+        };
+        Relationships: [];
+      };
+      audio_assets: {
+        Row: {
+          active_version_id: string | null;
+          confirmed_label: string | null;
+          created_at: string;
+          created_by: string;
+          id: string;
+          pronunciation_confirmed_at: string | null;
+          pronunciation_confirmed_by: string | null;
+          proposed_label: string;
+          school_id: string;
+          source: string;
+          teacher_note: string | null;
+          unit_kind: string;
+          unit_text: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          active_version_id?: string | null;
+          confirmed_label?: string | null;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          pronunciation_confirmed_at?: string | null;
+          pronunciation_confirmed_by?: string | null;
+          proposed_label: string;
+          school_id: string;
+          source?: string;
+          teacher_note?: string | null;
+          unit_kind: string;
+          unit_text: string;
+          updated_at?: string;
+        };
+        Update: {
+          active_version_id?: string | null;
+          confirmed_label?: string | null;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          pronunciation_confirmed_at?: string | null;
+          pronunciation_confirmed_by?: string | null;
+          proposed_label?: string;
+          school_id?: string;
+          source?: string;
+          teacher_note?: string | null;
+          unit_kind?: string;
+          unit_text?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      audio_voice_consents: {
+        Row: {
+          granted_at: string;
+          id: string;
+          notice_version: string;
+          school_id: string;
+          scope: string;
+          staff_id: string;
+          status: string;
+          withdraw_reason: string | null;
+          withdrawn_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          granted_at?: string;
+          id?: string;
+          notice_version: string;
+          school_id: string;
+          scope?: string;
+          staff_id: string;
+          status?: string;
+          withdraw_reason?: string | null;
+          withdrawn_at?: string | null;
+        };
+        Update: {
+          granted_at?: string;
+          id?: string;
+          notice_version?: string;
+          school_id?: string;
+          scope?: string;
+          staff_id?: string;
+          status?: string;
+          withdraw_reason?: string | null;
+          withdrawn_at?: string | null;
+        };
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           action: string;
@@ -2024,6 +2195,34 @@ export type Database = {
       };
       teacher_approve_leaderboard_alias: { Args: { p_student_id: string }; Returns: undefined };
       teacher_assign_band: { Args: { p_band: string; p_reason: string; p_student_id: string }; Returns: undefined };
+      teacher_audio_status: { Args: Record<PropertyKey, never>; Returns: Json };
+      teacher_confirm_audio_pronunciation: { Args: { p_asset_id: string; p_label: string }; Returns: undefined };
+      teacher_create_audio_version: {
+        Args: {
+          p_asset_id: string;
+          p_content_hash: string;
+          p_duration_ms: number;
+          p_mime_type: string;
+          p_size_bytes: number;
+          p_storage_key: string;
+          p_version_id: string;
+        };
+        Returns: Json;
+      };
+      teacher_discard_audio_version: { Args: { p_version_id: string }; Returns: undefined };
+      teacher_ensure_audio_asset: {
+        Args: { p_proposed_label: string; p_unit_kind: string; p_unit_text: string };
+        Returns: string;
+      };
+      teacher_grant_audio_consent: { Args: { p_notice_version: string }; Returns: string };
+      teacher_review_audio_version: {
+        Args: { p_decision: string; p_listened: boolean; p_note: string; p_version_id: string };
+        Returns: Json;
+      };
+      teacher_revoke_audio_version: { Args: { p_reason: string; p_version_id: string }; Returns: undefined };
+      teacher_set_audio_note: { Args: { p_asset_id: string; p_note: string }; Returns: undefined };
+      teacher_submit_audio_version: { Args: { p_version_id: string }; Returns: undefined };
+      teacher_withdraw_audio_consent: { Args: { p_reason: string }; Returns: number };
       teacher_confirm_class_curriculum: { Args: { p_class_id: string }; Returns: undefined };
       teacher_create_class: { Args: { p_name: string; p_school_year: string }; Returns: string };
       teacher_create_honor_snapshot: { Args: { p_class_id: string; p_request_id: string }; Returns: Json };

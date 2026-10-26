@@ -1,6 +1,6 @@
 # ReadMate AI — Kế hoạch ghi âm của giáo viên (DỰ KIẾN)
 
-> **Trạng thái: DỰ KIẾN — chưa giáo viên nào duyệt.** Lập ngày 2026-10-26 (R10.1) từ `content/kb/phonemes.json`, `rimes.json`, `letters.json` và 17 biến thể bài tập. Cách gọi âm trong kho là **đề xuất của AI, chờ GV xác nhận** (Q-02). Lớp 1A2 **chưa có hồ sơ tiến độ** (bộ sách Q-01 chưa biết) nên **chưa thể** nói lớp cần ghi những âm/vần nào. R10.1 không yêu cầu GV ghi âm.
+> **Trạng thái: DỰ KIẾN — chưa giáo viên nào duyệt.** Lập ngày 2026-10-26 (R10.1) từ `content/kb/phonemes.json`, `rimes.json`, `letters.json` và 17 biến thể bài tập. Cách gọi âm trong kho là **đề xuất của AI, chờ GV xác nhận** (Q-02). Lớp 1A2 **chưa có hồ sơ tiến độ** (bộ sách Q-01 chưa biết) nên **chưa thể** nói lớp cần ghi những âm/vần nào. R10.1 không yêu cầu GV ghi âm. **R10.2 (2026-10-27) đã dựng trang `/teacher/audio` để ghi theo danh sách này — vẫn chưa GV nào ghi, đồng ý hay duyệt; xem [TEACHER_AUDIO_GUIDE](TEACHER_AUDIO_GUIDE.md).**
 > Liên quan: [AUDIO_ENGINE](AUDIO_ENGINE.md), [PRD A7](PRD.md).
 
 ## 1. Nguyên tắc: không ghi hết nếu chưa cần
@@ -97,3 +97,11 @@ Có thể dừng sau buổi 1–2 rồi làm tiếp theo tiến độ dạy (ghi
 6. GV đồng ý để bản ghi giọng của mình được lưu và dùng trong ứng dụng (quyền sử dụng).
 
 **Kết luận:** danh sách trên là *dự kiến*; chỉ trở thành kế hoạch chính thức khi GV duyệt các mục §7.
+
+## 8. Công cụ ghi âm (R10.2) và quy trình
+
+- Trang `/teacher/audio`: danh sách P0 (38) với trạng thái *Chưa ghi / Bản nháp / Chờ duyệt / Đã duyệt / Cần ghi lại*, nhãn **"Chờ xác nhận cách đọc"** cho tới khi GV xác nhận, ghi trực tiếp hoặc tải tệp (WebM, Ogg, M4A, MP3, WAV ≤ 2 MB, ≤ 10 giây), nghe lại, ghi lại, lưu nháp, gửi duyệt, duyệt/yêu cầu ghi lại, thu hồi.
+- Điều kiện duyệt: đã nghe; cách đọc đã xác nhận và khớp; người ghi còn đồng ý. Không duyệt hàng loạt.
+- **Đồng ý dùng giọng** là thao tác rõ ràng (ô không chọn sẵn), lưu phiên bản thông báo + thời điểm; **hiện chưa có đồng ý thực tế nào** (chỉ fixture kiểm thử).
+- **Rút/xóa**: *Thu hồi* từng bản hoặc *Rút đồng ý* (thu hồi mọi bản của GV) làm bản ghi ngừng được dùng ngay. Xóa hẳn tệp theo yêu cầu: quản trị viên thực hiện thủ công (trigger chặn xóa qua API; dùng `npm run audio:reconcile` để kiểm tra tệp mồ côi) — chưa có nút tự xóa.
+- iPhone: dùng ứng dụng Ghi âm rồi tải tệp `.m4a`; ghi trực tiếp bằng Safari chưa kiểm thử trên thiết bị thật.

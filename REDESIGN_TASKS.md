@@ -285,7 +285,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 **Phụ thuộc:** R03, R04. **Có thể chạy song song từ sau R04.** **Điều kiện trước:** quyết định nhà cung cấp TTS (được phép tạo tài khoản thử nghiệm), GV sẵn sàng ghi âm âm/vần (Q-03), GV trả lời Q-01/Q-02.
 
 - [x] 10.1 (2026-10-26) `docs/AUDIO_ENGINE.md`, `docs/AUDIO_RECORDING_PLAN.md`, adapter `TtsProvider` + test. **POC bằng API thật CHƯA làm** (chờ khóa được cấp phép) — so sánh dựa trên tài liệu chính thức; GV chưa nghe giọng nào
-- [ ] 10.2 Ghi âm/tải tệp của GV ở `/teacher/audio` (route duy nhất bật microphone); duyệt bản ghi
+- [x] 10.2 (2026-10-27, **hoàn thành về kỹ thuật; chưa nghiệm thu với GV thật**) Ghi âm/tải tệp của GV ở `/teacher/audio` (route duy nhất bật microphone); quy trình duyệt bản ghi; bucket Storage riêng tư; đồng ý dùng giọng; kiểm thử dữ liệu giả — [AUDIO_ENGINE §12](docs/AUDIO_ENGINE.md), [TEACHER_AUDIO_GUIDE](docs/TEACHER_AUDIO_GUIDE.md). Không bản ghi thật/đã duyệt nào
 - [ ] 10.3 Phát âm thanh thật trong Player theo chính sách AD-35 (thay `AudioSlot` khóa); mở khóa âm thanh iOS; âm thanh mẫu chỉ sau khi chấm
 - [ ] 10.4 Giao diện soạn/duyệt nội dung (6 khuôn, báo cáo kiểm tra, phiên bản bất biến) — trước đây GĐ6
 - [ ] 10.5 Góc phụ huynh: tóm tắt buổi luyện, giải thích điểm thưởng không phải điểm đánh giá

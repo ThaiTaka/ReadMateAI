@@ -21,7 +21,8 @@ Không dùng `--force`/`--legacy-peer-deps`. Cảnh báo `npm audit` duy nhất 
 
 ```bash
 npm ci
-npm run db:start          # supabase start, bỏ các dịch vụ chưa dùng (studio, storage, realtime, edge…)
+npm run db:start          # supabase start (có Storage cho bản ghi giáo viên R10.2); bỏ studio, realtime, edge…
+npm run db:start:lite     # như trên NHƯNG không có storage-api — cho máy ít RAM (kiểm thử Storage sẽ tự bỏ qua; CI luôn dùng db:start và đặt REQUIRE_STORAGE=1)
 npm run db:env            # tạo/cập nhật .env.local từ `supabase status` (KHÔNG in giá trị; .env.local bị gitignore)
 npm run db:seed           # dữ liệu GIẢ: 1 trường, 2 GV, 2 lớp × 3 HS, đồng ý/thiết bị ở nhiều trạng thái (chạy lặp lại được)
 npm run dev               # http://127.0.0.1:3000 — đăng nhập GV ở /login
@@ -47,7 +48,8 @@ Mọi script ghi dữ liệu **từ chối chạy** khi URL không phải `127.0
 | `minimum_password_length` / `password_requirements` | 10 / `lower_upper_letters_digits` | Mật khẩu GV |
 | `[auth.rate_limit] anonymous_users`, `sign_in_sign_ups` | 300 / 300 (chỉ máy dev) | Bộ kiểm thử tạo nhiều thiết bị; **Cloud giữ mặc định** (30/giờ, 30/5 phút) + CAPTCHA |
 | `[db.seed] enabled` | `false` | Seed bằng `npm run db:seed` (cần Admin API để tạo GV) |
-| realtime, storage, edge_runtime, analytics | tắt | Chưa dùng ở R03 |
+| storage | **bật từ R10.2** (bucket riêng tư `teacher-audio` tạo từ `config.toml`; thêm ~1 container) — `db:start:lite` để tắt | Bản ghi giáo viên |
+| realtime, edge_runtime, analytics | tắt | Chưa dùng |
 
 ## 4. Biến môi trường
 
@@ -93,3 +95,9 @@ CI (`.github/workflows/ci.yml`, job `database`) chạy `db:start` → `db:lint` 
 | WebKit/iPhone không giữ phiên sau đăng nhập (local) | Cookie `Secure` trên `http://127.0.0.1` bị Safari bỏ | `cookie-options.ts`: chỉ bỏ `Secure` khi site là http localhost |
 | `Next.js encountered the unstable value Date.now() while prerendering` | `getClaims()` kiểm tra hạn token bằng `Date.now()` trong lúc Partial Prefetching dựng trước | `await connection()` đầu DAL phiên (`teacher.ts`, `session.ts`) |
 | Ký tự U+00AD, U+200B… bị ghi thành ký tự thật trong SQL | Công cụ ghi tệp giải mã chuỗi thoát | Script thay bằng `String.fromCharCode(92)` + quét byte (CLAUDE.md §9.6) |
+
+## Storage (R10.2)
+
+- Bucket `teacher-audio`: `public = false`, 2 MiB, chỉ `audio/webm|ogg|mp4|mpeg|wav`, khai báo trong `supabase/config.toml` (tạo khi `supabase start`). **Supabase Cloud chưa tạo**: khi có dự án, tạo bucket tương đương (private) trước khi bật cờ `teacher_audio_recording_approved`.
+- Đã có Docker đang chạy mà trước đó dùng `db:start` cũ (không Storage): chạy `npx supabase stop` rồi `npm run db:start` để bật Storage — **không** cần `db:reset`, dữ liệu giữ nguyên (migration mới áp dụng khi khởi động lại).
+- Ảnh hưởng: thêm 1 container (`storage-api`, ~150–300 MB RAM) cho E2E/DB test; các test cũ không dùng Storage nên không đổi.

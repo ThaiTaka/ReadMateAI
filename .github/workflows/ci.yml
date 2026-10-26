@@ -103,6 +103,8 @@ jobs:
           npm run db:seed
 
       - name: Kiểm thử tích hợp (RLS, thẻ học, xác thực, đồng ý)
+        env:
+          REQUIRE_STORAGE: "1"
         run: npm run test:db
 
       - name: Stop Supabase

@@ -1,6 +1,10 @@
 import { execSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
-import { setLocalHonorsApproval, setLocalLeaderboardApproval } from "../../scripts/lib/test-fixtures";
+import {
+  setLocalHonorsApproval,
+  setLocalLeaderboardApproval,
+  setLocalTeacherAudioApproval,
+} from "../../scripts/lib/test-fixtures";
 
 /**
  * Trước E2E có CSDL: xác minh Supabase LOCAL đang chạy và có dữ liệu giả; xóa bộ đếm giới hạn tần suất của máy dev
@@ -25,4 +29,6 @@ export default async function globalSetup() {
   setLocalLeaderboardApproval(true);
   // R06.2: tương tự cho cờ hệ thống vinh danh TOP 3 (global-teardown trả về TẮT).
   setLocalHonorsApproval(true);
+  // R10.2: cờ ghi âm giọng giáo viên (global-teardown trả về TẮT).
+  setLocalTeacherAudioApproval(true);
 }

@@ -8,6 +8,7 @@ import {
   House,
   LayoutDashboard,
   Library,
+  Mic,
   School,
   Settings,
   Trophy,
@@ -42,6 +43,7 @@ const ITEMS: readonly TeacherNavItem[] = [
   { label: s.scoreboard, Icon: Trophy, href: "/teacher/classes" },
   { label: s.honors, Icon: Crown, href: "/teacher#vinh-danh", comingSoon: true },
   { label: s.seasons, Icon: CalendarRange, href: "/teacher#mua-thi-dua", comingSoon: true },
+  { label: s.audio, Icon: Mic, href: "/teacher/audio" },
   { label: s.settings, Icon: Settings, href: "/teacher#cai-dat", comingSoon: true },
 ];
 

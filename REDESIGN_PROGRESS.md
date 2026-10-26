@@ -6,6 +6,7 @@
 
 ## 1. Trạng thái hiện tại
 
+- **R10.2 xong về kỹ thuật (2026-10-27; CI chờ): trang `/teacher/audio` (ghi âm bằng MediaRecorder + tải tệp, nghe lại, ghi lại, lưu nháp, gửi duyệt, duyệt/yêu cầu ghi lại/thu hồi), 38 âm P0 dự kiến từ kho tri thức, đồng ý dùng giọng (ô không chọn sẵn), bucket Storage riêng tư `teacher-audio`, migration `20261031090000` (3 bảng, 11 hàm, trigger bất biến, cờ `teacher_audio_recording_approved` TẮT), `Permissions-Policy microphone=(self)` chỉ ở `/teacher/audio`, kiểm tra tệp theo nội dung (WAV/Ogg/WebM/MP4/MP3), proxy phát lại có Range, `npm run audio:reconcile`. Kiểm thử: 90+ unit mới, pgTAP 13, DB `audio-library`, E2E `teacher-audio` (CSDL + Storage chạy ở CI; Docker local không chạy). KHÔNG có bản ghi thật, KHÔNG bản nào được duyệt, KHÔNG gọi TTS, `AudioSlot` vẫn khóa. Chờ: GV xác nhận cách đọc (Q-01/Q-02/Q-03), đồng ý dùng giọng, kiểm tra iPhone/micro thật. Không làm R10.3 — [AUDIO_ENGINE §12](docs/AUDIO_ENGINE.md).**
 - **R10.1 xong về thiết kế/mã (CI chờ): [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) (so sánh Google/Azure/FPT.AI theo tài liệu chính thức 2026-10-26), [docs/AUDIO_RECORDING_PLAN.md](docs/AUDIO_RECORDING_PLAN.md) (DỰ KIẾN: 38 âm P0 + 143 vần nhiều chữ, ≈ 60 phút ghi, 4–5 buổi 15–20 phút), adapter `TtsProvider` (`src/server/tts/`: none/mock/google-skeleton, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy`+`checkAudioLeaks`) + 21 unit test. KHÔNG gọi API thật (chưa có khóa được cấp phép — POC BLOCKED), KHÔNG nghe thử giọng, `AudioSlot` vẫn khóa, không route/migration/gọi hàng loạt. Đề xuất POC: Google Neural2 (chưa chọn/mua). Chờ chủ dự án D1–D6 (AUDIO_ENGINE §10). R10.2 chưa làm.**
 - **R08.6 xong (CI chờ): chơi lại Mê cung đã hoàn thành — vẫn 7 quái vật × 21 câu, 3 trái tim, kho báu, tự lưu, nhưng KHÔNG cộng/trừ điểm; nhãn "Chơi lại — không tính điểm" — §5t.** R08 xong **về kỹ thuật**; **chưa được phê duyệt dùng thật**: GV chưa duyệt hình/tên/lời thoại quái vật (R08.5 chỉ xong phần kỹ thuật) và kho học liệu thật 0 mục đã duyệt. R09 tiếp tục hoãn; bước tiếp theo theo lộ trình là R10 (chỉ làm khi được giao).
 - **R08.4 xong (CI chờ): giao diện chạm trán — lưu trước rồi kích hoạt, màn quái vật (3 trái tim, Player GĐ4, điểm/HP của máy chủ), hoạt cảnh defeated/undefeated, quay lại mê cung, tải lại giữa chạm trán, mở kho báu sau 7/7 — §5r.** E2E toàn trình 7 chạm trán xanh local (chromium desktop/mobile, webkit mobile). Bước tiếp: R08.5 (kiểm tên/lời thoại/hình quái vật, giấy phép, hồ sơ cho GV duyệt).
@@ -36,7 +37,7 @@
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (§5r) + **R08.5 phần kỹ thuật (§5s)** xong; **GV chưa duyệt quái vật (chờ xác nhận thực tế)**; R08.6 chưa làm |
-| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); R10.2–R10.7 chưa bắt đầu |
+| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); **R10.2 xong về kỹ thuật (thư viện bản ghi GV, chưa dùng với GV thật)**; R10.3–R10.7 chưa bắt đầu |
 | R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 

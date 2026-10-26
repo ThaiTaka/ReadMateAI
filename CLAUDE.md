@@ -44,6 +44,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/STUDENT_ACCESS.md](docs/STUDENT_ACCESS.md) | **R03** — thẻ học (QR fragment + mã dự phòng, HMAC), liên kết/thu hồi thiết bị, đánh giá Anonymous Auth |
 | [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) | **R03** — ma trận RLS đã kiểm thử, bất biến CSDL, quy trình thêm bảng |
 | [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | **R03** — Supabase local, `config.toml`, biến môi trường, danh mục Cloud (chưa tạo), sự cố |
+| [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) · [docs/TEACHER_AUDIO_GUIDE.md](docs/TEACHER_AUDIO_GUIDE.md) | **R10** — âm thanh: TTS (R10.1), thư viện bản ghi giáo viên `/teacher/audio`, Storage riêng tư, duyệt phiên bản (R10.2), hướng dẫn GV |
 | [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
 | [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
 | [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
@@ -198,6 +199,15 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 8. `notFound()` trong phần stream trả HTTP 200 → kiểm thử theo nội dung. `next/experimental/testing/server` bản 16.4.0 xuất `unstable_doesMiddlewareMatch` (tài liệu ghi tên mới).
 9. Next.js có vùng `role="alert"` riêng (route announcer) → E2E lọc `alert` theo nội dung.
 10. Bash tool: heredoc dài có backtick/`$` dễ bị cắt hoặc `$$` bị `String.replace` đổi thành `$` — dùng Edit/Write cho văn bản dài.
+
+### 9.8 Quy tắc rút ra ở R10.2 (BẮT BUỘC)
+
+1. Bản ghi giọng GV chỉ ở bucket riêng tư `teacher-audio` + bảng `audio_*`; **không** base64 trong CSDL, **không** tệp âm thanh trong repo, **không** URL công khai/ký. Khóa đối tượng do máy chủ sinh từ UUID; trình duyệt không bao giờ nhận `storage_key`.
+2. `approved` chỉ do `teacher_review_audio_version` đặt (đã nghe + cách đọc đã xác nhận và khớp + người ghi còn đồng ý); phiên bản đã gửi duyệt bất biến (trigger); sửa = phiên bản mới. Không viết mã/fixture đặt `approved` bằng đường khác. Cờ `teacher_audio_recording_approved` mặc định TẮT, không bật ngoài kiểm thử local (`setLocalTeacherAudioApproval`, phải trả về tắt).
+3. `getUserMedia`/`MediaRecorder` chỉ trong `src/app/teacher/(console)/audio/recorder.tsx`, chỉ khi GV bấm nút; micro mở `microphone=(self)` **chỉ** cho `/teacher/audio` (`security-headers.ts` + test). Không tự lưu/gửi sau khi dừng ghi.
+4. Kiểm tra tệp theo nội dung (`inspectAudio`), không tin tên/MIME. Fixture âm thanh là sóng tổng hợp (`tests/unit/audio-library/fixtures.ts`) — không giọng thật.
+5. Khi chuỗi SQL có `$$` ghi qua `String.replace`, `$$` bị đổi thành `$` (đã gặp ở R10.2, test quét migration bắt được): dùng `split/join`.
+6. `npm run db:start` có Storage; máy ít RAM dùng `db:start:lite`. Test Storage chỉ bỏ qua khi không đặt `REQUIRE_STORAGE=1` (CI luôn đặt).
 
 ## 10. Kiểm thử và Definition of Done
 

@@ -56,3 +56,15 @@ export function setLocalGameRunFixtures(allowed: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/**
+ * Giả lập "cờ hệ thống ghi âm giọng giáo viên đã được chấp thuận" CHỈ trên Supabase LOCAL để kiểm thử R10.2.
+ * Production không bao giờ chạy hàm này: cờ `teacher_audio_recording_approved` chỉ đổi bằng migration sau khi giáo viên
+ * đồng ý bằng văn bản và chủ dự án cho phép. Mặc định (migration R10.2) là TẮT; kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalTeacherAudioApproval(approved: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.feature_flags set enabled = ${approved ? "true" : "false"}, updated_at = now() where key = 'teacher_audio_recording_approved'"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}
