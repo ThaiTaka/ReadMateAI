@@ -1,20 +1,11 @@
-import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { expect, test, type Page, type Request, type Response } from "@playwright/test";
+import { expect, test, type Page, type Request, type Response, type TestInfo } from "@playwright/test";
+import { type SupabaseClient } from "@supabase/supabase-js";
+import { randomBytes } from "node:crypto";
 import { installAudioFixtures } from "../../scripts/lib/audio-fixtures";
 import { enableLocalTestFixtures, setLocalStudentAudioPlayback } from "../../scripts/lib/test-fixtures";
 import { vi } from "../../src/strings/vi";
-import { wav } from "../unit/audio-library/fixtures";
-import {
-  admin,
-  API_URL,
-  axeClean,
-  link,
-  newMember,
-  noHorizontalScroll,
-  PUBLISHABLE_KEY,
-  type ClassRow,
-} from "./class-fixtures";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { approvedRecording, exec, freshTeacher, mustRow as must, rpc } from "./audio-fixtures";
+import { admin, axeClean, link, newMember, noHorizontalScroll, type ClassRow } from "./class-fixtures";
 
 /**
  * R10.3a — học sinh nghe BẢN GHI GIÁO VIÊN ĐÃ DUYỆT trong buổi luyện, trên Supabase local + Storage local. Bản ghi là SÓNG
@@ -25,12 +16,6 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const t = vi.practice.audio;
 
-/** `must` của class-fixtures trả cả null; ở đây hàng luôn tồn tại (vừa chèn/đọc theo khóa). */
-async function must<T>(promise: PromiseLike<{ data: T; error: unknown }>): Promise<NonNullable<T>> {
-  const { data, error } = await promise;
-  if (error || data === null || data === undefined) throw new Error(JSON.stringify(error ?? "không có dữ liệu"));
-  return data as NonNullable<T>;
-}
 const UNITS: Array<[string, string]> = [
   ["b", "bờ"],
   ["c", "cờ"],
@@ -46,34 +31,9 @@ type World = {
   versions: Record<string, string>;
 };
 
-/** Chèn không trả hàng (không `.select()`): chỉ cần biết có lỗi hay không. */
-async function exec(promise: PromiseLike<{ error: unknown }>): Promise<void> {
-  const { error } = await promise;
-  if (error) throw new Error(JSON.stringify(error));
-}
-
 async function audioWorld(): Promise<World> {
   const hex = randomBytes(4).toString("hex");
-  const schoolId = (
-    await must(
-      admin
-        .from("schools")
-        .insert({ name: `Trường nghe ${hex}` })
-        .select("id")
-        .single(),
-    )
-  ).id;
-  const email = [`gv-nghe-${hex}`, ["readmate", "test"].join(".")].join("@");
-  const password = `Rm${randomBytes(12).toString("base64url")}7x`;
-  const created = await admin.auth.admin.createUser({ email, password, email_confirm: true });
-  if (created.error || !created.data.user) throw created.error ?? new Error("createUser");
-  const teacherId = created.data.user.id;
-  await exec(
-    admin.from("staff_profiles").insert({ id: teacherId, school_id: schoolId, display_name: `GV nghe ${hex}` }),
-  );
-  const teacher = createClient(API_URL, PUBLISHABLE_KEY, { auth: { persistSession: false } });
-  const signIn = await teacher.auth.signInWithPassword({ email, password });
-  if (signIn.error) throw signIn.error;
+  const { teacher, teacherId, schoolId } = await freshTeacher("nghe");
 
   enableLocalTestFixtures();
   const fx = await installAudioFixtures(admin, teacherId);
@@ -107,44 +67,6 @@ async function audioWorld(): Promise<World> {
   return world;
 }
 
-async function rpc(client: SupabaseClient, fn: string, args: Record<string, unknown>) {
-  const { data, error } = await client.rpc(fn, args);
-  if (error) throw new Error(`${fn}: ${JSON.stringify(error)}`);
-  return data;
-}
-
-/** Bản ghi TỔNG HỢP đã duyệt qua đúng hàm teacher_* (JWT giáo viên) + tệp thật trong Storage riêng tư. */
-async function approvedRecording(world: World, unit: string, label: string, index: number): Promise<string> {
-  const bytes = Buffer.from(wav(0.5 + index * 0.1, 8000));
-  const assetId = (await rpc(world.teacher, "teacher_ensure_audio_asset", {
-    p_unit_kind: "phoneme",
-    p_unit_text: unit,
-    p_proposed_label: label,
-  })) as string;
-  await rpc(world.teacher, "teacher_confirm_audio_pronunciation", { p_asset_id: assetId, p_label: label });
-  const versionId = randomUUID();
-  const key = `${world.schoolId}/${assetId}/${versionId}.wav`;
-  const up = await admin.storage.from("teacher-audio").upload(key, bytes, { contentType: "audio/wav", upsert: false });
-  if (up.error) throw up.error;
-  await rpc(world.teacher, "teacher_create_audio_version", {
-    p_asset_id: assetId,
-    p_version_id: versionId,
-    p_storage_key: key,
-    p_content_hash: createHash("sha256").update(bytes).digest("hex"),
-    p_mime_type: "audio/wav",
-    p_size_bytes: bytes.byteLength,
-    p_duration_ms: 1000,
-  });
-  await rpc(world.teacher, "teacher_submit_audio_version", { p_version_id: versionId });
-  await rpc(world.teacher, "teacher_review_audio_version", {
-    p_version_id: versionId,
-    p_decision: "approve",
-    p_note: "",
-    p_listened: true,
-  });
-  return versionId;
-}
-
 type Option = { id: string; text: string };
 type Question = { id: string; view: { variant: string; content: { options: Option[] } } };
 
@@ -159,6 +81,30 @@ async function openPractice(page: Page): Promise<Question> {
   expect(body.ok).toBe(true);
   expect(body.data.current.view.variant).toBe("listen_letter");
   return body.data.current;
+}
+
+/**
+ * Chạm nút nghe rồi trả mã trạng thái + tiêu đề phản hồi của tệp âm thanh.
+ * Chromium: lấy từ chính yêu cầu mà thẻ <audio> của trình duyệt gửi. WebKit của Playwright không cho quan sát yêu cầu
+ * media này (không có sự kiện `response`, hoặc `status()` = 0 trên Linux) nên ở đó hợp đồng HTTP được kiểm bằng
+ * `page.request` — cùng cookie phiên, cùng đường dẫn, máy chủ vẫn kiểm lại quyền ở MỖI yêu cầu — còn việc chạm nút
+ * vẫn được thực hiện thật và trạng thái giao diện vẫn được kiểm ở từng kịch bản.
+ */
+async function pressAndObserve(
+  page: Page,
+  testInfo: TestInfo,
+  path: string,
+  press: () => Promise<void>,
+): Promise<{ status: number; headers: Record<string, string>; text: () => Promise<string> }> {
+  if (testInfo.project.name.startsWith("chromium")) {
+    const seen = page.waitForResponse((r) => r.url().endsWith(path));
+    await press();
+    const response = await seen;
+    return { status: response.status(), headers: response.headers(), text: () => response.text() };
+  }
+  await press();
+  const response = await page.request.get(path);
+  return { status: response.status(), headers: response.headers(), text: () => response.text() };
 }
 
 const stimulusButton = (page: Page) => page.getByRole("button", { name: t.stimulus, exact: true });
@@ -207,11 +153,14 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
     expect(box!.height).toBeGreaterThanOrEqual(63);
     expect(audioCalls(requests)).toHaveLength(0); // chưa chạm → chưa tải tệp
 
-    const played = page.waitForResponse((r) => r.url().endsWith(`/question-instances/${question.id}/audio/stimulus`));
-    await button.click();
-    const response = await played;
-    expect([200, 206]).toContain(response.status());
-    const headers = response.headers();
+    const response = await pressAndObserve(
+      page,
+      testInfo,
+      `/api/student/question-instances/${question.id}/audio/stimulus`,
+      () => button.click(),
+    );
+    expect([200, 206]).toContain(response.status);
+    const headers = response.headers;
     expect(headers["content-type"]).toBe("audio/wav");
     expect(headers["cache-control"]).toBe("private, no-store");
     expect(headers["x-content-type-options"]).toBe("nosniff");
@@ -232,7 +181,7 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
     await axeClean(page);
   });
 
-  test("đọc mẫu chỉ sau khi chấm: trước đó API từ chối, sau đó nghe được", async ({ page }) => {
+  test("đọc mẫu chỉ sau khi chấm: trước đó API từ chối, sau đó nghe được", async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     const world = await audioWorld();
     const member = await newMember(world.cls, "Mau");
@@ -255,12 +204,18 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
 
     const model = page.getByRole("button", { name: t.model, exact: true });
     await expect(model).toBeEnabled({ timeout: 20_000 });
-    const played = page.waitForResponse((r) => r.url().endsWith(`/question-instances/${question.id}/audio/model`));
-    await model.click();
-    expect([200, 206]).toContain((await played).status());
+    const played = await pressAndObserve(
+      page,
+      testInfo,
+      `/api/student/question-instances/${question.id}/audio/model`,
+      () => model.click(),
+    );
+    expect([200, 206]).toContain(played.status);
   });
 
-  test("giáo viên thu hồi khi trang đang mở: lần nghe MỚI bị từ chối và nút báo lỗi nhẹ nhàng", async ({ page }) => {
+  test("giáo viên thu hồi khi trang đang mở: lần nghe MỚI bị từ chối và nút báo lỗi nhẹ nhàng", async ({
+    page,
+  }, testInfo) => {
     test.setTimeout(180_000);
     const world = await audioWorld();
     const member = await newMember(world.cls, "Thu");
@@ -288,11 +243,14 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
       p_reason: "Thu hồi khi đang học",
     });
 
-    const refused = page.waitForResponse((r) => r.url().endsWith(`/question-instances/${question.id}/audio/stimulus`));
-    await stimulusButton(page).click();
-    const response = await refused;
-    expect(response.status()).toBe(404);
-    expect(await response.json()).toEqual({ ok: false, code: "AUDIO_NOT_AVAILABLE" });
+    const response = await pressAndObserve(
+      page,
+      testInfo,
+      `/api/student/question-instances/${question.id}/audio/stimulus`,
+      () => stimulusButton(page).click(),
+    );
+    expect(response.status).toBe(404);
+    expect(JSON.parse(await response.text())).toEqual({ ok: false, code: "AUDIO_NOT_AVAILABLE" });
     await expect(page.getByText(t.error)).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as { __speech: number }).__speech)).toBe(0);
   });
@@ -332,7 +290,7 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
 
   test("màn hình hẹp 360 px + giảm chuyển động + bàn phím: nút nghe dùng được, không tràn ngang, axe sạch", async ({
     page,
-  }) => {
+  }, testInfo) => {
     test.setTimeout(180_000);
     await page.setViewportSize({ width: 360, height: 740 });
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -350,8 +308,12 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
     expect(box!.height).toBeGreaterThanOrEqual(63);
     await button.focus();
     await expect(button).toBeFocused();
-    const played = page.waitForResponse((r) => r.url().endsWith(`/question-instances/${question.id}/audio/stimulus`));
-    await page.keyboard.press("Enter");
-    expect([200, 206]).toContain((await played).status());
+    const played = await pressAndObserve(
+      page,
+      testInfo,
+      `/api/student/question-instances/${question.id}/audio/stimulus`,
+      () => page.keyboard.press("Enter"),
+    );
+    expect([200, 206]).toContain(played.status);
   });
 });
