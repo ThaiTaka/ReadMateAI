@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   setLocalHonorsApproval,
   setLocalLeaderboardApproval,
+  setLocalStudentAudioPlayback,
   setLocalTeacherAudioApproval,
 } from "../../scripts/lib/test-fixtures";
 
@@ -31,4 +32,6 @@ export default async function globalSetup() {
   setLocalHonorsApproval(true);
   // R10.2: cờ ghi âm giọng giáo viên (global-teardown trả về TẮT).
   setLocalTeacherAudioApproval(true);
+  // R10.3a: cờ phát bản ghi giáo viên cho học sinh (global-teardown trả về TẮT).
+  setLocalStudentAudioPlayback(true);
 }

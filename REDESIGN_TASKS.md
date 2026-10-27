@@ -286,6 +286,7 @@ Trợ năng (axe) và responsive nằm trong các spec trên nên đã chạy �
 
 - [x] 10.1 (2026-10-26) `docs/AUDIO_ENGINE.md`, `docs/AUDIO_RECORDING_PLAN.md`, adapter `TtsProvider` + test. **POC bằng API thật CHƯA làm** (chờ khóa được cấp phép) — so sánh dựa trên tài liệu chính thức; GV chưa nghe giọng nào
 - [x] 10.2 (2026-10-27, **hoàn thành về kỹ thuật; chưa nghiệm thu với GV thật**) Ghi âm/tải tệp của GV ở `/teacher/audio` (route duy nhất bật microphone); quy trình duyệt bản ghi; bucket Storage riêng tư; đồng ý dùng giọng; kiểm thử dữ liệu giả — [AUDIO_ENGINE §12](docs/AUDIO_ENGINE.md), [TEACHER_AUDIO_GUIDE](docs/TEACHER_AUDIO_GUIDE.md). Không bản ghi thật/đã duyệt nào
+- [x] 10.3a (2026-10-27, **xong về kỹ thuật; 10.3 CHƯA nghiệm thu**) Phát **một bản ghi GV đã duyệt** của âm đơn lẻ trong bài Nghe âm – chọn chữ: `gateway_resolve_teacher_audio`, 2 route `…/question-instances/{id}/audio[/{role}]`, `AudioSlot` phát được, chống lộ đáp án AD-35, không điểm khi thiếu âm thanh; cờ `student_teacher_audio_playback_approved` **TẮT**; kiểm thử bằng sóng tổng hợp — [AUDIO_ENGINE §13](docs/AUDIO_ENGINE.md). Chưa bản ghi thật, chưa thử iPhone/Android thật, chưa chọn TTS, chưa ghép chuỗi đánh vần
 - [ ] 10.3 Phát âm thanh thật trong Player theo chính sách AD-35 (thay `AudioSlot` khóa); mở khóa âm thanh iOS; âm thanh mẫu chỉ sau khi chấm
 - [ ] 10.4 Giao diện soạn/duyệt nội dung (6 khuôn, báo cáo kiểm tra, phiên bản bất biến) — trước đây GĐ6
 - [ ] 10.5 Góc phụ huynh: tóm tắt buổi luyện, giải thích điểm thưởng không phải điểm đánh giá

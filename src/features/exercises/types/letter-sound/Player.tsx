@@ -16,6 +16,7 @@ export function LetterSoundPlayer({
   marks,
   hint,
   reveal,
+  stimulusAudio,
 }: PlayerProps<LetterSoundItem>) {
   const selected = response?.kind === "choice" ? [response.optionId] : [];
   return (
@@ -39,6 +40,7 @@ export function LetterSoundPlayer({
         <div className="flex flex-col items-center gap-2 rounded-card border-2 border-dashed border-line-strong bg-surface-muted px-8 py-5 text-ink-soft">
           <Ear aria-hidden="true" className="size-12" />
           <span className="font-semibold">{vi.practice.picture.listen}</span>
+          {stimulusAudio}
         </div>
       ) : null}
       <TextOptionGrid

@@ -209,6 +209,15 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 5. Khi chuỗi SQL có `$$` ghi qua `String.replace`, `$$` bị đổi thành `$` (đã gặp ở R10.2, test quét migration bắt được): dùng `split/join`.
 6. `npm run db:start` có Storage; máy ít RAM dùng `db:start:lite`. Test Storage chỉ bỏ qua khi không đặt `REQUIRE_STORAGE=1` (CI luôn đặt).
 
+### 9.9 Quy tắc rút ra ở R10.3a (BẮT BUỘC)
+
+1. Phát bản ghi giáo viên cho học sinh chỉ qua `GET /api/student/question-instances/{id}/audio[/{role}]` → `src/server/audio-playback/` → hàm CSDL `gateway_resolve_teacher_audio` (chỉ `service_role`, chỉ đọc). Trình duyệt **không bao giờ** gửi mã tài nguyên/phiên bản/đường dẫn; `storageKey` không rời mã máy chủ; không URL công khai/URL ký; phản hồi `private, no-store`. Mọi điều kiện kiểm lại ở **mỗi** yêu cầu (không bộ nhớ đệm).
+2. Chính sách phát chỉ ở `features/audio-playback/policy.ts` và **dùng lại** `decideBeforeGrading`/`decideAfterGrading` (AD-35); khe nào dùng bản ghi giáo viên chỉ khai báo ở `features/audio-playback/roles.ts`. `model` chỉ sau khi câu đóng; khe `hint` bị từ chối cho tới khi có đường ghi nhận gợi ý.
+3. Cờ `student_teacher_audio_playback_approved` (và `teacher_audio_recording_approved`) **TẮT** mọi môi trường; chỉ kiểm thử local/CI bật tạm (`setLocalStudentAudioPlayback`, phải trả về TẮT; pgTAP kiểm). Không bật bằng mã ứng dụng.
+4. `AudioSlot` chỉ gọi `play()` trong hàm xử lý chạm; không `speechSynthesis`, không âm thầm thay bằng giọng khác, không chuyển mã; một âm tại một thời điểm; `roles.ts`/`support.ts` không import gì để không kéo kho tri thức vào bundle trình duyệt.
+5. Câu `scorable` bắt buộc nghe bản ghi giáo viên mà chưa có bản phát được → `AUDIO_NOT_AVAILABLE`, không lượt, không điểm (`submitAttempt`); gửi lại cùng `clientAttemptId` không bị chặn.
+6. Fixture âm thanh là sóng tổng hợp (`tests/unit/audio-library/fixtures.ts`); mã học sinh không tham chiếu `audio-library`/`teacher-audio` (module `server/audio-playback` là cầu nối duy nhất).
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:

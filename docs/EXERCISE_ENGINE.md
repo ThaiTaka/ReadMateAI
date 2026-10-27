@@ -203,6 +203,8 @@ Mỗi module khai báo **chữ nào được hiển thị/đọc ở trường n
 
 ### 5.3 Âm thanh ở GĐ4
 
+**Cập nhật R10.3a:** `AudioSlot` phát được **bản ghi giáo viên đã duyệt** của bài Nghe âm – chọn chữ khi máy chủ cho phép (cờ TẮT mặc định, chưa có bản ghi thật) — xem [AUDIO_ENGINE §13](AUDIO_ENGINE.md#13-r103a--phát-bản-ghi-giáo-viên-đã-duyệt-cho-học-sinh-nền-tảng-kỹ-thuật-cờ-tắt). Mọi khe còn lại (câu lệnh, tên tranh, từ, câu…) vẫn khóa như mô tả dưới đây.
+
 **Chưa có tệp âm thanh nào** (GĐ6). Mọi nút loa là điểm tích hợp `AudioSlot` **bị khóa**, ghi rõ "Chưa có âm thanh"; chỉ hiện khi chính sách cho phép khe đó ở mức hiện tại. Không giả lập phát âm thanh; **không dùng giọng đọc của trình duyệt** (Web Speech API) dù PRD §12.2 cho phép ở `/demo` — vì giọng tiếng Việt trên Chrome có thể gửi chữ ra máy chủ bên ngoài và chất lượng chưa xác minh (quyết định D-040). Bộ sinh gắn `assetId` khi thư viện media có tệp cùng vai trò + cùng lời đọc.
 
 ### 5.4 Bài "Nghe âm – chọn chữ"

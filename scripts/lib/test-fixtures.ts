@@ -68,3 +68,15 @@ export function setLocalTeacherAudioApproval(approved: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/**
+ * Giả lập "cờ hệ thống phát bản ghi giáo viên cho học sinh đã được chấp thuận" CHỈ trên Supabase LOCAL để kiểm thử R10.3a.
+ * Production không bao giờ chạy hàm này: cờ `student_teacher_audio_playback_approved` chỉ đổi bằng migration sau khi có
+ * bản ghi thật được duyệt, GV đồng ý, thử trên iPhone/Android và chủ dự án cho phép. Mặc định là TẮT; kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalStudentAudioPlayback(approved: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.feature_flags set enabled = ${approved ? "true" : "false"}, updated_at = now() where key = 'student_teacher_audio_playback_approved'"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}

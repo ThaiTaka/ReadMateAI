@@ -10,6 +10,7 @@ import { FeedbackBanner } from "@/components/kid/feedback-banner";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
+import { variantHasRecording } from "@/features/audio-playback/roles";
 import { hintText } from "@/features/exercises/core/feedback";
 import type { Response } from "@/features/exercises/core/primitives";
 import { responseKey } from "@/features/exercises/core/response-key";
@@ -20,6 +21,7 @@ import { cn } from "@/lib/cn";
 import type { ErrorCode } from "@/server/result";
 import { vi } from "@/strings/vi";
 import type { AttemptDto, PracticeSessionDto, PublicQuestion, ScoreSummary } from "../types";
+import { QuestionAudio } from "./question-audio";
 import { emptyResponseFor, isCompleteFor, ViewPlayer } from "./view-player";
 
 type ApiResult<T> = { ok: true; data: T } | { ok: false; code: ErrorCode };
@@ -159,8 +161,9 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
     }
     setPending(null);
     if (!result.ok) {
-      if (result.code === "DUPLICATE_RESPONSE") {
-        setNotice(vi.errors.DUPLICATE_RESPONSE);
+      if (result.code === "DUPLICATE_RESPONSE" || result.code === "AUDIO_NOT_AVAILABLE") {
+        // Không phải lỗi buổi luyện: giữ nguyên câu hiện tại, không điểm, không lượt (R10.3a).
+        setNotice(vi.errors[result.code]);
         return;
       }
       if (result.code === "QUESTION_CLOSED" || result.code === "NO_ATTEMPTS_LEFT") {
@@ -346,7 +349,15 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
           hint={hintOpen && open ? question.hint : null}
           reveal={question.reveal}
           idPrefix={question.id}
+          stimulusAudio={
+            variantHasRecording(question.view.variant, "stimulus") ? (
+              <QuestionAudio questionId={question.id} role="stimulus" label={vi.practice.audio.stimulus} />
+            ) : undefined
+          }
         />
+        {!open && variantHasRecording(question.view.variant, "model") ? (
+          <QuestionAudio questionId={question.id} role="model" label={vi.practice.audio.model} />
+        ) : null}
       </div>
 
       {open && question.hint ? (

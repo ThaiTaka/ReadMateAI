@@ -81,6 +81,10 @@ export const ERROR_CODES = [
   "LISTEN_REQUIRED",
   "NOTE_REQUIRED",
   "STORAGE_UNAVAILABLE",
+  // R10.3a — phát bản ghi giáo viên đã duyệt cho học sinh (migration 20261101090000).
+  "AUDIO_PLAYBACK_DISABLED",
+  "AUDIO_NOT_AVAILABLE",
+  "AUDIO_NOT_PERMITTED",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-26 — Phiên Claude Code R10.1 (Audio Engine, thiết kế); trước đó 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
+> **Cập nhật lần cuối:** 2026-10-27 — Phiên Claude Code R10.3a (phát bản ghi giáo viên đã duyệt cho học sinh, cờ TẮT; R10.3 chưa nghiệm thu); trước đó 2026-10-26 — R10.1 (Audio Engine, thiết kế); trước đó 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R10.3a xong về kỹ thuật (2026-10-27; CI chờ): nền tảng phát bản ghi GV đã duyệt cho học sinh — hàm CSDL `gateway_resolve_teacher_audio` + 2 route `…/audio[/{role}]` + `AudioSlot` phát được + `QuestionAudio`; cờ `student_teacher_audio_playback_approved` TẮT; fixture sóng tổng hợp; câu bắt buộc nghe mà thiếu âm thanh không tính điểm. KHÔNG TTS, KHÔNG ghép chuỗi đánh vần; R10.3 chưa nghiệm thu (xem §5u).**
 - **R10.2 xong về kỹ thuật (2026-10-27; CI chờ): trang `/teacher/audio` (ghi âm bằng MediaRecorder + tải tệp, nghe lại, ghi lại, lưu nháp, gửi duyệt, duyệt/yêu cầu ghi lại/thu hồi), 38 âm P0 dự kiến từ kho tri thức, đồng ý dùng giọng (ô không chọn sẵn), bucket Storage riêng tư `teacher-audio`, migration `20261031090000` (3 bảng, 11 hàm, trigger bất biến, cờ `teacher_audio_recording_approved` TẮT), `Permissions-Policy microphone=(self)` chỉ ở `/teacher/audio`, kiểm tra tệp theo nội dung (WAV/Ogg/WebM/MP4/MP3), proxy phát lại có Range, `npm run audio:reconcile`. Kiểm thử: 90+ unit mới, pgTAP 13, DB `audio-library`, E2E `teacher-audio` (CSDL + Storage chạy ở CI; Docker local không chạy). KHÔNG có bản ghi thật, KHÔNG bản nào được duyệt, KHÔNG gọi TTS, `AudioSlot` vẫn khóa. Chờ: GV xác nhận cách đọc (Q-01/Q-02/Q-03), đồng ý dùng giọng, kiểm tra iPhone/micro thật. **CI/E2E GitHub xanh trên commit `0f350d7`** (CI push + PR; E2E: 5 project không CSDL + 4 project có CSDL/Storage; E2E push webkit-mobile bị hủy một lần rồi chạy lại xanh). Hai lỗi do mã thật được E2E bắt và đã sửa: form cách đọc mất thông báo vì `key` đổi theo dữ liệu (remount sau refresh); test chọn nhầm nút `g` ↔ `gh`/`gi`. Không làm R10.3 — [AUDIO_ENGINE §12](docs/AUDIO_ENGINE.md).**
 - **R10.1 xong về thiết kế/mã (CI chờ): [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) (so sánh Google/Azure/FPT.AI theo tài liệu chính thức 2026-10-26), [docs/AUDIO_RECORDING_PLAN.md](docs/AUDIO_RECORDING_PLAN.md) (DỰ KIẾN: 38 âm P0 + 143 vần nhiều chữ, ≈ 60 phút ghi, 4–5 buổi 15–20 phút), adapter `TtsProvider` (`src/server/tts/`: none/mock/google-skeleton, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy`+`checkAudioLeaks`) + 21 unit test. KHÔNG gọi API thật (chưa có khóa được cấp phép — POC BLOCKED), KHÔNG nghe thử giọng, `AudioSlot` vẫn khóa, không route/migration/gọi hàng loạt. Đề xuất POC: Google Neural2 (chưa chọn/mua). Chờ chủ dự án D1–D6 (AUDIO_ENGINE §10). R10.2 chưa làm.**
 - **R08.6 xong (CI chờ): chơi lại Mê cung đã hoàn thành — vẫn 7 quái vật × 21 câu, 3 trái tim, kho báu, tự lưu, nhưng KHÔNG cộng/trừ điểm; nhãn "Chơi lại — không tính điểm" — §5t.** R08 xong **về kỹ thuật**; **chưa được phê duyệt dùng thật**: GV chưa duyệt hình/tên/lời thoại quái vật (R08.5 chỉ xong phần kỹ thuật) và kho học liệu thật 0 mục đã duyệt. R09 tiếp tục hoãn; bước tiếp theo theo lộ trình là R10 (chỉ làm khi được giao).
@@ -37,7 +38,7 @@
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (§5r) + **R08.5 phần kỹ thuật (§5s)** xong; **GV chưa duyệt quái vật (chờ xác nhận thực tế)**; R08.6 chưa làm |
-| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); **R10.2 xong về kỹ thuật (thư viện bản ghi GV, chưa dùng với GV thật)**; R10.3–R10.7 chưa bắt đầu |
+| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); **R10.2 xong về kỹ thuật (thư viện bản ghi GV, chưa dùng với GV thật)**; **R10.3a xong về kỹ thuật (phát bản ghi đã duyệt, cờ TẮT, chưa nghiệm thu thực tế)**; R10.3b–R10.7 chưa bắt đầu |
 | R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
@@ -371,6 +372,53 @@ Migration `20261028090000_r08_start_allocation.sql`. **Không** có API kích ho
 - **Kiểm thử (local):** pgTAP 212 (10 tệp; mới `10_game_allocation` 26: chữ ký/quyền, mặc định cờ, 18 ca hình dạng kế hoạch; `08_game_runs` đổi chữ ký), unit mới `game-planner.test.ts` (9), DB integration mới `game-allocation.test.ts` (17: 21 đủ/20 thiếu, trùng vân tay/mã, chưa duyệt/chưa học/Nhóm 3, môi trường kiểm thử tắt, rollback, hai tab, tiếp tục lượt, tiếp tục khi tụt dưới 50, ngưỡng 40/50, đồng ý/thu hồi/lớp khác, hình dạng sai, chống cày điểm, không lộ DTO/RLS, không ghi trực tiếp, reset mùa + song song 3 vòng, hồi quy R07/R08.1). Chạy lại `game-runs`, `game-runs-service`, `game-encounters`, `scoring`, `season-reset` + mới: **100/100**. `db:lint` 0 (đã sửa 3 cảnh báo ép kiểu `'{}'` bằng `array[]::…` trước khi commit), `typecheck`, `lint` 0 lỗi, `format:check`, `content:check` xanh. Full regression và Playwright giao GitHub Actions.
 - **Còn lại cho R08.3:** hàm kích hoạt (pending→active, `return_position` từ vị trí đã lưu, kiểm ô đang đứng là ô kích hoạt), chấm câu game + HP trong hàm ghi điểm (`gateway_record_attempt` hiện chỉ biết ngữ cảnh buổi luyện), kết thúc chạm trán, mở kho báu khi 7/7, DTO/API chạm trán hiện tại và ánh xạ mã lỗi mới. Lượt chơi chỉ tạo được ở local/test; **chưa** mở đường vào trên giao diện học sinh.
 
+## 5u. R10.3a — Kết nối bản ghi giáo viên với trình phát âm thanh học sinh (2026-10-27)
+
+> **Phạm vi:** nền tảng kỹ thuật phát **một bản ghi đã duyệt** của âm đơn lẻ (P0) trong bài **Nghe âm – chọn chữ** (`listen_letter`), dưới cờ **TẮT**, kiểm thử bằng **sóng tổng hợp**. Không TTS, không đọc từ/câu, không ghép chuỗi đánh vần. **R10.3 CHƯA nghiệm thu.** Chi tiết: [docs/AUDIO_ENGINE.md §13](docs/AUDIO_ENGINE.md).
+
+### Đã làm
+
+- **Migration `20261101090000_r10_3a_student_audio_playback.sql`:** cờ `student_teacher_audio_playback_approved` (**TẮT**) + `gateway_resolve_teacher_audio` (chỉ `service_role`, chỉ đọc, `security definer`, `search_path` rỗng). Kiểm lại ở mỗi lần gọi: cờ, thiết bị liên kết, đồng ý `learning_data`, trường, `active_version_id` + `approved` + đã nghe, cách đọc đã xác nhận và khớp bản ghi và khớp câu, người ghi còn đồng ý. **Không** mở SELECT bảng `audio_*` hay Storage cho học sinh.
+- **Máy chủ:** `src/server/audio-playback/` (`resolve.ts`, `service.ts`, `respond.ts`); 2 route `GET /api/student/question-instances/{id}/audio` (trạng thái JSON nhỏ) và `…/audio/{stimulus|model}` (stream có `Range` 206/416, `private, no-store`, `nosniff`, CORP cùng nguồn, CSP sandbox, chỉ cùng nguồn, 40 lần/phút/thiết bị). Âm suy ra **từ câu** (phương án đúng → `phoneme:x`), trình duyệt không gửi mã tài nguyên. Đọc Storage bằng khóa secret, đối chiếu kích thước + SHA-256; không URL công khai/URL ký.
+- **Lõi thuần:** `features/audio-playback/` — `roles.ts` (khe nào dùng bản ghi GV; client-safe), `bindings.ts` (câu ↔ bản ghi, i/y dùng chung), `policy.ts` (dùng lại `decideBeforeGrading`/`decideAfterGrading`; `model` chỉ sau chấm; `hint` bị từ chối), `support.ts` (`canPlayType`).
+- **Giao diện:** `AudioSlot` phát được khi có nguồn (≥ 64 px, không tự phát, một âm tại một thời điểm, dừng khi đổi câu/rời trang, trạng thái chưa có/đang tải/tắt âm/không hỗ trợ/lỗi/nghe lại, không Web Speech); `QuestionAudio` nối vào buổi luyện và chạm trán trong game; `LetterSoundPlayer` nhận `stimulusAudio` (bản chơi thử không đổi).
+- **Chấm điểm:** câu `scorable` bắt buộc nghe bản ghi GV mà chưa có bản phát được (kể cả cờ tắt) → `AUDIO_NOT_AVAILABLE`, không lượt, không điểm; quy tắc chấm/điểm không đổi; gửi lại cùng `clientAttemptId` không bị chặn.
+- 3 mã lỗi mới (`AUDIO_PLAYBACK_DISABLED`, `AUDIO_NOT_AVAILABLE`, `AUDIO_NOT_PERMITTED`) + chuỗi tiếng Việt; hạn mức `student.audio`.
+- Fixture: `scripts/fixtures/audio-items.ts` + `scripts/lib/audio-fixtures.ts` (6 câu nghe âm hư cấu), `setLocalStudentAudioPlayback` (global-setup bật / global-teardown trả TẮT).
+
+### Quyết định
+
+- **Không đưa `AudioSlot` vào `Player` qua dữ liệu câu**; thay vào đó `stimulusAudio` (ReactNode) do chế độ có điểm truyền vào → bản chơi thử `/demo` giữ nguyên.
+- **Hỏi trạng thái (`…/audio`) trước khi tải tệp**: cờ tắt / chưa duyệt → `slots` rỗng, nút khóa, **không gọi API phát tệp**; tệp chỉ tải khi trẻ chạm.
+- **Fail-closed với khe `hint`** (chưa có đường ghi nhận dùng gợi ý): từ chối phát.
+- **Không chuyển mã** ở R10.3a; định dạng không phát được thì báo (ghi hướng dẫn GV dùng M4A/MP3).
+- Mọi nguyên nhân về nội dung gộp thành `AUDIO_NOT_AVAILABLE` cho trình duyệt (trẻ không biết GV đã rút đồng ý…).
+
+### Kiểm thử (chạy thật, local 2026-10-27)
+
+| Lớp | Kết quả |
+|---|---|
+| pgTAP | 14 tệp, 270 kiểm tra đạt (mới: `14_student_audio_playback`, 9) · `db:lint` sạch |
+| Tích hợp CSDL + Storage (`REQUIRE_STORAGE=1`) | toàn bộ `test:db` 16 tệp, 315 test đạt (mới: `student-audio-playback.test.ts` 23) |
+| Unit (vitest) | 69 tệp, 1345 test đạt (mới: `tests/unit/audio-playback/`, 4 tệp, 55) · `build` + `check:bundle` sạch |
+| E2E có CSDL `student-audio.spec.ts` | Chromium desktop 5/5 local; các project còn lại chạy trên CI |
+| typecheck · lint · format:check · content:check | đạt (lint còn 1 cảnh báo cũ ở `season-reset.test.ts`) |
+
+### Việc BỊ CHẶN / chưa nghiệm thu thực tế
+
+1. Chưa có **bản ghi GV thật nào được duyệt**; GV chưa xác nhận Q-01/Q-02/Q-03 và các cách đọc; chưa có đồng ý dùng giọng thật.
+2. Chưa thử **iPhone/Safari thật** và **Android thật** (CI chỉ có WebKit Linux, có thể thiếu codec; `Cache-Control: no-store` với thẻ audio của Safari chưa thử thật). WebM/Opus có thể không phát trên iPhone → cần M4A/MP3.
+3. Chưa chọn **TTS**; câu lệnh vẫn khóa.
+4. Chủ dự án chưa chấp thuận **bật cờ**; cả hai cờ âm thanh vẫn TẮT.
+5. Validate `production` vẫn báo `MISSING_AUDIO` cho câu nghe âm (`assetId` trỏ vào thư viện media tĩnh, chưa nối với thư viện GV) → chưa có câu nghe âm nào được duyệt ở môi trường thật; việc nối là hạng mục kế tiếp.
+6. **Ghép chuỗi đánh vần** ("bờ – a – ba – huyền – bà") **chưa làm**: cần quy tắc đánh vần GV duyệt + thư viện tiếng cơ sở/dấu thanh/tiếng hoàn chỉnh.
+
+### Hạng mục kế tiếp (không tự làm)
+
+R10.3b (khe TTS sau quyết định D1–D6) · nối validate `production` với thư viện bản ghi GV · lọc câu nghe âm khỏi buổi luyện/game khi chưa có âm thanh · ghi nhận "đã dùng gợi ý" cho âm thanh `hint` · chuyển mã định dạng nếu bản ghi thật là WebM/Opus · ghép chuỗi đánh vần · R10.4.
+
+---
+
 ## 5t. R08.6 — Chơi lại Mê cung không tính điểm; nghiệm thu R08.5 kỹ thuật (2026-10-25)
 
 ### Nghiệm thu R08.5 trên `cb3a357` (kiểm tra thật bằng `gh run`)
@@ -610,6 +658,8 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 ## 8. Bước tiếp theo
 
+**Cập nhật 2026-10-27 (R10.3a):** dừng ở R10.3a. Việc cần người/GV làm trước khi bật cho học sinh thật: GV trả lời Q-01/Q-02/Q-03 và chốt cách đọc; có bản ghi thật được duyệt + đồng ý dùng giọng; thử phát trên iPhone/Safari và Android thật; quyết định D1–D6 về TTS; chủ dự án chấp thuận bật cờ. Hạng mục kỹ thuật kế tiếp (chỉ khi được giao): R10.3b (khe TTS), nối validate `production` với thư viện bản ghi GV, ghép chuỗi đánh vần (cần quy tắc GV duyệt), R10.4.
+
 **Cập nhật 2026-10-25 (R08.6):** R08 xong về kỹ thuật. Lộ trình còn lại **R10 → R11 → nộp dự án** (R09 hoãn) — chỉ làm khi được giao. Việc người điều phối/GV cần làm: (1) GV xem và ký `docs/reviews/R08_MONSTER_REVIEW.md` (hình, tên, lời thoại quái vật); (2) GV duyệt học liệu (149 mục `pending_review`) để có ít nhất 21 câu khác nhau đã duyệt cho mỗi lớp; (3) quyết định mở: cho học sinh tiếp tục lượt **tính điểm** đang dở khi điểm < 50 (trang vẫn chặn theo ngưỡng; chỉ lượt **chơi lại** được vào khi điểm dưới ngưỡng); (4) màn kế tiếp mở khi hoàn thành màn trước chưa hiện thực.
 
 **Cập nhật 2026-10-23 (R08.5):** phần kỹ thuật xong, chờ GV xem hồ sơ; bước tiếp theo vẫn là **R08.6** (chơi lại Mê cung đã hoàn thành không cộng/trừ điểm) — chỉ làm khi được giao; chưa bật hình quái vật cho học sinh thật cho tới khi GV duyệt.
@@ -626,6 +676,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-27 | R10.3a | R10 | Phát bản ghi GV đã duyệt cho học sinh (nghe âm): migration `20261101090000` + `gateway_resolve_teacher_audio`, 2 route, `AudioSlot` phát được, AD-35, không điểm khi thiếu âm thanh, cờ TẮT; local: unit 1345, DB 315 (Storage), pgTAP 270, E2E chromium 5/5, build + check:bundle sạch; CI chờ. Chưa bản ghi thật/iPhone/Android/TTS; R10.3 chưa nghiệm thu |
 | 2026-10-25 | R08.6 | R08 | Nghiệm thu R08.5 kỹ thuật (CI xanh; E2E push 1 lỗi chập chờn webkit-mobile + PR bị hủy — xem §5t); chơi lại Mê cung không tính điểm: `is_replay`, GAME_REPLAY, 7 × 21, điểm không đổi, hai tab, reset mùa; giao diện "Chơi lại cho vui"; pgTAP/DB/unit local xanh; CI chờ. Không làm R10/R11 |
 | 2026-10-23 | R08.5 | R08 | Soát tên/mã/nhãn quái vật (đổi sang tên bịa + mã trung tính, bảng mã cũ), bộ soát `monster-audit`, giấy phép hình + hoạt cảnh, hồ sơ GV với 3 ảnh dữ liệu giả; unit +22; **GV chưa duyệt**; CI chờ. Không làm R08.6 |
 | 2026-10-22 | R08.4 | R08 | Nghiệm thu R08.3 (sửa test R05 chập chờn); cổng chạm trán (lưu → kích hoạt), màn quái vật + 3 trái tim + Player GĐ4, hoạt cảnh, tải lại, rương; `resolvedTriggerKeys`; unit 1133, E2E toàn trình xanh local 3 project; demo 226,6 KB/60 FPS. Không làm R08.5 |

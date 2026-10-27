@@ -11,11 +11,13 @@ import { FeedbackBanner } from "@/components/kid/feedback-banner";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
+import { variantHasRecording } from "@/features/audio-playback/roles";
 import { hintText } from "@/features/exercises/core/feedback";
 import type { Response } from "@/features/exercises/core/primitives";
 import { responseKey } from "@/features/exercises/core/response-key";
 import { VARIANTS } from "@/features/exercises/runtime-registry";
 import type { EncounterDto } from "@/features/game-runs/encounter-dto";
+import { QuestionAudio } from "@/features/scored-practice/ui/question-audio";
 import { emptyResponseFor, isCompleteFor, ViewPlayer } from "@/features/scored-practice/ui/view-player";
 import { PointsChip } from "@/features/scored-practice/ui/scored-practice";
 import type { AttemptDto, PublicQuestion } from "@/features/scored-practice/types";
@@ -339,7 +341,15 @@ export function EncounterPlay({
           hint={hintOpen && open ? question.hint : null}
           reveal={question.reveal}
           idPrefix={question.id}
+          stimulusAudio={
+            variantHasRecording(question.view.variant, "stimulus") ? (
+              <QuestionAudio questionId={question.id} role="stimulus" label={vi.practice.audio.stimulus} />
+            ) : undefined
+          }
         />
+        {!open && variantHasRecording(question.view.variant, "model") ? (
+          <QuestionAudio questionId={question.id} role="model" label={vi.practice.audio.model} />
+        ) : null}
       </div>
 
       {open && question.hint ? (

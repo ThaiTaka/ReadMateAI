@@ -1504,6 +1504,9 @@ export const vi = {
     LISTEN_REQUIRED: "Hãy nghe bản ghi và đánh dấu đã nghe trước khi duyệt.",
     NOTE_REQUIRED: "Cần ghi chú (ít nhất 3 ký tự) khi yêu cầu ghi lại hoặc thu hồi.",
     STORAGE_UNAVAILABLE: "Kho lưu âm thanh tạm thời chưa dùng được. Bản ghi chưa được lưu, bạn hãy thử lại sau.",
+    AUDIO_PLAYBACK_DISABLED: "Phát âm thanh cho học sinh chưa được bật.",
+    AUDIO_NOT_AVAILABLE: "Câu này chưa có âm thanh để nghe nên chưa chấm điểm được. Con báo cô giáo giúp nhé.",
+    AUDIO_NOT_PERMITTED: "Âm thanh này chưa nghe được ở bước này.",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 
@@ -1589,6 +1592,14 @@ export const vi = {
       note: "Âm thanh sẽ do giáo viên ghi âm hoặc được tạo và duyệt ở giai đoạn sau. Bản chơi thử không phát âm thanh.",
       requiredMissing:
         "Dạng bài này cần âm thanh mẫu của giáo viên — hiện chưa có nên chỉ xem được giao diện, chưa làm bài được.",
+      // R10.3a — nút phát bản ghi giáo viên đã duyệt (câu chữ cho trẻ: ngắn, tích cực, không đổ lỗi).
+      loading: "Đang tải âm thanh…",
+      playing: "Đang phát — chạm để dừng",
+      replay: "Nghe lại",
+      error: "Chưa nghe được. Con chạm để thử lại nhé.",
+      unsupported: "Máy này chưa phát được âm thanh này. Con nhờ người lớn giúp nhé.",
+      muted: "Âm thanh đang tắt. Người lớn có thể bật lại ở phần cài đặt của con.",
+      stopLabel: "Dừng nghe",
     },
     picture: {
       label: "Hình {n}",

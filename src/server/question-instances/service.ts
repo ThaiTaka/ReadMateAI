@@ -21,6 +21,7 @@ import type {
 } from "@/features/scored-practice/types";
 import type { Json } from "@/lib/supabase/database.types";
 import type { AppSupabaseClient } from "@/lib/supabase/server";
+import { requiresTeacherRecording, resolveTeacherAudio } from "@/server/audio-playback/resolve";
 import { fail, mapDbError, ok, type Result } from "@/server/result";
 import { ownsStudent, vietnamDateKey, type StudentContext } from "@/server/student-gateway/context";
 import type { SupportLevel } from "@/types/learning";
@@ -39,7 +40,7 @@ export const GRADER_VERSION = "gd4.1-server";
 /** Mỗi chạm trán đúng 3 câu (GAME_DESIGN §4.5). */
 export const ENCOUNTER_QUESTION_COUNT = 3;
 
-type QuestionRow = {
+export type QuestionRow = {
   id: string;
   student_id: string;
   season_id: string;
@@ -84,7 +85,7 @@ function asMarks(value: Json): Record<string, Mark> {
 }
 
 /** Đọc câu bài tập (có đáp án) từ CSDL và kiểm lược đồ — chỉ ở máy chủ, không bao giờ trả nguyên về trình duyệt. */
-async function loadItem(admin: AppSupabaseClient, exerciseItemId: string): Promise<ExerciseItem | null> {
+export async function loadItem(admin: AppSupabaseClient, exerciseItemId: string): Promise<ExerciseItem | null> {
   const { data } = await admin
     .from("exercise_items")
     .select(
@@ -295,7 +296,7 @@ export async function getPracticeSession(
   return sessionDto(context.admin, sessionId);
 }
 
-async function ownedQuestion(context: StudentContext, questionId: string): Promise<QuestionRow | null> {
+export async function ownedQuestion(context: StudentContext, questionId: string): Promise<QuestionRow | null> {
   const { data } = await context.admin
     .from("question_instances")
     .select(QUESTION_COLUMNS)
@@ -318,7 +319,7 @@ async function questionTotal(admin: AppSupabaseClient, row: QuestionRow): Promis
  * Câu của chạm trán chỉ đọc được khi nó là câu hiện tại của chạm trán ĐANG DIỄN RA (hoặc đã đóng). Câu của chạm trán chưa
  * kích hoạt và câu sau khi câu trước chưa đóng không lộ nội dung (R08.3). Nộp bài thì CSDL tự chặn các trường hợp này.
  */
-async function readableNow(admin: AppSupabaseClient, row: QuestionRow): Promise<boolean> {
+export async function readableNow(admin: AppSupabaseClient, row: QuestionRow): Promise<boolean> {
   if (!row.game_encounter_id || row.status !== "open") return true;
   const { data: encounter } = await admin
     .from("game_encounters")
@@ -402,6 +403,20 @@ export async function submitAttempt(
   const item = await loadItem(context.admin, row.exercise_item_id);
   if (!item) return fail("UNKNOWN");
   if (!responseFits(item, input.response)) return fail("INVALID_INPUT");
+
+  // Câu bắt buộc NGHE bản ghi giáo viên mà chưa có bản đã duyệt phát được thì không tính điểm (không điểm giả). Lượt đã
+  // ghi (gửi lại cùng clientAttemptId) không bị chặn ở đây — CSDL trả đúng kết quả cũ.
+  if (row.scorable && requiresTeacherRecording(item)) {
+    const { data: prior } = await context.admin
+      .from("item_attempts")
+      .select("id")
+      .eq("client_attempt_id", input.clientAttemptId)
+      .maybeSingle();
+    if (!prior) {
+      const playable = await resolveTeacherAudio(context, row, item, "stimulus", { ignoreSoundPreference: true });
+      if (!playable.ok) return fail("AUDIO_NOT_AVAILABLE");
+    }
+  }
 
   const grade = runtimeOf(item).grade(item, input.response);
   const key = responseKey(input.response);

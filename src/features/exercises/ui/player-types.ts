@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { HintView, Mark, Response, RevealView } from "@/features/exercises/core/primitives";
 import type { ExerciseItem } from "@/features/exercises/items";
 
@@ -24,4 +25,9 @@ export type PlayerProps<I extends ExerciseItem> = {
   reveal: RevealView | null;
   /** Tiền tố id duy nhất cho phần tử (aria). */
   idPrefix: string;
+  /**
+   * Nút nghe âm cần nghe (R10.3a) do chế độ CÓ ĐIỂM truyền vào; chỉ bài nghe âm dùng. Bản chơi thử không truyền → giữ
+   * nguyên khung "Âm cần nghe" như cũ. Player không biết nguồn âm thanh hay đáp án.
+   */
+  stimulusAudio?: ReactNode;
 };

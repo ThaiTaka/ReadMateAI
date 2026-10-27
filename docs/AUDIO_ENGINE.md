@@ -1,4 +1,4 @@
-# ReadMate AI — Audio Engine (R10.1 thiết kế + R10.2 thư viện bản ghi giáo viên)
+# ReadMate AI — Audio Engine (R10.1 thiết kế + R10.2 thư viện bản ghi giáo viên + R10.3a phát bản ghi đã duyệt cho học sinh)
 
 > **Phiên bản:** 1.0 — R10.1 (2026-10-26). **Phạm vi:** thiết kế + nghiên cứu tài liệu + adapter `TtsProvider` kiểm thử bằng mock. **Chưa** có âm thanh nào được tạo, ghi hay phát; `AudioSlot` vẫn khóa (AD-39). R10.2–R10.7 chưa làm.
 > Liên quan: [ARCHITECTURE §13](ARCHITECTURE.md#13-hệ-thống-âm-thanh), [EXERCISE_ENGINE §5](EXERCISE_ENGINE.md), [PRD §12](PRD.md), [AUDIO_RECORDING_PLAN](AUDIO_RECORDING_PLAN.md).
@@ -11,7 +11,8 @@
 | Adapter Google Cloud TTS | **Skeleton** theo tài liệu REST; chỉ kiểm thử bằng `fetch` giả. **Chưa gọi API thật** |
 | Adapter Azure / FPT.AI | **Chưa viết** (chỉ đánh giá tài liệu; hợp đồng interface đã đủ để thêm) |
 | Gọi API thật, nghe thử chất lượng giọng Việt | **BLOCKED — chờ chủ dự án cấp phép tạo tài khoản/khóa thử nghiệm.** Chưa đánh giá chất lượng tổng hợp |
-| Bảng/migration thư viện âm thanh, giao diện GV `/teacher/audio`, Storage riêng tư, quy trình duyệt | **R10.2 đã có** (§12); kiểm thử với dữ liệu giả trên local/CI. **Phát trong Player: chưa làm (R10.3)** |
+| Bảng/migration thư viện âm thanh, giao diện GV `/teacher/audio`, Storage riêng tư, quy trình duyệt | **R10.2 đã có** (§12); kiểm thử với dữ liệu giả trên local/CI |
+| Phát bản ghi GV đã duyệt cho học sinh (bài Nghe âm – chọn chữ) | **R10.3a đã có về kỹ thuật** (§13) dưới cờ `student_teacher_audio_playback_approved` **TẮT**; kiểm thử bằng sóng tổng hợp. **R10.3 CHƯA nghiệm thu**: chưa bản ghi thật, chưa thử iPhone/Android thật, chưa chọn TTS |
 | Bản ghi âm GV | **Chưa có bản thật nào, chưa bản nào được duyệt**; cờ hệ thống ghi âm TẮT mặc định; chưa GV nào đồng ý dùng giọng |
 
 ## 2. Hai nguồn âm thanh
@@ -209,3 +210,119 @@ R10.1 **không** tự chuyển sang R10.2.
 ### 12.7 Điều kiện chuyển R10.3
 
 Ít nhất các âm P0 cần thiết có bản ghi **được GV duyệt thật** với cách đọc đã xác nhận; GV đồng ý dùng giọng; chủ dự án bật cờ; kiểm tra phát trên Safari/iPhone thật; quyết định D1–D6 (§10) về TTS. Không tự chuyển sang R10.3.
+
+## 13. R10.3a — Phát bản ghi giáo viên đã duyệt cho học sinh (nền tảng kỹ thuật, cờ TẮT)
+
+> **Phạm vi:** chỉ **một bản ghi đã duyệt** của **âm đơn lẻ (P0)** trong bài **Nghe âm – chọn chữ** (`listen_letter`). Chưa có TTS, chưa đọc cả từ/câu/đoạn, chưa tự ghép chuỗi đánh vần (xem §13.9). Kiểm thử bằng **sóng tổng hợp** — không phải bản ghi giáo viên thật. **R10.3 chưa nghiệm thu.**
+
+### 13.1 Luồng
+
+```mermaid
+sequenceDiagram
+  participant GV as Giáo viên (/teacher/audio)
+  participant DB as CSDL (audio_*)
+  participant HS as Trình duyệt học sinh
+  participant API as /api/student/question-instances/{id}/audio
+  participant ST as Storage riêng tư teacher-audio
+  GV->>DB: ghi → gửi duyệt → duyệt (đã nghe + cách đọc khớp + còn đồng ý)
+  HS->>API: GET …/audio (trạng thái, JSON nhỏ)
+  API->>DB: gateway_resolve_teacher_audio (mọi điều kiện)
+  API-->>HS: { muted, slots: { stimulus: { mimeType } } }
+  HS->>API: chạm nút → GET …/audio/stimulus (Range)
+  API->>DB: kiểm tra LẠI mọi điều kiện
+  API->>ST: đọc tệp bằng khóa secret, đối chiếu kích thước + SHA-256
+  API-->>HS: 200/206 audio (private, no-store)
+```
+
+### 13.2 Các điều kiện phát (kiểm lại ở **mỗi** yêu cầu, không lưu bộ nhớ đệm)
+
+| # | Điều kiện | Nơi kiểm | Mã khi thiếu (nội bộ → trả cho trình duyệt) |
+|---|---|---|---|
+| 1 | Cờ `student_teacher_audio_playback_approved` bật | CSDL | `AUDIO_PLAYBACK_DISABLED` |
+| 2 | Thiết bị học sinh đã liên kết, hồ sơ và lớp còn hoạt động; câu thuộc đúng học sinh đó | CSDL (`require_linked_device`) + `ownedQuestion` | `FORBIDDEN` / `NOT_FOUND` |
+| 3 | Đồng ý `learning_data` của học sinh còn hiệu lực | CSDL | `CONSENT_REQUIRED` |
+| 4 | Học sinh không tắt âm thanh trong cài đặt (`sound_preference`) | Máy chủ | `AUDIO_NOT_PERMITTED` (trạng thái báo `muted: true`) |
+| 5 | Chính sách chống lộ đáp án AD-35 cho phép khe này ở mức hỗ trợ hiện tại (§13.5) | Máy chủ (`decidePlayback`) | `AUDIO_NOT_PERMITTED` |
+| 6 | Tài nguyên đúng **trường** của lớp, đúng đơn vị kiến thức (suy từ câu, không từ trình duyệt) | CSDL | `AUDIO_NOT_AVAILABLE` |
+| 7 | Phiên bản là `active_version_id`, trạng thái `approved`, đã nghe + có người duyệt (không bị `draft/pending_review/rejected/superseded/revoked/discarded`) | CSDL | `AUDIO_NOT_AVAILABLE` |
+| 8 | Cách đọc GV đã xác nhận **và** khớp nhãn bản ghi **và** khớp cách đọc mà câu khai báo (kho tri thức) | CSDL | `PRONUNCIATION_UNCONFIRMED` / `LABEL_MISMATCH` → `AUDIO_NOT_AVAILABLE` |
+| 9 | Người ghi còn đồng ý dùng giọng (đúng chứng từ gắn vào phiên bản) | CSDL | `VOICE_CONSENT_REQUIRED` → `AUDIO_NOT_AVAILABLE` |
+| 10 | Tệp còn trong Storage, kích thước và SHA-256 khớp metadata đã duyệt (≤ 2 MiB) | Máy chủ | `AUDIO_NOT_AVAILABLE` (tệp thay/mất/hỏng) |
+
+Trẻ không nhìn thấy **vì sao** chưa có âm thanh (GV chưa duyệt, rút đồng ý, cách đọc lệch…): mọi nguyên nhân về nội dung gộp thành `AUDIO_NOT_AVAILABLE` (`publicAudioCode`). Mã chi tiết chỉ có ở hàm CSDL để kiểm thử.
+
+### 13.3 API (Student Gateway)
+
+| Route | Việc | Ghi chú |
+|---|---|---|
+| `GET /api/student/question-instances/{id}/audio` | Khe nào phát được **ngay bây giờ**: `{ muted, slots: { stimulus?: { mimeType }, model?: { mimeType } } }` | Giới hạn `read`; cờ tắt / chưa có bản ghi → `slots` rỗng (không lỗi). **Không** trả mã tài nguyên, khóa lưu trữ, tên GV, băm |
+| `GET /api/student/question-instances/{id}/audio/{role}` (`role` = `stimulus` \| `model`) | Phát tệp | Giới hạn **40 lần/phút/thiết bị**; chỉ **cùng nguồn** (Sec-Fetch-Site/Origin); `Range` → `206`/`416`; `Cache-Control: private, no-store`, `nosniff`, `Cross-Origin-Resource-Policy: same-origin`, CSP `default-src 'none'; sandbox` |
+
+- Trình duyệt **không** gửi mã tài nguyên/phiên bản/đường dẫn: máy chủ suy ra âm từ chính câu (`bindingFor`: phương án đúng → `phoneme:x`) — không có cách tải bản ghi tùy ý.
+- Máy chủ đọc Storage bằng khóa secret; **không** URL công khai, **không** URL ký, `storageKey` chỉ tồn tại trong mã máy chủ (kiểm bằng test quét + E2E).
+- Không log nội dung hay đường dẫn; mã lỗi là chuỗi máy đọc.
+
+### 13.4 Thu hồi
+
+- GV thu hồi bản ghi hoặc rút đồng ý ⇒ **yêu cầu phát mới bị từ chối ngay** (CSDL kiểm lại ở mỗi lần; phản hồi `no-store` nên trình duyệt phải hỏi máy chủ cho mỗi lần nghe lại). `AudioSlot` đặt `src` ngay trong thao tác chạm, không giữ blob/URL đối tượng.
+- **Không hứa** thu hồi dữ liệu mà trình duyệt đã tải về trước đó (đoạn đang phát hoặc đã nằm trong bộ nhớ của thẻ audio): máy chủ không thể xóa thứ đã gửi đi. Thu hồi chỉ chặn các lần tải **sau**.
+
+### 13.5 Chống lộ đáp án (AD-35) — không thêm logic thứ hai
+
+`decidePlayback` dùng lại **chính** `decideBeforeGrading`/`decideAfterGrading` và `VARIANTS[...].audioPolicy`:
+
+| Khe | Điều kiện phát | Ghi chú |
+|---|---|---|
+| `stimulus` (nghe âm) | `beforeGrading.stimulus` là `allowed` ở mức hỗ trợ của câu (nghe âm: H3–H0) | Đó là nhiệm vụ của bài, không phải lộ đáp án |
+| `stimulus` loại `hint` | **Từ chối** (`HINT_ONLY`) | Chưa có đường ghi nhận "đã dùng gợi ý"; fail-closed. Không biến thể nào có bản ghi GV ở khe `hint` hiện nay |
+| `model` (đọc mẫu) | Câu đã **đóng** (đúng hoặc hết lượt) **và** `modelAfterGrading` | Trước khi chấm → `AUDIO_NOT_PERMITTED` |
+| Bài đọc từ/câu (dạng 5, 6), tên tranh H0… | Không có ràng buộc bản ghi GV (`variantHasRecording`) ⇒ **không đi qua đường này** | Test quét: bài `reading` không phát kích thích trước chấm ở mọi mức |
+
+Việc bấm nghe **không** được coi là hoàn thành câu: điểm chỉ đến từ câu trả lời được nộp và chấm ở máy chủ; quy tắc chấm/điểm không đổi.
+
+### 13.6 Câu bắt buộc nghe mà chưa có âm thanh → không tính điểm
+
+`submitAttempt` (câu `scorable` mà biến thể yêu cầu khe `stimulus` bản ghi GV) kiểm tra việc nghe được trước khi chấm: nếu chưa có bản ghi đã duyệt phát được (kể cả **cờ tắt**) ⇒ `AUDIO_NOT_AVAILABLE`, **không** ghi lượt, **không** điểm; giao diện hiện lời nhắn nhẹ nhàng và giữ nguyên câu. Gửi lại cùng `clientAttemptId` của lượt đã ghi **không** bị chặn (trả đúng kết quả cũ). Cài đặt tắt âm thanh không làm câu mất điểm (chỉ kiểm sự tồn tại của bản ghi). Hiện chưa có câu nghe âm nào được duyệt ở môi trường thật (validate `production` vẫn báo `MISSING_AUDIO` vì thư viện media tĩnh chưa nối với thư viện GV — xem §13.9), nên quy tắc này là lớp bảo vệ thứ hai.
+
+### 13.7 Trình phát `AudioSlot` (`src/components/kid/audio-slot.tsx`)
+
+| Trạng thái | Giao diện |
+|---|---|
+| Không có nguồn / cờ tắt / chưa duyệt | Nút khóa "…: Chưa có âm thanh" (như trước) |
+| Đang hỏi máy chủ | Khóa, "Đang tải âm thanh…" |
+| Học sinh tắt âm thanh | Khóa, "Âm thanh đang tắt…" |
+| Định dạng không phát được | Khóa + lời nhắn "Máy này chưa phát được…" (**không chuyển mã, không đổi sang giọng khác**) |
+| Sẵn sàng | Nút ≥ 64 px "Nghe" — **không tự phát**; chỉ phát trong hàm xử lý chạm (đáp ứng hạn chế autoplay của iOS/Safari) |
+| Đang tải/đang phát | Chạm lại để dừng |
+| Phát xong | "Nghe lại" (mỗi lần là một yêu cầu mới tới máy chủ) |
+| Lỗi mạng / bị từ chối | "Chưa nghe được. Con chạm để thử lại nhé." |
+
+Một âm tại một thời điểm (`claimAudio`: phát cái mới thì dừng cái cũ); đổi câu / rời trang / thoát bài ⇒ gỡ thành phần ⇒ dừng và nhả tài nguyên. Khả năng phát định dạng kiểm bằng `canPlayType` (`mimeSupported`). Không dùng `speechSynthesis`/Web Speech API (test quét). Không có animation riêng ⇒ tôn trọng giảm chuyển động.
+
+### 13.8 Định dạng và giới hạn iPhone/Safari
+
+- Máy chủ phát **đúng định dạng đã lưu** (không chuyển mã ở R10.3a). Safari/iPhone **chắc chắn** phát được M4A (AAC), MP3, WAV; **WebM/Opus có thể không** (tùy phiên bản iOS). Chrome ghi trực tiếp ra WebM/Opus ⇒ bản ghi đó có thể **không nghe được trên iPhone của học sinh**.
+- Khi trình duyệt báo không phát được định dạng, nút khóa kèm lời nhắn; giáo viên cần cung cấp bản **M4A hoặc MP3** (xem [TEACHER_AUDIO_GUIDE §4](TEACHER_AUDIO_GUIDE.md)). Chưa có hệ thống chuyển mã.
+- **Chưa kiểm thử trên iPhone/Safari thật hay Android thật.** CI chỉ có WebKit trên Linux (có thể thiếu codec) nên E2E WebKit chỉ khẳng định yêu cầu mạng đúng (200/206, tiêu đề riêng tư); việc phát ra tiếng chỉ khẳng định trên Chromium.
+- `Cache-Control: no-store` với thẻ audio của Safari **chưa được thử trên thiết bị thật**; nếu Safari phát lỗi vì `no-store`, đổi sang `private, no-cache, max-age=0, must-revalidate` (vẫn buộc hỏi máy chủ ở mỗi lần).
+
+### 13.9 Hạng mục kế tiếp (KHÔNG làm ở R10.3a, không tuyên bố đã hỗ trợ)
+
+1. **R10.3b — khe TTS** (câu lệnh, lời khen, tên tranh) sau khi chủ dự án chọn nhà cung cấp và quyền dùng tệp tổng hợp (D1–D6, §10).
+2. Nối **validate chế độ `production`** với thư viện bản ghi GV (hiện `MISSING_AUDIO` vẫn đúng vì `assetId` trỏ vào thư viện media tĩnh) để câu nghe âm có thể được duyệt khi bản ghi thật đã được duyệt.
+3. **Ghép chuỗi đánh vần** kiểu "bờ – a – ba – huyền – bà": cần **quy tắc đánh vần do GV duyệt** (Q-01/Q-02) và thư viện âm thanh riêng cho tiếng cơ sở, dấu thanh, tiếng hoàn chỉnh. **Chưa triển khai**; R10.3a chỉ phát một bản ghi đã duyệt.
+4. Đường ghi nhận "đã dùng gợi ý" cho khe `hint` bằng âm thanh; vần đơn lẻ (P1/P2); lọc câu nghe âm khỏi buổi luyện/game khi chưa có âm thanh (hiện chặn ở bước chấm).
+5. Chuẩn hóa/chuyển mã định dạng cho iPhone nếu bản ghi thật là WebM/Opus.
+
+### 13.10 Điều kiện BẮT BUỘC trước khi bật cờ cho học sinh thật
+
+Đủ **tất cả**: (1) GV xác nhận Q-01/Q-02/Q-03 và các cách đọc cần dùng; (2) có sự đồng ý dùng giọng hợp lệ của người ghi; (3) có **bản ghi thật được duyệt** cho các âm sử dụng; (4) chủ dự án chấp thuận bật cờ (đổi bằng migration, không bằng mã); (5) đã kiểm thử phát trên **iPhone/Safari thật và ít nhất một thiết bị Android thật**; (6) quyết định TTS và quyền dùng âm tổng hợp nếu triển khai khe TTS. Cờ `student_teacher_audio_playback_approved` và `teacher_audio_recording_approved` luôn **TẮT** trong mọi môi trường cho tới khi đủ điều kiện; chỉ kiểm thử local/CI bật tạm rồi trả về TẮT (pgTAP kiểm).
+
+### 13.11 Kiểm thử R10.3a
+
+| Lớp | Nội dung |
+|---|---|
+| pgTAP `14_student_audio_playback` | Cờ mặc định tắt, quyền hàm (chỉ `service_role`), `security definer` + `search_path` rỗng, hàm chỉ đọc, không mở quyền bảng |
+| Tích hợp CSDL + Storage (`tests/db/student-audio-playback.test.ts`) | Chỉ bản `approved` đang dùng; draft/pending/rejected/superseded/revoked bị chặn; rút đồng ý; cách đọc chưa xác nhận/không khớp; i/y; trường khác; thiết bị lạ/bị thu hồi; học sinh rút đồng ý; tệp bị thay/mất; không đọc được bảng/hàm bằng JWT thiết bị/GV; chấm điểm không có âm thanh |
+| Unit | `bindingFor`, `decidePlayback` (mọi mức H3–H0), `mimeSupported`, `AudioSlot`/`QuestionAudio` (không tự phát, một âm, dừng khi đổi câu, lỗi, không hỗ trợ, không Web Speech), Route Handler (Range, cùng nguồn, tần suất, 401/403/404), quét an toàn mã + migration |
+| E2E có CSDL (`tests/e2e-db/student-audio.spec.ts`) | Nghe fixture tổng hợp ở Chromium/WebKit (yêu cầu mạng đúng, tiêu đề riêng tư, không lộ khóa/URL Storage, không TTS/Web Speech), đọc mẫu chỉ sau chấm, thu hồi khi đang mở trang, cờ tắt không gọi API phát và không tính điểm, 360 px + bàn phím + giảm chuyển động + axe |

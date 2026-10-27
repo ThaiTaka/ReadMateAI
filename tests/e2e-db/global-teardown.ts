@@ -2,6 +2,7 @@ import {
   setLocalGameRunFixtures,
   setLocalHonorsApproval,
   setLocalLeaderboardApproval,
+  setLocalStudentAudioPlayback,
   setLocalTeacherAudioApproval,
 } from "../../scripts/lib/test-fixtures";
 
@@ -11,4 +12,5 @@ export default function globalTeardown() {
   setLocalHonorsApproval(false);
   setLocalGameRunFixtures(false);
   setLocalTeacherAudioApproval(false);
+  setLocalStudentAudioPlayback(false);
 }
