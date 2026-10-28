@@ -20,6 +20,9 @@ export type PocCliOptions = {
 
 export type ParseResult = { ok: true; options: PocCliOptions } | { ok: false; error: string };
 
+/** Giọng Viettel chỉ lấy MP3 (`tts_return_option` = 3 là giá trị duy nhất xác minh được); không âm thầm đổi định dạng. */
+const WAV_UNSUPPORTED = "--format wav chưa hỗ trợ cho giọng Viettel (chỉ mp3)";
+
 export function parsePocArgs(argv: readonly string[]): ParseResult {
   const options: PocCliOptions = {
     live: false,
@@ -73,14 +76,25 @@ export function parsePocArgs(argv: readonly string[]): ParseResult {
         return { ok: false, error: `Đối số không được hỗ trợ: "${arg}"` };
     }
   }
+  if (options.format === "wav" && options.voices.some((key) => POC_VOICES[key].provider === "viettel")) {
+    return { ok: false, error: WAV_UNSUPPORTED };
+  }
   return { ok: true, options };
 }
 
+export const VIETTEL_KEY_ENV = "TTS_VIETTEL_TOKEN";
 export const FPT_KEY_ENV = "TTS_FPT_API_KEY";
 export const GOOGLE_KEY_ENV = "TTS_GOOGLE_API_KEY";
 export const COST_CONFIRM_ENV = "TTS_POC_COST_CONFIRMED";
 
 export type PocEnv = Readonly<Record<string, string | undefined>>;
+
+/**
+ * Token Viettel dùng làm giá trị tiêu đề HTTP nên phải là ký tự ASCII in được, không khoảng trắng, độ dài hợp lý. Sai dạng được
+ * coi như CHƯA CÓ token (không in giá trị ra); đây chỉ là kiểm tra dạng, không chứng minh token còn hiệu lực.
+ */
+export const isUsableViettelToken = (value: string | undefined): value is string =>
+  value !== undefined && /^[!-~]{8,512}$/u.test(value);
 
 export type PocMode =
   | { mode: "dry"; reason: "NOT_LIVE" }
@@ -98,8 +112,10 @@ export function decidePocMode(options: PocCliOptions, env: PocEnv): PocMode {
   if (!options.live) return { mode: "dry", reason: "NOT_LIVE" };
   if (env[COST_CONFIRM_ENV]?.trim() !== "yes") return { mode: "refused", reason: "COST_NOT_CONFIRMED" };
   const keys: Partial<Record<PocProviderId, string>> = {};
+  const viettel = env[VIETTEL_KEY_ENV]?.trim();
   const fpt = env[FPT_KEY_ENV]?.trim();
   const google = env[GOOGLE_KEY_ENV]?.trim();
+  if (isUsableViettelToken(viettel)) keys.viettel = viettel;
   if (fpt) keys.fpt = fpt;
   if (google) keys.google = google;
   const voices = options.voices.filter((key) => keys[POC_VOICES[key].provider] !== undefined);

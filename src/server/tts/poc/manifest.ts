@@ -18,7 +18,7 @@ export const pocSampleSchema = z.strictObject({
   /** Tên tệp = sha256 của NỘI DUNG + đuôi: hai yêu cầu cho ra cùng byte chỉ lưu một tệp. */
   file: z.string().regex(POC_FILE_PATTERN),
   sha256: z.string().regex(/^[0-9a-f]{64}$/u),
-  provider: z.enum(["fpt", "google"]),
+  provider: z.enum(["viettel", "fpt", "google"]),
   voiceKey: z.enum(POC_VOICE_KEYS),
   providerVoice: z.string().min(1),
   speed: z.enum(["slow", "normal"]),

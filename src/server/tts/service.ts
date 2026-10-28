@@ -5,6 +5,7 @@ import type { AudioRole, AudioSlot } from "../../features/exercises/core/primiti
 import { assetKeyOf } from "./hash.ts";
 import { createFptProvider } from "./fpt-provider.ts";
 import { createGoogleProvider, createMockProvider, noneProvider } from "./providers.ts";
+import { createViettelProvider } from "./viettel-provider.ts";
 import { checkTtsRequest } from "./request.ts";
 import type { TtsErrorCode, TtsOutcome, TtsProvider, TtsPurpose, TtsRequest } from "./types.ts";
 import type { TtsVoiceKey } from "./voice.ts";
@@ -19,7 +20,7 @@ export const DEFAULT_BATCH_CHAR_BUDGET = 3000;
 
 export type ProviderEnv = Readonly<Record<string, string | undefined>>;
 
-/** `TTS_PROVIDER` = none | mock | google | fpt. Thiếu khóa hoặc giá trị lạ → `none` (không rò rỉ, không lỗi khởi động). */
+/** `TTS_PROVIDER` = none | mock | google | fpt | viettel. Thiếu khóa hoặc giá trị lạ → `none` (không rò rỉ, không lỗi khởi động). */
 export function createTtsProvider(env: ProviderEnv): TtsProvider {
   const name = (env.TTS_PROVIDER ?? "none").trim();
   if (name === "mock") return createMockProvider();
@@ -30,6 +31,10 @@ export function createTtsProvider(env: ProviderEnv): TtsProvider {
   if (name === "fpt") {
     const key = env.TTS_FPT_API_KEY?.trim();
     return key ? createFptProvider({ apiKey: key }) : noneProvider;
+  }
+  if (name === "viettel") {
+    const token = env.TTS_VIETTEL_TOKEN?.trim();
+    return token ? createViettelProvider({ token }) : noneProvider;
   }
   return noneProvider;
 }

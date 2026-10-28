@@ -1312,8 +1312,20 @@ export const vi = {
     invalidTitle: "Không đọc được danh sách tệp nghe thử",
     invalidText: "Tệp danh sách bị hỏng hoặc sai định dạng. Hãy nhờ người vận hành kiểm tra, trang không tự ghi đè.",
     candidatesTitle: "Giọng đang thử",
-    candidateColumns: { provider: "Nhà cung cấp", voice: "Giọng", gender: "Giới tính", region: "Vùng miền" },
-    providers: { fpt: "FPT.AI", google: "Google Cloud" },
+    candidateColumns: {
+      provider: "Nhà cung cấp",
+      voice: "Giọng",
+      gender: "Giới tính",
+      region: "Vùng miền",
+      status: "Tình trạng nghe thử",
+    },
+    candidateStatus: {
+      noSample: "Chưa có tệp thật — chưa nghe",
+      hasSample: "Có {n} tệp để nghe — chờ giáo viên nghe, chưa quyết định",
+    },
+    candidatesNote:
+      "Giọng nam miền Nam Viettel AI Minh Quân là giọng chủ dự án chọn để nghe thử. Cách gọi API Viettel lấy từ mã chạy của chính trang Viettel AI và chưa được kiểm chứng bằng token thật; vùng miền và giới tính theo mô tả của nhà cung cấp, giáo viên nghe để xác nhận.",
+    providers: { viettel: "Viettel AI", fpt: "FPT.AI", google: "Google Cloud" },
     genders: { female: "Nữ", male: "Nam" },
     regions: { north: "Bắc", south: "Nam", unspecified: "Chưa rõ — nghe để xác định" },
     speeds: { normal: "Tốc độ bình thường", slow: "Tốc độ chậm vừa" },
@@ -1338,6 +1350,7 @@ export const vi = {
     criteria: [
       "Phát âm dấu thanh (huyền, sắc, hỏi, ngã, nặng)",
       "Phát âm phụ âm đầu và nguyên âm",
+      "Giọng miền Nam có lẫn cách phát âm vùng (ví dụ r/d/gi, tr/ch, hỏi/ngã) làm lệch chính tả không",
       "Mức tự nhiên",
       "Dễ nghe với học sinh lớp 1",
       "Tốc độ và khoảng ngắt",

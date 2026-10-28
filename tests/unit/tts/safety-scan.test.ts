@@ -41,18 +41,20 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("địa chỉ dịch vụ ngoài chỉ xuất hiện trong hai adapter (providers.ts = Google, fpt-provider.ts = FPT.AI); không có Azure", () => {
-    const adapters = ["/providers.ts", "/fpt-provider.ts"];
+  it("địa chỉ dịch vụ ngoài chỉ xuất hiện trong ba adapter (providers.ts = Google, fpt-provider.ts = FPT.AI, viettel-provider.ts = Viettel AI); không có Azure", () => {
+    const adapters = ["/providers.ts", "/fpt-provider.ts", "/viettel-provider.ts"];
     for (const file of ttsFiles) {
       const body = text(file);
       expect(body, file).not.toMatch(/cognitiveservices|speech\.microsoft|tts\.speech/iu);
       if (!adapters.some((suffix) => norm(file).endsWith(suffix))) {
         expect(body, file).not.toMatch(/https?:\/\//u);
-        expect(body, file).not.toMatch(/api\.fpt\.ai|texttospeech\.googleapis/iu);
+        expect(body, file).not.toMatch(/api\.fpt\.ai|texttospeech\.googleapis|viettelai\.vn/iu);
       }
     }
     for (const file of outside)
-      expect(text(file), file).not.toMatch(/texttospeech\.googleapis|cognitiveservices|api\.fpt\.ai|hmi\/tts/iu);
+      expect(text(file), file).not.toMatch(
+        /texttospeech\.googleapis|cognitiveservices|api\.fpt\.ai|hmi\/tts|viettelai\.vn|viettelgroup\.ai|speech_synthesis/iu,
+      );
   });
 
   it("mô-đun TTS không đọc process.env và không import dữ liệu học sinh, xác thực, điểm, game, bảng xếp hạng", () => {
@@ -94,13 +96,34 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     );
     for (const file of outside) {
       const body = text(file);
-      if (/server\/tts\/(poc\/|fpt-provider)/u.test(body)) {
+      if (/server\/tts\/(poc\/|fpt-provider|viettel-provider)/u.test(body)) {
         expect(allowed.has(norm(file)), `${relative(root, file)} import mô-đun nghe thử`).toBe(true);
         expect(body, file).not.toMatch(/["']use client["']/u);
       }
     }
     // Khóa API không bao giờ có tiền tố công khai.
-    for (const file of sourceFiles) expect(text(file), file).not.toMatch(/NEXT_PUBLIC_[A-Z_]*TTS/u);
+    for (const file of sourceFiles) expect(text(file), file).not.toMatch(/NEXT_PUBLIC_[A-Z_]*(TTS|VIETTEL)/u);
+    // Token Viettel chỉ được đọc ở dịch vụ TTS phía máy chủ và bộ chọn chế độ của công cụ nghe thử.
+    const readers = sourceFiles
+      .filter((file) => /TTS_VIETTEL_TOKEN/u.test(text(file)))
+      .map((file) => norm(relative(root, file)));
+    expect(readers.sort()).toEqual([
+      "src/server/tts/poc/options.ts",
+      "src/server/tts/service.ts",
+      "src/server/tts/viettel-provider.ts",
+    ]);
+  });
+
+  it("mô-đun TTS không có đường ghi log (token, nội dung, phản hồi không ra console) và không chạm bảng/bucket âm thanh giáo viên", () => {
+    for (const file of ttsFiles) {
+      const body = text(file);
+      expect(body, file).not.toMatch(/console\.(log|warn|error|info|debug)/u);
+      expect(body, file).not.toMatch(/audio_assets|audio_asset_versions|teacher-audio|teacher_audio/u);
+    }
+    // Công cụ dòng lệnh chỉ in mã chẩn đoán cố định, không bao giờ in token/khóa; cũng không chạm âm thanh giáo viên.
+    const script = readFileSync(join(root, "scripts/tts-poc.ts"), "utf8");
+    expect(script).not.toMatch(/console\.\w+\([^)]*(mode\.keys|\.token|apiKey)/u);
+    expect(script).not.toMatch(/audio_assets|audio_asset_versions|teacher-audio/u);
   });
 
   it("không có mã ứng dụng nào bật cờ phát TTS; cờ phát âm thanh và ghi âm vẫn TẮT trong mọi migration", () => {
@@ -121,6 +144,7 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     expect(env).toMatch(/^TTS_PROVIDER=none$/mu);
     expect(env).toMatch(/^TTS_GOOGLE_API_KEY=$/mu);
     expect(env).toMatch(/^TTS_FPT_API_KEY=$/mu);
+    expect(env).toMatch(/^TTS_VIETTEL_TOKEN=$/mu);
     expect(env).toMatch(/^TTS_POC_COST_CONFIRMED=$/mu);
   });
 

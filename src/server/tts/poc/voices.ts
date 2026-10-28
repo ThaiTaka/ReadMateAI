@@ -3,12 +3,15 @@
  * chọn giọng: không giọng nào được tuyên bố đạt chuẩn (docs/TTS_APPROVAL_CHECKLIST.md G1–G3). HẰNG SỐ THUẦN, không đọc môi trường.
  *
  * Tên giọng, vùng miền và giới tính lấy từ tài liệu chính thức của nhà cung cấp (đối chiếu 2026-10-28):
+ * - Viettel AI: mã giọng `hcm-minhquan` (nam, vùng TP.HCM = miền Nam) — mã giọng được xác nhận có trong mã chạy
+ *   của chính trang web Viettel AI; giới tính/vùng theo tiền tố mã (hcm) và mô tả sản phẩm, GIÁO VIÊN NGHE để xác nhận.
  * - FPT.AI TTS v5 (docs.fpt.ai): banmai = nữ Bắc, lannhi = nữ Nam, thuminh = nữ Bắc.
  * - Google Cloud TTS (danh sách giọng vi-VN): Neural2-A = nữ, Neural2-D = nam; Google không nêu vùng miền.
  * Azure (vi-VN-HoaiMyNeural, vi-VN-NamMinhNeural) chỉ là phương án dự phòng — CHƯA có adapter.
  */
 
 export const POC_VOICE_KEYS = [
+  "viettel-hcm-minhquan",
   "fpt-banmai",
   "fpt-lannhi",
   "fpt-thuminh",
@@ -17,7 +20,7 @@ export const POC_VOICE_KEYS = [
 ] as const;
 export type PocVoiceKey = (typeof POC_VOICE_KEYS)[number];
 
-export type PocProviderId = "fpt" | "google";
+export type PocProviderId = "viettel" | "fpt" | "google";
 
 export type PocVoice = {
   key: PocVoiceKey;
@@ -31,6 +34,14 @@ export type PocVoice = {
 };
 
 export const POC_VOICES: Readonly<Record<PocVoiceKey, PocVoice>> = {
+  "viettel-hcm-minhquan": {
+    key: "viettel-hcm-minhquan",
+    provider: "viettel",
+    providerVoice: "hcm-minhquan",
+    label: "Viettel AI Minh Quân (nam, miền Nam)",
+    gender: "male",
+    region: "south",
+  },
   "fpt-banmai": {
     key: "fpt-banmai",
     provider: "fpt",
@@ -76,5 +87,8 @@ export const POC_VOICES: Readonly<Record<PocVoiceKey, PocVoice>> = {
 export const isPocVoiceKey = (value: string): value is PocVoiceKey =>
   (POC_VOICE_KEYS as readonly string[]).includes(value);
 
-/** Giọng chạy mặc định ở lần thử đầu: hai giọng FPT.AI được chủ dự án ưu tiên (banmai Bắc, lannhi Nam). */
-export const DEFAULT_POC_VOICES: readonly PocVoiceKey[] = ["fpt-banmai", "fpt-lannhi"];
+/**
+ * Giọng chạy mặc định (R10.3b2-P0b): giọng nam miền Nam Viettel AI Minh Quân do chủ dự án chọn để nghe thử. Các giọng FPT.AI
+ * (hai giọng nữ banmai/lannhi trước đây) và Google vẫn dùng được để đối chiếu bằng `--voices`.
+ */
+export const DEFAULT_POC_VOICES: readonly PocVoiceKey[] = ["viettel-hcm-minhquan"];

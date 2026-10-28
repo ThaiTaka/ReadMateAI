@@ -11,6 +11,7 @@ import {
   FPT_KEY_ENV,
   GOOGLE_KEY_ENV,
   parsePocArgs,
+  VIETTEL_KEY_ENV,
   type PocCliOptions,
 } from "@/server/tts/poc/options";
 import { planPocRun, POC_MAX_CHARS_PER_RUN, POC_MAX_REQUESTS_PER_RUN } from "@/server/tts/poc/plan";
@@ -23,14 +24,14 @@ import {
 } from "@/server/tts/poc/sentences";
 import { servePocSample } from "@/server/tts/poc/serve";
 import { createFsPocStore, readPocManifest } from "@/server/tts/poc/store";
-import { POC_VOICES, POC_VOICE_KEYS } from "@/server/tts/poc/voices";
+import { DEFAULT_POC_VOICES, POC_VOICES, POC_VOICE_KEYS } from "@/server/tts/poc/voices";
 import { TTS_VOICE_KEYS } from "@/server/tts/voice";
 import type { TtsProvider } from "@/server/tts/types";
 import { mp3, wav } from "../../audio-library/fixtures";
 
 const base: PocCliOptions = {
   live: false,
-  voices: ["fpt-banmai", "fpt-lannhi"],
+  voices: ["viettel-hcm-minhquan"],
   set: "catalog",
   speed: "normal",
   format: "mp3",
@@ -67,6 +68,13 @@ describe("bộ câu nghe thử", () => {
 
   it("khóa giọng nghe thử tách khỏi khóa giọng sản xuất", () => {
     for (const key of POC_VOICE_KEYS) expect((TTS_VOICE_KEYS as readonly string[]).includes(key)).toBe(false);
+    expect(POC_VOICES["viettel-hcm-minhquan"]).toMatchObject({
+      provider: "viettel",
+      providerVoice: "hcm-minhquan",
+      gender: "male",
+      region: "south",
+    });
+    expect(DEFAULT_POC_VOICES).toEqual(["viettel-hcm-minhquan"]);
     expect(POC_VOICES["fpt-banmai"]).toMatchObject({ providerVoice: "banmai", gender: "female", region: "north" });
     expect(POC_VOICES["fpt-lannhi"]).toMatchObject({ providerVoice: "lannhi", gender: "female", region: "south" });
     expect(POC_VOICES["google-neural2-a"].providerVoice).toBe("vi-VN-Neural2-A");
@@ -77,7 +85,7 @@ describe("bộ câu nghe thử", () => {
 describe("kế hoạch và giới hạn chi phí", () => {
   const plan = (over: Partial<Parameters<typeof planPocRun>[0]> = {}) =>
     planPocRun({
-      voices: base.voices,
+      voices: ["fpt-banmai", "fpt-lannhi"],
       set: "catalog",
       speed: "normal",
       format: "mp3",
@@ -85,7 +93,16 @@ describe("kế hoạch và giới hạn chi phí", () => {
       ...over,
     });
 
-  it("lần chạy đầu: 6 câu × 2 giọng = 12 lần gọi, trong hạn mức ký tự", () => {
+  it("lần chạy mặc định (giọng nam miền Nam Viettel): 6 câu × 1 giọng = 6 lần gọi, trong hạn mức ký tự", () => {
+    const result = plan({ voices: base.voices });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.jobs).toHaveLength(6);
+    expect(result.jobs.every((job) => job.voice.provider === "viettel")).toBe(true);
+    expect(result.chars).toBeLessThanOrEqual(POC_MAX_CHARS_PER_RUN);
+  });
+
+  it("đối chiếu hai giọng FPT.AI cũ vẫn đủ: 6 câu × 2 giọng = 12 lần gọi, trong hạn mức ký tự", () => {
     const result = plan();
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -148,7 +165,7 @@ describe("kế hoạch và giới hạn chi phí", () => {
 });
 
 describe("đối số và chế độ chạy", () => {
-  it("mặc định là chạy khô, giọng banmai + lannhi, tốc độ bình thường", () => {
+  it("mặc định là chạy khô, giọng Viettel Minh Quân (nam, miền Nam), tốc độ bình thường", () => {
     const parsed = parsePocArgs([]);
     expect(parsed.ok && parsed.options).toEqual(base);
     expect(decidePocMode(base, {})).toEqual({ mode: "dry", reason: "NOT_LIVE" });
@@ -165,8 +182,22 @@ describe("đối số và chế độ chạy", () => {
 
   it("--live đã xác nhận nhưng thiếu khóa → no_keys (CHƯA THỬ API THẬT), không gọi mạng", () => {
     const live = { ...base, live: true };
-    expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes" })).toEqual({ mode: "no_keys", missing: ["fpt"] });
-    expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes", [FPT_KEY_ENV]: "   " }).mode).toBe("no_keys");
+    expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes" })).toEqual({ mode: "no_keys", missing: ["viettel"] });
+    // Khóa của nhà khác không mở giọng Viettel; token rỗng/sai dạng (khoảng trắng, quá ngắn, ký tự lạ) coi như chưa có.
+    expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes", [FPT_KEY_ENV]: "khoa-fpt-1234" }).mode).toBe("no_keys");
+    for (const bad of [
+      "   ",
+      "ngan",
+      "co khoang trang 12345",
+      `ky-tu-la-${String.fromCharCode(233)}-12345`,
+      "a".repeat(600),
+    ]) {
+      expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes", [VIETTEL_KEY_ENV]: bad }).mode, bad).toBe("no_keys");
+    }
+    expect(decidePocMode(live, { [COST_CONFIRM_ENV]: "yes", [VIETTEL_KEY_ENV]: "token-gia-lap-12345" })).toMatchObject({
+      mode: "live",
+      voices: ["viettel-hcm-minhquan"],
+    });
   });
 
   it("chỉ chạy các giọng có khóa; giọng thiếu khóa bị bỏ qua", () => {
@@ -186,6 +217,9 @@ describe("đối số và chế độ chạy", () => {
       ["--max-requests", "0"],
       ["--max-requests", "abc"],
       ["--tat-ca"],
+      // Viettel chỉ lấy MP3: không âm thầm đổi định dạng (cả khi là giọng mặc định).
+      ["--format", "wav"],
+      ["--voices", "viettel-hcm-minhquan", "--format", "wav"],
     ]) {
       expect(parsePocArgs(argv).ok, argv.join(" ")).toBe(false);
     }

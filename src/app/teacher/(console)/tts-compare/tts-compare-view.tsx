@@ -26,6 +26,10 @@ const average = (values: readonly number[]): number =>
 export function TtsCompareView({ samples, problem }: TtsCompareViewProps) {
   const t = vi.ttsCompare;
   const voices = POC_VOICE_KEYS.map((key) => POC_VOICES[key]);
+  const sampleCount = new Map<string, number>();
+  for (const sample of samples) sampleCount.set(sample.voiceKey, (sampleCount.get(sample.voiceKey) ?? 0) + 1);
+  // Bảng ghi nhận chỉ có cột cho giọng đã có tệp để nghe; chưa có tệp nào thì hiện tất cả ứng viên.
+  const noteVoices = samples.length > 0 ? voices.filter((voice) => sampleCount.has(voice.key)) : voices;
   const groups = new Map<string, PocSample[]>();
   for (const sample of samples) {
     const key = `${sample.voiceKey}|${sample.speed}`;
@@ -65,8 +69,11 @@ export function TtsCompareView({ samples, problem }: TtsCompareViewProps) {
                 <th scope="col" className="py-2 pr-4">
                   {t.candidateColumns.gender}
                 </th>
-                <th scope="col" className="py-2">
+                <th scope="col" className="py-2 pr-4">
                   {t.candidateColumns.region}
+                </th>
+                <th scope="col" className="py-2">
+                  {t.candidateColumns.status}
                 </th>
               </tr>
             </thead>
@@ -76,12 +83,18 @@ export function TtsCompareView({ samples, problem }: TtsCompareViewProps) {
                   <td className="py-2 pr-4">{t.providers[voice.provider]}</td>
                   <td className="py-2 pr-4 font-semibold">{voice.providerVoice}</td>
                   <td className="py-2 pr-4">{t.genders[voice.gender]}</td>
-                  <td className="py-2">{t.regions[voice.region]}</td>
+                  <td className="py-2 pr-4">{t.regions[voice.region]}</td>
+                  <td className="py-2 text-ink-soft">
+                    {sampleCount.get(voice.key)
+                      ? fill(t.candidateStatus.hasSample, { n: String(sampleCount.get(voice.key)) })
+                      : t.candidateStatus.noSample}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-3 text-sm text-ink-soft">{t.candidatesNote}</p>
       </section>
 
       {samples.length > 0 ? (
@@ -205,7 +218,7 @@ export function TtsCompareView({ samples, problem }: TtsCompareViewProps) {
                 <th scope="col" className="py-2 pr-4">
                   <span className="sr-only">{t.notesTitle}</span>
                 </th>
-                {voices.map((voice) => (
+                {noteVoices.map((voice) => (
                   <th key={voice.key} scope="col" className="py-2 pr-4">
                     {voice.label}
                   </th>
@@ -218,7 +231,7 @@ export function TtsCompareView({ samples, problem }: TtsCompareViewProps) {
                   <th scope="row" className="py-2 pr-4 font-normal">
                     {criterion}
                   </th>
-                  {voices.map((voice) => (
+                  {noteVoices.map((voice) => (
                     <td key={voice.key} className="py-2 pr-4 text-ink-soft">
                       {t.notesPending}
                     </td>

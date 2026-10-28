@@ -36,7 +36,8 @@ export type RunPocParams = {
   /** Đồng hồ đơn điệu (ms) để đo thời gian tạo; truyền vào để kiểm thử không phụ thuộc giờ thật. */
   clock: () => number;
   nowIso: () => string;
-  timeoutMs: number;
+  /** Một số chung, hoặc thời gian chờ riêng cho từng nhà cung cấp (mỗi bên có độ trễ điển hình khác nhau). */
+  timeoutMs: number | Readonly<Record<PocProviderId, number>>;
 };
 
 export async function runPocJobs(params: RunPocParams): Promise<PocJobResult[]> {
@@ -62,7 +63,7 @@ export async function runPocJobs(params: RunPocParams): Promise<PocJobResult[]> 
       provider,
       request: { text: job.sentence.text, purpose: job.sentence.purpose, voiceKey: job.voice.key, speed: job.speed },
       budget,
-      timeoutMs,
+      timeoutMs: typeof timeoutMs === "number" ? timeoutMs : timeoutMs[job.voice.provider],
     });
     const latencyMs = Math.max(0, Math.round(clock() - started));
     if (!outcome.ok) {

@@ -72,16 +72,17 @@ Chỉ khi **tất cả** dưới đây đạt (mỗi mục cần bằng chứng,
 | Hạng mục | Tình trạng (sự thật) |
 |---|---|
 | Công cụ | `npm run tts:poc` (mặc định chạy khô) và trang giáo viên `/teacher/tts-compare` — [AUDIO_ENGINE §15](AUDIO_ENGINE.md) |
-| Giọng ứng viên | FPT.AI `banmai` (nữ Bắc), `lannhi` (nữ Nam), `thuminh` (nữ Bắc); Google `vi-VN-Neural2-A` (nữ), `vi-VN-Neural2-D` (nam). Azure: dự phòng, chưa có adapter |
-| Khóa API | **Chưa có** trong môi trường — **API thật chưa được gọi, chưa có giọng nào được nghe** |
-| Chạy thật cần | cờ `--live` + `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận quota/thanh toán) + khóa trong `.env.local`; tối đa 12 lần gọi / 600 ký tự mỗi lần chạy |
+| Giọng ứng viên | **Mặc định (P0b, chủ dự án chọn): Viettel AI `hcm-minhquan` (nam, miền Nam).** Đối chiếu: FPT.AI `banmai` (nữ Bắc), `lannhi` (nữ Nam), `thuminh` (nữ Bắc); Google `vi-VN-Neural2-A` (nữ), `vi-VN-Neural2-D` (nam). Azure: dự phòng, chưa có adapter. Vbee SG Minh Hoàng: **chưa tích hợp** (chưa xác minh được tài liệu API và mã giọng chính thức) |
+| Khóa API | **Chưa có** `TTS_VIETTEL_TOKEN` / `TTS_FPT_API_KEY` / `TTS_GOOGLE_API_KEY` — **API thật chưa được gọi, chưa có giọng nào được nghe** |
+| Giao thức Viettel | Lấy từ mã chạy của trang web Viettel AI vì trang tài liệu chính thức không đọc được bằng công cụ (AUDIO_ENGINE §15.9); phần giá, hạn mức, `without_filter`, dải tốc độ, trần ký tự trả phí **chưa xác minh** |
+| Chạy thật cần | cờ `--live` + `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận quota/thanh toán) + token/khóa trong `.env.local`; tối đa 12 lần gọi / 600 ký tự mỗi lần chạy (mặc định 6 lần / 219 ký tự) |
 | Tệp tạo ra | Chỉ ở `.tts-poc/` trên máy người vận hành (`.gitignore`); không Git, không Supabase, không Vercel — vì P6 chưa xác minh |
 
 **Cần người có thẩm quyền, qua kênh bảo mật:**
 
 | # | Việc | Ai | Trạng thái |
 |---|---|---|---|
-| N1 | Cấp khóa thử cho từng nhà cung cấp muốn nghe (không dán vào chat hay commit) | Chủ dự án | **Chưa cấp** |
+| N1 | Cấp khóa thử cho từng nhà cung cấp muốn nghe (không dán vào chat hay commit); với giọng nam miền Nam: **token Viettel AI** (`TTS_VIETTEL_TOKEN`) | Chủ dự án | **Chưa cấp** |
 | N2 | Xác nhận đã kiểm tra quota/thanh toán trước khi đặt `TTS_POC_COST_CONFIRMED=yes` (FPT.AI: gói miễn phí theo trang giá cần xác minh trực tiếp; Google: bắt buộc bật thanh toán) | Chủ dự án | **Chưa xác nhận** |
 | N3 | Xác minh điều khoản **lưu lâu dài/phân phối lại** tệp (P6) và **lưu văn bản gửi đi** (P7) của nhà cung cấp trước khi đưa tệp vào Git/Storage | Chủ dự án | **Chưa xác minh** |
-| N4 | Nghe tệp trên `/teacher/tts-compare`, ghi nhận theo 7 tiêu chí, rồi quyết định G1–G3 | Giáo viên | **Chưa nghe** |
+| N4 | Nghe tệp trên `/teacher/tts-compare`, ghi nhận theo 8 tiêu chí, rồi quyết định G1–G3 | Giáo viên | **Chưa nghe** |

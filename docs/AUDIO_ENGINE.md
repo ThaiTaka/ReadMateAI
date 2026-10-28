@@ -427,11 +427,13 @@ Mong muốn của chủ dự án: học sinh ghép **"bà"** → máy đọc **"
 6. Cần: bảng quy tắc đánh vần (dữ liệu trong `content/`, `pending_review`), danh mục đoạn âm thanh, thử nghiệm với giáo viên trước khi mở cho học sinh.
 
 
-## 15. R10.3b2-P0 — Công cụ nghe thử giọng AI tiếng Việt (adapter FPT.AI + so sánh giọng) — CHƯA THỬ API THẬT
+## 15. R10.3b2-P0 / P0b — Công cụ nghe thử giọng AI tiếng Việt (adapter Viettel AI + FPT.AI + so sánh giọng) — CHƯA THỬ API THẬT
+
+> **P0b (2026-10-28):** chủ dự án chọn **giọng nam miền Nam** để nghe thử → thêm adapter **Viettel AI** (`hcm-minhquan`) và đặt làm giọng mặc định của `npm run tts:poc`. Xem §15.9 (nguồn giao thức, phần chưa xác minh). Các đoạn dưới về FPT.AI/Google giữ nguyên làm đối chiếu.
 
 > **Phạm vi:** một POC giới hạn để **giáo viên nghe và so sánh** giọng AI tiếng Việt. **Không** phải R10.3b2 đầy đủ: không bảng/migration TTS, không Storage, không đường phát cho học sinh, không cờ phát nào được bật, không bản ghi `approved` từ tệp AI, không R10.4. **Việc cho phép nghe thử không phải là cho phép bật thanh toán, phát hành nội dung hay mở cho học sinh thật.**
 >
-> **Trạng thái trung thực (2026-10-28): CHƯA THỬ API THẬT.** Chưa có khóa API nào được cấp cho dự án (`.env.local` không có `TTS_FPT_API_KEY` / `TTS_GOOGLE_API_KEY`), nên **chưa gọi API nào, chưa có tệp âm thanh nào, chưa giọng nào được nghe**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Giao thức FPT.AI bên dưới được viết theo tài liệu chính thức, **chưa được kiểm chứng bằng phản hồi thật** (xem §15.7).
+> **Trạng thái trung thực (2026-10-28): CHƯA THỬ API THẬT.** Chưa có khóa API nào được cấp cho dự án (`.env.local` không có `TTS_VIETTEL_TOKEN` / `TTS_FPT_API_KEY` / `TTS_GOOGLE_API_KEY`), nên **chưa gọi API nào, chưa có tệp âm thanh nào, chưa giọng nào được nghe**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Giao thức FPT.AI bên dưới được viết theo tài liệu chính thức, **chưa được kiểm chứng bằng phản hồi thật** (xem §15.7).
 
 ### 15.1 Đối chiếu tài liệu chính thức (2026-10-28)
 
@@ -452,6 +454,8 @@ Mong muốn của chủ dự án: học sinh ghép **"bà"** → máy đọc **"
 | Tệp | Vai trò |
 |---|---|
 | `src/server/tts/fpt-provider.ts` | Adapter `TtsProvider` cho FPT.AI v5 (`id: "fpt"`): `POST` → lấy liên kết `async` → kiểm tra liên kết (`checkFptAudioUrl`) → hỏi lại có giới hạn → đọc tệp có giới hạn dung lượng |
+| `src/server/tts/viettel-provider.ts` | Adapter `TtsProvider` cho Viettel AI (`id: "viettel"`): một `POST` JSON, token ở tiêu đề `token`, nhận byte MP3 trực tiếp; không đọc thân lỗi, không tin HTTP 200 (§15.9) |
+| `src/server/tts/read-capped.ts` | Đọc thân phản hồi có trần dung lượng, dùng chung cho FPT và Viettel |
 | `src/server/tts/providers.ts` | Adapter Google giữ nguyên; thêm khóa giọng nghe thử `google-neural2-a/d` và tùy chọn `wav` (LINEAR16) |
 | `src/server/tts/poc/voices.ts` | Giọng ứng viên (nhà cung cấp, tên giọng, giới tính, vùng miền) — **không phải quyết định chọn giọng** |
 | `src/server/tts/poc/sentences.ts` | 6 câu lấy từ 34 lời đọc của danh mục (2 lời khen/nhắc ngắn, 1 nhắc dài, 3 câu hướng dẫn gồm câu dài nhất 60 ký tự) + 1 câu chẩn đoán `bà, bá, mẹ, nhà` |
@@ -474,7 +478,7 @@ npm run tts:poc -- --live --set diagnostic --voices fpt-banmai,fpt-lannhi
 
 Gọi API thật khi và chỉ khi **cả ba**: cờ `--live`; biến `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận đã kiểm tra quota/thanh toán của nhà cung cấp — công cụ **không tự kiểm tra** quota hay thanh toán, chỉ chặn nếu chưa xác nhận); khóa của nhà cung cấp tương ứng trong môi trường máy chủ (`TTS_FPT_API_KEY`, `TTS_GOOGLE_API_KEY` — `.env.local`, không commit). Thiếu điều kiện nào → thoát mã 3 với dòng **"CHƯA THỬ API THẬT"** và không gọi mạng. Khóa không bao giờ được in, ghi log, ghi vào sổ hay gửi tới trình duyệt.
 
-Giọng mặc định: `fpt-banmai`, `fpt-lannhi`. Có thể chọn `fpt-thuminh`, `google-neural2-a`, `google-neural2-d` bằng `--voices` (tối đa hai giọng trong một lần chạy mặc định vì giới hạn dưới). Tốc độ: `--speed normal` (FPT `0`, Google `1.0`) hoặc `slow` (FPT `-1`, Google `0.8`) — **"chậm vừa phải" chỉ là giá trị thử, chưa phải quyết định G3**. Định dạng `--format mp3|wav`.
+Giọng mặc định (từ P0b): `viettel-hcm-minhquan` (Viettel AI Minh Quân, nam, miền Nam; khóa `TTS_VIETTEL_TOKEN`). Các giọng cũ vẫn dùng để đối chiếu bằng `--voices`: `fpt-banmai`, `fpt-lannhi`, `fpt-thuminh`, `google-neural2-a`, `google-neural2-d` (tối đa hai giọng cho 6 câu trong một lần chạy vì giới hạn dưới; mặc định chỉ 1 giọng = 6 lần gọi, 219 ký tự). Giọng Viettel chỉ lấy MP3: `--format wav` với giọng Viettel bị từ chối ngay lúc đọc đối số. Tốc độ: `--speed normal` (FPT `0`, Google `1.0`) hoặc `slow` (FPT `-1`, Google `0.8`) — **"chậm vừa phải" chỉ là giá trị thử, chưa phải quyết định G3**. Định dạng `--format mp3|wav`.
 
 ### 15.4 Giới hạn chi phí và an toàn (kiểm thử bằng unit test)
 
@@ -495,7 +499,7 @@ Giọng mặc định: `fpt-banmai`, `fpt-lannhi`. Có thể chọn `fpt-thuminh
 
 ### 15.6 Trang `/teacher/tts-compare`
 
-Chỉ giáo viên (`requireTeacher`; route phát tệp từ chối thiết bị học sinh), chỉ đọc, luôn có khung **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**. Hiện danh sách giọng ứng viên (nhà cung cấp, vùng miền, giới tính), từng câu với các tệp nghe A/B (`<audio controls preload="none">`, chỉ một đoạn phát tại một thời điểm, phát qua `/api/teacher/tts-poc/…` — **không** từ địa chỉ nhà cung cấp), số liệu đo được (thời gian tạo, dung lượng, thời lượng; chi phí thực tế ghi "Chưa có số liệu") và bảng ghi nhận khi nghe 7 tiêu chí (dấu thanh, phụ âm/nguyên âm, mức tự nhiên, dễ nghe với học sinh lớp 1, tốc độ và ngắt, câu dài, chất lượng trên trình duyệt). **Không có nút duyệt/chọn giọng, không biểu mẫu, không lưu nhận xét.** Khi chưa có tệp, trang nói rõ chưa gọi API thật.
+Chỉ giáo viên (`requireTeacher`; route phát tệp từ chối thiết bị học sinh), chỉ đọc, luôn có khung **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**. Hiện danh sách giọng ứng viên (nhà cung cấp, vùng miền, giới tính), từng câu với các tệp nghe A/B (`<audio controls preload="none">`, chỉ một đoạn phát tại một thời điểm, phát qua `/api/teacher/tts-poc/…` — **không** từ địa chỉ nhà cung cấp), số liệu đo được (thời gian tạo, dung lượng, thời lượng; chi phí thực tế ghi "Chưa có số liệu") và bảng ghi nhận khi nghe 8 tiêu chí (dấu thanh, phụ âm/nguyên âm, phát âm vùng miền [thêm ở P0b], mức tự nhiên, dễ nghe với học sinh lớp 1, tốc độ và ngắt, câu dài, chất lượng trên trình duyệt). **Không có nút duyệt/chọn giọng, không biểu mẫu, không lưu nhận xét.** Khi chưa có tệp, trang nói rõ chưa gọi API thật.
 
 ### 15.7 Việc CHƯA làm / còn chờ
 
@@ -504,6 +508,39 @@ Chỉ giáo viên (`requireTeacher`; route phát tệp từ chối thiết bị 
 - **Giáo viên cần:** nghe và quyết định giọng (G1–G3), duyệt lời đọc (G4–G7) và từng tệp (G8). Không có mục nào tự động; không giọng nào được coi là đạt chuẩn.
 - Chưa so sánh FPT AI Factory Voice Studio, Azure, hay Chirp 3 HD của Google.
 - Chưa kiểm tra phát trên iPhone/Safari và Android thật (điều kiện C4).
+
+### 15.9 P0b — Viettel AI Minh Quân (giọng nam miền Nam) — CHƯA GỌI API THẬT, CHƯA NGHE GIỌNG THẬT
+
+**Trạng thái trung thực (2026-10-28):** chưa có `TTS_VIETTEL_TOKEN` → **chưa gọi API Viettel, chưa có tệp âm thanh, chưa nghe giọng nào**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Không tạo tài khoản, không bật thanh toán.
+
+**Nguồn giao thức — nói rõ giới hạn.** Trang tài liệu chính thức `viettelai.vn/en/tai-lieu` là ứng dụng Nuxt dựng bằng JavaScript; công cụ tải trang chỉ thấy tiêu đề, và `viettelgroup.ai` (trang đặc tả cũ) không truy cập được từ máy phát triển. Vì vậy **không đọc được trang đặc tả chính thức**. Các điểm dưới đây lấy từ **mã chạy của chính trang web Viettel AI** (phần "trải nghiệm TTS" trong gói JavaScript do `viettelai.vn` phục vụ, đối chiếu 2026-10-28) — tức cách khách hàng chính thức của dịch vụ gọi API — cộng một nguồn thứ ba chỉ để tham khảo:
+
+| Điểm | Giá trị dùng | Mức xác minh |
+|---|---|---|
+| Endpoint | `POST https://viettelai.vn/tts/speech_synthesis` | Mã chạy của trang Viettel AI (nhiều thành phần cùng dùng) |
+| Xác thực | tiêu đề `token: <token>` (+ `Content-Type: application/json`) | Mã chạy của trang Viettel AI |
+| Thân | `{ speed, voice, text, tts_return_option: 3, without_filter: false }` | Mã chạy của trang Viettel AI |
+| Mã giọng | `hcm-minhquan` | Có trong mã chạy của trang (câu mẫu của giọng này); ví dụ khác lấy `hcm-diemmy`. Giới tính **nam** và vùng **miền Nam** theo tiền tố `hcm` và mô tả sản phẩm — **giáo viên nghe để xác nhận** |
+| Phản hồi | byte âm thanh (mã chạy đặt tên `audio.mp3`); lỗi là JSON (`vi_message`/`en_message`); `429` = hết lượt dùng thử | Mã chạy của trang |
+| Tốc độ | `normal` = 1, `slow` = 0,9 (một bước chậm hơn) | Giao diện thử chỉ cho 0,8–1,2 bước 0,1; dải của API trả phí **chưa xác minh**; "chậm vừa" **chưa phải quyết định G3** |
+| Định dạng | chỉ MP3 (`tts_return_option` = 3) | Mã chạy chỉ dùng 3; nguồn thứ ba nêu 1 = luồng, 2 = wav, 3 = mp3 — **không dựa vào 1, 2** |
+| Trần ký tự | 300 | Là trần của giao diện thử; API trả phí **chưa xác minh** |
+| `without_filter` | luôn `false` | Ý nghĩa chính thức **chưa xác minh** |
+| Giá, hạn mức, điều khoản lưu/phân phối tệp (P6), lưu văn bản gửi đi (P7) | — | **Chưa xác minh**; việc nghe thử không thay xác nhận của chủ dự án |
+
+**Phòng vệ vì giao thức chưa được đặc tả đầy đủ** (đều có unit test):
+
+- Không tin HTTP 200: nhãn `application/json` → `API_ERROR`; nhãn không phải âm thanh → `BAD_RESPONSE`; thân rỗng → `EMPTY_AUDIO`; byte đầu giống JSON/HTML → `API_ERROR`; rồi mọi tệp vẫn qua `checkSynthesizedAudio` (nhận dạng MP3 **theo nội dung**, thời lượng ≥ 300 ms, MIME khớp) trước khi lưu.
+- Lỗi HTTP: `401/403` → `HTTP_UNAUTHORIZED`, `429` → `HTTP_RATE_LIMITED`, còn lại `HTTP_ERROR`; **thân phản hồi lỗi không được đọc hay đưa vào chẩn đoán** (nhà cung cấp có thể phản hồi lại nội dung).
+- Trần dung lượng 2 MB (cả `content-length` khai báo lẫn byte thực), `redirect: "error"`, một lần gọi cho mỗi yêu cầu (không hỏi lại, không retry), thời gian chờ 30 giây (`VIETTEL_SUGGESTED_TIMEOUT_MS`; công cụ dòng lệnh dùng thời gian chờ riêng cho từng nhà cung cấp) — treo giữa lúc kết nối hoặc giữa lúc đọc thân đều → `TIMEOUT`.
+- Token: chỉ ở tiêu đề `token`; không ở URL, thân, log, chẩn đoán, sổ hay lỗi; kiểm tra dạng (ASCII in được, không khoảng trắng, 8–512 ký tự — sai dạng coi như chưa có, không in giá trị) nhưng **không chứng minh còn hiệu lực**. Chỉ `service.ts` (`TTS_PROVIDER=viettel`) và `poc/options.ts` đọc tên biến này; không có tiền tố `NEXT_PUBLIC_` (bộ quét).
+- Giữ nguyên giới hạn: tối đa **12 lần gọi và 600 ký tự mỗi lần chạy**; mặc định 6 lần gọi / 219 ký tự; dừng nhà cung cấp sau 2 lỗi liên tiếp.
+
+**Cách chạy thật (khi chủ dự án sẵn sàng):** đặt `TTS_VIETTEL_TOKEN=<token>` trong `.env.local` (không commit, không dán vào chat), xác nhận quota/chi phí rồi đặt `TTS_POC_COST_CONFIRMED=yes`, chạy `npm run tts:poc -- --live`. Quan sát dòng `[Viettel] <mã>` nếu có lỗi; mã `HTTP_UNAUTHORIZED` nghĩa là token sai/hết hạn, `HTTP_RATE_LIMITED` là hết lượt. Kết quả thật đầu tiên có thể cho thấy tham số cần chỉnh (ví dụ dải `speed`) — chỉnh có chủ đích rồi cập nhật bảng trên, không nới tự động.
+
+**Tách biệt:** TTS vẫn hoàn toàn tách khỏi bản ghi giáo viên — không chạm `audio_assets`, `audio_asset_versions`, bucket `teacher-audio`, quy trình đồng ý ghi âm, và các cờ `student_teacher_audio_playback_approved`, `teacher_audio_recording_approved` (vẫn TẮT; bộ quét `safety-scan` kiểm: mã TTS và `scripts/tts-poc.ts` không nhắc các tên đó). Tệp nghe thử chỉ ở `.tts-poc/`.
+
+**Trang `/teacher/tts-compare`:** thêm hàng Viettel AI (nam, miền Nam), cột **"Tình trạng nghe thử"** (chưa có tệp / có N tệp — chờ giáo viên nghe, chưa quyết định), ghi chú về mức xác minh giao thức, và tiêu chí thứ 2 trong bảng ghi nhận về **phát âm vùng miền** (r/d/gi, tr/ch, hỏi/ngã — người miền Nam hay lẫn các cặp này, trong khi bài học phân biệt chúng). Khi đã có tệp, bảng ghi nhận chỉ giữ cột của giọng đã có tệp. Vẫn **không** có nút duyệt/chọn giọng và không lưu nhận xét; không giọng nào được đánh dấu đã duyệt.
 
 ### 15.8 Kiểm thử
 

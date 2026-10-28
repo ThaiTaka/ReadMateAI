@@ -105,8 +105,39 @@ describe("trang so sánh giọng AI (chỉ giáo viên, chỉ nghe)", () => {
   it("liệt kê đủ giọng đang thử với nhà cung cấp, vùng miền", () => {
     render(<TtsCompareView samples={[]} problem="MISSING" />);
     expect(screen.getAllByRole("table").length).toBeGreaterThanOrEqual(2);
-    for (const voice of ["banmai", "lannhi", "thuminh", "vi-VN-Neural2-A", "vi-VN-Neural2-D"]) {
+    for (const voice of ["hcm-minhquan", "banmai", "lannhi", "thuminh", "vi-VN-Neural2-A", "vi-VN-Neural2-D"]) {
       expect(screen.getByText(voice)).toBeInTheDocument();
     }
+  });
+
+  it("Viettel Minh Quân: hiện nam, miền Nam; chưa có tệp thì nói chưa nghe; có tệp thì cho nghe nhưng không ghi 'đã duyệt'", () => {
+    const { container, rerender } = render(<TtsCompareView samples={[]} problem="MISSING" />);
+    const row = screen.getByText("hcm-minhquan").closest("tr")!;
+    expect(within(row).getByText("Viettel AI")).toBeInTheDocument();
+    // Cột giới tính và vùng miền đều ghi "Nam" (nam, miền Nam).
+    expect(within(row).getAllByText(t.regions.south)).toHaveLength(2);
+    expect(within(row).getByText(t.candidateStatus.noSample)).toBeInTheDocument();
+    expect(container.textContent).toContain("chưa được kiểm chứng bằng token thật");
+
+    const viettel = sample(7, {
+      provider: "viettel",
+      voiceKey: "viettel-hcm-minhquan",
+      providerVoice: "hcm-minhquan",
+    });
+    rerender(<TtsCompareView samples={[viettel]} problem="NONE" />);
+    const audios = container.querySelectorAll("audio");
+    expect(audios).toHaveLength(1);
+    expect(audios[0]!.getAttribute("src")).toMatch(/^\/api\/teacher\/tts-poc\/[0-9a-f]{64}\.mp3$/u);
+    const article = screen.getByRole("article", { name: POC_CATALOG_SENTENCES[0]!.id });
+    expect(
+      within(article).getByText(/Viettel AI Minh Quân \(nam, miền Nam\) · Tốc độ bình thường/u),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Có 1 tệp để nghe/u)).toBeInTheDocument();
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(container.textContent ?? "").not.toMatch(/đã duyệt/iu);
+    // Bảng ghi nhận chỉ còn cột của giọng đã có tệp, mọi ô vẫn là "Chưa nghe".
+    const notes = screen.getByRole("heading", { name: t.notesTitle }).closest("section")!;
+    expect(within(notes).getAllByRole("columnheader")).toHaveLength(2);
+    expect(within(notes).getAllByText(t.notesPending)).toHaveLength(t.criteria.length);
   });
 });

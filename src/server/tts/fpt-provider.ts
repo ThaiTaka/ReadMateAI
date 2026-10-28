@@ -1,4 +1,5 @@
 import { POC_VOICES, type PocVoiceKey } from "./poc/voices.ts";
+import { readCapped } from "./read-capped.ts";
 import type { SynthesizeOptions, TtsAudio, TtsOutcome, TtsProvider } from "./types.ts";
 
 /**
@@ -101,35 +102,6 @@ function abortError(): Error {
 
 /** Chờ tăng dần 2 → 6 giây: 24 lần ≈ 2 phút 14 giây, đủ khoảng chờ tối đa mà tài liệu nêu. */
 const pollDelayMs = (attempt: number): number => Math.min(2000 + attempt * 1000, 6000);
-
-async function readCapped(response: Response, limit: number): Promise<Uint8Array | "TOO_LARGE"> {
-  const declared = Number(response.headers.get("content-length"));
-  if (Number.isFinite(declared) && declared > limit) return "TOO_LARGE";
-  if (!response.body) {
-    const buffer = new Uint8Array(await response.arrayBuffer());
-    return buffer.byteLength > limit ? "TOO_LARGE" : buffer;
-  }
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    total += value.byteLength;
-    if (total > limit) {
-      await reader.cancel();
-      return "TOO_LARGE";
-    }
-    chunks.push(value);
-  }
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return out;
-}
 
 const isAbort = (error: unknown): boolean => error instanceof Error && error.name === "AbortError";
 
