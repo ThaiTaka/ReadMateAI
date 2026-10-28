@@ -283,4 +283,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-27 | R10.2 | Thư viện bản ghi giáo viên: `/teacher/audio`, migration `20261031090000` (audio_assets/versions/consents + 11 hàm + trigger bất biến + cờ TẮT), Storage riêng tư `teacher-audio`, micro chỉ ở trang này, kiểm tra tệp theo nội dung, quy trình duyệt, tài liệu; test unit/pgTAP/DB/E2E bằng dữ liệu giả; CI chờ. Không bản ghi thật/duyệt thật; không TTS; không làm R10.3 |
 
 | 2026-10-27 | R10.3a | Phát bản ghi giáo viên đã duyệt cho học sinh (bài nghe âm), cờ TẮT, kiểm thử bằng sóng tổng hợp; R10.3 chưa nghiệm thu (xem REDESIGN_PROGRESS §5u) |
-| 2026-10-28 | R10.3a | Nghiệm thu CI/E2E R10.3a: sửa kiểm thử, `0872310` CI + E2E push/PR xanh; lỗi chập chờn R08.4 webkit-mobile chưa rõ nguyên nhân gốc (xem REDESIGN_PROGRESS §5u) |
+| 2026-10-28 | R10.3a | Nghiệm thu CI/E2E R10.3a: sửa kiểm thử, `c6b98fa` CI + E2E push/PR xanh; lỗi chập chờn R08.4/R08.6 webkit-mobile (trang không hydrate) chưa rõ nguyên nhân gốc, đã gắn chẩn đoán (xem REDESIGN_PROGRESS §5u) |
