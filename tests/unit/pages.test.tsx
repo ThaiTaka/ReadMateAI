@@ -10,15 +10,16 @@ import { EXERCISE_TYPES } from "@/features/exercises/catalog";
 import { GAME_WORLDS } from "@/features/game-world/catalog";
 
 describe("Trang chủ / (định hướng R02)", () => {
-  it("thông điệp chính, thông điệp phụ, nút Khám phá ReadMate và Chơi thử", () => {
+  it("thông điệp chính, thông điệp phụ, nút Vào trang của con (khu vực học sinh thật) và Chơi thử", () => {
     render(<HomePage />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "ReadMate AI – Học Tiếng Việt, khám phá thế giới kỳ diệu",
     );
     expect(screen.getByText("Tự luyện mỗi ngày – Tích điểm, mở khóa và phiêu lưu cùng tri thức")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Khám phá ReadMate/ })).toHaveAttribute("href", "/learn");
+    expect(screen.getByRole("link", { name: /Vào trang của con/ })).toHaveAttribute("href", "/learn/me");
     expect(screen.getAllByRole("link", { name: /Chơi thử/ })[0]).toHaveAttribute("href", "/demo");
-    expect(screen.getAllByText("Bản xem trước").length).toBeGreaterThan(0);
+    // Trang giới thiệu không còn gắn nhãn "Bản xem trước" lên cả sản phẩm; bản chơi thử tự ghi rõ là dữ liệu minh họa.
+    expect(screen.queryByText("Bản xem trước")).toBeNull();
   });
 
   it("ba bước: luyện tại nhà → tích điểm → mở khóa phiêu lưu", () => {
@@ -29,24 +30,28 @@ describe("Trang chủ / (định hướng R02)", () => {
     }
   });
 
-  it("giới thiệu đủ ba lộ trình và bốn mini-game kèm ngưỡng điểm, ghi rõ đang phát triển", () => {
+  it("giới thiệu đủ ba lộ trình và bốn mini-game kèm ngưỡng điểm: Mê cung chơi được, ba game còn lại chưa phát hành", () => {
     render(<HomePage />);
     const paths = screen.getByRole("region", { name: "Mỗi con một lộ trình phù hợp" });
     for (const name of ["Khởi động", "Vững bước", "Tăng tốc"]) {
       expect(within(paths).getByRole("heading", { name })).toBeInTheDocument();
     }
-    const games = screen.getByRole("region", { name: "Bốn vùng đất đang chờ con" });
+    const games = screen.getByRole("region", { name: "Những vùng đất phiêu lưu" });
     for (const game of GAME_WORLDS) {
       expect(within(games).getByRole("heading", { name: game.name })).toBeInTheDocument();
       expect(within(games).getByText(`Mở khi có ${game.minBalance} điểm`)).toBeInTheDocument();
     }
-    expect(within(games).getAllByText("Đang phát triển")).toHaveLength(4);
+    expect(within(games).getAllByText("Chơi được")).toHaveLength(1);
+    expect(within(games).getAllByText("Chưa phát hành")).toHaveLength(3);
   });
 
-  it("đánh dấu năm công cụ giáo viên là dự kiến, không quảng cáo như đã có", () => {
+  it("năm công cụ giáo viên ghi đúng tình trạng thật: hai mục đang phát triển, hai mục đã có nhưng mặc định tắt, một mục đã có", () => {
     render(<HomePage />);
-    const teachers = screen.getByRole("region", { name: "Công cụ dự kiến cho giáo viên" });
-    expect(within(teachers).getAllByText("Dự kiến")).toHaveLength(5);
+    const teachers = screen.getByRole("region", { name: "Công cụ cho giáo viên" });
+    expect(within(teachers).getAllByText("Đang phát triển")).toHaveLength(2);
+    expect(within(teachers).getAllByText("Đã có — mặc định tắt")).toHaveLength(2);
+    expect(within(teachers).getAllByText("Đã có")).toHaveLength(1);
+    expect(within(teachers).queryByText("Dự kiến")).toBeNull();
     for (const name of ["Bảng xếp hạng trong lớp", "Vinh danh TOP 3", "Tổ chức mùa thi đua mới"]) {
       expect(within(teachers).getByRole("heading", { name })).toBeInTheDocument();
     }

@@ -43,7 +43,7 @@ test.describe("Game World trên /learn (dữ liệu minh họa)", () => {
     expect(pageErrors).toEqual([]);
   });
 
-  test("Xem chi tiết mở bảng thông tin thật; Vào chơi bị khóa và ghi Sắp có; Esc đóng, focus trở lại nút", async ({
+  test("Xem chi tiết mở bảng thông tin thật; Mê cung có bản thử không tính điểm, game chưa làm chỉ ghi Chưa phát hành; Esc đóng, focus trở lại nút", async ({
     page,
   }) => {
     await page.goto("/learn");
@@ -52,9 +52,16 @@ test.describe("Game World trên /learn (dữ liệu minh họa)", () => {
       await trigger.click();
       const dialog = page.getByRole("dialog", { name: game.name });
       await expect(dialog).toBeVisible();
-      const play = dialog.getByRole("button", { name: /Vào chơi – Sắp có/ });
-      await expect(play).toBeDisabled();
-      await expect(dialog.getByText(/Trò chơi đang được xây dựng/)).toBeVisible();
+      // Không còn nút giả "Vào chơi – Sắp có" và không còn "dự kiến"/"đang được xây dựng" trong bảng thông tin.
+      await expect(dialog.getByRole("button", { name: /Vào chơi/ })).toHaveCount(0);
+      await expect(dialog).not.toContainText(/Sắp có|dự kiến|đang được xây dựng/iu);
+      if (game.name === "Mê cung kho báu") {
+        const demo = dialog.getByRole("link", { name: "Chơi bản thử (không tính điểm)" });
+        await expect(demo).toHaveAttribute("href", "/demo/treasure-maze");
+      } else {
+        await expect(dialog.getByRole("link")).toHaveCount(0);
+        await expect(dialog.getByText("Trò chơi này chưa phát hành nên chưa có nút vào chơi.")).toBeVisible();
+      }
       await page.keyboard.press("Escape");
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();

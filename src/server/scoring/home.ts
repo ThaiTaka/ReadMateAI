@@ -1,4 +1,7 @@
 import "server-only";
+import { BUNDLED_LEVEL_FILES } from "@/features/game-engine/levels/bundled";
+import { mazeEntry, type MazeRunSummary } from "@/features/game-runs/entry";
+import { TREASURE_MAZE_KEY } from "@/features/game-runs/dto";
 import {
   MAP_TILE_COUNT,
   WORLD_MAP_KEY,
@@ -108,6 +111,7 @@ export async function getStudentHome(context: StudentContext, student: LinkedStu
 
   const score = consent && state ? state.score : { balance: 0, earnedTotal: 0 };
   const revealed = consent && state ? state.revealed : [];
+  const activity = consent && state ? await seasonActivity(admin, student.id, state.season.id) : null;
   return ok({
     student: { displayName: student.displayName, avatarKey: student.avatarKey, className: student.className },
     season: state ? { seqNo: state.season.seq_no } : null,
@@ -119,7 +123,52 @@ export async function getStudentHome(context: StudentContext, student: LinkedStu
       discovered: Boolean(consent && state?.discovered.has(game.game)),
     })),
     practice: { blocker, openSession },
+    learning: activity?.learning ?? { sessionsDone: 0, correctAnswers: 0 },
+    maze: mazeEntry(
+      BUNDLED_LEVEL_FILES.map((file) => file.id),
+      activity?.mazeRuns ?? [],
+      state?.season.id ?? null,
+    ),
   });
+}
+
+/**
+ * Những gì học sinh đã làm TRONG MÙA hiện tại (chỉ của chính em): số buổi luyện đã xong, số câu đúng, các lượt Mê cung.
+ * Dùng để hiện tiến độ học và chọn nhãn nút vào Mê cung — không phải điểm, không dùng để xếp hạng.
+ */
+async function seasonActivity(admin: AppSupabaseClient, studentId: string, seasonId: string) {
+  const [sessions, correct, runs] = await Promise.all([
+    admin
+      .from("practice_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", studentId)
+      .eq("season_id", seasonId)
+      .eq("status", "completed"),
+    admin
+      .from("question_instances")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", studentId)
+      .eq("season_id", seasonId)
+      .eq("context_kind", "practice_session")
+      .eq("status", "correct"),
+    admin
+      .from("game_runs")
+      .select("level_key, status, scored, season_id")
+      .eq("student_id", studentId)
+      .eq("game_key", TREASURE_MAZE_KEY)
+      .eq("season_id", seasonId)
+      .in("status", ["in_progress", "completed"]),
+  ]);
+  const mazeRuns: MazeRunSummary[] = (runs.data ?? []).map((run) => ({
+    levelKey: run.level_key,
+    status: run.status,
+    scored: run.scored,
+    seasonId: run.season_id,
+  }));
+  return {
+    learning: { sessionsDone: sessions.count ?? 0, correctAnswers: correct.count ?? 0 },
+    mazeRuns,
+  };
 }
 
 /**

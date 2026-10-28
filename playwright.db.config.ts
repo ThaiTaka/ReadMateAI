@@ -35,7 +35,9 @@ export default defineConfig({
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${PORT}`,
     url: BASE_URL,
     timeout: 240_000,
-    reuseExistingServer: false,
+    // Mặc định luôn dựng bản build mới (CI). Đặt E2E_REUSE_SERVER=1 khi đã tự chạy `npm run start` ở cổng 3200 để
+    // lặp nhiều lần mà không build lại (dùng khi chẩn đoán lỗi chập chờn).
+    reuseExistingServer: process.env.E2E_REUSE_SERVER === "1",
     stdout: "ignore",
     stderr: "pipe",
     env: { NEXT_TELEMETRY_DISABLED: "1", NEXT_PUBLIC_SITE_URL: BASE_URL },

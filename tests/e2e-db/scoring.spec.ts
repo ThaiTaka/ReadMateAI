@@ -172,6 +172,13 @@ test.describe("R04 — luyện có điểm, bản đồ, điều kiện mini-gam
     await expect(page.getByTestId("score-balance")).toHaveText("0");
     await expect(page.getByText("Đã khám phá 0/8 ô")).toBeVisible();
     await expect(page.locator("#me-game-treasure_maze")).toContainText("Cần thêm 50 điểm");
+    // Chưa đủ điểm: thẻ Mê cung không có nút vào chơi (không nút giả); hai khu vực Học tập / Thi đấu tách bạch.
+    await expect(page.getByTestId("me-game-treasure_maze-play")).toHaveCount(0);
+    await expect(page.locator('[data-zone="learn"]').getByRole("heading", { level: 2, name: "Học tập" })).toBeVisible();
+    await expect(
+      page.locator('[data-zone="compete"]').getByRole("heading", { level: 2, name: "Thi đấu" }),
+    ).toBeVisible();
+    await expect(page.getByTestId("learning-sessions")).toHaveText("0");
     await noHorizontalScroll(page);
     await axeClean(page);
 
@@ -243,7 +250,7 @@ test.describe("R04 — luyện có điểm, bản đồ, điều kiện mini-gam
     await expect(mapArea.getByText("Đã khám phá 2/8 ô")).toBeVisible();
     await expect(mapArea.getByText("Luyện thêm để có lượt khám phá mới nhé.")).toBeVisible();
 
-    // Tải lại: điểm và thẻ vẫn giữ; Mê cung đủ điều kiện nhưng mini-game chưa chơi được (không có route game).
+    // Tải lại: điểm và thẻ vẫn giữ; Mê cung đủ điều kiện và có nút vào chơi THẬT; game chưa phát hành không có thẻ.
     await page.reload();
     await expect(page.getByTestId("score-balance")).toHaveText("55");
     await expect(page.getByText("Đã khám phá 2/8 ô")).toBeVisible();
@@ -251,16 +258,28 @@ test.describe("R04 — luyện có điểm, bản đồ, điều kiện mini-gam
     const maze = page.locator("#me-game-treasure_maze");
     await expect(maze).toContainText("Đủ điểm");
     await expect(maze).toContainText("Đã khám phá");
-    await expect(page.locator("#me-game-wonder_forest")).toContainText("Cần thêm 65 điểm");
+    for (const key of ["wonder_forest", "tone_island", "rhyme_castle"]) {
+      await expect(page.locator(`#me-game-${key}`)).toHaveCount(0);
+    }
+    const play = page.getByTestId("me-game-treasure_maze-play");
+    await expect(play).toBeVisible();
+    await expect(play).toHaveText("Vào mê cung");
+    await expect(play).toHaveAttribute("href", "/learn/me/games/treasure-maze");
+    expect((await play.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(63.5);
     await maze.getByRole("button", { name: /Xem chi tiết/u }).click();
-    await expect(page.getByRole("dialog").getByRole("button", { name: "Mini-game đang phát triển" })).toBeDisabled();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("link", { name: "Vào mê cung" })).toHaveAttribute(
+      "href",
+      "/learn/me/games/treasure-maze",
+    );
+    await expect(dialog).not.toContainText(/Sắp có|dự kiến|đang được xây dựng|đang phát triển/iu);
     await page.keyboard.press("Escape");
-    // Chỉ còn đúng một đường vào game có thật: Mê cung kho báu có xác thực (R07.5b2); ba game kia không có liên kết.
-    expect(
-      await page
-        .locator('a[href*="/games"]')
-        .evaluateAll((links) => links.map((a) => a.getAttribute("href")?.split("?")[0])),
-    ).toEqual(["/learn/me/games/treasure-maze"]);
+    // Chỉ còn đúng một đích vào game có thật: Mê cung kho báu có xác thực (R07.5b2) — ở thẻ và trong bảng thông tin.
+    const targets = await page
+      .locator('a[href*="/games"]')
+      .evaluateAll((links) => links.map((a) => a.getAttribute("href")?.split("?")[0]));
+    expect([...new Set(targets)]).toEqual(["/learn/me/games/treasure-maze"]);
+    await expect(page.getByText(/Sắp có|Sắp ra mắt|Mini-game đang/u)).toHaveCount(0);
     await noHorizontalScroll(page);
     await axeClean(page);
     await page.screenshot({ path: testInfo.outputPath("learn-me-scored.png"), fullPage: true });

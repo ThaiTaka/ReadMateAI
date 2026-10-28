@@ -85,10 +85,12 @@ describe("câu chữ điểm thưởng tích cực, trung tính khi trừ (CLAUD
       vi.learnMe.practice,
       vi.learnMe.map,
       vi.learnMe.games,
+      vi.zones,
+      vi.treasureMazePlay,
     ]);
     expect(text).not.toMatch(/thua|kém|cuối bảng|phạt|tệ|dốt|sai rồi/iu);
     expect(text).not.toMatch(/ở lớp|tại lớp|trên lớp|phiếu/iu);
     expect(vi.scoredPractice.practiceOnly).toBe("Câu luyện thêm – Không tính điểm");
-    expect(vi.gameWorld.inDevelopment).toBe("Mini-game đang phát triển");
+    expect(vi.gameWorld.unreleased).toBe("Chưa phát hành");
   });
 });

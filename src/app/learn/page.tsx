@@ -25,7 +25,8 @@ export const metadata: Metadata = {
 
 /**
  * Student Adventure Dashboard (R02) — BẢN CHƠI THỬ với hồ sơ hư cấu "Mây". Không đọc/ghi dữ liệu học sinh,
- * không có thao tác nào làm thay đổi điểm. Mọi trò chơi là bản xem trước; "Luyện bài" dẫn tới bản chơi thử /demo.
+ * không có thao tác nào làm thay đổi điểm. Điểm, huy hiệu, bảng điểm ở đây là hư cấu; học sinh thật vào bằng thẻ học
+ * ở /learn/me. Mê cung kho báu có bản thử không tính điểm (/demo/treasure-maze); "Luyện bài" dẫn tới bản chơi thử /demo.
  */
 export default function LearnPage() {
   const t = vi.learn;

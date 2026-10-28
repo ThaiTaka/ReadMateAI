@@ -63,7 +63,6 @@ export default function HomePage() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="brand">{vi.brand.name}</Badge>
-              <Badge tone="sun">{vi.brand.previewBadge}</Badge>
             </div>
             <p className="mt-5 font-semibold text-ink-faint">{t.hero.eyebrow}</p>
             <h1 id="hero-title" className="mt-2 text-display font-extrabold text-ink">
@@ -73,7 +72,7 @@ export default function HomePage() {
             <p className="mt-4 text-xl font-bold leading-snug text-magic-700 sm:text-2xl">{vi.brand.tagline}</p>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">{t.hero.description}</p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-              <AdventureLink href="/learn" tone="jade" className="sm:shrink-0">
+              <AdventureLink href="/learn/me" tone="jade" className="sm:shrink-0">
                 {t.hero.primaryCta}
                 <ArrowRight aria-hidden="true" className="size-6" />
               </AdventureLink>
@@ -218,7 +217,9 @@ export default function HomePage() {
                       <span className={cn("rounded-full px-3 py-1 text-xs font-extrabold", game.accent.chip)}>
                         {t.games.threshold.replace("{n}", String(game.minBalance))}
                       </span>
-                      <Badge tone="neutral">{t.games.status}</Badge>
+                      <Badge tone={game.release === "playable" ? "brand" : "neutral"}>
+                        {game.release === "playable" ? t.games.statusPlayable : t.games.statusUnreleased}
+                      </Badge>
                     </div>
                   </div>
                 </li>
@@ -252,7 +253,13 @@ export default function HomePage() {
                     <span className="flex size-11 items-center justify-center rounded-2xl bg-jade-50 text-jade-700">
                       <Icon aria-hidden="true" className="size-6" />
                     </span>
-                    <Badge tone="neutral">{vi.status.planned}</Badge>
+                    <Badge tone={feature.status === "building" ? "neutral" : "brand"}>
+                      {feature.status === "building"
+                        ? t.teachers.statusBuilding
+                        : feature.status === "available"
+                          ? t.teachers.statusAvailable
+                          : t.teachers.statusAvailableOff}
+                    </Badge>
                   </div>
                   <h3 className="text-lg font-bold text-ink">{feature.title}</h3>
                   <p className="leading-relaxed text-ink-soft">{feature.text}</p>

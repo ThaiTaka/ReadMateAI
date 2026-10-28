@@ -148,9 +148,14 @@ export const vi = {
         "Con đã gặp {total} bạn quái vật: {defeated} bạn biến thành sao, {undefeated} bạn bay đi ngủ. Điểm thưởng của con vẫn giữ nguyên.",
       failed: "Chưa bắt đầu được lượt chơi lại. Con kiểm tra mạng rồi bấm Thử lại nhé.",
     },
-    comingSoon: "Sắp ra mắt: {names}.",
-    entry: "Vào Mê cung kho báu",
+    /** Nút vào chơi trên thẻ trò chơi ở khu vực Thi đấu — nhãn theo tình trạng lượt chơi THẬT của học sinh. */
+    entry: "Vào mê cung",
+    entryResume: "Tiếp tục cuộc phiêu lưu",
+    entryReplay: "Chơi lại",
     entryText: "Cần {min} điểm thưởng. Vị trí của con được lưu lại, lần sau đi tiếp được.",
+    entryReplayText: "Con đã đi hết mê cung này. Chơi lại cho vui, điểm thưởng không thay đổi.",
+    entryResumeText: "Con đang đi dở. Chạm để đi tiếp từ chỗ con đã dừng.",
+    entryNeedMore: "Cần thêm {n} điểm thưởng để vào mê cung. Đi luyện tập để có thêm điểm nhé!",
   },
   /** Màn gặp quái vật và kho báu của Mê cung có điểm (R08.4). Quái vật luôn thân thiện: không "thua/thất bại", không dọa. */
   encounter: {
@@ -253,7 +258,7 @@ export const vi = {
     eyebrow: "Game World",
     title: "Bản đồ thế giới phiêu lưu",
     description:
-      "Trả lời đúng để tích điểm. Mỗi {step} điểm tích lũy mở một mốc khám phá; đủ điểm thì mở lối vào trò chơi. Các trò chơi đang được xây dựng — đây là bản xem trước.",
+      "Trả lời đúng để tích điểm. Mỗi {step} điểm tích lũy mở một mốc khám phá; đủ điểm thì mở lối vào trò chơi.",
     mapLabel: "Bản đồ thế giới: trạm luyện tập ở giữa, bốn vùng trò chơi xung quanh, vùng chưa đủ điểm còn phủ mây",
     station: "Trạm luyện tập",
     eligible: "Đủ điểm",
@@ -264,7 +269,7 @@ export const vi = {
     details: "Xem chi tiết",
     detailsFor: "Xem chi tiết: {name}",
     skillsTitle: "Con sẽ luyện",
-    howTitle: "Cách chơi (dự kiến)",
+    howTitle: "Cách chơi",
     rulesTitle: "Luật chung",
     rules: [
       "Mỗi màn có tối đa 7 thử thách, mỗi thử thách 3 câu Tiếng Việt.",
@@ -272,12 +277,16 @@ export const vi = {
       "Vào chơi không tốn điểm.",
     ],
     monsterLine: "Các bạn quái vật thân thiện sẽ hỏi con những câu thật vui!",
-    playSoon: "Vào chơi – Sắp có",
-    playNote: "Trò chơi đang được xây dựng (dự kiến {phase}). Nút sẽ mở khi trò chơi sẵn sàng.",
-    statusEligibleNote: "Con đã đủ điểm. Trò chơi sẽ mở khi xây dựng xong.",
-    inDevelopment: "Mini-game đang phát triển",
-    inDevelopmentNote:
-      "Đủ điểm hiện tại là đủ điều kiện vào khu vực (không tốn điểm). Trò chơi sẽ mở khi xây dựng xong.",
+    /** Game đã có bản chơi thật, học sinh đã liên kết thẻ học và đủ điểm. */
+    playable: "Chơi được",
+    eligibleNote: "Con đã đủ điểm để vào chơi. Vào chơi không tốn điểm.",
+    /** Game chưa làm: không có nút vào chơi. */
+    unreleased: "Chưa phát hành",
+    unreleasedNote: "Trò chơi này chưa phát hành nên chưa có nút vào chơi.",
+    /** Trang xem trước (không tài khoản): chỉ có bản thử không tính điểm. */
+    demoPlay: "Chơi bản thử (không tính điểm)",
+    demoNote:
+      "Bản thử để làm quen cách đi: chưa có câu hỏi, không tính điểm, không lưu. Muốn chơi thật, con vào trang của mình bằng thẻ học.",
     discovered: "Đã khám phá",
     statusLockedNote: "Luyện thêm để có đủ điểm nhé.",
     milestones: {
@@ -302,10 +311,10 @@ export const vi = {
       eyebrow: "Dành cho học sinh lớp 1 · Tự luyện Tiếng Việt tại nhà",
       description:
         "Mỗi ngày con luyện chữ, âm, vần, đánh vần và đọc trơn ngay tại nhà — có hình ảnh, gợi ý và lời khen. Trả lời đúng thì tích điểm, đủ điểm thì mở khóa bản đồ và những trò chơi phiêu lưu.",
-      primaryCta: "Khám phá ReadMate",
+      primaryCta: "Vào trang của con",
       secondaryCta: "Chơi thử",
       statusNote:
-        "Bản xem trước: sáu dạng bài luyện tập đã chơi thử được; điểm thưởng, bản đồ và trò chơi hiện dùng dữ liệu minh họa và sẽ hoàn thiện ở các giai đoạn sau.",
+        "Học sinh vào học bằng thẻ học do cô giáo cấp. “Chơi thử” là bản làm quen với dữ liệu minh họa, không lưu kết quả.",
       artLabel:
         "Minh họa: bạn nhỏ thám hiểm vẫy tay chào cùng Cú Bông cầm đèn lồng, phía sau là đồi xanh và lâu đài trên đảo bay.",
       bubble: "Cùng đi phiêu lưu nào!",
@@ -327,7 +336,7 @@ export const vi = {
           text: "Đủ điểm thì khám phá thêm bản đồ và mở lối vào trò chơi — nơi câu hỏi vẫn là bài luyện Tiếng Việt.",
         },
       ],
-      note: "Điểm thưởng và mở khóa thật: dự kiến ở giai đoạn R04. Bản xem trước dùng số liệu minh họa.",
+      note: "Điểm thưởng chỉ được tính khi học sinh vào bằng thẻ học và đã được phụ huynh đồng ý; điểm do máy chủ tính.",
     },
     paths: {
       eyebrow: "Ba lộ trình",
@@ -338,38 +347,47 @@ export const vi = {
     },
     games: {
       eyebrow: "Game World",
-      title: "Bốn vùng đất đang chờ con",
+      title: "Những vùng đất phiêu lưu",
       description:
-        "Mỗi trò chơi là một chuyến phiêu lưu với câu hỏi Tiếng Việt. Các trò chơi đang được xây dựng; hình dưới đây là bản phác thảo.",
+        "Mỗi trò chơi là một chuyến phiêu lưu với câu hỏi Tiếng Việt. Mê cung kho báu đã mở cửa; ba vùng đất còn lại chưa phát hành.",
       threshold: "Mở khi có {n} điểm",
-      status: "Đang phát triển",
-      cta: "Xem bản đồ Game World",
+      statusPlayable: "Chơi được",
+      statusUnreleased: "Chưa phát hành",
+      cta: "Xem bản đồ Game World (minh họa)",
     },
     teachers: {
       eyebrow: "Dành cho giáo viên",
-      title: "Công cụ dự kiến cho giáo viên",
+      title: "Công cụ cho giáo viên",
       description:
-        "Các chức năng dưới đây đang được xây dựng theo từng giai đoạn và chưa hoạt động trong bản xem trước.",
+        "Giáo viên đăng nhập bằng tài khoản riêng để quản lý lớp, cấp thẻ học và ghi âm giọng đọc. Mục nào còn đang làm được ghi rõ.",
+      statusBuilding: "Đang phát triển",
+      statusAvailable: "Đã có",
+      statusAvailableOff: "Đã có — mặc định tắt",
       features: [
         {
           title: "Giao bài và duyệt nội dung",
           text: "Kiểm tra tự động chính tả, chữ đã học, âm thanh — giáo viên duyệt lần cuối trước khi đến tay học sinh.",
+          status: "building",
         },
         {
           title: "Theo dõi tiến bộ",
           text: "Kết quả theo âm – vần, lỗi thường gặp và mức hỗ trợ của từng em.",
+          status: "building",
         },
         {
           title: "Bảng xếp hạng trong lớp",
           text: "Chỉ trong lớp, mặc định tắt; chỉ hiện tên hiển thị đã duyệt khi phụ huynh đồng ý.",
+          status: "available_off",
         },
         {
           title: "Vinh danh TOP 3",
           text: "Màn vinh danh nhẹ nhàng để cô khen ngợi các bạn chăm luyện.",
+          status: "available_off",
         },
         {
           title: "Tổ chức mùa thi đua mới",
           text: "Kết thúc mùa, lưu vinh danh và bắt đầu mùa mới — dữ liệu học tập vẫn giữ nguyên.",
+          status: "available",
         },
       ],
       cta: "Xem khu vực giáo viên",
@@ -613,6 +631,8 @@ export const vi = {
       achievements: "Thành tích",
       games: "Trò chơi",
       leaderboard: "Bảng điểm",
+      learnZone: "Học tập",
+      competeZone: "Thi đấu",
     },
     exit: "Trang chủ",
   },
@@ -931,7 +951,6 @@ export const vi = {
     notConfigured: "Máy chủ dữ liệu chưa được cấu hình.",
     pendingNote:
       "Điểm thưởng, bản đồ và bài luyện của con sẽ xuất hiện ở đây khi giáo viên hoàn tất chương trình và học liệu được duyệt.",
-    worldLink: "Xem Game World (minh họa)",
     preferences: {
       title: "Chọn avatar và cài đặt",
       avatar: "Avatar của con",
@@ -984,9 +1003,42 @@ export const vi = {
     },
     games: {
       title: "Khu vực trò chơi",
-      text: "Đủ điểm hiện tại là đủ điều kiện vào khu vực — không tốn điểm. Các mini-game đang được xây dựng.",
+      text: "Đủ điểm hiện tại là đủ điều kiện vào chơi — vào chơi không tốn điểm.",
       discovered: "Đã khám phá",
     },
+  },
+
+  /**
+   * Hai khu vực của trang học sinh có xác thực. HỌC TẬP: nghe chữ, luyện đọc (có hướng dẫn, âm thanh). THI ĐẤU: dùng điểm
+   * thưởng vào trò chơi, đánh bại quái vật, mở rương. Lời lẽ nhẹ nhàng — không so sánh với bạn khác, không áp lực thành tích.
+   */
+  zones: {
+    switcherLabel: "Chọn khu vực",
+    learn: {
+      name: "Học tập",
+      eyebrow: "Khu vực 1",
+      tagline: "Nghe chữ, luyện đọc cùng Cú Bông",
+      text: "Ở đây con học chữ, âm, vần, ghép tiếng và đọc từ. Có lời hướng dẫn, có thể nghe cách đọc và có gợi ý. Con cứ từ từ, không đếm giờ.",
+      listenCta: "Nghe cách đọc chữ",
+      listenText: "Chạm vào chữ để nghe cô giáo đọc. Không tính điểm.",
+      practiceHeading: "Luyện bài",
+      progressTitle: "Tiến độ học của con",
+      progressOpen: "Con đang làm dở một buổi luyện: {closed}/{total} câu.",
+      progressNone: "Con chưa làm buổi luyện nào trong mùa này. Bắt đầu thôi nào!",
+      progressDone: "Con đã hoàn thành {sessions} buổi luyện, làm đúng {correct} câu.",
+      sessionsLabel: "Buổi luyện đã xong",
+      correctLabel: "Câu con làm đúng",
+    },
+    compete: {
+      name: "Thi đấu",
+      eyebrow: "Khu vực 2",
+      tagline: "Thử thách vui cùng các bạn quái vật",
+      text: "Dùng điểm thưởng để vào trò chơi, giúp các bạn quái vật đi ngủ và mở rương kho báu. Vào chơi không tốn điểm.",
+      earnTitle: "Muốn có thêm điểm thưởng?",
+      earnHint: "Điểm thưởng đến từ các câu con làm đúng ở khu vực Học tập.",
+      earnCta: "Về khu vực Học tập",
+    },
+    note: "Học tập để làm quen và nghe hướng dẫn. Thi đấu là lúc con thử sức với trò chơi.",
   },
 
   /** Buổi luyện CÓ ĐIỂM (R04) — chấm ở máy chủ, điểm thật của học sinh đã liên kết. */
@@ -1016,7 +1068,8 @@ export const vi = {
     newTiles: "Con có {n} lượt khám phá ô bản đồ mới!",
     openMap: "Mở bản đồ khám phá",
     unlocked: "Đã khám phá khu vực mới: {name}!",
-    unlockedNote: "Con đã đủ điểm cho khu vực này. Mini-game đang được xây dựng.",
+    unlockedNote: "Con đã đủ điểm để vào chơi. Vào chơi không tốn điểm.",
+    unlockedCta: "Đến khu vực Thi đấu",
     errorTitle: "Chưa mở được buổi luyện",
     summary: {
       title: "Con đã hoàn thành buổi luyện!",

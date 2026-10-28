@@ -134,7 +134,7 @@ describe("Game World: bản đồ, thẻ khu vực, mốc khám phá", () => {
     expect(container.querySelectorAll("a, button")).toHaveLength(0);
   });
 
-  it("thẻ đủ điểm / chưa đủ điểm đúng theo dữ liệu minh họa; nút Vào chơi luôn khóa, không có liên kết tới game", () => {
+  it("thẻ đủ điểm / chưa đủ điểm đúng theo dữ liệu minh họa; chỉ Mê cung có bản thử, game chưa làm không có nút hay liên kết", () => {
     const { container } = render(
       <ul>
         {states.map((state) => (
@@ -151,10 +151,49 @@ describe("Game World: bản đồ, thẻ khu vực, mốc khám phá", () => {
     for (const game of GAME_WORLDS) {
       expect(within(card(game.name)).getAllByText(`Mở khi có ${game.minBalance} điểm`).length).toBeGreaterThan(0);
     }
-    const play = screen.getAllByRole("button", { name: /Vào chơi/, hidden: true });
-    expect(play).toHaveLength(4);
-    for (const button of play) expect(button).toBeDisabled();
-    expect(container.querySelectorAll("a")).toHaveLength(0);
+    // Không còn nút giả "Vào chơi – Sắp có": game chưa phát hành chỉ ghi "Chưa phát hành".
+    expect(screen.queryAllByRole("button", { name: /Vào chơi/, hidden: true })).toHaveLength(0);
+    expect(container.textContent).not.toMatch(/Sắp có|dự kiến|đang được xây dựng/iu);
+    for (const name of ["Rừng chữ kỳ diệu", "Đảo dấu thanh", "Lâu đài ghép vần"]) {
+      expect(within(card(name)).getAllByText("Chưa phát hành").length).toBeGreaterThan(0);
+      expect(card(name).querySelectorAll("a")).toHaveLength(0);
+    }
+    // Mê cung: đúng một đích — bản thử không tính điểm (ở thẻ và trong bảng thông tin).
+    const links = [...container.querySelectorAll("a")];
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) expect(link).toHaveAttribute("href", "/demo/treasure-maze");
+    expect(within(card("Mê cung kho báu")).getAllByText("Chơi bản thử (không tính điểm)").length).toBeGreaterThan(0);
+  });
+
+  it("khu vực thật (live): nút vào chơi là liên kết có nhãn theo tình trạng lượt chơi; thiếu điểm thì không có nút vào", () => {
+    const maze = gameWorld("treasure_maze");
+    const eligible = gameUnlockStates(60)[0]!;
+    const { rerender, container } = render(
+      <WorldMapCard
+        game={maze}
+        state={eligible}
+        live
+        entry={{ kind: "play", href: "/learn/me/games/treasure-maze" as never, label: "Tiếp tục cuộc phiêu lưu" }}
+      />,
+    );
+    const play = container.querySelector('[data-testid="game-treasure_maze-play"]');
+    expect(play).toHaveTextContent("Tiếp tục cuộc phiêu lưu");
+    expect(play).toHaveAttribute("href", "/learn/me/games/treasure-maze");
+    expect(container.textContent).toContain("Chơi được");
+    expect(container.textContent).not.toMatch(/Sắp có|dự kiến|đang phát triển|đang được xây dựng|bản xem trước/iu);
+
+    const short = gameUnlockStates(20)[0]!;
+    rerender(
+      <WorldMapCard
+        game={maze}
+        state={short}
+        live
+        entry={{ kind: "blocked", note: "Cần thêm 30 điểm thưởng để vào mê cung." }}
+      />,
+    );
+    expect(container.querySelector('[data-testid="game-treasure_maze-play"]')).toBeNull();
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    expect(container.textContent).toContain("Cần thêm 30 điểm thưởng để vào mê cung.");
   });
 
   it("nút Xem chi tiết mở bảng thông tin của đúng trò chơi", () => {
@@ -165,7 +204,9 @@ describe("Game World: bản đồ, thẻ khu vực, mốc khám phá", () => {
     const dialog = document.querySelector("dialog[open]") as HTMLElement;
     expect(within(dialog).getByRole("heading", { level: 2, name: "Mê cung kho báu" })).toBeInTheDocument();
     expect(within(dialog).getByText("Vào chơi không tốn điểm.")).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: /Vào chơi – Sắp có/ })).toBeDisabled();
+    expect(within(dialog).getByRole("link", { name: /Chơi bản thử/ })).toHaveAttribute("href", "/demo/treasure-maze");
+    expect(within(dialog).getByText("Cách chơi")).toBeInTheDocument();
+    expect(dialog.textContent).not.toMatch(/Sắp có|dự kiến|đang được xây dựng/iu);
   });
 
   it("dải mốc: 135 điểm → 4 mốc đã khám phá, mốc 150 là mốc tiếp theo", () => {

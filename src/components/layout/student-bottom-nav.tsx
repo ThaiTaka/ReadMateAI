@@ -14,13 +14,13 @@ const DEMO_ITEMS: readonly NavItem[] = [
 ];
 
 /**
- * Trang có xác thực (/learn/me…): bản đồ, buổi luyện có điểm, khu vực trò chơi. Không đọc tham số URL (useSearchParams
- * buộc bọc Suspense và thay DOM lúc hydrate); thiết bị có nhiều hồ sơ sẽ được hỏi chọn hồ sơ khi mở liên kết.
+ * Trang có xác thực (/learn/me…): hai khu vực độc lập — Học tập và Thi đấu — cùng bản đồ và bảng điểm. Không đọc tham số
+ * URL (useSearchParams buộc bọc Suspense và thay DOM lúc hydrate); thiết bị có nhiều hồ sơ sẽ được hỏi chọn hồ sơ khi mở liên kết.
  */
 const LINKED_ITEMS: readonly NavItem[] = [
+  { href: "/learn/me#hoc-tap", label: vi.learn.bottomNav.learnZone, Icon: BookOpenCheck },
+  { href: "/learn/me#thi-dau", label: vi.learn.bottomNav.competeZone, Icon: Gamepad2 },
   { href: "/learn/me#ban-do", label: vi.learn.bottomNav.map, Icon: MapIcon },
-  { href: "/learn/me/practice", label: vi.learn.bottomNav.practice, Icon: BookOpenCheck },
-  { href: "/learn/me#tro-choi", label: vi.learn.bottomNav.games, Icon: Gamepad2 },
   { href: "/learn/leaderboard", label: vi.learn.bottomNav.leaderboard, Icon: Trophy },
 ];
 

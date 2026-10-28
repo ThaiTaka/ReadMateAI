@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { House } from "lucide-react";
 import { MotionScope, MotionToggle } from "@/components/adventure/motion";
+import { LearnPreviewBadge } from "@/components/layout/learn-preview-badge";
 import { LogoWordmark } from "@/components/layout/logo";
 import { MAIN_CONTENT_ID } from "@/components/layout/skip-link";
 import { StudentBottomNav } from "@/components/layout/student-bottom-nav";
-import { Badge } from "@/components/ui/badge";
 import { vi } from "@/strings/vi";
 
 /**
  * Khung khu vực học sinh — ưu tiên điện thoại, mở rộng thành bảng điều khiển trên máy tính bảng/máy tính.
  * Không script bên thứ ba, không liên kết ra ngoài, không ô nhập văn bản tự do (CLAUDE.md §6). /learn là bản minh
- * họa hư cấu (R02); /learn/me… là khu vực có xác thực của thiết bị đã liên kết (R03–R04).
+ * họa hư cấu (R02); /learn/me… là khu vực có xác thực của thiết bị đã liên kết (R03–R04): Học tập và Thi đấu.
  */
 export default function LearnLayout({ children }: LayoutProps<"/learn">) {
   return (
@@ -20,9 +20,9 @@ export default function LearnLayout({ children }: LayoutProps<"/learn">) {
           <Link href="/" aria-label={vi.a11y.homeLink} className="rounded-xl">
             <LogoWordmark />
           </Link>
-          {/* Điện thoại hẹp: nhãn bản chơi thử đã có ở dải ghi chú đầu trang. */}
+          {/* Chỉ trang minh họa /learn có nhãn; điện thoại hẹp: đã có dải ghi chú đầu trang. */}
           <span className="hidden sm:inline-flex">
-            <Badge tone="sun">{vi.brand.previewBadge}</Badge>
+            <LearnPreviewBadge />
           </span>
         </span>
         {/* Điện thoại: logo + Trang chủ ở dòng đầu, công tắc giảm chuyển động xuống dòng dưới; màn rộng: một dòng. */}

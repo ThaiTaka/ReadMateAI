@@ -1,10 +1,14 @@
 import { GAME_KEYS, GAME_MIN_BALANCE, type GameKey } from "../gamification/rules.ts";
 
 /**
- * Danh mục Game World (dữ liệu miền, R02). Mọi mini-game hiện là BẢN XEM TRƯỚC: chưa có màn chơi, chưa có
- * nút vào chơi hoạt động (Game Engine dự kiến R07–R09). Ngưỡng điểm lấy từ `GAME_MIN_BALANCE` — không chép số.
+ * Danh mục Game World (dữ liệu miền). `release` nói trò chơi nào CÓ BẢN CHƠI THẬT cho học sinh đã liên kết thẻ học:
+ * hiện chỉ Mê cung kho báu (R07–R08). Ba trò chơi còn lại chưa phát hành (R09 hoãn) — giao diện học sinh không vẽ nút
+ * vào chơi cho chúng. Ngưỡng điểm lấy từ `GAME_MIN_BALANCE` — không chép số.
  * Tên game, nhân vật là tên gọi tạm, chờ GV góp ý (RQ-M5).
  */
+
+/** `playable` = có đường vào chơi thật (`playPath`); `unreleased` = chưa làm, không có đường vào. */
+export type GameRelease = "playable" | "unreleased";
 
 export type GameWorldInfo = {
   key: GameKey;
@@ -13,11 +17,16 @@ export type GameWorldInfo = {
   description: string;
   /** Kiến thức luyện trong game (để người lớn hiểu; học sinh không thấy nhóm/lộ trình). */
   skills: readonly string[];
-  /** Cách khám phá dự kiến trong game. */
+  /** Cách chơi, một câu cho trẻ. */
   howToPlay: string;
   minBalance: number;
-  /** Giai đoạn dự kiến xây dựng. */
+  /** Giai đoạn dự kiến xây dựng (chỉ cho game chưa phát hành). */
   plannedPhase: string;
+  release: GameRelease;
+  /** Đường vào bản chơi THẬT của học sinh có xác thực; null khi chưa phát hành. */
+  playPath: string | null;
+  /** Đường vào bản thử nghiệm không tính điểm, không cần thẻ học (trang xem trước); null khi chưa có. */
+  demoPath: string | null;
   /** Lớp màu nhấn của thẻ (chuỗi đầy đủ để Tailwind quét được). */
   accent: { ring: string; chip: string; text: string };
 };
@@ -31,6 +40,9 @@ const INFO: Readonly<Record<GameKey, Omit<GameWorldInfo, "key" | "minBalance">>>
     skills: ["Nhận diện chữ – âm", "Ghép tiếng", "Đọc từ"],
     howToPlay: "Đi bằng 4 nút mũi tên lớn hoặc phím mũi tên; trả lời câu hỏi để giúp quái vật đi ngủ.",
     plannedPhase: "R07–R08",
+    release: "playable",
+    playPath: "/learn/me/games/treasure-maze",
+    demoPath: "/demo/treasure-maze",
     accent: { ring: "ring-jade-300", chip: "bg-jade-100 text-jade-800", text: "text-jade-700" },
   },
   wonder_forest: {
@@ -40,6 +52,9 @@ const INFO: Readonly<Record<GameKey, Omit<GameWorldInfo, "key" | "minBalance">>>
     skills: ["Nhìn tranh – chọn chữ", "Tìm âm đầu, vần"],
     howToPlay: "Chọn ngả rẽ bằng nút lớn; mỗi cây chữ là một thử thách 3 câu.",
     plannedPhase: "R09",
+    release: "unreleased",
+    playPath: null,
+    demoPath: null,
     accent: { ring: "ring-brand-300", chip: "bg-brand-100 text-brand-800", text: "text-brand-700" },
   },
   tone_island: {
@@ -49,6 +64,9 @@ const INFO: Readonly<Record<GameKey, Omit<GameWorldInfo, "key" | "minBalance">>>
     skills: ["Nhận biết dấu thanh", "Ghép tiếng có thanh"],
     howToPlay: "Bấm nút chọn hòn đảo kế tiếp; mỗi đảo là một thử thách 3 câu.",
     plannedPhase: "R09",
+    release: "unreleased",
+    playPath: null,
+    demoPath: null,
     accent: { ring: "ring-lagoon-200", chip: "bg-lagoon-100 text-lagoon-800", text: "text-lagoon-700" },
   },
   rhyme_castle: {
@@ -58,6 +76,9 @@ const INFO: Readonly<Record<GameKey, Omit<GameWorldInfo, "key" | "minBalance">>>
     skills: ["Ghép âm – vần", "Điền vần còn thiếu", "Đọc câu ngắn"],
     howToPlay: "Mỗi tầng là một thử thách; ghép đúng để mở cửa lên tầng trên.",
     plannedPhase: "R09",
+    release: "unreleased",
+    playPath: null,
+    demoPath: null,
     accent: { ring: "ring-magic-300", chip: "bg-magic-100 text-magic-800", text: "text-magic-700" },
   },
 };
@@ -72,6 +93,11 @@ export function gameWorld(key: GameKey): GameWorldInfo {
   const found = GAME_WORLDS.find((game) => game.key === key);
   if (!found) throw new Error(`Không có game ${key}`);
   return found;
+}
+
+/** Trò chơi đã có bản chơi thật — khu vực học sinh có xác thực chỉ vẽ các trò này (không vẽ nút giả cho game chưa làm). */
+export function isPlayable(key: GameKey): boolean {
+  return gameWorld(key).release === "playable";
 }
 
 /** Tám mốc khám phá đầu tiên của bản đồ mùa đầu (mỗi mốc ứng với MAP_TILE_STEP điểm tích lũy). */

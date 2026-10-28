@@ -10,7 +10,7 @@ type GameWorldHeaderProps = {
   actions?: ReactNode;
   /** `light` cho nền sáng, `dark` cho nền khung cảnh sâu. */
   tone?: "light" | "dark";
-  level?: 1 | 2;
+  level?: 1 | 2 | 3;
   className?: string;
 };
 
@@ -25,7 +25,7 @@ export function GameWorldHeader({
   level = 2,
   className,
 }: GameWorldHeaderProps) {
-  const Heading = level === 1 ? "h1" : "h2";
+  const Heading = level === 1 ? "h1" : level === 3 ? "h3" : "h2";
   const dark = tone === "dark";
   return (
     <div className={cn("flex flex-col gap-4 md:flex-row md:items-end md:justify-between", className)}>

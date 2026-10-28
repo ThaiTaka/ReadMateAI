@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export type AdventureTone = "jade" | "sun" | "magic" | "plain";
@@ -42,7 +42,7 @@ export function AdventureButton({ tone, size, className, type = "button", ...pro
   return <button type={type} className={adventureClasses(tone, size, className)} {...props} />;
 }
 
-type AdventureLinkProps = {
+type AdventureLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "className" | "children"> & {
   href: Route;
   children: ReactNode;
   tone?: AdventureTone;
@@ -51,9 +51,9 @@ type AdventureLinkProps = {
 };
 
 /** Liên kết điều hướng có hình thức nút phiêu lưu — chỉ dùng khi đích đến thực sự tồn tại. */
-export function AdventureLink({ href, children, tone, size, className }: AdventureLinkProps) {
+export function AdventureLink({ href, children, tone, size, className, ...props }: AdventureLinkProps) {
   return (
-    <Link href={href} className={adventureClasses(tone, size, className)}>
+    <Link href={href} className={adventureClasses(tone, size, className)} {...props}>
       {children}
     </Link>
   );

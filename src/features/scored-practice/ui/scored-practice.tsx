@@ -15,7 +15,7 @@ import { hintText } from "@/features/exercises/core/feedback";
 import type { Response } from "@/features/exercises/core/primitives";
 import { responseKey } from "@/features/exercises/core/response-key";
 import { VARIANTS } from "@/features/exercises/runtime-registry";
-import { gameWorld } from "@/features/game-world/catalog";
+import { gameWorld, isPlayable } from "@/features/game-world/catalog";
 import type { GameKey } from "@/features/gamification/rules";
 import { cn } from "@/lib/cn";
 import type { ErrorCode } from "@/server/result";
@@ -387,16 +387,23 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
         {points && (showMarks || !open) ? <PointsChip points={points} /> : null}
       </div>
 
-      {unlocked.length > 0 ? (
+      {/* Chỉ báo trò chơi ĐÃ PHÁT HÀNH: không khoe khu vực chưa có bản chơi. */}
+      {unlocked.some(isPlayable) ? (
         <div className="flex gap-3 rounded-2xl border-2 border-magic-200 bg-magic-50 p-4">
           <Sparkles aria-hidden="true" className="mt-0.5 size-6 shrink-0 animate-pop-in text-magic-700" />
-          <div>
-            {unlocked.map((key) => (
+          <div className="flex flex-col gap-2">
+            {unlocked.filter(isPlayable).map((key) => (
               <p key={key} className="font-extrabold text-ink">
                 {t.unlocked.replace("{name}", gameWorld(key).name)}
               </p>
             ))}
             <p className="text-sm text-ink-soft">{t.unlockedNote}</p>
+            <Link
+              href={`${homeHref}#thi-dau` as Route}
+              className="inline-flex min-h-12 items-center self-start font-bold text-magic-800 underline"
+            >
+              {t.unlockedCta}
+            </Link>
           </div>
         </div>
       ) : null}

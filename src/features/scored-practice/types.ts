@@ -96,6 +96,13 @@ export type StudentHomeDto = {
     blocker: PracticeBlocker | null;
     openSession: { id: string; closed: number; total: number } | null;
   };
+  /** Tiến độ học trong mùa hiện tại — chỉ của chính học sinh (không so với bạn khác, không nhóm năng lực). */
+  learning: { sessionsDone: number; correctAnswers: number };
+  /** Tình trạng Mê cung kho báu của chính học sinh: vào mới, đi tiếp lượt dở, hay chơi lại (không tính điểm). */
+  maze: MazeEntryDto;
 };
+
+/** `level` là số màn (bắt đầu từ 1) mà nút vào chơi dẫn tới. */
+export type MazeEntryDto = { mode: "start" | "resume" | "replay"; level: number };
 
 export type RevealTileDto = { outcome: "revealed" | "already_revealed"; map: MapStateDto };
