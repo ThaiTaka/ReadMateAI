@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Notice } from "@/components/ui/notice";
 import { inputClass } from "@/components/forms/form-controls";
-import type { AudioUnit } from "@/features/audio-library/p0-catalog";
+import type { AudioUnit, AudioUnitKind } from "@/features/audio-library/p0-catalog";
 import {
   countStates,
   deriveUnitState,
@@ -37,10 +37,13 @@ const STATE_TONE: Record<UnitState, BadgeTone> = {
 };
 
 type Filter = "all" | UnitState;
+type KindFilter = "all" | AudioUnitKind;
+const KIND_FILTERS: readonly KindFilter[] = ["all", "letter", "phoneme"];
 
 export function AudioStudio({ units, assets, context }: Props) {
   const t = vi.audioStudio;
   const [filter, setFilter] = useState<Filter>("all");
+  const [kindFilter, setKindFilter] = useState<KindFilter>("all");
   const [query, setQuery] = useState("");
   const [openKey, setOpenKey] = useState<string | null>(null);
 
@@ -57,6 +60,7 @@ export function AudioStudio({ units, assets, context }: Props) {
   const visible = rows.filter(
     (row) =>
       (filter === "all" || row.state === filter) &&
+      (kindFilter === "all" || row.unit.kind === kindFilter) &&
       (needle === "" ||
         row.unit.displayText.toLowerCase().includes(needle) ||
         row.unit.text.toLowerCase().startsWith(needle)),
@@ -106,6 +110,24 @@ export function AudioStudio({ units, assets, context }: Props) {
             </button>
           ))}
         </div>
+        <div role="group" aria-label={t.kindFilterLabel} className="mt-3 flex flex-wrap gap-2">
+          {KIND_FILTERS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={kindFilter === value}
+              onClick={() => setKindFilter(value)}
+              className={cn(
+                "min-h-touch rounded-full border-2 px-4 text-sm font-semibold transition-colors",
+                kindFilter === value
+                  ? "border-lagoon-600 bg-lagoon-50 text-lagoon-800"
+                  : "border-line-strong bg-surface text-ink-soft hover:border-lagoon-400",
+              )}
+            >
+              {t.kinds[value]}
+            </button>
+          ))}
+        </div>
         <label htmlFor="audio-search" className="mt-4 block font-semibold text-ink">
           {t.filters.searchLabel}
         </label>
@@ -152,6 +174,7 @@ export function AudioStudio({ units, assets, context }: Props) {
                         </span>
                       </p>
                       <div className="mt-1 flex flex-wrap gap-2">
+                        <Badge tone={unit.kind === "letter" ? "lagoon" : "sun"}>{t.kinds[unit.kind]}</Badge>
                         <Badge tone={STATE_TONE[state]}>{t.state[state]}</Badge>
                         {confirmed ? null : <Badge tone="sun">{t.unit.awaitingConfirm}</Badge>}
                         {asset?.activeVersionId ? <Badge tone="brand">{t.unit.active}</Badge> : null}
@@ -169,7 +192,10 @@ export function AudioStudio({ units, assets, context }: Props) {
                       variant={open ? "outline" : "primary"}
                       aria-expanded={open}
                       aria-controls={panelId}
-                      aria-label={t.unit.openLabel.replace("{unit}", unit.displayText)}
+                      aria-label={(unit.kind === "letter" ? t.unit.openLabelLetter : t.unit.openLabel).replace(
+                        "{unit}",
+                        unit.displayText,
+                      )}
                       onClick={() => setOpenKey(open ? null : unit.key)}
                     >
                       {open ? (

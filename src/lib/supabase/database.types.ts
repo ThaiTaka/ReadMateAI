@@ -2222,6 +2222,10 @@ export type Database = {
         Returns: boolean;
       };
       gateway_latest_honors: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
+      gateway_list_learning_audio: {
+        Args: { p_auth_user_id: string; p_student_id: string; p_units: Json };
+        Returns: Json;
+      };
       gateway_open_treasure: {
         Args: { p_auth_user_id: string; p_run_id: string; p_student_id: string };
         Returns: Json;
@@ -2249,6 +2253,17 @@ export type Database = {
           outcome: string;
           student_id: string;
         }[];
+      };
+      gateway_resolve_learning_audio: {
+        Args: {
+          p_auth_user_id: string;
+          p_expected_label: string;
+          p_fallback_unit_text: string;
+          p_student_id: string;
+          p_unit_kind: string;
+          p_unit_text: string;
+        };
+        Returns: Json;
       };
       gateway_resolve_teacher_audio: {
         Args: {

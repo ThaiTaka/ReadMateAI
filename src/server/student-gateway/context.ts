@@ -46,6 +46,8 @@ export const STUDENT_RATE_LIMITS = {
   read: { purpose: "student.read", windowSeconds: 60, limit: 120 },
   /** Phát âm thanh (R10.3a): 40 lần / phút / thiết bị — đủ để nghe lại nhiều lần, chặn tải hàng loạt tệp. */
   audio: { purpose: "student.audio", windowSeconds: 60, limit: 40 },
+  /** Nghe chữ khi học (R10.4): trẻ chạm nhiều chữ liên tiếp — 90 lần / phút / thiết bị, vẫn chặn tải hàng loạt tệp. */
+  learningAudio: { purpose: "student.learning_audio", windowSeconds: 60, limit: 90 },
 } as const satisfies Record<string, RateLimitRule>;
 
 export async function limitDevice(context: StudentContext, rule: RateLimitRule): Promise<Result<true>> {

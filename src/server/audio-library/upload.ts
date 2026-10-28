@@ -2,12 +2,12 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { inspectAudio } from "@/features/audio-library/inspect";
 import { AUDIO_EXTENSIONS, AUDIO_MAX_BYTES } from "@/features/audio-library/limits";
-import { findP0Unit } from "@/features/audio-library/p0-catalog";
+import { findAudioUnit } from "@/features/audio-library/p0-catalog";
 import { fail, ok, type Result } from "@/server/result";
 
 /**
  * Xử lý tải bản ghi lên (lõi thuần, phụ thuộc được tiêm vào để kiểm thử không cần Storage/CSDL):
- *   1. kiểm tra đơn vị thuộc danh mục P0 + tệp (kích thước, chữ ký, thời lượng) — theo NỘI DUNG, không theo tên/MIME;
+ *   1. kiểm tra đơn vị thuộc danh mục thư viện (tên chữ cái / âm của chữ) + tệp (kích thước, chữ ký, thời lượng) — theo NỘI DUNG, không theo tên/MIME;
  *   2. tiền kiểm: cờ hệ thống + tài nguyên + đồng ý dùng giọng (CSDL kiểm lại khi ghi);
  *   3. máy chủ sinh khóa đối tượng từ UUID → tải lên Storage (không ghi đè) → ghi metadata bằng hàm CSDL;
  *   4. ghi metadata lỗi → gỡ tệp vừa tải (không để mồ côi); tải lỗi → không tạo metadata (không trỏ vào tệp không có).
@@ -15,7 +15,7 @@ import { fail, ok, type Result } from "@/server/result";
  */
 
 export const uploadFieldsSchema = z.strictObject({
-  unitKind: z.literal("phoneme"),
+  unitKind: z.enum(["letter", "phoneme"]),
   unitText: z.string().min(1).max(6),
 });
 
@@ -45,7 +45,7 @@ export async function processAudioUpload(
 ): Promise<Result<UploadedVersion>> {
   const fields = uploadFieldsSchema.safeParse({ unitKind: input.unitKind, unitText: input.unitText });
   if (!fields.success) return fail("INVALID_INPUT");
-  const unit = findP0Unit(fields.data.unitKind, fields.data.unitText.normalize("NFC"));
+  const unit = findAudioUnit(fields.data.unitKind, fields.data.unitText.normalize("NFC"));
   if (!unit) return fail("INVALID_INPUT");
 
   if (!(input.file instanceof Blob)) return fail("INVALID_INPUT");

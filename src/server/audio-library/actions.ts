@@ -3,7 +3,7 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { VOICE_NOTICE_VERSION } from "@/features/audio-library/limits";
-import { P0_UNIT_BY_KEY } from "@/features/audio-library/p0-catalog";
+import { AUDIO_UNIT_BY_KEY } from "@/features/audio-library/p0-catalog";
 import type { TeacherSession } from "@/server/auth/teacher";
 import { teacherOrFail } from "@/server/audio-library/http";
 import { fail, mapDbError, ok, type Result } from "@/server/result";
@@ -22,7 +22,7 @@ const text = (min: number, max: number) =>
     .pipe(z.string().min(min).max(max));
 
 async function ensureAsset(session: TeacherSession, unitKey: string): Promise<Result<string>> {
-  const unit = P0_UNIT_BY_KEY.get(unitKey);
+  const unit = AUDIO_UNIT_BY_KEY.get(unitKey);
   if (!unit) return fail("INVALID_INPUT");
   const { data, error } = await session.supabase.rpc("teacher_ensure_audio_asset", {
     p_unit_kind: unit.kind,

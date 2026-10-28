@@ -958,7 +958,7 @@ export const vi = {
       motionOptions: { system: "Theo thiết bị", reduce: "Giảm chuyển động", full: "Đầy đủ" },
       sound: "Âm thanh",
       soundOptions: { on: "Bật", off: "Tắt" },
-      soundNote: "Âm thanh sẽ có ở bản sau.",
+      soundNote: "Bật để nghe cô giáo đọc chữ và lời hướng dẫn. Tắt thì không có tiếng.",
       save: "Lưu",
       saving: "Đang lưu…",
       saved: "Đã lưu!",
@@ -1039,6 +1039,32 @@ export const vi = {
       earnCta: "Về khu vực Học tập",
     },
     note: "Học tập để làm quen và nghe hướng dẫn. Thi đấu là lúc con thử sức với trò chơi.",
+  },
+
+  /** Nghe cách đọc chữ khi học (R10.4): không câu hỏi, không điểm. Hai nút khác nhau: tên chữ cái và âm của chữ. */
+  studyAudio: {
+    meta: { title: "Nghe cách đọc chữ", description: "Chạm nút để nghe cô giáo đọc tên chữ cái và âm của chữ." },
+    title: "Nghe cách đọc chữ",
+    intro: "Chạm nút để nghe cô giáo đọc. Chạm lần nữa để nghe lại. Ở đây con chỉ nghe, không tính điểm.",
+    legend: "Tên chữ là cách gọi tên chữ cái. Âm là cách đọc chữ khi ghép vần.",
+    lettersTitle: "Chữ cái",
+    digraphsTitle: "Chữ ghép",
+    nameButton: "Tên chữ",
+    soundButton: "Âm",
+    nameAria: "Nghe tên chữ {letter}",
+    soundAria: "Nghe âm của chữ {letter}",
+    back: "Về trang của con",
+    status: {
+      pending: "Đang kiểm tra âm thanh…",
+      muted: "Âm thanh đang tắt. Người lớn có thể bật lại ở phần cài đặt của con.",
+      none: "Chưa có bản ghi nào của cô giáo được duyệt để phát, nên các nút nghe đang khóa.",
+      some: "Có {n} âm thanh nghe được. Nút khóa là chữ cô giáo chưa thu âm.",
+    },
+    entry: {
+      title: "Nghe cách đọc chữ",
+      text: "Chạm vào nút để nghe cô giáo đọc tên chữ và âm của chữ. Không tính điểm.",
+      cta: "Nghe cách đọc chữ",
+    },
   },
 
   /** Buổi luyện CÓ ĐIỂM (R04) — chấm ở máy chủ, điểm thật của học sinh đã liên kết. */
@@ -1415,11 +1441,14 @@ export const vi = {
   audioStudio: {
     meta: {
       title: "Ghi âm giọng đọc",
-      description: "Giáo viên ghi âm, nghe lại và gửi duyệt cách đọc các âm đơn lẻ dùng trong bài luyện.",
+      description:
+        "Giáo viên ghi âm, nghe lại và gửi duyệt tên chữ cái và cách đọc các âm đơn lẻ dùng khi học và trong bài luyện.",
     },
     title: "Ghi âm giọng đọc",
     intro:
-      "Chọn một âm, bấm ghi, nghe lại rồi gửi duyệt. Bản ghi chỉ đến tay học sinh sau khi giáo viên nghe và duyệt.",
+      "Chọn một chữ hoặc một âm, bấm ghi, nghe lại rồi gửi duyệt. Tên chữ cái (ví dụ “bê”) và âm của chữ (ví dụ “bờ”) là hai bản ghi khác nhau. Bản ghi chỉ đến tay học sinh sau khi giáo viên nghe và duyệt.",
+    kinds: { all: "Mọi loại", letter: "Tên chữ cái", phoneme: "Âm của chữ" },
+    kindFilterLabel: "Loại âm thanh",
     notice: {
       trialTitle: "Danh sách dự kiến — chưa có bản ghi nào được duyệt",
       trialText:
@@ -1429,7 +1458,7 @@ export const vi = {
         "Tính năng lưu bản ghi chưa được bật ở môi trường này. Bạn vẫn xem được danh sách và hướng dẫn, nhưng chưa ghi hay tải tệp lên được.",
     },
     stats: {
-      total: "Âm trong danh sách",
+      total: "Mục trong danh sách",
       missing: "Chưa ghi",
       draft: "Bản nháp",
       pending_review: "Chờ duyệt",
@@ -1444,10 +1473,10 @@ export const vi = {
       pending_review: "Chờ duyệt",
       approved: "Đã duyệt",
       rerecord: "Cần ghi lại",
-      searchLabel: "Tìm âm",
+      searchLabel: "Tìm chữ hoặc âm",
       searchPlaceholder: "Gõ chữ cần tìm, ví dụ ngh",
-      noResult: "Không có âm nào khớp. Hãy thử bộ lọc khác.",
-      resultCount: "{count} âm",
+      noResult: "Không có mục nào khớp. Hãy thử bộ lọc khác.",
+      resultCount: "{count} mục",
     },
     state: {
       missing: "Chưa ghi",
@@ -1465,6 +1494,7 @@ export const vi = {
       open: "Mở",
       close: "Đóng",
       openLabel: "Mở phần ghi âm của âm {unit}",
+      openLabelLetter: "Mở phần ghi âm của tên chữ {unit}",
       active: "Đang dùng bản đã duyệt",
     },
     pronunciation: {

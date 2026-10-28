@@ -1,3 +1,4 @@
+import letters from "../../../content/kb/letters.json";
 import phonemes from "../../../content/kb/phonemes.json";
 
 /**
@@ -6,10 +7,16 @@ import phonemes from "../../../content/kb/phonemes.json";
  * `i` và `y` chung một cách gọi nên chung một bản ghi (trừ khi GV chọn "i dài" cho y — khi đó xác nhận nhãn riêng).
  */
 
+/**
+ * Hai loại bản ghi giáo viên KHÁC NHAU (không gộp): `letter` = TÊN chữ cái (ví dụ b → "bê"), `phoneme` = ÂM của chữ
+ * (ví dụ b → "bờ"). Tiếng/từ hoàn chỉnh không nằm ở đây: thuộc thư viện giọng máy (TTS), có quy trình duyệt riêng.
+ */
+export type AudioUnitKind = "letter" | "phoneme";
+
 export type AudioUnit = {
-  /** Khóa ổn định, ví dụ `phoneme:ngh`. */
+  /** Khóa ổn định, ví dụ `phoneme:ngh` hoặc `letter:b`. */
   key: string;
-  kind: "phoneme";
+  kind: AudioUnitKind;
   /** Chữ ghi âm (NFC) — cũng là `unit_text` trong CSDL. */
   text: string;
   /** Chữ hiển thị (ví dụ "i / y"). */
@@ -52,6 +59,41 @@ function build(): readonly AudioUnit[] {
 }
 
 export const P0_UNITS: readonly AudioUnit[] = build();
+
+type RawLetter = { id: string; lower: string; upper: string; order: number; name: { proposed: string } };
+
+/** Tên chữ cái do trường/bộ sách quy ước (ă → "á", â → "ớ", k, q, y…): GV phải chốt trước khi ghi. */
+const LETTER_NEEDS_DECISION = new Set(["ă", "â", "k", "q", "y"]);
+
+function buildLetters(): readonly AudioUnit[] {
+  const items = (letters as { items: RawLetter[] }).items;
+  return [...items]
+    .sort((a, b) => a.order - b.order)
+    .map((item): AudioUnit => {
+      const text = item.lower.normalize("NFC");
+      return {
+        key: `letter:${text}`,
+        kind: "letter",
+        text,
+        displayText: `${item.upper.normalize("NFC")} ${text}`,
+        proposedLabel: item.name.proposed.normalize("NFC"),
+        alsoCovers: [],
+        needsDecision: LETTER_NEEDS_DECISION.has(text),
+      };
+    });
+}
+
+/** 29 tên chữ cái (ĐỀ XUẤT của kho tri thức, chờ GV xác nhận — Q-01). */
+export const LETTER_UNITS: readonly AudioUnit[] = buildLetters();
+
+/** Mọi đơn vị âm thanh của thư viện giáo viên: tên chữ cái rồi âm của chữ. */
+export const AUDIO_UNITS: readonly AudioUnit[] = [...LETTER_UNITS, ...P0_UNITS];
+
+export const AUDIO_UNIT_BY_KEY: ReadonlyMap<string, AudioUnit> = new Map(AUDIO_UNITS.map((unit) => [unit.key, unit]));
+
+export function findAudioUnit(kind: string, text: string): AudioUnit | undefined {
+  return AUDIO_UNIT_BY_KEY.get(`${kind}:${text}`);
+}
 
 export const P0_UNIT_BY_KEY: ReadonlyMap<string, AudioUnit> = new Map(P0_UNITS.map((unit) => [unit.key, unit]));
 

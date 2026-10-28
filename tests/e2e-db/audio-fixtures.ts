@@ -68,10 +68,11 @@ export async function approvedRecording(
   unit: string,
   label: string,
   index: number,
+  kind: "letter" | "phoneme" = "phoneme",
 ): Promise<string> {
   const bytes = Buffer.from(wav(0.5 + index * 0.1, 8000));
   const assetId = (await rpc(world.teacher, "teacher_ensure_audio_asset", {
-    p_unit_kind: "phoneme",
+    p_unit_kind: kind,
     p_unit_text: unit,
     p_proposed_label: label,
   })) as string;

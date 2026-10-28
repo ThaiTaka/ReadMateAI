@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
-import { P0_UNITS } from "@/features/audio-library/p0-catalog";
+import { AUDIO_UNITS } from "@/features/audio-library/p0-catalog";
 import { loadAudioStudio } from "@/server/audio-library/queries";
 import { requireTeacher } from "@/server/auth/teacher";
 import { vi } from "@/strings/vi";
@@ -40,7 +40,7 @@ async function AudioContent() {
   }
   return (
     <AudioStudio
-      units={P0_UNITS}
+      units={AUDIO_UNITS}
       assets={data.data.assets}
       context={{
         userId: data.data.userId,

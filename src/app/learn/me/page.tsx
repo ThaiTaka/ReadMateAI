@@ -2,7 +2,7 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { after } from "next/server";
 import { Suspense, type ReactNode } from "react";
-import { BookOpenCheck, LogOut, School, Smartphone, Trophy } from "lucide-react";
+import { BookOpenCheck, LogOut, School, Smartphone, Trophy, Volume2 } from "lucide-react";
 import { AdventureLink } from "@/components/adventure/adventure-button";
 import { AvatarFrame } from "@/components/adventure/avatar-frame";
 import { GameWorldHeader } from "@/components/adventure/game-world-header";
@@ -187,6 +187,23 @@ function StudentDashboard({ home, studentId, query }: { home: StudentHomeDto; st
 
       <ZoneSection zone="learn" titleId="hoc-tap-title">
         <div className="grid gap-6 lg:grid-cols-2">
+          <Card
+            id="nghe-chu"
+            data-testid="study-entry"
+            className="flex scroll-mt-6 flex-col justify-center gap-4 p-5 sm:p-8"
+          >
+            <div className="flex items-center gap-4">
+              <span className="flex size-16 shrink-0 items-center justify-center rounded-3xl bg-jade-100 text-jade-800">
+                <Volume2 aria-hidden="true" className="size-9" />
+              </span>
+              <h3 className="text-2xl font-extrabold text-ink">{vi.studyAudio.entry.title}</h3>
+            </div>
+            <p className="text-lg font-semibold text-ink-soft">{vi.studyAudio.entry.text}</p>
+            <AdventureLink href={`/learn/me/study${query}` as Route} tone="jade" className="self-start">
+              <Volume2 aria-hidden="true" className="size-6" />
+              {vi.studyAudio.entry.cta}
+            </AdventureLink>
+          </Card>
           <div
             id="luyen-tap"
             className="relative flex scroll-mt-6 flex-col justify-center gap-4 overflow-hidden rounded-world bg-linear-to-br from-jade-600 via-jade-700 to-deep-800 p-5 text-white shadow-world sm:p-8"
@@ -224,7 +241,7 @@ function StudentDashboard({ home, studentId, query }: { home: StudentHomeDto; st
               </>
             )}
           </div>
-          <Card className="flex flex-col justify-center gap-3 p-5 sm:p-8" data-testid="learning-progress">
+          <Card className="flex flex-col justify-center gap-3 p-5 sm:p-8 lg:col-span-2" data-testid="learning-progress">
             <h3 className="text-2xl font-extrabold text-ink">{z.learn.progressTitle}</h3>
             <p className="text-lg font-semibold text-ink-soft">{progressText}</p>
             <dl className="grid grid-cols-2 gap-3">

@@ -170,7 +170,8 @@ test.describe("giáo viên", () => {
     }
 
     await expect(page.getByRole("heading", { level: 1, name: t.title })).toBeVisible();
-    await expect(page.locator("li[data-unit]")).toHaveCount(38);
+    // 29 tên chữ cái + 38 âm của chữ.
+    await expect(page.locator("li[data-unit]")).toHaveCount(67);
     await expect(page.getByText(t.unit.awaitingConfirm).first()).toBeVisible();
     await expect(page.getByText(t.notice.trialTitle)).toBeVisible();
 

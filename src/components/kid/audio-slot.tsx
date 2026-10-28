@@ -22,12 +22,19 @@ type AudioSlotProps = {
   pending?: boolean;
   /** Học sinh đã tắt âm thanh trong cài đặt: không phát. */
   muted?: boolean;
+  /** Nút kín chiều ngang của ô chứa (ô chữ ở trang Học tập). Không đổi hành vi. */
+  fill?: boolean;
+  /** Tên truy cập khi sẵn sàng (phải chứa chữ hiển thị). Ví dụ "Nghe tên chữ b". */
+  ariaLabel?: string;
 };
 
 type PlayState = "ready" | "loading" | "playing" | "error";
 
-const lockedClasses =
-  "inline-flex min-h-10 items-center gap-1.5 rounded-full border-2 border-dashed border-line-strong bg-surface-muted px-3 text-xs font-semibold text-ink-soft";
+const lockedBase =
+  "inline-flex items-center gap-1.5 rounded-full border-2 border-dashed border-line-strong bg-surface-muted px-3 font-semibold text-ink-soft";
+// Nút khóa nhỏ ở khung câu hỏi; nút khóa kín ô (ô chữ) giữ cùng chiều cao 64 px với nút phát để ô không "nhảy" khi mở khóa.
+const lockedClasses = `${lockedBase} min-h-10 text-xs`;
+const lockedFillClasses = `${lockedBase} min-h-touch-kid text-sm`;
 const playClasses =
   "inline-flex min-h-touch-kid min-w-touch-kid items-center gap-3 rounded-full border-2 border-ink bg-surface px-5 text-lg font-extrabold text-ink hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2";
 
@@ -41,7 +48,16 @@ const playClasses =
  * - Mỗi lần chạm là một yêu cầu mới tới máy chủ (không lưu bộ nhớ đệm) nên bản ghi bị thu hồi sẽ không phát lại được.
  * - Một âm tại một thời điểm (`claimAudio`); rời trang hoặc đổi `key` của thành phần (đổi câu) → dừng và nhả tài nguyên.
  */
-export function AudioSlot({ label, note, className, source = null, pending = false, muted = false }: AudioSlotProps) {
+export function AudioSlot({
+  label,
+  note,
+  className,
+  source = null,
+  pending = false,
+  muted = false,
+  fill = false,
+  ariaLabel,
+}: AudioSlotProps) {
   const [state, setState] = useState<PlayState>("ready");
   const [played, setPlayed] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -93,9 +109,17 @@ export function AudioSlot({ label, note, className, source = null, pending = fal
   };
 
   const tail = note ? <span className="pl-2 text-xs text-ink-faint">{note}</span> : null;
+  const fillClasses = fill ? "w-full justify-center text-center" : "";
   const locked = (reason: string, busy = false) => (
-    <span className={cn("inline-flex flex-col items-start gap-1", className)}>
-      <button type="button" disabled aria-disabled="true" aria-busy={busy || undefined} className={lockedClasses}>
+    <span className={cn("inline-flex flex-col items-start gap-1", fill && "w-full", className)}>
+      <button
+        type="button"
+        disabled
+        aria-disabled="true"
+        aria-busy={busy || undefined}
+        aria-label={ariaLabel ? `${ariaLabel}: ${reason}` : undefined}
+        className={cn(fill ? lockedFillClasses : lockedClasses, fillClasses)}
+      >
         {busy ? <Volume2 aria-hidden="true" className="size-4" /> : <VolumeX aria-hidden="true" className="size-4" />}
         <span>
           {label}: {reason}
@@ -110,8 +134,14 @@ export function AudioSlot({ label, note, className, source = null, pending = fal
   if (!source) return locked(vi.practice.audio.unavailable);
   if (!browserSupportsMime(source.mimeType)) {
     return (
-      <span className={cn("inline-flex flex-col items-start gap-1", className)}>
-        <button type="button" disabled aria-disabled="true" className={lockedClasses}>
+      <span className={cn("inline-flex flex-col items-start gap-1", fill && "w-full", className)}>
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          aria-label={ariaLabel ? `${ariaLabel}: ${vi.practice.audio.unavailable}` : undefined}
+          className={cn(fill ? lockedFillClasses : lockedClasses, fillClasses)}
+        >
           <VolumeX aria-hidden="true" className="size-4" />
           <span>
             {label}: {vi.practice.audio.unavailable}
@@ -134,14 +164,24 @@ export function AudioSlot({ label, note, className, source = null, pending = fal
           ? vi.practice.audio.replay
           : label;
   return (
-    <span className={cn("inline-flex flex-col items-start gap-1", className)}>
+    <span className={cn("inline-flex flex-col items-start gap-1", fill && "w-full", className)}>
       <button
         type="button"
         onClick={press}
-        aria-label={!busy && played ? `${text}: ${label}` : undefined}
+        aria-label={
+          !busy
+            ? ariaLabel
+              ? played
+                ? `${text}: ${ariaLabel}`
+                : ariaLabel
+              : played
+                ? `${text}: ${label}`
+                : undefined
+            : undefined
+        }
         aria-busy={state === "loading" || undefined}
         data-audio-state={state}
-        className={playClasses}
+        className={cn(playClasses, fillClasses)}
       >
         {busy ? <Square aria-hidden="true" className="size-6" /> : <Volume2 aria-hidden="true" className="size-7" />}
         <span>{text}</span>

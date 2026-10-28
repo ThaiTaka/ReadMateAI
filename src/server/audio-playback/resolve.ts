@@ -19,7 +19,7 @@ import type { SupportLevel } from "@/types/learning";
  * Kết quả chứa `storageKey`: CHỈ để máy chủ đọc tệp; không bao giờ đưa vào phản hồi cho trình duyệt.
  */
 
-const resolvedSchema = z.object({
+export const resolvedAudioSchema = z.object({
   versionId: z.uuid(),
   storageKey: z.string().min(1),
   mimeType: z.enum(AUDIO_MIME_TYPES),
@@ -27,7 +27,7 @@ const resolvedSchema = z.object({
   durationMs: z.number().int().positive(),
   contentHash: z.string().regex(/^[0-9a-f]{64}$/u),
 });
-export type ResolvedAudio = z.infer<typeof resolvedSchema>;
+export type ResolvedAudio = z.infer<typeof resolvedAudioSchema>;
 
 type QuestionFacts = { id: string; student_id: string; status: string; support_level: number };
 
@@ -82,7 +82,7 @@ export async function resolveTeacherAudio(
     p_expected_label: binding.expectedLabel,
   });
   if (resolved.error) return fail(publicAudioCode(mapDbError(resolved.error)));
-  const parsed = resolvedSchema.safeParse(resolved.data);
+  const parsed = resolvedAudioSchema.safeParse(resolved.data);
   return parsed.success ? ok(parsed.data) : fail("AUDIO_NOT_AVAILABLE");
 }
 
