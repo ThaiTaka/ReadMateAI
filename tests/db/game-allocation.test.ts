@@ -560,6 +560,7 @@ describe("R08.2 — reset mùa", () => {
       const m = await gameMember(t, cls.id, { burn: 5 });
       const plan = (await realPlan(m))!;
       const season1 = await activeSeason(cls.id);
+      const ledgerBefore = await admin.from("point_events").select("id").eq("season_id", season1);
       const [start, reset] = await Promise.all([
         startWith(m, plan),
         t.rpc("teacher_reset_season", {
@@ -570,7 +571,33 @@ describe("R08.2 — reset mùa", () => {
         }),
       ]);
       expect(reset.error).toBeNull();
-      if (start.error) expect(errorMessage(start)).toBe("SEASON_CLOSED");
+      const season2 = await activeSeason(cls.id); // reset luôn đóng mùa cũ và mở đúng MỘT mùa mới
+      expect(season2).not.toBe(season1);
+      // Kết cục của lần bắt đầu phụ thuộc thứ tự giao dịch; chỉ có BA kết cục hợp lệ:
+      //  - thành công: start xong trước, reset sau đó void lượt (vòng lặp bên dưới kiểm);
+      //  - SEASON_CLOSED: reset xong trong lúc start đợi khóa `for share` → mùa cũ không còn `active`;
+      //  - INSUFFICIENT_POINTS: reset đã commit TRƯỚC khi start đọc mùa → start thấy mùa MỚI (điểm 0 < ngưỡng), đúng như
+      //    bắt đầu lượt sau reset ở kịch bản tuần tự phía trên. Mã này chỉ hợp lệ khi điểm mùa mới thật sự dưới ngưỡng.
+      if (start.error) {
+        const code = errorMessage(start);
+        expect(["SEASON_CLOSED", "INSUFFICIENT_POINTS"]).toContain(code);
+        if (code === "INSUFFICIENT_POINTS") {
+          const score = await admin
+            .from("season_scores")
+            .select("balance")
+            .eq("season_id", season2)
+            .eq("student_id", m.studentId);
+          expect((score.data ?? []).every((row) => row.balance === 0)).toBe(true);
+        }
+      }
+      // Bất biến cho MỌI kết cục: mùa mới không nhận lượt/chạm trán/câu/điểm nào từ lần bắt đầu này, mùa cũ không bị ghi điểm.
+      expect((await admin.from("game_runs").select("id").eq("season_id", season2)).data).toEqual([]);
+      expect((await admin.from("game_encounters").select("id").eq("season_id", season2)).data).toEqual([]);
+      expect((await admin.from("question_instances").select("id").eq("season_id", season2)).data).toEqual([]);
+      expect((await admin.from("point_events").select("id").eq("season_id", season2)).data).toEqual([]);
+      expect((await admin.from("point_events").select("id").eq("season_id", season1)).data).toHaveLength(
+        ledgerBefore.data!.length,
+      );
       const runs = await admin.from("game_runs").select("id, status, season_id").eq("student_id", m.studentId);
       for (const r of runs.data!) {
         expect(r.status).toBe("void_season_reset");

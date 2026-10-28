@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page, type Response } from "@playwright/test";
+import { expect, test, type Locator, type Page, type Response, type TestInfo } from "@playwright/test";
 import { findPath, parseLevel, positionKey, type Position } from "../../src/features/game-engine/core";
 import { MONSTER_KEYS } from "../../src/features/game-runs/monsters";
 import level1 from "../../content/games/treasure-maze/levels/level-01.json";
@@ -71,6 +71,55 @@ class Tracker {
   }
   get total() {
     return this.deltas.reduce((sum, value) => sum + value, 0);
+  }
+}
+
+/**
+ * Ghi lại console, lỗi trang, yêu cầu hỏng và mã trả về của API học sinh. Mê cung đôi khi không mở trên WebKit mobile
+ * ở CI (kẹt "Đang mở mê cung…" mà không có dấu vết nào); khi đó báo cáo phải nói được: yêu cầu bắt đầu lượt có được gửi
+ * không, máy chủ trả gì, trang đã hydrate chưa.
+ */
+function watchPage(page: Page): string[] {
+  const lines: string[] = [];
+  const path = (url: string) => new URL(url).pathname;
+  page.on("console", (message) => lines.push(`console.${message.type()}: ${message.text().slice(0, 300)}`));
+  page.on("pageerror", (error) => lines.push(`pageerror: ${error.message.slice(0, 300)}`));
+  page.on("requestfailed", (request) =>
+    lines.push(`requestfailed: ${request.method()} ${path(request.url())} ${request.failure()?.errorText ?? ""}`),
+  );
+  page.on("response", (response) => {
+    if (path(response.url()).startsWith("/api/student/")) {
+      lines.push(`response ${response.status()}: ${response.request().method()} ${path(response.url())}`);
+    }
+  });
+  return lines;
+}
+
+async function expectMazeOpened(page: Page, tracker: Tracker, watched: string[], testInfo: TestInfo) {
+  try {
+    await expect(page.getByTestId("maze-run")).toBeVisible({ timeout: 30_000 });
+  } catch (error) {
+    const state = await page
+      .evaluate(() => {
+        const loading = document.querySelector('[data-testid="maze-loading"]');
+        return {
+          readyState: document.readyState,
+          visibility: document.visibilityState,
+          online: navigator.onLine,
+          loadingShown: loading !== null,
+          hydrated: loading ? Object.keys(loading).some((key) => key.startsWith("__react")) : null,
+          scriptResources: performance.getEntriesByType("resource").filter((e) => e.name.endsWith(".js")).length,
+        };
+      })
+      .catch(() => ({ unavailable: true }));
+    const report = [
+      `url: ${new URL(page.url()).pathname}`,
+      `state: ${JSON.stringify(state)}`,
+      `api requests sent: ${JSON.stringify(tracker.requests)}`,
+      ...watched,
+    ].join("\n");
+    await testInfo.attach("maze-open-diagnostics", { body: report, contentType: "text/plain" });
+    throw new Error(`${(error as Error).message}\n--- chẩn đoán mở mê cung ---\n${report}`);
   }
 }
 
@@ -207,9 +256,10 @@ test("R08.4 toàn trình: 7 chạm trán qua giao diện, tải lại giữa ch�
   expect(await balanceOf(member.id)).toBe(50);
 
   const tracker = new Tracker(page);
+  const watched = watchPage(page);
   await resetRateLimits();
   await page.goto(PAGE);
-  await expect(page.getByTestId("maze-run")).toBeVisible({ timeout: 30_000 });
+  await expectMazeOpened(page, tracker, watched, testInfo);
   await expect(page.getByTestId("maze-ribbon")).toHaveText("Lượt chơi có điểm");
   // Bản đồ chưa vẽ trước quái vật nào, chưa có màn quái vật.
   await expect(page.getByTestId("monster-view")).toHaveCount(0);
