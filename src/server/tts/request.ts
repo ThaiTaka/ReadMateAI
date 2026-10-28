@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { POC_VOICE_KEYS } from "./poc/voices.ts";
 import { TTS_PURPOSES, type TtsRequest } from "./types.ts";
 
 /**
@@ -20,7 +21,8 @@ const nfcText = z
 export const ttsRequestSchema = z.strictObject({
   text: nfcText,
   purpose: z.enum(TTS_PURPOSES),
-  voiceKey: z.enum(VOICE_KEYS),
+  // Khóa giọng thử nghiệm (R10.3b2-P0) chỉ để nghe thử; danh mục/lô sản xuất vẫn chỉ dùng `VOICE_KEYS` (voice.ts).
+  voiceKey: z.enum([...VOICE_KEYS, ...POC_VOICE_KEYS]),
   speed: z.enum(["slow", "normal"]),
 });
 

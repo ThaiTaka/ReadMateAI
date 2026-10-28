@@ -9,7 +9,8 @@
 |---|---|
 | Interface `TtsProvider`, chế độ `none`, mock, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy` | **Đã hiện thực + unit test** (`src/server/tts/`, `tests/unit/tts/`) |
 | Adapter Google Cloud TTS | **Skeleton** theo tài liệu REST; chỉ kiểm thử bằng `fetch` giả. **Chưa gọi API thật** |
-| Adapter Azure / FPT.AI | **Chưa viết** (chỉ đánh giá tài liệu; hợp đồng interface đã đủ để thêm) |
+| Adapter FPT.AI TTS v5 | **Đã viết (R10.3b2-P0, §15)**; chỉ kiểm thử bằng `fetch` giả, **chưa gọi API thật** |
+| Adapter Azure | **Chưa viết** (chỉ đánh giá tài liệu; hợp đồng interface đã đủ để thêm) |
 | Gọi API thật, nghe thử chất lượng giọng Việt | **BLOCKED — chờ chủ dự án cấp phép tạo tài khoản/khóa thử nghiệm.** Chưa đánh giá chất lượng tổng hợp |
 | Bảng/migration thư viện âm thanh, giao diện GV `/teacher/audio`, Storage riêng tư, quy trình duyệt | **R10.2 đã có** (§12); kiểm thử với dữ liệu giả trên local/CI |
 | Phát bản ghi GV đã duyệt cho học sinh (bài Nghe âm – chọn chữ) | **R10.3a đã có về kỹ thuật** (§13) dưới cờ `student_teacher_audio_playback_approved` **TẮT**; kiểm thử bằng sóng tổng hợp. **R10.3 CHƯA nghiệm thu**: chưa bản ghi thật, chưa thử iPhone/Android thật, chưa chọn TTS |
@@ -68,7 +69,7 @@ Ngữ liệu hiện có: 17 câu lệnh chuẩn ≈ 1.100 ký tự, 60 từ ≈ 
 
 ### 3.5 Kết quả POC
 
-**Chưa thực hiện.** Không gọi API thật, không có mẫu âm thanh, không có đánh giá chất lượng. Mọi kiểm thử adapter dùng mock/`fetch` giả.
+**Chưa thực hiện.** Không gọi API thật, không có mẫu âm thanh, không có đánh giá chất lượng. Mọi kiểm thử adapter dùng mock/`fetch` giả. Công cụ nghe thử và adapter FPT.AI đã sẵn sàng từ R10.3b2-P0 (§15) nhưng **vẫn CHƯA THỬ API THẬT** vì chưa có khóa được cấp.
 
 ## 4. Kiến trúc và luồng dữ liệu
 
@@ -424,3 +425,86 @@ Mong muốn của chủ dự án: học sinh ghép **"bà"** → máy đọc **"
 4. **Có âm thanh riêng cho tiếng cơ sở ("ba") và tiếng hoàn chỉnh ("bà")** do giáo viên ghi hoặc duyệt. **Không giả định** nối "bờ" + "a" tự tạo được giọng đọc tự nhiên của "ba" (ghép thô sẽ khác cách đọc thật), và không tạo tiếng hoàn chỉnh bằng cách nối đoạn.
 5. Tuân thủ AD-35: trong bài đọc, không phát chuỗi đánh vần của chữ cần đọc trước khi chấm; chuỗi đánh vần chỉ là phản hồi/đọc mẫu sau chấm hoặc ở hoạt động học (không chấm) do chính sách dạng bài cho phép.
 6. Cần: bảng quy tắc đánh vần (dữ liệu trong `content/`, `pending_review`), danh mục đoạn âm thanh, thử nghiệm với giáo viên trước khi mở cho học sinh.
+
+
+## 15. R10.3b2-P0 — Công cụ nghe thử giọng AI tiếng Việt (adapter FPT.AI + so sánh giọng) — CHƯA THỬ API THẬT
+
+> **Phạm vi:** một POC giới hạn để **giáo viên nghe và so sánh** giọng AI tiếng Việt. **Không** phải R10.3b2 đầy đủ: không bảng/migration TTS, không Storage, không đường phát cho học sinh, không cờ phát nào được bật, không bản ghi `approved` từ tệp AI, không R10.4. **Việc cho phép nghe thử không phải là cho phép bật thanh toán, phát hành nội dung hay mở cho học sinh thật.**
+>
+> **Trạng thái trung thực (2026-10-28): CHƯA THỬ API THẬT.** Chưa có khóa API nào được cấp cho dự án (`.env.local` không có `TTS_FPT_API_KEY` / `TTS_GOOGLE_API_KEY`), nên **chưa gọi API nào, chưa có tệp âm thanh nào, chưa giọng nào được nghe**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Giao thức FPT.AI bên dưới được viết theo tài liệu chính thức, **chưa được kiểm chứng bằng phản hồi thật** (xem §15.7).
+
+### 15.1 Đối chiếu tài liệu chính thức (2026-10-28)
+
+**FPT.AI TTS v5** ([docs.fpt.ai/…/speech/api/text-to-speech](https://docs.fpt.ai/docs/en/speech/api/text-to-speech)):
+
+- `POST https://api.fpt.ai/hmi/tts/v5`; khóa ở tiêu đề **`api_key`** (gạch dưới — trang tài liệu dùng đúng chữ này); tiêu đề `voice`, `speed` (-3…+3, mặc định 0), `format` (`mp3`|`wav`), `callback_url` (tùy chọn); thân yêu cầu là văn bản, **3–5.000 ký tự**.
+- Giọng: `banmai` (nữ Bắc), `lannhi` (nữ Nam), `leminh` (nam Bắc), `myan` (nữ Trung), `thuminh` (nữ Bắc), `giahuy` (nam Trung), `linhsan` (nữ Nam).
+- Phản hồi JSON `{ error, async, message, request_id }`: `error = 0` là thành công; `async` là **liên kết** tới tệp, tệp **có thể chưa tồn tại** khi phản hồi trả về (tài liệu: chờ khoảng 5 giây tới 2 phút theo độ dài). Tài liệu **không** mô tả cách hỏi lại, thời hạn liên kết hay mã lỗi cụ thể (chỉ `0` = thành công); ví dụ liên kết nằm trên S3 `ap-southeast-1` (đường dẫn `text2speech-v4`) nhưng **không cam kết** tên miền.
+- **FPT TTS v5 và FPT AI Factory Voice Studio là hai giao diện sản phẩm khác nhau**; không mặc định cùng API hay bảng giá. Adapter này chỉ viết cho **API v5** ở trên. Voice Studio **chưa được đánh giá**.
+- Giá: trang bảng giá TTS ([tts-pricing](https://docs.fpt.ai/docs/en/speech/documentation/tts-pricing)) — qua tóm tắt tìm kiếm — nêu gói miễn phí **100.000 ký tự/tháng** cho giọng v5 nhưng tốc độ thấp, xếp hàng, giới hạn số yêu cầu mỗi ngày; gói trả phí cộng thêm ký tự (từ 500.000 VND cho 1,5 triệu ký tự). Trang ghi bản quyền 2025. **Chưa đọc trực tiếp trang đầy đủ; cần xác minh trước khi dựa vào.**
+
+**Google Cloud TTS** ([danh sách giọng](https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types), đã đọc trực tiếp): vi-VN có `Neural2-A` (nữ), `Neural2-D` (nam), 4 Standard, 4 WaveNet và 30 giọng Chirp3-HD. Chirp 3 HD **không** hỗ trợ tham số tốc độ đọc/cao độ/SSML; Neural2 dùng được `speakingRate`. Giá Neural2 (khoảng 16 USD/1 triệu ký tự, miễn phí 1 triệu ký tự/tháng) **chỉ là số nhớ, chưa xác minh** — trang giá không đọc được đầy đủ. Google bắt buộc bật thanh toán.
+
+**Azure** `vi-VN-HoaiMyNeural` (nữ), `vi-VN-NamMinhNeural` (nam): **chỉ là phương án dự phòng, CHƯA có adapter**, không bắt buộc ở POC này.
+
+### 15.2 Thành phần mã
+
+| Tệp | Vai trò |
+|---|---|
+| `src/server/tts/fpt-provider.ts` | Adapter `TtsProvider` cho FPT.AI v5 (`id: "fpt"`): `POST` → lấy liên kết `async` → kiểm tra liên kết (`checkFptAudioUrl`) → hỏi lại có giới hạn → đọc tệp có giới hạn dung lượng |
+| `src/server/tts/providers.ts` | Adapter Google giữ nguyên; thêm khóa giọng nghe thử `google-neural2-a/d` và tùy chọn `wav` (LINEAR16) |
+| `src/server/tts/poc/voices.ts` | Giọng ứng viên (nhà cung cấp, tên giọng, giới tính, vùng miền) — **không phải quyết định chọn giọng** |
+| `src/server/tts/poc/sentences.ts` | 6 câu lấy từ 34 lời đọc của danh mục (2 lời khen/nhắc ngắn, 1 nhắc dài, 3 câu hướng dẫn gồm câu dài nhất 60 ký tự) + 1 câu chẩn đoán `bà, bá, mẹ, nhà` |
+| `src/server/tts/poc/plan.ts` | Kế hoạch và giới hạn cứng (hàm thuần) |
+| `src/server/tts/poc/options.ts` | Đối số CLI và quyết định chế độ chạy khô/thật (hàm thuần, nhận `env` từ ngoài) |
+| `src/server/tts/poc/run.ts` | Chạy tuần tự, không retry, dừng nhà cung cấp sau 2 lỗi liên tiếp, kiểm tra tệp theo nội dung (`checkSynthesizedAudio`) |
+| `src/server/tts/poc/store.ts`, `manifest.ts` | Lưu cục bộ `.tts-poc/` (tên tệp = sha256 nội dung) và sổ `manifest.json` (zod) |
+| `src/server/tts/poc/serve.ts` + `src/app/api/teacher/tts-poc/[file]/route.ts` | Phát lại cho **giáo viên** (xác thực GV; tên tệp phải khớp mẫu băm và có trong sổ; kiểm lại sha256; `no-store`, `nosniff`, sandbox, Range) |
+| `scripts/tts-poc.ts` → `npm run tts:poc` | Công cụ dòng lệnh |
+| `src/app/teacher/(console)/tts-compare/` | Trang `/teacher/tts-compare` nghe A/B, bảng số đo và bảng ghi nhận khi nghe |
+
+### 15.3 Cách chạy
+
+```
+npm run tts:poc                     # CHẠY KHÔ (mặc định): in kế hoạch, không mạng
+npm run tts:poc -- --live           # gọi API thật — cần ĐỒNG THỜI các điều kiện dưới đây
+npm run tts:poc -- --live --speed slow
+npm run tts:poc -- --live --set diagnostic --voices fpt-banmai,fpt-lannhi
+```
+
+Gọi API thật khi và chỉ khi **cả ba**: cờ `--live`; biến `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận đã kiểm tra quota/thanh toán của nhà cung cấp — công cụ **không tự kiểm tra** quota hay thanh toán, chỉ chặn nếu chưa xác nhận); khóa của nhà cung cấp tương ứng trong môi trường máy chủ (`TTS_FPT_API_KEY`, `TTS_GOOGLE_API_KEY` — `.env.local`, không commit). Thiếu điều kiện nào → thoát mã 3 với dòng **"CHƯA THỬ API THẬT"** và không gọi mạng. Khóa không bao giờ được in, ghi log, ghi vào sổ hay gửi tới trình duyệt.
+
+Giọng mặc định: `fpt-banmai`, `fpt-lannhi`. Có thể chọn `fpt-thuminh`, `google-neural2-a`, `google-neural2-d` bằng `--voices` (tối đa hai giọng trong một lần chạy mặc định vì giới hạn dưới). Tốc độ: `--speed normal` (FPT `0`, Google `1.0`) hoặc `slow` (FPT `-1`, Google `0.8`) — **"chậm vừa phải" chỉ là giá trị thử, chưa phải quyết định G3**. Định dạng `--format mp3|wav`.
+
+### 15.4 Giới hạn chi phí và an toàn (kiểm thử bằng unit test)
+
+- Tối đa **12 lần gọi và 600 ký tự mỗi lần chạy** (6 câu × 2 giọng ≈ 440 ký tự); `--max-requests` chỉ **hạ** được trần; 3 giọng × 6 câu bị từ chối. Không có đường chạy 34 câu hàng loạt.
+- **Chống gọi lặp:** khóa yêu cầu = nhà cung cấp + giọng + tốc độ + định dạng + chữ NFC; yêu cầu đã có tệp được bỏ qua (không tốn ký tự). Tên tệp = sha256 nội dung nên hai yêu cầu cho cùng byte chỉ lưu một tệp.
+- **Không retry**; sau **2 lỗi liên tiếp** một nhà cung cấp bị dừng trong lần chạy đó. Hỏi lại tệp FPT tối đa 24 lần, chờ tăng dần 2→6 giây (≈ 2 phút 14 giây), có hạn thời gian tổng (`FPT_SUGGESTED_TIMEOUT_MS` = 150 giây).
+- **SSRF (liên kết `async` là đầu vào không tin cậy):** chỉ `https`, không IP/`localhost`/tên không có dấu chấm, không cổng, không tài khoản trong địa chỉ, tên miền phải là S3 `ap-southeast-1` hoặc `*.fpt.ai`; mọi `fetch` dùng `redirect: "error"`; giới hạn 2 MB (kiểm tiêu đề lẫn byte thực); chỉ nhận `audio/*` hoặc `application/octet-stream`. Liên kết bị từ chối → `PROVIDER_ERROR`, chẩn đoán chỉ ghi mã `URL_REJECTED` và tên miền. Không dùng `callback_url` (cần địa chỉ công khai). Nếu lần chạy thật cho thấy tên miền thật khác, **thêm có chủ đích** vào danh sách — không nới tự động.
+- Chỉ văn bản học liệu/lời đọc cố định được gửi đi (qua cùng `checkTtsRequest`: NFC, ≤ 300 ký tự, từ chối chữ giống dữ liệu cá nhân, chặn `<` `>`). **Không dữ liệu giáo viên/học sinh.**
+- Byte giả của `mock` không bao giờ thành tệp nghe thử (`checkSynthesizedAudio` từ chối).
+
+### 15.5 Tách biệt hoàn toàn với bản ghi giáo viên
+
+- Giữ nguyên `audio_assets`, `audio_asset_versions` và bucket `teacher-audio`; POC **không** chạm CSDL hay Storage.
+- Tệp nghe thử chỉ ở `.tts-poc/` (trong `.gitignore`, `.prettierignore` theo `.gitignore`), **không** vào Git, Supabase hay Vercel: quyền lưu và phân phối tệp của nhà cung cấp **chưa được xác minh** (TTS_APPROVAL_CHECKLIST P6).
+- Khóa giọng nghe thử (`fpt-*`, `google-neural2-*`) **tách khỏi** khóa giọng sản xuất (`vi-female-1`, `vi-male-1`); danh mục và lô sản xuất (`catalog.ts`, `batch.ts`) không dùng được chúng; adapter FPT từ chối khóa sản xuất (`INVALID_INPUT`).
+- Domain TTS riêng cho giai đoạn sau (R10.3b2 đầy đủ, **chưa làm**): danh mục + duyệt lời đọc TTS, phiên bản tệp TTS (nhà cung cấp, model, giọng, tốc độ, hash), nguồn gốc/quyền sử dụng, nghe duyệt/thu hồi, cờ phát TTS riêng mặc định TẮT. Hai hệ thống chỉ dùng chung chính sách AD-35 và hạ tầng trình phát phù hợp, **không** dùng chung bản ghi hay quyền duyệt.
+- Câu chẩn đoán `bà, bá, mẹ, nhà` **không phải học liệu**: không nằm trong danh mục, không vào thư viện phát cho học sinh và không thay bản ghi giáo viên (âm/vần đơn lẻ luôn do giáo viên ghi).
+
+### 15.6 Trang `/teacher/tts-compare`
+
+Chỉ giáo viên (`requireTeacher`; route phát tệp từ chối thiết bị học sinh), chỉ đọc, luôn có khung **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**. Hiện danh sách giọng ứng viên (nhà cung cấp, vùng miền, giới tính), từng câu với các tệp nghe A/B (`<audio controls preload="none">`, chỉ một đoạn phát tại một thời điểm, phát qua `/api/teacher/tts-poc/…` — **không** từ địa chỉ nhà cung cấp), số liệu đo được (thời gian tạo, dung lượng, thời lượng; chi phí thực tế ghi "Chưa có số liệu") và bảng ghi nhận khi nghe 7 tiêu chí (dấu thanh, phụ âm/nguyên âm, mức tự nhiên, dễ nghe với học sinh lớp 1, tốc độ và ngắt, câu dài, chất lượng trên trình duyệt). **Không có nút duyệt/chọn giọng, không biểu mẫu, không lưu nhận xét.** Khi chưa có tệp, trang nói rõ chưa gọi API thật.
+
+### 15.7 Việc CHƯA làm / còn chờ
+
+- **Chưa gọi API thật nào**; chưa nghe giọng nào; chưa đo thời gian tạo hay chi phí thật. Giao thức FPT (tiêu đề `api_key`, thân văn bản thô không đặt `Content-Type`, trường `async`, tên miền S3, trạng thái 403/404 khi tệp chưa sẵn sàng, cách phản hồi khi hết hạn mức) **chỉ được kiểm bằng `fetch` giả** theo tài liệu.
+- **Chủ dự án cần:** cấp khóa thử qua kênh bảo mật (không dán vào chat/commit), xác nhận quota/thanh toán trước khi đặt `TTS_POC_COST_CONFIRMED=yes`, và trả lời P1–P9 (đặc biệt **P6 quyền lưu/phân phối tệp** và P7 nhà cung cấp có lưu văn bản không — FPT.AI chưa có điều khoản được xác minh).
+- **Giáo viên cần:** nghe và quyết định giọng (G1–G3), duyệt lời đọc (G4–G7) và từng tệp (G8). Không có mục nào tự động; không giọng nào được coi là đạt chuẩn.
+- Chưa so sánh FPT AI Factory Voice Studio, Azure, hay Chirp 3 HD của Google.
+- Chưa kiểm tra phát trên iPhone/Safari và Android thật (điều kiện C4).
+
+### 15.8 Kiểm thử
+
+`tests/unit/tts/poc/` (adapter FPT bằng `fetch` giả: tiêu đề/thân, ánh xạ giọng–tốc độ, hỏi lại có giới hạn, timeout, lỗi API, tệp quá lớn, 11 kiểu liên kết nguy hiểm, không lộ khóa; adapter Google với khóa nghe thử; kế hoạch/giới hạn/chống trùng; đối số và chế độ chạy; chạy–lưu–sổ–phục vụ tệp bằng thư mục tạm; giao diện so sánh) và cập nhật `safety-scan.test.ts` (địa chỉ dịch vụ ngoài chỉ ở hai adapter; mô-đun nghe thử chỉ dùng ở khu giáo viên; route TTS duy nhất là route nghe lại của giáo viên; `.env.example` không chứa khóa).

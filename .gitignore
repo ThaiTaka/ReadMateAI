@@ -53,3 +53,6 @@ exports/
 *.backup
 *.sql.gz
 .logs/
+
+# R10.3b2-P0: tệp giọng máy nghe thử — quyền lưu/phân phối chưa xác minh, chỉ ở máy người vận hành
+.tts-poc/

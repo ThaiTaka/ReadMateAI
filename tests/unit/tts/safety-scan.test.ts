@@ -41,14 +41,18 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("địa chỉ dịch vụ ngoài chỉ xuất hiện trong adapter Google (providers.ts); không có Azure/FPT.AI", () => {
+  it("địa chỉ dịch vụ ngoài chỉ xuất hiện trong hai adapter (providers.ts = Google, fpt-provider.ts = FPT.AI); không có Azure", () => {
+    const adapters = ["/providers.ts", "/fpt-provider.ts"];
     for (const file of ttsFiles) {
       const body = text(file);
-      expect(body, file).not.toMatch(/cognitiveservices|speech\.microsoft|tts\.speech|fpt\.ai|api\.fpt/iu);
-      if (!norm(file).endsWith("/providers.ts")) expect(body, file).not.toMatch(/https?:\/\//u);
+      expect(body, file).not.toMatch(/cognitiveservices|speech\.microsoft|tts\.speech/iu);
+      if (!adapters.some((suffix) => norm(file).endsWith(suffix))) {
+        expect(body, file).not.toMatch(/https?:\/\//u);
+        expect(body, file).not.toMatch(/api\.fpt\.ai|texttospeech\.googleapis/iu);
+      }
     }
     for (const file of outside)
-      expect(text(file), file).not.toMatch(/texttospeech\.googleapis|cognitiveservices|fpt\.ai/iu);
+      expect(text(file), file).not.toMatch(/texttospeech\.googleapis|cognitiveservices|api\.fpt\.ai|hmi\/tts/iu);
   });
 
   it("mô-đun TTS không đọc process.env và không import dữ liệu học sinh, xác thực, điểm, game, bảng xếp hạng", () => {
@@ -73,7 +77,30 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
       if (/["']use client["']/u.test(body)) expect(body, file).not.toMatch(/server\/tts/u);
       expect(body, file).not.toMatch(/runTtsBatch|synthesizeSpeech/u);
     }
-    expect(outside.filter((file) => /\/api\/.*tts/iu.test(norm(file)))).toEqual([]);
+    // Route duy nhất liên quan TTS là route NGHE LẠI tệp thử nghiệm cho giáo viên (R10.3b2-P0); không có route học sinh.
+    expect(
+      outside.filter((file) => /\/api\/.*tts/iu.test(norm(file))).map((file) => norm(relative(root, file))),
+    ).toEqual(["src/app/api/teacher/tts-poc/[file]/route.ts"]);
+    expect(outside.filter((file) => /\/api\/student\/.*tts/iu.test(norm(file)))).toEqual([]);
+  });
+
+  it("mô-đun nghe thử (poc/, fpt-provider) chỉ được dùng ở khu giáo viên; không ở mã học sinh hay mã trình duyệt", () => {
+    const allowed = new Set(
+      [
+        "src/app/teacher/(console)/tts-compare/page.tsx",
+        "src/app/teacher/(console)/tts-compare/tts-compare-view.tsx",
+        "src/app/api/teacher/tts-poc/[file]/route.ts",
+      ].map((name) => norm(join(root, name))),
+    );
+    for (const file of outside) {
+      const body = text(file);
+      if (/server\/tts\/(poc\/|fpt-provider)/u.test(body)) {
+        expect(allowed.has(norm(file)), `${relative(root, file)} import mô-đun nghe thử`).toBe(true);
+        expect(body, file).not.toMatch(/["']use client["']/u);
+      }
+    }
+    // Khóa API không bao giờ có tiền tố công khai.
+    for (const file of sourceFiles) expect(text(file), file).not.toMatch(/NEXT_PUBLIC_[A-Z_]*TTS/u);
   });
 
   it("không có mã ứng dụng nào bật cờ phát TTS; cờ phát âm thanh và ghi âm vẫn TẮT trong mọi migration", () => {
@@ -93,6 +120,8 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     const env = readFileSync(join(root, ".env.example"), "utf8");
     expect(env).toMatch(/^TTS_PROVIDER=none$/mu);
     expect(env).toMatch(/^TTS_GOOGLE_API_KEY=$/mu);
+    expect(env).toMatch(/^TTS_FPT_API_KEY=$/mu);
+    expect(env).toMatch(/^TTS_POC_COST_CONFIRMED=$/mu);
   });
 
   it("mô-đun danh mục không bị kéo vào mã trình duyệt (node:crypto chỉ ở máy chủ)", () => {

@@ -3,6 +3,7 @@ import { checkAudioLeaks, type AudioExposure } from "../../features/exercises/co
 import type { VariantAudioPolicy } from "../../features/exercises/core/audio.ts";
 import type { AudioRole, AudioSlot } from "../../features/exercises/core/primitives.ts";
 import { assetKeyOf } from "./hash.ts";
+import { createFptProvider } from "./fpt-provider.ts";
 import { createGoogleProvider, createMockProvider, noneProvider } from "./providers.ts";
 import { checkTtsRequest } from "./request.ts";
 import type { TtsErrorCode, TtsOutcome, TtsProvider, TtsPurpose, TtsRequest } from "./types.ts";
@@ -18,13 +19,17 @@ export const DEFAULT_BATCH_CHAR_BUDGET = 3000;
 
 export type ProviderEnv = Readonly<Record<string, string | undefined>>;
 
-/** `TTS_PROVIDER` = none | mock | google. Thiếu khóa hoặc giá trị lạ → `none` (không rò rỉ, không lỗi khởi động). */
+/** `TTS_PROVIDER` = none | mock | google | fpt. Thiếu khóa hoặc giá trị lạ → `none` (không rò rỉ, không lỗi khởi động). */
 export function createTtsProvider(env: ProviderEnv): TtsProvider {
   const name = (env.TTS_PROVIDER ?? "none").trim();
   if (name === "mock") return createMockProvider();
   if (name === "google") {
     const key = env.TTS_GOOGLE_API_KEY?.trim();
     return key ? createGoogleProvider(key) : noneProvider;
+  }
+  if (name === "fpt") {
+    const key = env.TTS_FPT_API_KEY?.trim();
+    return key ? createFptProvider({ apiKey: key }) : noneProvider;
   }
   return noneProvider;
 }

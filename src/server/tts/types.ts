@@ -45,7 +45,7 @@ export type SynthesizeOptions = { signal: AbortSignal };
  * không ném ngoại lệ chứa nội dung yêu cầu, khóa API hay phản hồi thô.
  */
 export interface TtsProvider {
-  readonly id: "none" | "mock" | "google";
+  readonly id: "none" | "mock" | "google" | "fpt";
   /** Nhà cung cấp có thật sự gọi dịch vụ bên ngoài (để tính chi phí/giới hạn). */
   readonly external: boolean;
   synthesize(request: TtsRequest, options: SynthesizeOptions): Promise<TtsOutcome>;

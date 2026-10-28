@@ -1294,6 +1294,58 @@ export const vi = {
     },
     empty: "Chưa có lời đọc nào.",
   },
+  ttsCompare: {
+    meta: {
+      title: "So sánh giọng AI tiếng Việt (thử nghiệm)",
+      description: "Giáo viên nghe thử và so sánh các giọng AI tiếng Việt trước khi chọn giọng.",
+    },
+    title: "So sánh giọng AI tiếng Việt",
+    intro:
+      "Nghe từng câu bằng các giọng khác nhau rồi ghi nhận cảm nhận của bạn. Trang này chỉ để nghe thử: không chọn giọng, không duyệt, và học sinh không nghe được gì từ đây.",
+    banner: "BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA",
+    bannerText:
+      "Không giọng nào được coi là đạt chuẩn. Giáo viên nghe rồi quyết định. Âm thanh ở đây là giọng máy, khác bản ghi giọng giáo viên; âm và vần đơn lẻ luôn dùng bản ghi giọng giáo viên.",
+    backToScript: "Xem danh sách lời đọc",
+    emptyTitle: "Chưa có tệp nghe thử nào",
+    emptyText:
+      "Chưa tạo tệp âm thanh thật: chưa gọi API của nhà cung cấp nào. Người vận hành tạo tệp bằng công cụ dòng lệnh sau khi chủ dự án cấp khóa và xác nhận chi phí; tệp chỉ nằm trên máy người vận hành.",
+    invalidTitle: "Không đọc được danh sách tệp nghe thử",
+    invalidText: "Tệp danh sách bị hỏng hoặc sai định dạng. Hãy nhờ người vận hành kiểm tra, trang không tự ghi đè.",
+    candidatesTitle: "Giọng đang thử",
+    candidateColumns: { provider: "Nhà cung cấp", voice: "Giọng", gender: "Giới tính", region: "Vùng miền" },
+    providers: { fpt: "FPT.AI", google: "Google Cloud" },
+    genders: { female: "Nữ", male: "Nam" },
+    regions: { north: "Bắc", south: "Nam", unspecified: "Chưa rõ — nghe để xác định" },
+    speeds: { normal: "Tốc độ bình thường", slow: "Tốc độ chậm vừa" },
+    sentencesTitle: "Nghe từng câu",
+    diagnosticNote: "Câu chẩn đoán phát âm — không phải học liệu, không đưa vào thư viện phát cho học sinh.",
+    sampleMeta: "{format} · {seconds} giây · {kb} KB · tạo trong {latency} giây",
+    statsTitle: "Số liệu đo được",
+    statsColumns: {
+      voice: "Giọng",
+      speed: "Tốc độ",
+      files: "Số tệp",
+      latency: "Thời gian tạo trung bình",
+      size: "Dung lượng trung bình",
+      duration: "Thời lượng trung bình",
+      cost: "Chi phí thực tế",
+    },
+    costUnknown: "Chưa có số liệu",
+    notesTitle: "Bảng ghi nhận khi nghe",
+    notesText:
+      "Ghi vào giấy hoặc bản sao riêng của bạn. Trang này không lưu và không gửi nhận xét, cũng không có nút duyệt.",
+    notesPending: "Chưa nghe",
+    criteria: [
+      "Phát âm dấu thanh (huyền, sắc, hỏi, ngã, nặng)",
+      "Phát âm phụ âm đầu và nguyên âm",
+      "Mức tự nhiên",
+      "Dễ nghe với học sinh lớp 1",
+      "Tốc độ và khoảng ngắt",
+      "Hiểu được câu dài",
+      "Chất lượng khi phát trên trình duyệt (ghi rõ máy và trình duyệt)",
+    ],
+    playLabel: "Nghe {voice}, {speed}",
+  },
   audioStudio: {
     meta: {
       title: "Ghi âm giọng đọc",

@@ -24,6 +24,7 @@
     "db:start": "supabase start -x studio,mailpit,imgproxy,vector,logflare,supavisor,realtime,edge-runtime",
     "db:start:lite": "supabase start -x studio,mailpit,imgproxy,vector,logflare,supavisor,realtime,storage-api,edge-runtime",
     "db:stop": "supabase stop",
+    "tts:poc": "node --conditions=react-server --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/tts-poc.ts",
     "audio:reconcile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/audio-reconcile.ts",
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint --level warning --fail-on warning",

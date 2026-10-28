@@ -40,9 +40,17 @@ const GOOGLE_ENDPOINT = "https://texttospeech.googleapis.com/v1/text:synthesize"
 const GOOGLE_VOICES: Readonly<Record<string, string>> = {
   "vi-female-1": "vi-VN-Neural2-A",
   "vi-male-1": "vi-VN-Neural2-D",
+  // Khóa nghe thử (R10.3b2-P0): cùng giọng, tên khóa nói rõ nhà cung cấp để bảng so sánh không nhầm.
+  "google-neural2-a": "vi-VN-Neural2-A",
+  "google-neural2-d": "vi-VN-Neural2-D",
 };
 
-export function createGoogleProvider(apiKey: string, fetchImpl: typeof fetch = fetch): TtsProvider {
+/** `wav` = LINEAR16 (Google trả tệp WAV có tiêu đề) — để nghe thử chất lượng trên trình duyệt (R10.3b2-P0). */
+export function createGoogleProvider(
+  apiKey: string,
+  fetchImpl: typeof fetch = fetch,
+  format: "mp3" | "wav" = "mp3",
+): TtsProvider {
   return {
     id: "google",
     external: true,
@@ -58,7 +66,10 @@ export function createGoogleProvider(apiKey: string, fetchImpl: typeof fetch = f
           body: JSON.stringify({
             input: { text: request.text },
             voice: { languageCode: "vi-VN", name: voice },
-            audioConfig: { audioEncoding: "MP3", speakingRate: request.speed === "slow" ? 0.8 : 1 },
+            audioConfig: {
+              audioEncoding: format === "wav" ? "LINEAR16" : "MP3",
+              speakingRate: request.speed === "slow" ? 0.8 : 1,
+            },
           }),
         });
         if (!response.ok) return { ok: false, code: "PROVIDER_ERROR" };
@@ -68,7 +79,13 @@ export function createGoogleProvider(apiKey: string, fetchImpl: typeof fetch = f
             ? (body as { audioContent: unknown }).audioContent
             : null;
         if (typeof content !== "string" || content.length === 0) return { ok: false, code: "PROVIDER_ERROR" };
-        return { ok: true, data: { bytes: new Uint8Array(Buffer.from(content, "base64")), mimeType: "audio/mpeg" } };
+        return {
+          ok: true,
+          data: {
+            bytes: new Uint8Array(Buffer.from(content, "base64")),
+            mimeType: format === "wav" ? "audio/wav" : "audio/mpeg",
+          },
+        };
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return { ok: false, code: "TIMEOUT" };
         return { ok: false, code: "PROVIDER_ERROR" };

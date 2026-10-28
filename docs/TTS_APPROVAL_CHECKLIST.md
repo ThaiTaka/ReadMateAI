@@ -8,9 +8,9 @@
 
 | Hạng mục | Tình trạng |
 |---|---|
-| Nhà cung cấp TTS | Chưa chọn (`TTS_PROVIDER=none`; Google chỉ là adapter thử nghiệm chưa gọi API thật) |
+| Nhà cung cấp TTS | Chưa chọn (`TTS_PROVIDER=none`; adapter Google và FPT.AI v5 đã viết nhưng **chưa gọi API thật** — xem §6) |
 | Tài khoản Cloud / khóa API / thanh toán | Chưa tạo, chưa bật |
-| Giọng đọc | Chưa nghe thử giọng nào; cấu hình giữ chỗ `provisional-0` |
+| Giọng đọc | Chưa nghe thử giọng nào (công cụ nghe thử `/teacher/tts-compare` đã sẵn sàng nhưng chưa có tệp); cấu hình giữ chỗ `provisional-0` |
 | Lời đọc đã duyệt | 0 trên 34 lời đọc của danh mục tĩnh (17 câu lệnh + 17 phản hồi, tổng 1.260 ký tự); danh sách xem trước ở `/teacher/tts-script`, mọi mục "Chờ giáo viên duyệt") |
 | Tệp âm thanh TTS | 0 |
 | Cờ phát âm thanh cho học sinh (`student_teacher_audio_playback_approved`) và cờ ghi âm giáo viên (`teacher_audio_recording_approved`) | **TẮT** |
@@ -64,3 +64,24 @@ Chỉ khi **tất cả** dưới đây đạt (mỗi mục cần bằng chứng,
 - Lời đọc chưa duyệt không được sinh; tệp chưa duyệt, tệp mock, tệp bị thu hồi hoặc không khớp nội dung đã duyệt không được phát.
 - Đổi chữ, giọng, tốc độ hay nhà cung cấp tạo **phiên bản mới**, không sửa tệp đã duyệt.
 - Không dữ liệu học sinh trong lời đọc; không TTS khi học sinh mở bài; trình duyệt học sinh không gọi nhà cung cấp.
+
+## 6. Nghe thử giọng AI (R10.3b2-P0, 2026-10-28) — công cụ sẵn sàng, CHƯA THỬ API THẬT
+
+> Chủ dự án đã yêu cầu (trong yêu cầu phiên R10.3b2-P0) làm công cụ để **nghe thử** giọng AI tiếng Việt. Đó **không** là quyết định P1–P9 và **không** cho phép bật thanh toán, lưu/phân phối tệp, phát hành hay mở cho học sinh. Các ô ở §2–§4 vẫn **"Chưa quyết định"**.
+
+| Hạng mục | Tình trạng (sự thật) |
+|---|---|
+| Công cụ | `npm run tts:poc` (mặc định chạy khô) và trang giáo viên `/teacher/tts-compare` — [AUDIO_ENGINE §15](AUDIO_ENGINE.md) |
+| Giọng ứng viên | FPT.AI `banmai` (nữ Bắc), `lannhi` (nữ Nam), `thuminh` (nữ Bắc); Google `vi-VN-Neural2-A` (nữ), `vi-VN-Neural2-D` (nam). Azure: dự phòng, chưa có adapter |
+| Khóa API | **Chưa có** trong môi trường — **API thật chưa được gọi, chưa có giọng nào được nghe** |
+| Chạy thật cần | cờ `--live` + `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận quota/thanh toán) + khóa trong `.env.local`; tối đa 12 lần gọi / 600 ký tự mỗi lần chạy |
+| Tệp tạo ra | Chỉ ở `.tts-poc/` trên máy người vận hành (`.gitignore`); không Git, không Supabase, không Vercel — vì P6 chưa xác minh |
+
+**Cần người có thẩm quyền, qua kênh bảo mật:**
+
+| # | Việc | Ai | Trạng thái |
+|---|---|---|---|
+| N1 | Cấp khóa thử cho từng nhà cung cấp muốn nghe (không dán vào chat hay commit) | Chủ dự án | **Chưa cấp** |
+| N2 | Xác nhận đã kiểm tra quota/thanh toán trước khi đặt `TTS_POC_COST_CONFIRMED=yes` (FPT.AI: gói miễn phí theo trang giá cần xác minh trực tiếp; Google: bắt buộc bật thanh toán) | Chủ dự án | **Chưa xác nhận** |
+| N3 | Xác minh điều khoản **lưu lâu dài/phân phối lại** tệp (P6) và **lưu văn bản gửi đi** (P7) của nhà cung cấp trước khi đưa tệp vào Git/Storage | Chủ dự án | **Chưa xác minh** |
+| N4 | Nghe tệp trên `/teacher/tts-compare`, ghi nhận theo 7 tiêu chí, rồi quyết định G1–G3 | Giáo viên | **Chưa nghe** |

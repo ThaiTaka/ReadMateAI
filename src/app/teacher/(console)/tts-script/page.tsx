@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { LoadingState } from "@/components/ui/loading-state";
 import { buildDemoPracticeData } from "@/features/demo/practice-data";
@@ -27,6 +28,11 @@ export default function TtsScriptPage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
       <h1 className="text-3xl font-extrabold leading-tight text-ink sm:text-4xl">{t.title}</h1>
       <p className="mt-2 text-lg text-ink-soft">{t.intro}</p>
+      <p className="mt-2">
+        <Link href="/teacher/tts-compare" className="font-semibold underline">
+          {vi.ttsCompare.title}
+        </Link>
+      </p>
       <Suspense fallback={<LoadingState className="mt-8" />}>
         <TtsScriptContent />
       </Suspense>
