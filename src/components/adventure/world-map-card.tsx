@@ -75,11 +75,12 @@ export function WorldMapCard({
   const playable = game.release === "playable";
   const demoHref = !live && playable && game.demoPath ? (game.demoPath as Route) : null;
 
-  const progressText = !playable
-    ? t.unreleasedNote
-    : state.eligible
+  // Câu "chưa phát hành" chỉ xuất hiện một lần (ở khung hành động); dòng này nói về ĐIỂM của học sinh.
+  const progressText = !state.eligible
+    ? t.needMore.replace("{n}", String(state.missing))
+    : playable
       ? t.eligibleNote
-      : t.needMore.replace("{n}", String(state.missing));
+      : null;
 
   const chip = !playable ? t.unreleased : live ? t.playable : t.preview;
   const liveEntry = live && playable ? entry : null;
@@ -156,7 +157,7 @@ export function WorldMapCard({
                   {t.threshold.replace("{n}", String(game.minBalance))}
                 </span>
               </div>
-              <p className="text-sm font-semibold text-ink-soft">{progressText}</p>
+              {progressText ? <p className="text-sm font-semibold text-ink-soft">{progressText}</p> : null}
               <section aria-label={t.skillsTitle}>
                 <h3 className="font-extrabold text-ink">{t.skillsTitle}</h3>
                 <ul className="mt-2 flex flex-wrap gap-2">
