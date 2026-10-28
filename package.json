@@ -32,7 +32,8 @@
     "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts && prettier --write src/lib/supabase/database.types.ts",
     "db:env": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-env.ts",
     "db:sync-content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/db-sync-content.ts",
-    "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/db-seed.ts"
+    "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/db-seed.ts",
+    "teacher:bootstrap": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/teacher-bootstrap.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
