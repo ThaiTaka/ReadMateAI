@@ -88,23 +88,25 @@ async function openPractice(page: Page): Promise<Question> {
  * Chromium: lấy từ chính yêu cầu mà thẻ <audio> của trình duyệt gửi. WebKit của Playwright không cho quan sát yêu cầu
  * media này (không có sự kiện `response`, hoặc `status()` = 0 trên Linux) nên ở đó hợp đồng HTTP được kiểm bằng
  * `page.request` — cùng cookie phiên, cùng đường dẫn, máy chủ vẫn kiểm lại quyền ở MỖI yêu cầu — còn việc chạm nút
- * vẫn được thực hiện thật và trạng thái giao diện vẫn được kiểm ở từng kịch bản.
+ * vẫn được thực hiện thật và trạng thái giao diện vẫn được kiểm ở từng kịch bản. Chỉ lấy mã + tiêu đề: Chromium không giữ lại
+ * thân phản hồi của yêu cầu media (`response.text()` lỗi "No data found for resource"), nên thân phản hồi luôn kiểm bằng
+ * `page.request` riêng.
  */
 async function pressAndObserve(
   page: Page,
   testInfo: TestInfo,
   path: string,
   press: () => Promise<void>,
-): Promise<{ status: number; headers: Record<string, string>; text: () => Promise<string> }> {
+): Promise<{ status: number; headers: Record<string, string> }> {
   if (testInfo.project.name.startsWith("chromium")) {
     const seen = page.waitForResponse((r) => r.url().endsWith(path));
     await press();
     const response = await seen;
-    return { status: response.status(), headers: response.headers(), text: () => response.text() };
+    return { status: response.status(), headers: response.headers() };
   }
   await press();
   const response = await page.request.get(path);
-  return { status: response.status(), headers: response.headers(), text: () => response.text() };
+  return { status: response.status(), headers: response.headers() };
 }
 
 const stimulusButton = (page: Page) => page.getByRole("button", { name: t.stimulus, exact: true });
@@ -250,7 +252,9 @@ test.describe("R10.3a — nghe bản ghi giáo viên đã duyệt trong buổi l
       () => stimulusButton(page).click(),
     );
     expect(response.status).toBe(404);
-    expect(JSON.parse(await response.text())).toEqual({ ok: false, code: "AUDIO_NOT_AVAILABLE" });
+    const body = await page.request.get(`/api/student/question-instances/${question.id}/audio/stimulus`);
+    expect(body.status()).toBe(404);
+    expect(await body.json()).toEqual({ ok: false, code: "AUDIO_NOT_AVAILABLE" });
     await expect(page.getByText(t.error)).toBeVisible();
     expect(await page.evaluate(() => (window as unknown as { __speech: number }).__speech)).toBe(0);
   });
