@@ -4,7 +4,9 @@ import {
   setLocalHonorsApproval,
   setLocalLeaderboardApproval,
   setLocalStudentAudioPlayback,
+  setLocalStudentTtsPlayback,
   setLocalTeacherAudioApproval,
+  setLocalTtsLibrary,
 } from "../../scripts/lib/test-fixtures";
 
 /**
@@ -34,4 +36,7 @@ export default async function globalSetup() {
   setLocalTeacherAudioApproval(true);
   // R10.3a: cờ phát bản ghi giáo viên cho học sinh (global-teardown trả về TẮT).
   setLocalStudentAudioPlayback(true);
+  // R10.5: cờ thư viện giọng máy + phát giọng máy cho học sinh (global-teardown trả về TẮT).
+  setLocalTtsLibrary(true);
+  setLocalStudentTtsPlayback(true);
 }

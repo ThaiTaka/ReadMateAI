@@ -129,7 +129,7 @@ describe("Trang /teacher", () => {
     expect(within(review).getAllByText("Bản phác thảo – chờ giáo viên duyệt").length).toBeGreaterThanOrEqual(9);
   });
 
-  it("sidebar: mười mục (R02 + ghi âm R10.2), không còn 'Phiếu học tập'", () => {
+  it("sidebar: mười hai mục (R02 + ghi âm R10.2 + giọng máy và độ phủ âm thanh R10.5), không còn 'Phiếu học tập'", () => {
     render(<TeacherSidebar />);
     const nav = screen.getByRole("navigation", { name: "Điều hướng khu vực giáo viên" });
     const labels = within(nav)
@@ -145,6 +145,8 @@ describe("Trang /teacher", () => {
       "Vinh danh",
       "Mùa thi đua",
       "Ghi âm giọng đọc",
+      "Giọng máy",
+      "Độ phủ âm thanh",
       "Cài đặt",
     ]);
     expect(nav.textContent).not.toMatch(/Phiếu học tập|Ghi nhận tại lớp/);

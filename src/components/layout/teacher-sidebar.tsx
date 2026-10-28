@@ -8,11 +8,13 @@ import {
   House,
   LayoutDashboard,
   Library,
+  ListChecks,
   Mic,
   School,
   Settings,
   Trophy,
   Users,
+  Volume2,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +46,8 @@ const ITEMS: readonly TeacherNavItem[] = [
   { label: s.honors, Icon: Crown, href: "/teacher#vinh-danh", comingSoon: true },
   { label: s.seasons, Icon: CalendarRange, href: "/teacher#mua-thi-dua", comingSoon: true },
   { label: s.audio, Icon: Mic, href: "/teacher/audio" },
+  { label: s.ttsScript, Icon: Volume2, href: "/teacher/tts-script" },
+  { label: s.audioCoverage, Icon: ListChecks, href: "/teacher/audio-coverage" },
   { label: s.settings, Icon: Settings, href: "/teacher#cai-dat", comingSoon: true },
 ];
 

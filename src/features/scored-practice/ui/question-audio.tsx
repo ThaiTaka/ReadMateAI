@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { AudioSlot, type AudioSource } from "@/components/kid/audio-slot";
 import type { PlaybackRole } from "@/features/audio-playback/roles";
 
-type Availability = { phase: "pending" } | { phase: "done"; muted: boolean; source: AudioSource | null };
+type Availability =
+  { phase: "pending" } | { phase: "done"; muted: boolean; withheld: boolean; source: AudioSource | null };
 
 /**
  * Nút nghe bản ghi giáo viên của MỘT khe của MỘT câu (R10.3a). Hỏi máy chủ (`GET …/audio`) xem khe này phát được ngay bây
@@ -30,7 +31,7 @@ export function QuestionAudio({
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
-      let value: Availability = { phase: "done", muted: false, source: null };
+      let value: Availability = { phase: "done", muted: false, withheld: false, source: null };
       try {
         const response = await fetch(`/api/student/question-instances/${questionId}/audio`, {
           cache: "no-store",
@@ -38,12 +39,18 @@ export function QuestionAudio({
         });
         const body = (await response.json()) as {
           ok?: boolean;
-          data?: { muted?: boolean; slots?: Partial<Record<PlaybackRole, { mimeType?: unknown }>> };
+          data?: {
+            muted?: boolean;
+            slots?: Partial<Record<PlaybackRole, { mimeType?: unknown }>>;
+            withheld?: unknown;
+          };
         };
         const slot = body.ok ? body.data?.slots?.[role] : undefined;
         value = {
           phase: "done",
           muted: body.ok === true && body.data?.muted === true,
+          // Khe bị chính sách giữ lại ở mức hỗ trợ này (ví dụ câu lệnh ở H1/H0): không phải "chưa có âm thanh" nên không vẽ nút.
+          withheld: body.ok === true && Array.isArray(body.data?.withheld) && body.data.withheld.includes(role),
           source:
             slot && typeof slot.mimeType === "string"
               ? { url: `/api/student/question-instances/${questionId}/audio/${role}`, mimeType: slot.mimeType }
@@ -58,6 +65,7 @@ export function QuestionAudio({
   }, [questionId, role, key]);
 
   const current = found?.key === key ? found.value : ({ phase: "pending" } as const);
+  if (current.phase === "done" && current.withheld) return null;
   return (
     <AudioSlot
       key={key}

@@ -2,10 +2,11 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { AUDIO_MAX_BYTES } from "@/features/audio-library/limits";
 import { bindingFor } from "@/features/audio-playback/bindings";
-import { PLAYBACK_ROLES, type PlaybackRole } from "@/features/audio-playback/roles";
+import { isTtsRole, PLAYBACK_ROLES, type PlaybackRole } from "@/features/audio-playback/roles";
 import { readAudioObject } from "@/server/audio-library/storage";
 import { loadItem, ownedQuestion, readableNow } from "@/server/question-instances/service";
 import { fail, ok, type Result } from "@/server/result";
+import { loadInstructionAudio, resolveInstructionAudio } from "@/server/tts-library/playback";
 import type { StudentContext } from "@/server/student-gateway/context";
 import { publicAudioCode, resolveTeacherAudio } from "./resolve";
 
@@ -23,6 +24,11 @@ export type AudioStatusDto = {
   muted: boolean;
   /** Khe nào phát được NGAY BÂY GIỜ (kèm định dạng để trình duyệt kiểm khả năng phát). Khe vắng mặt = không phát. */
   slots: Partial<Record<PlaybackRole, { mimeType: string }>>;
+  /**
+   * Khe BỊ CHÍNH SÁCH GIỮ LẠI ở mức hỗ trợ này (ví dụ câu lệnh ở H1/H0): giao diện không vẽ nút, vì đó không phải "chưa có âm thanh".
+   * Chỉ có khi không rỗng.
+   */
+  withheld?: PlaybackRole[];
 };
 
 export async function audioStatus(context: StudentContext, questionId: string): Promise<Result<AudioStatusDto>> {
@@ -35,14 +41,20 @@ export async function audioStatus(context: StudentContext, questionId: string): 
   if (!item) return fail("UNKNOWN");
 
   const slots: AudioStatusDto["slots"] = {};
+  const withheld: PlaybackRole[] = [];
   for (const role of PLAYBACK_ROLES) {
+    if (isTtsRole(role)) {
+      // Câu lệnh: giọng máy đã duyệt (thư viện TTS), không phải bản ghi giáo viên.
+      const instruction = await resolveInstructionAudio(context, row, item);
+      if (instruction.ok) slots[role] = { mimeType: instruction.data.mimeType };
+      else if (instruction.code === "AUDIO_NOT_PERMITTED") withheld.push(role);
+      continue;
+    }
     if (!bindingFor(item, role)) continue;
     const resolved = await resolveTeacherAudio(context, row, item, role);
     if (resolved.ok) slots[role] = { mimeType: resolved.data.mimeType };
-    // Cờ tắt: không còn gì để hỏi nữa (các khe khác cũng sẽ bị từ chối cùng lý do).
-    else if (resolved.code === "AUDIO_PLAYBACK_DISABLED") break;
   }
-  return ok({ muted: false, slots });
+  return ok({ muted: false, slots, ...(withheld.length > 0 ? { withheld } : {}) });
 }
 
 export type PlayableBytes = { bytes: Uint8Array<ArrayBuffer>; mimeType: string };
@@ -56,6 +68,10 @@ export async function loadPlayableAudio(
   if (!row || !(await readableNow(context.admin, row))) return fail("NOT_FOUND");
   const item = await loadItem(context.admin, row.exercise_item_id);
   if (!item) return fail("UNKNOWN");
+  if (isTtsRole(role)) {
+    const instruction = await loadInstructionAudio(context, row, item);
+    return instruction.ok ? ok(instruction.data) : fail(publicAudioCode(instruction.code));
+  }
   const resolved = await resolveTeacherAudio(context, row, item, role);
   if (!resolved.ok) return fail(publicAudioCode(resolved.code));
 

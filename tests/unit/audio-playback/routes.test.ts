@@ -73,7 +73,8 @@ describe("GET …/audio/[role]", () => {
 
   it("khe lạ hoặc mã không phải UUID → 404 JSON, không gọi dịch vụ", async () => {
     for (const [role, id] of [
-      ["instruction", QID],
+      ["options", QID],
+      ["feedback", QID],
       ["../x", QID],
       ["stimulus", "khong-phai-uuid"],
     ] as const) {

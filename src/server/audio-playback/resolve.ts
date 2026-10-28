@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AUDIO_MAX_BYTES, AUDIO_MIME_TYPES } from "@/features/audio-library/limits";
 import { bindingFor } from "@/features/audio-playback/bindings";
 import { decidePlayback } from "@/features/audio-playback/policy";
-import { variantHasRecording, type PlaybackRole } from "@/features/audio-playback/roles";
+import { isTtsRole, variantHasRecording, type PlaybackRole } from "@/features/audio-playback/roles";
 import type { ExerciseItem } from "@/features/exercises/items";
 import { VARIANTS } from "@/features/exercises/runtime-registry";
 import { fail, mapDbError, ok, type ErrorCode, type Result } from "@/server/result";
@@ -31,7 +31,7 @@ export type ResolvedAudio = z.infer<typeof resolvedAudioSchema>;
 
 type QuestionFacts = { id: string; student_id: string; status: string; support_level: number };
 
-function supportLevelOf(value: number): SupportLevel {
+export function supportLevelOf(value: number): SupportLevel {
   return value === 0 || value === 1 || value === 2 || value === 3 ? value : 3;
 }
 
@@ -59,6 +59,8 @@ export async function resolveTeacherAudio(
   role: PlaybackRole,
   options: { ignoreSoundPreference?: boolean } = {},
 ): Promise<Result<ResolvedAudio>> {
+  // Khe giọng máy (câu lệnh) KHÔNG đi qua bản ghi giáo viên: có đường riêng ở tts-library/playback.ts.
+  if (isTtsRole(role)) return fail("AUDIO_NOT_AVAILABLE");
   const binding = bindingFor(item, role);
   if (!binding) return fail("AUDIO_NOT_AVAILABLE");
   const student = context.students.find((entry) => entry.id === question.student_id);

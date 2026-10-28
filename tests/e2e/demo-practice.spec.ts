@@ -340,7 +340,9 @@ test.describe("bản chơi thử /demo — luyện tập tương tác", () => {
     // Làm bài hoàn toàn trong trình duyệt. Sau khi trang tải, chỉ được phép có request GET không có dữ liệu do
     // Next.js tự tải trước các trang được liên kết (prefetch) — không request nào chứa câu trả lời hay kết quả.
     // R03: prefetch /teacher của khách bị proxy chuyển sang /login (GET, không dữ liệu).
-    const appPaths = new Set(["/", "/demo", "/learn", "/teacher", "/join", "/login"]);
+    // R07/R08: /demo có liên kết tới bản xem trước mê cung (/demo/treasure-maze), nên Next cũng tải trước trang đó khi liên kết vào khung nhìn
+    // (GET, chỉ ?_rsc, không dữ liệu) — lúc có lúc không tùy thời điểm cuộn, nên trước đây test chập chờn.
+    const appPaths = new Set(["/", "/demo", "/demo/treasure-maze", "/learn", "/teacher", "/join", "/login"]);
     const later = requests.slice(before).filter((request) => request.type === "fetch" || request.type === "xhr");
     expect(
       later.filter((request) => {

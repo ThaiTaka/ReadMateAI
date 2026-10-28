@@ -49,6 +49,8 @@ function answerPhoneme(item: ItemLike): string | null {
 
 /** Ràng buộc bản ghi giáo viên của một khe, hoặc null khi khe này không dùng bản ghi giáo viên. */
 export function bindingFor(item: ItemLike, role: PlaybackRole): UnitBinding | null {
+  // Khe giọng máy (câu lệnh) không có bản ghi giáo viên: thuộc thư viện TTS (server/tts-library/playback.ts).
+  if (role === "instruction") return null;
   if (!variantHasRecording(item.variant, role)) return null;
   const expectedLabel = item.audio[role]?.spokenText.normalize("NFC").trim();
   const unitText = answerPhoneme(item);

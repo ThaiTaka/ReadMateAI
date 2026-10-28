@@ -260,11 +260,17 @@ describe("secret không tới trình duyệt", () => {
     for (const file of outside) expect(readFileSync(file, "utf8"), file).not.toMatch(/TTS_GOOGLE_API_KEY/u);
   });
 
-  it("không tệp 'use client' nào import mô-đun TTS", () => {
+  it("không tệp 'use client' nào import mô-đun TTS (trừ Server Actions của thư viện giọng máy)", () => {
+    // Ngoại lệ DUY NHẤT: `@/server/tts-library/actions` là mô-đun "use server" — trình duyệt chỉ nhận cuống gọi RPC, không nhận mã,
+    // khóa hay nhà cung cấp (cùng khuôn với server/audio-library/actions). Mọi đường dẫn `server/tts…` khác vẫn bị cấm.
     for (const file of outside) {
       const text = readFileSync(file, "utf8");
-      if (/^\s*["']use client["']/mu.test(text)) expect(text, file).not.toMatch(/server\/tts/u);
+      if (/^\s*["']use client["']/mu.test(text))
+        expect(text, file).not.toMatch(/server\/tts(?!-library\/actions["'])/u);
     }
+    expect(readFileSync(join(process.cwd(), "src/server/tts-library/actions.ts"), "utf8")).toMatch(
+      /^\s*["']use server["']/u,
+    );
   });
 
   it("không dùng Web Speech API", () => {

@@ -68,21 +68,34 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
   });
 
   it("không có route, tác vụ nền hay giao diện học sinh nào gọi lô/danh mục/phát TTS", () => {
+    // R10.5: thư viện giọng máy (src/server/tts-library) là NƠI DUY NHẤT ngoài src/server/tts dùng danh mục TTS và gọi nhà cung cấp,
+    // và chỉ qua hành động bấm của giáo viên; trang /teacher/tts-script chỉ đọc danh mục/trạng thái.
+    const library = (file: string) => norm(file).includes("/src/server/tts-library/");
     const allowedConsumers = new Set(
       ["page.tsx", "tts-script-list.tsx"].map((name) => norm(join(root, "src/app/teacher/(console)/tts-script", name))),
     );
     for (const file of outside) {
       const body = text(file);
       if (/server\/tts\/(batch|catalog|versions|playback|script-review|audio-check)/u.test(body)) {
-        expect(allowedConsumers.has(norm(file)), `${relative(root, file)} import mô-đun TTS`).toBe(true);
+        expect(allowedConsumers.has(norm(file)) || library(file), `${relative(root, file)} import mô-đun TTS`).toBe(
+          true,
+        );
       }
-      if (/["']use client["']/u.test(body)) expect(body, file).not.toMatch(/server\/tts/u);
-      expect(body, file).not.toMatch(/runTtsBatch|synthesizeSpeech/u);
+      // Giao diện giáo viên chỉ được gọi Server Actions của thư viện ("use server": trình duyệt chỉ nhận cuống RPC); mọi đường dẫn TTS khác bị cấm.
+      if (/["']use client["']/u.test(body)) expect(body, file).not.toMatch(/server\/tts(?!-library\/actions["'])/u);
+      expect(body, file).not.toMatch(/runTtsBatch/u);
+      // synthesizeSpeech chỉ được gọi ở lõi tạo tệp của thư viện (do giáo viên bấm), không nơi nào khác.
+      if (/synthesizeSpeech/u.test(body)) {
+        expect(norm(file).endsWith("/src/server/tts-library/generate.ts"), relative(root, file)).toBe(true);
+      }
     }
-    // Route duy nhất liên quan TTS là route NGHE LẠI tệp thử nghiệm cho giáo viên (R10.3b2-P0); không có route học sinh.
+    // Route liên quan TTS: nghe lại tệp thử nghiệm (R10.3b2-P0) và nghe lại tệp thư viện (R10.5) — chỉ cho giáo viên; không route học sinh.
     expect(
       outside.filter((file) => /\/api\/.*tts/iu.test(norm(file))).map((file) => norm(relative(root, file))),
-    ).toEqual(["src/app/api/teacher/tts-poc/[file]/route.ts"]);
+    ).toEqual([
+      "src/app/api/teacher/tts-library/versions/[versionId]/audio/route.ts",
+      "src/app/api/teacher/tts-poc/[file]/route.ts",
+    ]);
     expect(outside.filter((file) => /\/api\/student\/.*tts/iu.test(norm(file)))).toEqual([]);
   });
 
@@ -107,7 +120,9 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     const readers = sourceFiles
       .filter((file) => /TTS_VIETTEL_TOKEN/u.test(text(file)))
       .map((file) => norm(relative(root, file)));
+    // provider.ts của thư viện chỉ NHẮC tên biến trong chú thích và chuyển `process.env` cho createTtsProvider (cổng `TTS_PROVIDER`).
     expect(readers.sort()).toEqual([
+      "src/server/tts-library/provider.ts",
       "src/server/tts/poc/options.ts",
       "src/server/tts/service.ts",
       "src/server/tts/viettel-provider.ts",
@@ -131,8 +146,15 @@ describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học 
     const migrations = walk(join(root, "supabase/migrations"), /\.sql$/u)
       .map(text)
       .join("\n");
-    expect(migrations).not.toMatch(/student_tts|tts_playback/iu);
-    for (const flag of ["student_teacher_audio_playback_approved", "teacher_audio_recording_approved"]) {
+    // R10.5 thêm hai cờ của thư viện giọng máy: phải được khai báo với giá trị TẮT, không dòng nào đặt BẬT.
+    expect(migrations).toMatch(/\('student_tts_playback_approved', false/u);
+    expect(migrations).toMatch(/\('tts_library_approved', false/u);
+    for (const flag of [
+      "student_teacher_audio_playback_approved",
+      "teacher_audio_recording_approved",
+      "student_tts_playback_approved",
+      "tts_library_approved",
+    ]) {
       // mọi dòng đặt giá trị cờ trong migration phải là `false`
       const sets = migrations.match(new RegExp(`${flag}[^;]*?(true|false)`, "giu")) ?? [];
       for (const match of sets) expect(match.toLowerCase(), match).not.toMatch(/\btrue\b/u);

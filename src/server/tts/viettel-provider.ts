@@ -24,6 +24,11 @@ import type { SynthesizeOptions, TtsAudio, TtsOutcome, TtsProvider } from "./typ
  */
 
 export const VIETTEL_ENDPOINT = "https://viettelai.vn/tts/speech_synthesis";
+/**
+ * Khóa giọng NỘI BỘ dùng cho thư viện sản xuất (R10.5) → mã giọng của Viettel AI. `vi-male-1` = `hcm-minhquan` (nam, miền Nam): giọng THỬ do chủ
+ * dự án chọn sau khi nghe trên giao diện của nhà cung cấp — KHÔNG thay bước giáo viên NGHE và duyệt từng tệp (quyết định G1–G3 vẫn là của giáo viên).
+ */
+const VIETTEL_PRODUCTION_VOICES: Readonly<Record<string, string>> = { "vi-male-1": "hcm-minhquan" };
 export const VIETTEL_SUGGESTED_TIMEOUT_MS = 30_000;
 export const VIETTEL_MAX_AUDIO_BYTES = 2_000_000;
 export const VIETTEL_MIN_CHARS = 1;
@@ -69,8 +74,11 @@ export function createViettelProvider(options: ViettelProviderOptions): TtsProvi
     id: "viettel",
     external: true,
     synthesize: async (request, { signal }: SynthesizeOptions): Promise<TtsOutcome> => {
-      const voice = POC_VOICES[request.voiceKey as PocVoiceKey];
-      if (!voice || voice.provider !== "viettel") return { ok: false, code: "INVALID_INPUT" };
+      const pocVoice = POC_VOICES[request.voiceKey as PocVoiceKey];
+      const providerVoice =
+        VIETTEL_PRODUCTION_VOICES[request.voiceKey] ??
+        (pocVoice?.provider === "viettel" ? pocVoice.providerVoice : null);
+      if (!providerVoice) return { ok: false, code: "INVALID_INPUT" };
       if (request.text.length < VIETTEL_MIN_CHARS || request.text.length > VIETTEL_MAX_CHARS) {
         return { ok: false, code: "INVALID_INPUT" };
       }
@@ -82,7 +90,7 @@ export function createViettelProvider(options: ViettelProviderOptions): TtsProvi
           headers: { "Content-Type": "application/json", Accept: "audio/*", token },
           body: JSON.stringify({
             speed: VIETTEL_SPEED[request.speed],
-            voice: voice.providerVoice,
+            voice: providerVoice,
             text: request.text,
             tts_return_option: VIETTEL_RETURN_MP3,
             without_filter: false,

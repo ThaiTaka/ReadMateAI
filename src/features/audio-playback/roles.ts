@@ -6,7 +6,11 @@
  * Thêm biến thể mới ở đây (kèm test) chỉ sau khi GV đã duyệt chính sách âm thanh của biến thể đó.
  */
 
-export const PLAYBACK_ROLES = ["stimulus", "model"] as const;
+/**
+ * `stimulus` / `model`: bản ghi GIÁO VIÊN. `instruction`: giọng MÁY của câu lệnh chuẩn (thư viện TTS đã duyệt, R10.5) — nguồn khác,
+ * miền dữ liệu khác, cùng đường phát và cùng chính sách chống lộ đáp án.
+ */
+export const PLAYBACK_ROLES = ["stimulus", "model", "instruction"] as const;
 export type PlaybackRole = (typeof PLAYBACK_ROLES)[number];
 
 export function isPlaybackRole(value: string): value is PlaybackRole {
@@ -16,6 +20,11 @@ export function isPlaybackRole(value: string): value is PlaybackRole {
 const BOUND_ROLES: Readonly<Record<string, readonly PlaybackRole[]>> = {
   listen_letter: ["stimulus", "model"],
 };
+
+/** Khe lấy từ thư viện giọng máy (không phải bản ghi giáo viên). */
+export function isTtsRole(role: PlaybackRole): boolean {
+  return role === "instruction";
+}
 
 /** Trình duyệt chỉ biết `variant` (không có đáp án): có nên hỏi máy chủ về âm thanh khe này không. */
 export function variantHasRecording(variant: string, role: PlaybackRole): boolean {

@@ -1,6 +1,8 @@
+import "./server-only-shim"; // phải đứng đầu: mã máy chủ của thư viện giọng máy nhập `server-only`
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { wav } from "../unit/audio-library/fixtures";
+import { libraryEntry } from "../../src/server/tts-library/entries";
 import { admin, API_URL, PUBLISHABLE_KEY } from "./class-fixtures";
 
 /**
@@ -98,4 +100,60 @@ export async function approvedRecording(
     p_listened: true,
   });
   return versionId;
+}
+
+/**
+ * Lời đọc GIỌNG MÁY (R10.5) đã đi qua đúng các hàm teacher_* bằng JWT giáo viên: duyệt lời đọc → lưu tệp TỔNG HỢP (sóng sin, không phải giọng
+ * của nhà cung cấp nào) vào bucket riêng tư `tts-audio` → đăng ký → (tùy chọn) duyệt tệp. `assetKey` khác khóa hiện hành mô phỏng
+ * "giọng/chữ đã đổi" (bản lỗi thời, không phát). KHÔNG gọi dịch vụ ngoài.
+ */
+export async function ttsLine(
+  world: Pick<TeacherWorld, "teacher" | "schoolId">,
+  entryId: string,
+  options: { stage?: "pending" | "approved"; assetKey?: string; approveScript?: boolean } = {},
+): Promise<{ versionId: string; key: string; bytes: Buffer }> {
+  const entry = libraryEntry(entryId);
+  if (!entry) throw new Error(`Không có lời đọc ${entryId}`);
+  if (options.approveScript !== false) {
+    await rpc(world.teacher, "teacher_review_tts_script", {
+      p_entry_id: entry.id,
+      p_content_hash: entry.contentHash,
+      p_decision: "approve",
+      p_pronunciation_confirmed: true,
+      p_note: "",
+    });
+  }
+  const bytes = Buffer.from(wav(0.6, 8000));
+  const versionId = randomUUID();
+  const key = `${world.schoolId}/${versionId}.wav`;
+  const up = await admin.storage.from("tts-audio").upload(key, bytes, { contentType: "audio/wav", upsert: false });
+  if (up.error) throw up.error;
+  await rpc(world.teacher, "teacher_register_tts_version", {
+    p_version_id: versionId,
+    p_entry_id: entry.id,
+    p_purpose: entry.purpose,
+    p_text: entry.text,
+    p_content_hash: entry.contentHash,
+    p_asset_key: options.assetKey ?? entry.assetKey,
+    p_provider: "viettel",
+    p_voice_key: "vi-male-1",
+    p_speed: "slow",
+    p_config_version: "viettel-minhquan-0.9-v1",
+    p_storage_key: key,
+    p_mime_type: "audio/wav",
+    p_size_bytes: bytes.byteLength,
+    p_duration_ms: 1000,
+    p_content_sha256: createHash("sha256").update(bytes).digest("hex"),
+    p_test_only: false,
+  });
+  if ((options.stage ?? "approved") === "approved") {
+    await rpc(world.teacher, "teacher_review_tts_version", {
+      p_version_id: versionId,
+      p_decision: "approve",
+      p_note: "",
+      p_listened: true,
+      p_pronunciation_confirmed: true,
+    });
+  }
+  return { versionId, key, bytes };
 }

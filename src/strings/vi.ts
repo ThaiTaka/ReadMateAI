@@ -513,6 +513,8 @@ export const vi = {
       honors: "Vinh danh",
       seasons: "Mùa thi đua",
       audio: "Ghi âm giọng đọc",
+      ttsScript: "Giọng máy",
+      audioCoverage: "Độ phủ âm thanh",
       settings: "Cài đặt",
       backHome: "Về trang chủ",
     },
@@ -1041,6 +1043,77 @@ export const vi = {
     note: "Học tập để làm quen và nghe hướng dẫn. Thi đấu là lúc con thử sức với trò chơi.",
   },
 
+  /** Thư viện giọng máy cho câu lệnh và lời phản hồi cố định (R10.5): giáo viên duyệt lời đọc, tạo âm thanh, nghe rồi duyệt tệp. */
+  ttsLibrary: {
+    title: "Giọng máy cho lời hướng dẫn và lời phản hồi",
+    intro:
+      "Đây là những câu cố định trong ứng dụng (câu lệnh của từng dạng bài, lời khen, lời nhắc). Bạn duyệt lời đọc, tạo âm thanh bằng giọng máy, NGHE rồi mới duyệt tệp. Tệp chỉ đến tay học sinh sau khi bạn duyệt và khi quản trị bật phát âm thanh.",
+    voiceTitle: "Giọng đang dùng",
+    voiceText:
+      "Viettel AI — giọng nam miền Nam (Minh Quân), tốc độ 0,9. Đây là giọng thử do chủ dự án chọn; bạn quyết định có dùng hay không bằng cách nghe và duyệt từng tệp.",
+    notices: {
+      disabledTitle: "Thư viện chưa được bật ở môi trường này",
+      disabledText:
+        "Bạn xem được danh sách, nhưng chưa duyệt lời đọc hay tạo âm thanh được. Quản trị viên cần bật cờ hệ thống (chỉ sau khi chủ dự án đồng ý).",
+      noProviderTitle: "Chưa kết nối nhà cung cấp giọng máy",
+      noProviderText:
+        "Máy chủ chưa có TTS_PROVIDER=viettel và khóa của nhà cung cấp, nên nút Tạo âm thanh đang khóa và không có yêu cầu nào được gửi đi.",
+      costTitle: "Mỗi lần bấm Tạo âm thanh gửi một lời đọc tới Viettel AI",
+      costText:
+        "Chỉ gửi đúng chữ của lời đọc (không có dữ liệu học sinh) và chỉ khi bạn bấm. Hạn mức dùng thử của nhà cung cấp có thể hết; khi đó nút sẽ báo lỗi và không thử lại tự động.",
+    },
+    stats: { total: "Lời đọc", usable: "Dùng được", pending: "Chờ nghe và duyệt", missing: "Chưa có âm thanh" },
+    purposes: { instruction: "Câu lệnh", feedback: "Phản hồi" },
+    script: {
+      pending: "Lời đọc chờ duyệt",
+      approved: "Lời đọc đã duyệt",
+      rejected: "Lời đọc bị từ chối",
+      confirm: "Tôi đã đọc lời đọc này và đồng ý nội dung và cách đọc.",
+      approve: "Duyệt lời đọc",
+      approving: "Đang lưu…",
+      approved_ok: "Đã duyệt lời đọc.",
+      reject: "Từ chối lời đọc",
+      rejectNote: "Lý do (ít nhất 3 ký tự)",
+      rejected_ok: "Đã từ chối lời đọc.",
+      withdraw: "Rút duyệt lời đọc",
+    },
+    audio: {
+      missing: "Chưa có âm thanh",
+      pending_review: "Âm thanh chờ nghe và duyệt",
+      approved: "Âm thanh đã duyệt",
+      rejected: "Âm thanh bị từ chối",
+      revoked: "Âm thanh đã thu hồi",
+      stale: "Đã có bản duyệt của chữ hoặc giọng cũ — không còn phát. Cần tạo và duyệt lại.",
+      generate: "Tạo âm thanh",
+      generating: "Đang tạo…",
+      generated_ok: "Đã tạo. Hãy nghe rồi duyệt.",
+      needScript: "Duyệt lời đọc trước khi tạo âm thanh.",
+      listen: "Nghe thử",
+      duration: "Thời lượng {seconds} giây",
+      listened: "Tôi đã nghe cả tệp.",
+      pronunciation: "Tôi xác nhận cách đọc đúng.",
+      approve: "Duyệt âm thanh",
+      reject: "Từ chối âm thanh",
+      note: "Ghi chú (bắt buộc khi từ chối, ít nhất 3 ký tự)",
+      revoke: "Thu hồi âm thanh",
+      revokeReason: "Lý do thu hồi (ít nhất 3 ký tự)",
+      approved_ok: "Đã duyệt âm thanh.",
+      rejected_ok: "Đã từ chối âm thanh.",
+      revoked_ok: "Đã thu hồi âm thanh.",
+      saving: "Đang lưu…",
+    },
+    bulk: {
+      button: "Tạo các lời đã duyệt còn thiếu (tối đa {n})",
+      working: "Đang tạo…",
+      done: "Đã tạo {generated} lời. Còn {skipped} lời chờ tạo.",
+      stopped: "Đã dừng ở lời đầu tiên bị lỗi. Đã tạo {generated} lời.",
+    },
+    previewTitle: "Lời đọc của câu bài tập (xem trước, chưa dùng)",
+    previewText:
+      "Tên tranh, từ và câu của từng bài tập sẽ cần giọng máy ở giai đoạn sau. Hiện danh sách dưới đây chỉ để giáo viên xem trước; chưa có âm thanh nào được tạo hay phát cho những lời đọc này.",
+    usedBy: "Dùng ở: {where}",
+  },
+
   /** Nghe cách đọc chữ khi học (R10.4): không câu hỏi, không điểm. Hai nút khác nhau: tên chữ cái và âm của chữ. */
   studyAudio: {
     meta: { title: "Nghe cách đọc chữ", description: "Chạm nút để nghe cô giáo đọc tên chữ cái và âm của chữ." },
@@ -1103,7 +1176,6 @@ export const vi = {
       earned: "Con nhận được {n} điểm thưởng trong buổi này.",
       score: "Điểm hiện tại của con: {n} điểm.",
     },
-    instructionAudioNote: "Âm thanh câu lệnh sẽ có ở bản sau.",
   },
 
   learnHome: {
@@ -1438,6 +1510,82 @@ export const vi = {
     ],
     playLabel: "Nghe {voice}, {speed}",
   },
+  audioCoverage: {
+    meta: {
+      title: "Độ phủ âm thanh",
+      description: "Báo cáo chữ, âm và lời hướng dẫn nào đã có âm thanh được giáo viên duyệt và còn thiếu gì.",
+    },
+    title: "Độ phủ âm thanh",
+    intro:
+      "Báo cáo này chỉ đếm những tệp giáo viên đã nghe và duyệt. Bản nháp, bản chờ duyệt, bị từ chối, đã thu hồi hoặc của giọng cũ đều tính là chưa có. Số liệu đọc trực tiếp từ dữ liệu của trường bạn mỗi lần mở trang.",
+    verdict: {
+      incomplete: "Chưa đủ để nói “mọi chữ đều đọc được”: còn {count} mục chưa có tệp đã duyệt.",
+      complete:
+        "Đã có tệp đã duyệt cho mọi tên chữ cái, mọi âm của chữ và mọi câu lệnh. Vần, tiếng, từ và câu chưa được theo dõi ở báo cáo này nên chưa thể nói mọi thứ đều đọc được.",
+      studentNote:
+        "Có tệp đã duyệt chưa có nghĩa là học sinh nghe được ngay: việc phát âm thanh cho học sinh còn phụ thuộc cờ hệ thống do quản trị bật sau khi chủ dự án đồng ý.",
+    },
+    stats: {
+      letters: "Tên chữ cái",
+      phonemes: "Âm của chữ",
+      study: "Nút nghe trong Học tập",
+      instruction: "Câu lệnh",
+      feedback: "Lời phản hồi",
+    },
+    progress: "{done} / {total} đã duyệt",
+    studyProgress: "{done} / {total} có tệp đã duyệt",
+    studyUnmapped: "{count} nút chưa nối với khe âm thanh nào.",
+    studyAllMapped: "Mọi nút nghe đã được nối đúng khe âm thanh.",
+    sections: {
+      letters: {
+        title: "Tên chữ cái",
+        hint: "Ví dụ chữ b đọc là “bê”. Mỗi chữ cái một bản ghi của giáo viên.",
+      },
+      phonemes: {
+        title: "Âm của chữ",
+        hint: "Ví dụ chữ b có âm “bờ”; gồm cả các chữ ghép như ngh, qu. Khác hẳn tên chữ cái.",
+      },
+      study: {
+        title: "Nút nghe trong Học tập",
+        hint: "Mỗi nút nghe trên trang Học tập cần đúng một bản ghi đã duyệt (tên chữ cái hoặc âm của chữ).",
+      },
+      instruction: {
+        title: "Câu lệnh bằng giọng máy",
+        hint: "Câu lệnh chuẩn của từng dạng bài. Dùng được khi lời đọc đã duyệt và tệp âm thanh đã duyệt.",
+      },
+      feedback: {
+        title: "Lời phản hồi bằng giọng máy",
+        hint: "Lời khen và lời nhắc cố định.",
+        notWired: "Học sinh chưa nghe được lời phản hồi vì chưa nối vào màn hình học; tệp đã duyệt được giữ sẵn.",
+      },
+    },
+    untracked: {
+      title: "Chưa theo dõi",
+      rimes:
+        "Vần: kho tri thức có {count} vần nhưng công cụ ghi âm hiện chỉ hỗ trợ tên chữ cái và âm của chữ, và học sinh chưa có nút nghe vần. Giáo viên cần quyết định cách đọc vần trước khi ghi.",
+      words:
+        "Tiếng, từ và câu: giọng máy cho từng tiếng, từ và câu của bài tập chưa được tạo; mỗi tệp sẽ cần giáo viên nghe và duyệt.",
+    },
+    states: {
+      missing: "Chưa ghi",
+      draft: "Bản nháp",
+      pending_review: "Chờ duyệt",
+      approved: "Đã duyệt",
+      rerecord: "Cần ghi lại",
+    },
+    lineStates: {
+      usable: "Dùng được",
+      scriptPending: "Lời đọc chờ duyệt",
+      scriptRejected: "Lời đọc bị từ chối",
+      stale: "Tệp của giọng hoặc chữ cũ",
+    },
+    needsDecision: "Cần chốt cách đọc",
+    todoTitle: "Cần bổ sung",
+    todoRecord: "Chưa có bản ghi đã duyệt: {items}",
+    todoLines: "Câu lệnh chưa dùng được: {count}. Mở thư viện giọng máy để duyệt lời đọc, tạo âm thanh, nghe và duyệt.",
+    allDone: "Không còn mục nào thiếu trong phạm vi báo cáo này.",
+    links: { record: "Mở trang ghi âm", tts: "Mở thư viện giọng máy", coverage: "Xem độ phủ âm thanh" },
+  },
   audioStudio: {
     meta: {
       title: "Ghi âm giọng đọc",
@@ -1717,6 +1865,15 @@ export const vi = {
     AUDIO_PLAYBACK_DISABLED: "Phát âm thanh cho học sinh chưa được bật.",
     AUDIO_NOT_AVAILABLE: "Câu này chưa có âm thanh để nghe nên chưa chấm điểm được. Con báo cô giáo giúp nhé.",
     AUDIO_NOT_PERMITTED: "Âm thanh này chưa nghe được ở bước này.",
+    TTS_LIBRARY_DISABLED:
+      "Thư viện giọng máy chưa được bật ở môi trường này. Bạn vẫn xem được danh sách lời đọc, nhưng chưa duyệt hay tạo âm thanh được.",
+    SCRIPT_NOT_APPROVED: "Lời đọc này chưa được duyệt. Hãy duyệt lời đọc trước khi tạo âm thanh.",
+    NO_PROVIDER:
+      "Chưa kết nối nhà cung cấp giọng máy ở máy chủ (cần TTS_PROVIDER=viettel và khóa của nhà cung cấp). Chưa gọi dịch vụ nào.",
+    ALREADY_GENERATED: "Lời đọc này đã có âm thanh đang chờ duyệt hoặc đang dùng với cùng giọng. Không tạo thêm.",
+    PROVIDER_ERROR:
+      "Nhà cung cấp giọng máy chưa trả được âm thanh (hết lượt dùng thử, lỗi mạng hoặc từ chối). Hãy thử lại sau.",
+    BUDGET_EXCEEDED: "Lời đọc vượt hạn mức ký tự cho một lần tạo nên chưa gửi đi.",
     UNKNOWN: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
 

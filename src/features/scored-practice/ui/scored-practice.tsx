@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowRight, ClipboardCheck, Lightbulb, Map as MapIcon, RotateCw, Sparkles, Trophy } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StarMark } from "@/components/adventure/score-badge";
-import { AudioSlot } from "@/components/kid/audio-slot";
 import { FeedbackBanner } from "@/components/kid/feedback-banner";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
@@ -334,7 +333,8 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
             </span>
             <p className="text-xl font-extrabold text-ink sm:text-2xl">{definition.instruction.text}</p>
           </div>
-          <AudioSlot label={vi.practice.audio.instruction} note={t.instructionAudioNote} />
+          {/* Giọng máy ĐÃ DUYỆT của câu lệnh; ở mức hỗ trợ mà chính sách không cho phát (H1/H0) thì không vẽ nút. */}
+          <QuestionAudio questionId={question.id} role="instruction" label={vi.practice.audio.instruction} />
         </div>
         <ViewPlayer
           view={question.view}

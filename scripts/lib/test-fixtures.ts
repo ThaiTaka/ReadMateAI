@@ -80,3 +80,35 @@ export function setLocalStudentAudioPlayback(approved: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/**
+ * Giả lập "cờ hệ thống thư viện giọng máy đã được chấp thuận" (giáo viên duyệt lời đọc, tạo và duyệt âm thanh) CHỈ trên Supabase LOCAL để
+ * kiểm thử R10.5. Production không bao giờ chạy hàm này: cờ `tts_library_approved` chỉ đổi bằng migration sau khi chủ dự án chọn nhà cung
+ * cấp/giọng và xác nhận điều khoản/chi phí. Mặc định là TẮT; kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalTtsLibrary(approved: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.feature_flags set enabled = ${approved ? "true" : "false"}, updated_at = now() where key = 'tts_library_approved'"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}
+
+/**
+ * Giả lập "cờ phát giọng máy ĐÃ DUYỆT cho học sinh" CHỈ trên Supabase LOCAL để kiểm thử R10.5. Production không bao giờ chạy hàm này:
+ * cờ `student_tts_playback_approved` chỉ đổi bằng migration sau khi giáo viên đã nghe và duyệt tệp, đã thử trên iPhone/Android và chủ dự án
+ * cho phép. Mặc định là TẮT; kiểm thử phải trả về TẮT khi xong.
+ */
+export function setLocalStudentTtsPlayback(approved: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.feature_flags set enabled = ${approved ? "true" : "false"}, updated_at = now() where key = 'student_tts_playback_approved'"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}
+
+/** Tắt/bật "môi trường kiểm thử" (fixture) để kiểm tra rằng tệp `test_only` KHÔNG phát được khi môi trường kiểm thử tắt. Chỉ Supabase local. */
+export function setLocalFixturesAllowed(allowed: boolean): void {
+  execSync(
+    `npx supabase db query --local "update private.test_environment set fixtures_allowed = ${allowed ? "true" : "false"}, updated_at = now() where singleton"`,
+    { stdio: ["ignore", "ignore", "pipe"] },
+  );
+}

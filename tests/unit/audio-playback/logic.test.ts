@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { AUDIO_FIXTURE_EXERCISES, LISTEN_SPECS, listenLetterItem } from "../../../scripts/fixtures/audio-items";
 import { bindingFor, sharedRecordingUnit } from "@/features/audio-playback/bindings";
 import { decidePlayback } from "@/features/audio-playback/policy";
-import { isPlaybackRole, PLAYBACK_ROLES, variantHasRecording } from "@/features/audio-playback/roles";
+import { isPlaybackRole, isTtsRole, PLAYBACK_ROLES, variantHasRecording } from "@/features/audio-playback/roles";
 import { mimeSupported } from "@/features/audio-playback/support";
 import { VARIANTS } from "@/features/exercises/runtime-registry";
 import type { ExerciseItem } from "@/features/exercises/items";
@@ -14,15 +14,23 @@ const LEVELS: readonly SupportLevel[] = [3, 2, 1, 0];
 const listen = (letter: string) => listenLetterItem(LISTEN_SPECS[letter]!, 0);
 
 describe("khe nào dùng bản ghi giáo viên", () => {
-  it("chỉ nghe âm (stimulus + model); mọi biến thể khác không có bản ghi giáo viên để phát", () => {
-    expect(PLAYBACK_ROLES).toEqual(["stimulus", "model"]);
+  it("bản ghi giáo viên chỉ ở bài nghe âm (stimulus + model); câu lệnh (instruction) là giọng MÁY của thư viện TTS, không có bản ghi giáo viên ở bất kỳ biến thể nào", () => {
+    expect(PLAYBACK_ROLES).toEqual(["stimulus", "model", "instruction"]);
+    expect(isTtsRole("instruction")).toBe(true);
+    expect(isTtsRole("stimulus")).toBe(false);
+    expect(isTtsRole("model")).toBe(false);
+    for (const variant of Object.keys(VARIANTS)) {
+      expect(variantHasRecording(variant, "instruction"), `${variant}/instruction`).toBe(false);
+    }
     expect(variantHasRecording("listen_letter", "stimulus")).toBe(true);
     expect(variantHasRecording("listen_letter", "model")).toBe(true);
     for (const variant of Object.keys(VARIANTS).filter((id) => id !== "listen_letter")) {
       for (const role of PLAYBACK_ROLES) expect(variantHasRecording(variant, role), `${variant}/${role}`).toBe(false);
     }
     expect(isPlaybackRole("stimulus")).toBe(true);
-    expect(isPlaybackRole("instruction")).toBe(false);
+    expect(isPlaybackRole("instruction")).toBe(true);
+    expect(isPlaybackRole("options")).toBe(false);
+    expect(isPlaybackRole("feedback")).toBe(false);
     expect(isPlaybackRole("../x")).toBe(false);
   });
 

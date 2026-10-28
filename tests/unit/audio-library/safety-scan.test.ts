@@ -63,12 +63,14 @@ describe("không lộ khóa/đặc quyền xuống trình duyệt", () => {
   });
 
   it("Client Component không import khóa admin, Storage máy chủ, TTS hay đọc biến môi trường", () => {
+    // Ngoại lệ DUY NHẤT cho TTS: `@/server/tts-library/actions` ("use server" — trình duyệt chỉ nhận cuống RPC, như audio-library/actions).
     const offenders = clientFiles.filter((file) =>
-      /createSupabaseAdminClient|server\/audio-library\/(storage|deps|queries|http|upload)|@\/server\/tts|process\.env|TTS_|SUPABASE_SECRET|service_role/u.test(
+      /createSupabaseAdminClient|server\/audio-library\/(storage|deps|queries|http|upload)|@\/server\/tts(?!-library\/actions["'])|process\.env|TTS_|SUPABASE_SECRET|service_role/u.test(
         read(file),
       ),
     );
     expect(offenders).toEqual([]);
+    expect(read("src/server/tts-library/actions.ts").trimStart()).toMatch(/^["']use server["']/u);
   });
 
   it("các mô-đun máy chủ của thư viện âm thanh đều import 'server-only' (trừ lõi thuần được kiểm thử)", () => {

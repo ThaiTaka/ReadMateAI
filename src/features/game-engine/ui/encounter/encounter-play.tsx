@@ -6,7 +6,6 @@ import { ArrowRight, ClipboardCheck, Lightbulb, Pause, Play, RotateCw, Trophy } 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HeartIndicator } from "@/components/adventure/heart-indicator";
 import { StarMark } from "@/components/adventure/score-badge";
-import { AudioSlot } from "@/components/kid/audio-slot";
 import { FeedbackBanner } from "@/components/kid/feedback-banner";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
@@ -327,7 +326,7 @@ export function EncounterPlay({
             </span>
             <p className="text-xl font-extrabold text-ink sm:text-2xl">{definition.instruction.text}</p>
           </div>
-          <AudioSlot label={vi.practice.audio.instruction} note={vi.scoredPractice.instructionAudioNote} />
+          <QuestionAudio questionId={question.id} role="instruction" label={vi.practice.audio.instruction} />
         </div>
         <ViewPlayer
           view={question.view}

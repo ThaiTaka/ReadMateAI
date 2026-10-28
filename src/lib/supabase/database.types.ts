@@ -2206,6 +2206,187 @@ export type Database = {
           },
         ];
       };
+      tts_audio_versions: {
+        Row: {
+          asset_key: string;
+          config_version: string;
+          content_hash: string;
+          content_sha256: string;
+          duration_ms: number;
+          entry_id: string;
+          generated_at: string;
+          generated_by: string;
+          id: string;
+          mime_type: string;
+          provider: string;
+          purpose: string;
+          review_listened: boolean;
+          review_note: string | null;
+          review_pronunciation_confirmed: boolean;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          revoke_reason: string | null;
+          revoked_at: string | null;
+          revoked_by: string | null;
+          school_id: string;
+          size_bytes: number;
+          speed: string;
+          status: string;
+          storage_bucket: string;
+          storage_key: string;
+          test_only: boolean;
+          text_nfc: string;
+          version_no: number;
+          voice_key: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          asset_key: string;
+          config_version: string;
+          content_hash: string;
+          content_sha256: string;
+          duration_ms: number;
+          entry_id: string;
+          generated_at?: string;
+          generated_by: string;
+          id?: string;
+          mime_type: string;
+          provider: string;
+          purpose: string;
+          review_listened?: boolean;
+          review_note?: string | null;
+          review_pronunciation_confirmed?: boolean;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+          school_id: string;
+          size_bytes: number;
+          speed: string;
+          status?: string;
+          storage_bucket?: string;
+          storage_key: string;
+          test_only?: boolean;
+          text_nfc: string;
+          version_no: number;
+          voice_key: string;
+        };
+        Update: {
+          asset_key?: string;
+          config_version?: string;
+          content_hash?: string;
+          content_sha256?: string;
+          duration_ms?: number;
+          entry_id?: string;
+          generated_at?: string;
+          generated_by?: string;
+          id?: string;
+          mime_type?: string;
+          provider?: string;
+          purpose?: string;
+          review_listened?: boolean;
+          review_note?: string | null;
+          review_pronunciation_confirmed?: boolean;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          revoked_by?: string | null;
+          school_id?: string;
+          size_bytes?: number;
+          speed?: string;
+          status?: string;
+          storage_bucket?: string;
+          storage_key?: string;
+          test_only?: boolean;
+          text_nfc?: string;
+          version_no?: number;
+          voice_key?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tts_audio_versions_generated_by_fkey";
+            columns: ["generated_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tts_audio_versions_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tts_audio_versions_revoked_by_fkey";
+            columns: ["revoked_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tts_audio_versions_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tts_script_reviews: {
+        Row: {
+          content_hash: string;
+          decision: string;
+          entry_id: string;
+          id: string;
+          note: string | null;
+          pronunciation_confirmed: boolean;
+          reviewed_at: string;
+          reviewed_by: string;
+          school_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          content_hash: string;
+          decision: string;
+          entry_id: string;
+          id?: string;
+          note?: string | null;
+          pronunciation_confirmed: boolean;
+          reviewed_at?: string;
+          reviewed_by: string;
+          school_id: string;
+        };
+        Update: {
+          content_hash?: string;
+          decision?: string;
+          entry_id?: string;
+          id?: string;
+          note?: string | null;
+          pronunciation_confirmed?: boolean;
+          reviewed_at?: string;
+          reviewed_by?: string;
+          school_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tts_script_reviews_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "staff_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tts_script_reviews_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -2272,6 +2453,16 @@ export type Database = {
           p_fallback_unit_text: string;
           p_question_instance_id: string;
           p_unit_text: string;
+        };
+        Returns: Json;
+      };
+      gateway_resolve_tts_line: {
+        Args: {
+          p_asset_key: string;
+          p_auth_user_id: string;
+          p_content_hash: string;
+          p_entry_id: string;
+          p_student_id: string;
         };
         Returns: Json;
       };
@@ -2366,6 +2557,27 @@ export type Database = {
         };
         Returns: string;
       };
+      teacher_register_tts_version: {
+        Args: {
+          p_asset_key: string;
+          p_config_version: string;
+          p_content_hash: string;
+          p_content_sha256: string;
+          p_duration_ms: number;
+          p_entry_id: string;
+          p_mime_type: string;
+          p_provider: string;
+          p_purpose: string;
+          p_size_bytes: number;
+          p_speed: string;
+          p_storage_key: string;
+          p_test_only: boolean;
+          p_text: string;
+          p_version_id: string;
+          p_voice_key: string;
+        };
+        Returns: Json;
+      };
       teacher_rename_class: { Args: { p_class_id: string; p_name: string }; Returns: undefined };
       teacher_reset_season: {
         Args: { p_class_id: string; p_confirmation: string; p_expected_season_id: string; p_request_id: string };
@@ -2375,9 +2587,30 @@ export type Database = {
         Args: { p_decision: string; p_listened: boolean; p_note: string; p_version_id: string };
         Returns: Json;
       };
+      teacher_review_tts_script: {
+        Args: {
+          p_content_hash: string;
+          p_decision: string;
+          p_entry_id: string;
+          p_note: string;
+          p_pronunciation_confirmed: boolean;
+        };
+        Returns: Json;
+      };
+      teacher_review_tts_version: {
+        Args: {
+          p_decision: string;
+          p_listened: boolean;
+          p_note: string;
+          p_pronunciation_confirmed: boolean;
+          p_version_id: string;
+        };
+        Returns: Json;
+      };
       teacher_revoke_audio_version: { Args: { p_reason: string; p_version_id: string }; Returns: undefined };
       teacher_revoke_device: { Args: { p_device_id: string }; Returns: undefined };
       teacher_revoke_login_code: { Args: { p_code_id: string }; Returns: undefined };
+      teacher_revoke_tts_version: { Args: { p_reason: string; p_version_id: string }; Returns: undefined };
       teacher_set_audio_note: { Args: { p_asset_id: string; p_note: string }; Returns: undefined };
       teacher_set_class_curriculum: {
         Args: { p_class_id: string; p_lesson_id: string; p_series_id: string };
@@ -2391,6 +2624,7 @@ export type Database = {
       };
       teacher_set_student_status: { Args: { p_status: string; p_student_id: string }; Returns: undefined };
       teacher_submit_audio_version: { Args: { p_version_id: string }; Returns: undefined };
+      teacher_tts_status: { Args: Record<PropertyKey, never>; Returns: Json };
       teacher_update_student: {
         Args: { p_avatar_key: string; p_display_name: string; p_student_id: string; p_student_number: number };
         Returns: undefined;

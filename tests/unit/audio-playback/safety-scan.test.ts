@@ -24,7 +24,7 @@ describe("máy chủ phát âm thanh", () => {
     for (const file of files) expect(read(file), file).toMatch(/^import "server-only";/mu);
   });
 
-  it("không URL công khai/URL ký, không TTS, không Web Speech API trong đường phát", () => {
+  it("không URL công khai/URL ký, không Web Speech API, không GỌI nhà cung cấp TTS trong đường phát (chỉ ĐỌC tệp giọng máy đã duyệt)", () => {
     const files = srcFiles.filter(
       (file) =>
         file.startsWith("src/server/audio-playback/") ||
@@ -37,9 +37,18 @@ describe("máy chủ phát âm thanh", () => {
     expect(files.length).toBeGreaterThan(8);
     for (const file of files) {
       expect(read(file), file).not.toMatch(
-        /createSignedUrl|getPublicUrl|speechSynthesis|SpeechSynthesisUtterance|@\/server\/tts|synthesizeSpeech|TTS_/u,
+        /createSignedUrl|getPublicUrl|speechSynthesis|SpeechSynthesisUtterance|@\/server\/tts\/|synthesizeSpeech|createTtsProvider|libraryProvider|tts-library\/(provider|generate|actions)|TTS_/u,
       );
     }
+    // R10.5: cầu nối DUY NHẤT từ đường phát tới thư viện giọng máy là playback.ts (chỉ đọc tệp đã duyệt); không import khác.
+    const bridges = files.filter((file) => /from "@\/server\/tts-library\//u.test(read(file)));
+    expect(bridges).toEqual(["src/server/audio-playback/service.ts"]);
+    expect(read("src/server/audio-playback/service.ts")).toMatch(/from "@\/server\/tts-library\/playback"/u);
+    const playback = read("src/server/tts-library/playback.ts");
+    expect(playback).not.toMatch(
+      /synthesizeSpeech|createTtsProvider|libraryProvider|from "\.\/provider"|from "\.\/generate"|TTS_[A-Z]+/u,
+    );
+    expect(playback).toContain('rpc("gateway_resolve_tts_line"');
   });
 
   it("khóa đối tượng chỉ ở máy chủ: trạng thái trả về chỉ có định dạng; route không nhắc storage", () => {
@@ -107,7 +116,13 @@ describe("migration R10.3a", () => {
     for (const file of srcFiles) expect(read(file), file).not.toContain("student_teacher_audio_playback_approved");
     const scripts = walk("scripts").map(norm);
     const setters = scripts.filter((file) => read(file).includes("student_teacher_audio_playback_approved"));
-    expect(setters).toEqual(["scripts/lib/test-fixtures.ts"]);
+    // Hai nơi duy nhất được đổi cờ này: hàm của kiểm thử và công cụ dev `npm run audio:local-flags` — công cụ đó chỉ nói chuyện với CSDL local
+    // (`supabase db query --local`), từ chối khi URL không phải local, và chỉ đổi bốn cờ âm thanh cố định (không nhận tên cờ từ dòng lệnh).
+    expect(setters).toEqual(["scripts/lib/test-fixtures.ts", "scripts/local-audio-flags.ts"]);
+    const tool = read("scripts/local-audio-flags.ts");
+    expect(tool).toMatch(/isLocalUrl\(apiUrl\)/u);
+    expect(tool).toMatch(/db query --local/u);
+    expect(tool).not.toMatch(/process\.argv|positionals\[1\]|values\.flag/u);
   });
 
   it("không mở quyền bảng âm thanh hay Storage cho anon/authenticated; hàm chỉ service_role", () => {

@@ -33,7 +33,8 @@
     "db:env": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-env.ts",
     "db:sync-content": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/db-sync-content.ts",
     "db:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/db-seed.ts",
-    "teacher:bootstrap": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/teacher-bootstrap.ts"
+    "teacher:bootstrap": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/teacher-bootstrap.ts",
+    "audio:local-flags": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/local-audio-flags.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

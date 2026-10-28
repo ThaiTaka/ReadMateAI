@@ -128,6 +128,13 @@ public = false
 file_size_limit = "2MiB"
 allowed_mime_types = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/wav"]
 
+# Giọng máy cho câu lệnh/lời phản hồi cố định (R10.5): riêng tư, tối đa 2 MiB, chỉ định dạng âm thanh máy chủ đã kiểm tra chữ ký tệp.
+# Miền dữ liệu RIÊNG, không dùng chung với bucket bản ghi giáo viên; không policy storage.objects cho anon/authenticated.
+[storage.buckets.tts-audio]
+public = false
+file_size_limit = "2MiB"
+allowed_mime_types = ["audio/mpeg", "audio/wav", "audio/ogg"]
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true

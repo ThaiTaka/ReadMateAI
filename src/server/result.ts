@@ -85,6 +85,13 @@ export const ERROR_CODES = [
   "AUDIO_PLAYBACK_DISABLED",
   "AUDIO_NOT_AVAILABLE",
   "AUDIO_NOT_PERMITTED",
+  // R10.5 — thư viện giọng máy cho câu lệnh/lời phản hồi cố định (migration 20261103090000).
+  "TTS_LIBRARY_DISABLED",
+  "SCRIPT_NOT_APPROVED",
+  "NO_PROVIDER",
+  "ALREADY_GENERATED",
+  "PROVIDER_ERROR",
+  "BUDGET_EXCEEDED",
   "UNKNOWN",
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
