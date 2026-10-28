@@ -14,6 +14,7 @@ import {
   PASSWORD,
   resetRateLimits,
 } from "./class-fixtures";
+import { expectVisibleOrExplain, watchPage } from "./maze-diagnostics";
 
 /**
  * R08.6 — Chơi lại Mê cung KHÔNG tính điểm, qua giao diện trên Supabase LOCAL (dữ liệu giả, nội dung fixture).
@@ -188,6 +189,7 @@ test("R08.6 chơi lại không tính điểm: mời chơi lại, 7 quái vật, 
       .catch(() => undefined);
   });
 
+  const watched = watchPage(page);
   await resetRateLimits();
   // Lượt tính điểm đã xong: chỉ còn lời mời chơi lại, nói rõ điểm không đổi; chưa dựng bàn chơi.
   const offer = page.getByTestId("maze-replay-offer");
@@ -199,7 +201,7 @@ test("R08.6 chơi lại không tính điểm: mời chơi lại, 7 quái vật, 
     () => false,
   );
   if (!shown) await page.reload();
-  await expect(offer).toBeVisible({ timeout: 30_000 });
+  await expectVisibleOrExplain(page, offer, watched, testInfo, 30_000);
   await expect(offer).toContainText("Lần này con vẫn được gặp các bạn quái vật và làm câu hỏi");
   await expect(offer).toContainText("điểm thưởng sẽ không thay đổi nhé!");
   await expect(page.getByTestId("maze-run")).toHaveCount(0);
