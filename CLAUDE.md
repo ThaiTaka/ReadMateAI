@@ -44,8 +44,10 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/STUDENT_ACCESS.md](docs/STUDENT_ACCESS.md) | **R03** — thẻ học (QR fragment + mã dự phòng, HMAC), liên kết/thu hồi thiết bị, đánh giá Anonymous Auth |
 | [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) | **R03** — ma trận RLS đã kiểm thử, bất biến CSDL, quy trình thêm bảng |
 | [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | **R03** — Supabase local, `config.toml`, biến môi trường, danh mục Cloud (chưa tạo), sự cố |
-| [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) · [docs/TEACHER_AUDIO_GUIDE.md](docs/TEACHER_AUDIO_GUIDE.md) | **R10** — âm thanh: TTS (R10.1), thư viện bản ghi giáo viên `/teacher/audio`, Storage riêng tư, duyệt phiên bản (R10.2), hướng dẫn GV |
+| [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) · [docs/TEACHER_AUDIO_GUIDE.md](docs/TEACHER_AUDIO_GUIDE.md) | **R10** — âm thanh: TTS (R10.1), thư viện bản ghi giáo viên `/teacher/audio`, Storage riêng tư, duyệt phiên bản (R10.2), hướng dẫn GV; **chạm chữ để nghe (§16) và thư viện giọng máy Viettel Minh Quân 0,9 (§17, 2026-10-29)** |
 | [docs/TTS_APPROVAL_CHECKLIST.md](docs/TTS_APPROVAL_CHECKLIST.md) | **R10.3b1** — bảng quyết định của chủ dự án/giáo viên trước khi dùng TTS (nhà cung cấp, giọng, điều khoản, chi phí, xưng hô); ô chưa xác nhận ghi "Chưa quyết định" |
+| [docs/AUDIO_COVERAGE.md](docs/AUDIO_COVERAGE.md) | **R10.5** — báo cáo độ phủ âm thanh `/teacher/audio-coverage`: chỉ đếm tệp ĐÃ DUYỆT, nêu mục còn thiếu, không bao giờ kết luận "mọi chữ đều đọc được" khi còn thiếu |
+| [docs/TEACHER_ACCOUNT_GUIDE.md](docs/TEACHER_ACCOUNT_GUIDE.md) | Tạo tài khoản giáo viên cho chủ dự án trên Supabase local (`npm run teacher:bootstrap`, mật khẩu nhập ẩn) và quy trình thử âm thanh trên máy |
 | [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
 | [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
 | [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
@@ -219,6 +221,18 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 5. Câu `scorable` bắt buộc nghe bản ghi giáo viên mà chưa có bản phát được → `AUDIO_NOT_AVAILABLE`, không lượt, không điểm (`submitAttempt`); gửi lại cùng `clientAttemptId` không bị chặn.
 6. Fixture âm thanh là sóng tổng hợp (`tests/unit/audio-library/fixtures.ts`); mã học sinh không tham chiếu `audio-library`/`teacher-audio` (module `server/audio-playback` là cầu nối duy nhất).
 
+### 9.10 Quy tắc rút ra ở phiên "dùng được như ứng dụng" — 10.3c/10.3d/10.3e, nhãn "R10.4"/"R10.5" trong mã (BẮT BUỘC)
+
+1. **Ba loại âm thanh KHÁC NHAU, không gộp:** tên chữ cái (`letter`: b → "bê"), âm của chữ (`phoneme`: b → "bờ"), tiếng/từ (giọng máy theo bài, chưa làm). Bản ghi loại này không thay cho loại kia (tài nguyên khóa theo trường, loại, chữ). Chạm-để-nghe ở Học tập đi **chỉ** qua `GET /api/student/learning-audio[/{kind}/{unit}]` → `gateway_resolve_learning_audio`; nhãn cách đọc mong đợi do máy chủ lấy từ kho tri thức, không từ trình duyệt; mọi nút nghe phải nối đúng một khe âm thanh (test `unmapped = 0`).
+2. **Giọng máy chỉ tạo khi giáo viên bấm:** một yêu cầu mỗi lần bấm, chỉ gửi chữ cố định của thư viện (không dữ liệu học sinh), chỉ cho lời đọc **đã được giáo viên duyệt** (khớp bản băm). `synthesizeSpeech` chỉ được gọi ở `src/server/tts-library/generate.ts` (test quét). Không tự duyệt tệp: giáo viên phải nghe rồi duyệt; đổi chữ/giọng/tốc độ/phiên bản cấu hình → khóa tệp khác → duyệt lại. Viettel Minh Quân 0,9 là lựa chọn thử của chủ dự án, **không thay** bước duyệt phát âm của giáo viên.
+3. **Bốn cờ âm thanh** (`teacher_audio_recording_approved`, `student_teacher_audio_playback_approved`, `tts_library_approved`, `student_tts_playback_approved`) **TẮT ở mọi môi trường**. Chỉ kiểm thử (`setLocal…`, phải trả về TẮT) và `npm run audio:local-flags` (**chỉ Supabase local**, từ chối URL khác, danh sách cờ cố định trong mã) được đổi; không bật bằng mã ứng dụng; production đổi bằng migration sau khi chủ dự án cho phép.
+4. **Client Component** chỉ được nhập đúng `@/server/tts-library/actions` (mô-đun `"use server"`) từ mã TTS máy chủ; mọi đường dẫn `server/tts…` khác bị cấm (test quét ở `tests/unit/tts` và `tests/unit/audio-library`).
+5. **Độ phủ âm thanh** (`features/audio-coverage/build.ts`, hàm thuần): chỉ tệp đã duyệt được tính; thứ chưa theo dõi (vần, tiếng, từ, câu) ghi "Chưa theo dõi"; **không bao giờ** tuyên bố "mọi chữ đều đọc được" khi còn thiếu — kể cả trong báo cáo cuối phiên.
+6. **Tài khoản giáo viên đầu tiên** bằng `npm run teacher:bootstrap` (chỉ Supabase local; mật khẩu không có trong mã, tệp, tham số, biến môi trường, log hay Git). Không tạo hộ tài khoản có mật khẩu của chủ dự án; báo đúng "đã tạo" hay "mới có công cụ".
+7. **Playwright:** mã máy chủ có `server-only` chỉ nhập được vào fixture E2E qua `import "./server-only-shim"` đứng đầu tệp; danh sách cho phép prefetch ở `demo-practice.spec.ts` phải gồm mọi trang `/demo` liên kết tới (prefetch `?_rsc` tới lúc có lúc không tùy cuộn); assert "không còn 'Sắp có'" phải giới hạn trong vùng nội dung (`getByRole("main")` hoặc thẻ cụ thể) vì thanh bên và phần xem trước chưa xây dựng ghi "Sắp có" đúng sự thật.
+8. **Lỗi chập chờn WebKit trên CI:** chẩn đoán bằng trace (`gh run download` → `trace.network`/`trace.trace`) trước khi kết luận; đã gặp `BrowserContext.newPage` đứng ~30 s trên runner (không phải ứng dụng). Không nâng thời gian chờ, không bỏ test; chạy lại job lỗi (`gh run rerun --failed`) và báo trung thực.
+9. **Nhãn:** "R10.4"/"R10.5" trong mã/commit = 10.3c/10.3d của REDESIGN_TASKS, không phải hai mục 10.4/10.5 chưa làm.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
@@ -247,6 +261,8 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run db:start` · `db:stop` · `db:reset` | Supabase local (Docker) · dừng · dựng lại CSDL từ migration |
 | `npm run db:env` · `db:seed` · `db:sync-content` · `db:types` | `.env.local` từ Supabase local · dữ liệu giả · đồng bộ `content/` · sinh kiểu TS |
 | `npm run db:lint` · `db:test` · `test:db` · `test:e2e:db` | Lint CSDL · pgTAP · tích hợp RLS (JWT thật) · E2E có CSDL (cần `db:env` + `db:seed`) |
+| `npm run teacher:bootstrap -- --email <email>` | Tạo tài khoản giáo viên cho máy dev (CHỈ Supabase local; mật khẩu nhập ẩn; chạy lại không trùng, không đổi mật khẩu có sẵn) |
+| `npm run audio:local-flags -- status` (hoặc `on`, `off`) | Xem/bật/tắt bốn cờ âm thanh CHỈ ở Supabase local; production luôn TẮT |
 
 Thay đổi CSDL/route/xác thực: chạy thêm `db:lint`, `db:test`, `test:db`, `test:e2e:db`. Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 

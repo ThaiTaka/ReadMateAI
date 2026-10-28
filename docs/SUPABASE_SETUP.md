@@ -60,6 +60,7 @@ Mọi script ghi dữ liệu **từ chối chạy** khi URL không phải `127.0
 | `LOGIN_CODE_PEPPER` | **chỉ máy chủ**, ≥ 32 ký tự | HMAC thẻ học và khóa giới hạn tần suất. Đổi pepper = mọi thẻ cũ mất hiệu lực |
 | `NEXT_PUBLIC_SITE_URL` | công khai | liên kết QR; `http://127.0.0.1…`/`localhost` → cookie không `Secure` (Safari bỏ cookie Secure trên http) |
 | `SEED_TEACHER_PASSWORD` | chỉ máy dev | mật khẩu GV giả của `db:seed` |
+| `TTS_PROVIDER`, `TTS_VIETTEL_TOKEN` | **chỉ máy chủ**, chỉ máy dev (không commit) | R10.5: thư viện giọng máy chỉ tạo âm thanh khi `TTS_PROVIDER=viettel` **và** có token; thiếu → nút Tạo âm thanh khóa, không yêu cầu nào đi đâu |
 
 Khóa JWT `anon`/`service_role` cũ **bị từ chối** (`readSupabasePublicEnv`, `createSupabaseAdminClient`). Thiếu cấu hình → trang công khai và `/demo` vẫn chạy; `/login`, `/join` báo "chưa cấu hình máy chủ dữ liệu".
 
@@ -101,3 +102,21 @@ CI (`.github/workflows/ci.yml`, job `database`) chạy `db:start` → `db:lint` 
 - Bucket `teacher-audio`: `public = false`, 2 MiB, chỉ `audio/webm|ogg|mp4|mpeg|wav`, khai báo trong `supabase/config.toml` (tạo khi `supabase start`). **Supabase Cloud chưa tạo**: khi có dự án, tạo bucket tương đương (private) trước khi bật cờ `teacher_audio_recording_approved`.
 - Đã có Docker đang chạy mà trước đó dùng `db:start` cũ (không Storage): chạy `npx supabase stop` rồi `npm run db:start` để bật Storage — **không** cần `db:reset`, dữ liệu giữ nguyên (migration mới áp dụng khi khởi động lại).
 - Ảnh hưởng: thêm 1 container (`storage-api`, ~150–300 MB RAM) cho E2E/DB test; các test cũ không dùng Storage nên không đổi.
+
+## Storage giọng máy (R10.5)
+
+- Bucket `tts-audio`: `public = false`, 2 MiB, chỉ `audio/mpeg|wav|ogg`, khai báo ở `supabase/config.toml` (tạo khi `supabase start` và sau `db:reset`). **Tách khỏi** `teacher-audio`: khác bảng, khác cờ, khác quyền. Không policy `storage.objects` cho `anon`/`authenticated` — chỉ máy chủ đọc/ghi bằng khóa secret.
+- **Supabase Cloud chưa tạo:** khi có dự án, tạo bucket cùng thông số bằng migration/Dashboard (tài liệu này là danh mục việc cần làm).
+
+## Quy trình thử âm thanh trên máy local (thứ tự khuyến nghị)
+
+```powershell
+npm run db:start                 # Supabase local (có Storage)
+npm run db:reset                 # (tùy chọn) CSDL sạch; bốn cờ âm thanh về TẮT
+npm run db:seed                  # dữ liệu giả
+npm run teacher:bootstrap -- --email <email-của-bạn>     # tài khoản giáo viên của bạn (mật khẩu nhập ẩn)
+npm run audio:local-flags -- on  # bật bốn cờ âm thanh CHỈ ở local (hỏi xác nhận)
+npm run dev                      # http://localhost:3000/login
+```
+
+Chi tiết từng bước và việc nên làm trên từng trang: [TEACHER_ACCOUNT_GUIDE](TEACHER_ACCOUNT_GUIDE.md). Báo cáo còn thiếu gì: [AUDIO_COVERAGE](AUDIO_COVERAGE.md). `npm run audio:local-flags -- off` (hoặc `db:reset`) tắt lại. Chạy kiểm thử CSDL trước khi bật cờ thủ công nếu máy đã từng chạy E2E (E2E bật cờ rồi tắt lại ở `global-teardown`).

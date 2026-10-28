@@ -8,12 +8,12 @@
 
 | Hạng mục | Tình trạng |
 |---|---|
-| Nhà cung cấp TTS | Chưa chọn (`TTS_PROVIDER=none`; adapter Google và FPT.AI v5 đã viết nhưng **chưa gọi API thật** — xem §6) |
+| Nhà cung cấp TTS | **Giọng thử nghiệm do chủ dự án chọn: Viettel AI `hcm-minhquan` (nam, miền Nam), tốc độ 0,9** (ghi nhận từ yêu cầu của chủ dự án 2026-10-29; chưa phải quyết định P1–P9 đầy đủ — xem §7). Mặc định `TTS_PROVIDER=none` nên không gọi gì. Adapter Google/FPT.AI đã viết, chưa gọi API thật |
 | Tài khoản Cloud / khóa API / thanh toán | Chưa tạo, chưa bật |
 | Giọng đọc | Chưa nghe thử giọng nào (công cụ nghe thử `/teacher/tts-compare` đã sẵn sàng nhưng chưa có tệp); cấu hình giữ chỗ `provisional-0` |
 | Lời đọc đã duyệt | 0 trên 34 lời đọc của danh mục tĩnh (17 câu lệnh + 17 phản hồi, tổng 1.260 ký tự); danh sách xem trước ở `/teacher/tts-script`, mọi mục "Chờ giáo viên duyệt") |
-| Tệp âm thanh TTS | 0 |
-| Cờ phát âm thanh cho học sinh (`student_teacher_audio_playback_approved`) và cờ ghi âm giáo viên (`teacher_audio_recording_approved`) | **TẮT** |
+| Tệp âm thanh TTS | **0 tệp đã duyệt.** Thư viện giọng máy (R10.5, [AUDIO_ENGINE §17](AUDIO_ENGINE.md)) đã có về kỹ thuật; `.tts-poc/` trên máy dev có 1 tệp chẩn đoán từ lần nghe thử 2026-10-28 (không thuộc thư viện, không phát cho học sinh) |
+| Bốn cờ âm thanh (`teacher_audio_recording_approved`, `student_teacher_audio_playback_approved`, `tts_library_approved`, `student_tts_playback_approved`) | **TẮT** ở mọi môi trường; chỉ kiểm thử và `npm run audio:local-flags` (chỉ Supabase local) đổi được |
 
 ## 2. Quyết định của chủ dự án
 
@@ -86,3 +86,22 @@ Chỉ khi **tất cả** dưới đây đạt (mỗi mục cần bằng chứng,
 | N2 | Xác nhận đã kiểm tra quota/thanh toán trước khi đặt `TTS_POC_COST_CONFIRMED=yes` (FPT.AI: gói miễn phí theo trang giá cần xác minh trực tiếp; Google: bắt buộc bật thanh toán) | Chủ dự án | **Chưa xác nhận** |
 | N3 | Xác minh điều khoản **lưu lâu dài/phân phối lại** tệp (P6) và **lưu văn bản gửi đi** (P7) của nhà cung cấp trước khi đưa tệp vào Git/Storage | Chủ dự án | **Chưa xác minh** |
 | N4 | Nghe tệp trên `/teacher/tts-compare`, ghi nhận theo 8 tiêu chí, rồi quyết định G1–G3 | Giáo viên | **Chưa nghe** |
+
+## 7. Thư viện giọng máy (R10.5, 2026-10-29) — đã có về kỹ thuật, các cờ vẫn TẮT
+
+> **Ghi nhận từ yêu cầu của chủ dự án (2026-10-29):** chủ dự án đã nghe giọng Minh Quân trên giao diện Viettel và thấy ổn; đây là **lựa chọn giọng thử nghiệm**, **chưa thay thế** bước duyệt phát âm của giáo viên, và **không** là quyết định P1–P9 hay G1–G9. Các ô ở §2–§4 giữ nguyên **"Chưa quyết định"** — không ô nào được điền hộ.
+
+| Hạng mục | Tình trạng (sự thật) |
+|---|---|
+| Thư viện | Bảng `tts_script_reviews`/`tts_audio_versions`, bucket riêng tư `tts-audio`, hai cờ mới `tts_library_approved` và `student_tts_playback_approved` (**TẮT**); trang `/teacher/tts-script`; báo cáo `/teacher/audio-coverage` — [AUDIO_ENGINE §17](AUDIO_ENGINE.md), [AUDIO_COVERAGE](AUDIO_COVERAGE.md) |
+| Quy trình | Giáo viên duyệt **lời đọc** (G5–G6) → bấm **Tạo âm thanh** (một yêu cầu/lần bấm) → **nghe** → duyệt **tệp** (G8). Chưa duyệt lời đọc thì không gọi nhà cung cấp |
+| Học sinh nghe | **Chỉ câu lệnh**, chỉ H3/H2, chỉ tệp đã duyệt khớp cấu hình giọng, chỉ khi cờ phát bật. Lời phản hồi chưa nối |
+| Gọi API thật trong R10.5 | **Không.** Một lần gọi thật trước đó (2026-10-28, câu chẩn đoán, công cụ nghe thử) được ghi ở `.tts-poc/manifest.json`. Đường tạo của thư viện chưa chạy với Viettel thật |
+| Điều kiện còn thiếu để mở cho học sinh thật | P1–P9, G1–G9, nghe và duyệt từng tệp, iPhone/Android thật, đường ghi nhận gợi ý (C5), rà soát quyền riêng tư (C7) — **toàn bộ chưa đạt** |
+
+**Việc cần người có thẩm quyền (mới):**
+
+| # | Việc | Ai | Trạng thái |
+|---|---|---|---|
+| N5 | Đặt `TTS_PROVIDER=viettel` cùng `TTS_VIETTEL_TOKEN` ở máy chủ cần tạo tệp và **xác nhận quota/chi phí** trước khi giáo viên bấm Tạo âm thanh (mỗi lần bấm là một yêu cầu thật; chỉ gửi chữ cố định, không dữ liệu học sinh) | Chủ dự án | **Chưa làm** |
+| N6 | Nghe từng tệp đã tạo và quyết định G1–G8 (xưng hô con/em, 3 câu có chữ phủ định, tốc độ, giọng nam hay nữ) | Giáo viên | **Chưa nghe** |

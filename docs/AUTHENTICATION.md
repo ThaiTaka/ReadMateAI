@@ -46,3 +46,14 @@ Server Action luôn: xác thực → zod → gọi hàm CSDL bằng JWT của GV
 - Giao diện quản trị cấp tài khoản GV, mời GV cùng dạy (co_teacher) — hiện chỉ qua script/Dashboard.
 - Giới hạn tần suất của Supabase Auth tính theo **IP máy chủ** (mọi đăng nhập đi qua server) — Cloud cần chỉnh hạn mức phù hợp; giới hạn của ứng dụng tính theo IP người dùng (`x-forwarded-for` của Vercel).
 - Một trình duyệt chỉ giữ một phiên: GV đăng nhập trên máy đã liên kết thẻ học sẽ thay phiên thiết bị (trang `/login` có cảnh báo `reason=student_device`); `/join` từ chối khi đang có phiên GV.
+
+## 7. Tài khoản giáo viên đầu tiên trên máy dev
+
+Giáo viên **không tự đăng ký** (Auth Hook chặn). Trên máy dev, tài khoản đầu tiên của chủ dự án được tạo bằng `npm run teacher:bootstrap` — hướng dẫn từng bước: [TEACHER_ACCOUNT_GUIDE](TEACHER_ACCOUNT_GUIDE.md).
+
+- **Chỉ Supabase local** (`127.0.0.1`/`localhost`): từ chối mọi địa chỉ khác, kể cả khi đặt `ALLOW_REMOTE_SEED`. Không tạo Supabase Cloud hay tài khoản production.
+- **Mật khẩu** nhập ẨN tại terminal (hoặc dòng đầu đầu vào chuẩn với `--password-stdin`), hai lần; không có trong mã, tệp, tham số, biến môi trường, nhật ký hay Git; không bao giờ được in ra. Kiểm tra độ mạnh nhưng không lặp lại nội dung mật khẩu trong lý do.
+- Dùng **Admin API** tạo người dùng, rồi tạo `staff_profiles` (trường phát triển, UUID cố định) và `class_staff` quyền `owner` cho "Lớp phát triển"; tùy chọn cài nội dung thử nghiệm hư cấu để chơi thử trên máy. Sau đó **đăng nhập thử bằng phiên của chính giáo viên** và đọc hồ sơ/lớp qua RLS để kiểm phân quyền.
+- **Idempotent:** chạy lại không tạo trùng (tìm theo email; lớp theo trường/tên/năm học) và **không đổi mật khẩu** tài khoản đã có, trừ khi `--reset-password`.
+- Phiên trình duyệt vẫn là phiên Supabase Auth bình thường (cookie `httpOnly`); **không** dùng `service_role` cho trình duyệt; RLS vẫn áp dụng.
+- Mã: `scripts/teacher-bootstrap.ts` (dòng lệnh), `scripts/lib/teacher-bootstrap.ts` (lõi, kiểm thử được bằng đối tượng giả), `scripts/lib/hidden-input.ts`. Kiểm thử: `tests/unit/accounts/teacher-bootstrap.test.ts` (15), `tests/db/teacher-bootstrap.test.ts` (5, Supabase thật: đăng nhập + phân quyền + chạy lại không trùng + không đổi mật khẩu + từ chối URL không phải local).
