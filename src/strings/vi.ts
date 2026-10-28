@@ -1232,6 +1232,68 @@ export const vi = {
     },
   },
 
+  // R10.3b1 — danh sách lời đọc giọng máy để giáo viên xem trước (chưa có âm thanh, chưa duyệt, chưa phát cho học sinh).
+  ttsScript: {
+    meta: {
+      title: "Lời đọc giọng máy (thử nghiệm)",
+      description: "Danh sách lời hướng dẫn và lời động viên dự kiến đọc bằng giọng máy, để giáo viên xem trước.",
+    },
+    title: "Lời đọc giọng máy",
+    intro:
+      "Những câu dưới đây là lời hướng dẫn và lời động viên đã có trong bài luyện. Sau này giáo viên duyệt chữ và cách đọc, rồi nghe thử giọng máy trước khi học sinh được nghe.",
+    banner: "BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA",
+    bannerText:
+      "Danh sách chỉ để xem. Chưa có âm thanh giọng máy nào được tạo, chưa chọn nhà cung cấp hay giọng đọc, chưa lời đọc nào được duyệt, và học sinh chưa nghe được gì từ đây.",
+    differenceTitle: "Giọng máy khác bản ghi giọng giáo viên",
+    differenceText:
+      "Âm và vần đơn lẻ luôn dùng bản ghi giọng của giáo viên (trang Ghi âm giọng đọc). Giọng máy chỉ dành cho câu hướng dẫn, lời động viên và những lời đọc mà chính sách của dạng bài cho phép.",
+    stats: { total: "Lời đọc", pending: "Chờ duyệt", approved: "Đã duyệt", excluded: "Bị loại" },
+    entryLabels: {
+      purpose: "Mục đích",
+      usedIn: "Dùng ở",
+      voice: "Giọng dự kiến",
+      source: "Nguồn",
+      status: "Trạng thái",
+      levels: "Khi nào phát",
+      allKinds: "Mọi dạng bài",
+    },
+    purposes: {
+      instruction: "Câu hướng dẫn",
+      feedback: "Lời động viên",
+      picture_name: "Tên tranh",
+      word: "Đọc mẫu từ",
+      sentence: "Đọc mẫu câu",
+      model: "Đọc mẫu sau khi chấm",
+    },
+    status: { pending_review: "Chờ giáo viên duyệt" },
+    voiceNotChosen: "Giọng chưa được chọn",
+    voiceSlow: "đọc chậm",
+    voiceNormal: "đọc bình thường",
+    availability: {
+      auto: "Tự phát",
+      tap: "Phát khi chạm",
+      hint_locked: "Gợi ý — đang khóa",
+      forbidden: "Không phát",
+      after_grading: "Sau khi chấm",
+    },
+    attention: {
+      ADDRESSING_UNDECIDED: "Cách xưng hô chờ giáo viên chọn",
+      NEGATIVE_WORDING: "Giáo viên cân nhắc giọng điệu",
+    },
+    approveSoon: "Duyệt lời đọc — Sắp có",
+    excludedTitle: "Lời đọc không đưa vào danh sách",
+    excludedText:
+      "Những lời đọc này không được tạo giọng máy vì chính sách của dạng bài. Chữ không được lưu lại ở đây.",
+    excludedReasons: {
+      TEACHER_RECORDING_REQUIRED: "Cần bản ghi giọng giáo viên",
+      AUDIO_ROLE_FORBIDDEN: "Dạng bài không cho phát ở bước này",
+      AUDIO_LEAKS_ANSWER: "Có thể làm lộ đáp án",
+      INVALID_INPUT: "Nội dung không hợp lệ",
+      PERSONAL_DATA_REJECTED: "Có chữ giống thông tin cá nhân",
+      other: "Lý do khác",
+    },
+    empty: "Chưa có lời đọc nào.",
+  },
   audioStudio: {
     meta: {
       title: "Ghi âm giọng đọc",

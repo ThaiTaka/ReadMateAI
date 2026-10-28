@@ -284,3 +284,4 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 
 | 2026-10-27 | R10.3a | Phát bản ghi giáo viên đã duyệt cho học sinh (bài nghe âm), cờ TẮT, kiểm thử bằng sóng tổng hợp; R10.3 chưa nghiệm thu (xem REDESIGN_PROGRESS §5u) |
 | 2026-10-28 | R10.3a | Nghiệm thu CI/E2E R10.3a: sửa kiểm thử, `c6b98fa` CI + E2E push/PR xanh; lỗi chập chờn R08.4/R08.6 webkit-mobile (trang không hydrate) chưa rõ nguyên nhân gốc, đã gắn chẩn đoán (xem REDESIGN_PROGRESS §5u) |
+| 2026-10-28 | R10.3b1 | Chuẩn bị TTS (danh mục lời đọc, duyệt lời đọc/tệp, khóa tái sử dụng, điều kiện phát, kế hoạch lô, trang xem trước `/teacher/tts-script`); không gọi TTS thật, không migration, cờ TẮT; R10.3 chưa nghiệm thu (xem REDESIGN_PROGRESS §5v, docs/TTS_APPROVAL_CHECKLIST.md) |

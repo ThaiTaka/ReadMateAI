@@ -1,5 +1,6 @@
 # Hướng dẫn giáo viên: Ghi âm giọng đọc (`/teacher/audio`)
 
+> **Cập nhật R10.3b1 (2026-10-28):** thêm mục 7 — phân biệt *bản ghi giọng giáo viên* với *giọng máy (AI)*. Giọng máy **chưa được tạo**; hiện chỉ có danh sách lời đọc để bạn xem trước.
 > **Cập nhật R10.3a (2026-10-27):** phần *phát cho học sinh* đã có về kỹ thuật nhưng **TẮT** (cờ `student_teacher_audio_playback_approved`) và mới thử bằng âm thanh tổng hợp. Xem mục 4a về định dạng tương thích với điện thoại của học sinh.
 > **Trạng thái (R10.2, 2026-10-27):** phần kỹ thuật đã có và kiểm thử với **dữ liệu giả** trên Supabase local/CI. **Chưa dùng với giáo viên thật**: chưa có xác nhận cách đọc, chưa có sự đồng ý dùng giọng, chưa kiểm tra thiết bị ghi âm thật. Tính năng lưu bản ghi **tắt mặc định** (cờ hệ thống `teacher_audio_recording_approved`); khi tắt, trang chỉ ở chế độ xem trước.
 > Liên quan: [AUDIO_ENGINE](AUDIO_ENGINE.md), [AUDIO_RECORDING_PLAN](AUDIO_RECORDING_PLAN.md), [PRIVACY_AND_SECURITY](PRIVACY_AND_SECURITY.md).
@@ -58,3 +59,21 @@ Chọn tệp từ điện thoại/máy tính ở mục *Hoặc tải tệp ghi s
 **Điều kiện để bật phát cho học sinh thật (nghiệm thu R10.3):** có bản ghi **được duyệt thật** cho các âm cần thiết, cách đọc đã xác nhận (Q-01/Q-02/Q-03), sự đồng ý dùng giọng hợp lệ, đã kiểm tra phát trên **iPhone/Safari thật và ít nhất một điện thoại Android thật**, quyết định về TTS cho các câu hướng dẫn, và chủ dự án cho phép bật cờ.
 
 **Chưa làm (hạng mục kế tiếp):** ghép chuỗi đánh vần kiểu *"bờ – a – ba – huyền – bà"*. Việc đó cần quy tắc đánh vần do GV duyệt và thêm bản ghi cho tiếng cơ sở, dấu thanh, tiếng hoàn chỉnh; hiện hệ thống chỉ phát **một bản ghi đã duyệt cho một âm**.
+
+## 7. Bản ghi giọng giáo viên và giọng máy (AI) — khác nhau thế nào
+
+| | Bản ghi giọng giáo viên | Giọng máy (TTS, chưa có) |
+|---|---|---|
+| Ai tạo | Chính giáo viên ghi hoặc tải tệp (trang *Ghi âm giọng đọc*) | Máy tính tạo từ chữ, sau khi chủ dự án chọn dịch vụ |
+| Dùng cho | **Âm và vần đơn lẻ** (ví dụ "bờ", "a") — bắt buộc, không thay bằng giọng máy | Câu hướng dẫn, lời động viên, và những lời đọc mà chính sách của dạng bài cho phép |
+| Bạn duyệt gì | Nghe bản ghi + xác nhận cách đọc + người ghi còn đồng ý dùng giọng | **Hai lần**: (1) *chữ và cách đọc* của từng lời trước khi tạo âm thanh; (2) *nghe tệp đã tạo* trước khi học sinh được nghe |
+| Khi nào học sinh nghe | Bản đã duyệt, đang dùng, còn đồng ý | Chưa — chưa có nhà cung cấp, chưa chọn giọng, chưa lời nào được duyệt |
+
+Những điều cần biết:
+
+- **Xem trước:** trang *Lời đọc giọng máy (thử nghiệm)* (`/teacher/tts-script`) liệt kê các câu hướng dẫn và lời động viên **đang có trong bài luyện**, kèm mục đích dùng, giọng dự kiến, nguồn và lúc nào được phát ở từng mức hỗ trợ (H3→H0). Trang ghi rõ **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**, chỉ để đọc: chưa có nút duyệt, chưa phát được âm thanh.
+- **Đừng duyệt hộ máy:** không lời đọc nào tự được duyệt. Mục có nhãn *"Cách xưng hô chờ giáo viên chọn"* (con/em) hoặc *"Giáo viên cân nhắc giọng điệu"* (ví dụ "Chưa đúng rồi") là chỗ bạn nên góp ý trước.
+- **Không bao giờ** có giọng máy cho âm/vần đơn lẻ, và giọng máy **không đọc hộ** chữ, từ, câu mà bài đang kiểm tra khả năng tự đọc của trẻ — chỉ đọc mẫu **sau khi** trẻ đã trả lời.
+- Đổi chữ của một lời đọc, đổi giọng hay tốc độ đọc là tạo **phiên bản mới** và phải duyệt lại; tệp đã duyệt không bị sửa.
+- Quyết định còn thiếu (chọn dịch vụ, giọng Bắc/Nam, xưng hô "con"/"em", điều khoản lưu tệp…) nằm trong [TTS_APPROVAL_CHECKLIST](TTS_APPROVAL_CHECKLIST.md); các ô chưa xác nhận ghi **"Chưa quyết định"**.
+- *Ghép chuỗi đánh vần* ("bờ – a – ba – huyền – bà") vẫn là hạng mục sau này, cần quy tắc do giáo viên duyệt ([AUDIO_ENGINE §14.9](AUDIO_ENGINE.md)).

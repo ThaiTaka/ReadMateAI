@@ -1,11 +1,12 @@
 import "server-only";
-import { createHash } from "node:crypto";
 import { checkAudioLeaks, type AudioExposure } from "../../features/exercises/core/leaks.ts";
 import type { VariantAudioPolicy } from "../../features/exercises/core/audio.ts";
 import type { AudioRole, AudioSlot } from "../../features/exercises/core/primitives.ts";
+import { assetKeyOf } from "./hash.ts";
 import { createGoogleProvider, createMockProvider, noneProvider } from "./providers.ts";
 import { checkTtsRequest } from "./request.ts";
 import type { TtsErrorCode, TtsOutcome, TtsProvider, TtsPurpose, TtsRequest } from "./types.ts";
+import type { TtsVoiceKey } from "./voice.ts";
 
 /**
  * Dịch vụ TTS phía máy chủ (docs/AUDIO_ENGINE.md §5–§6). Chỉ dùng cho tác vụ tạo âm thanh TRƯỚC của GV;
@@ -45,11 +46,17 @@ export class CharBudget {
   }
 }
 
-/** Khóa dùng lại tệp đã tạo: sha256(mục đích + văn bản NFC + giọng + tốc độ + nhà cung cấp). Không chứa dữ liệu học sinh. */
-export function ttsCacheKey(request: TtsRequest, providerId: string): string {
-  return createHash("sha256")
-    .update([providerId, request.purpose, request.voiceKey, request.speed, request.text].join("\u0001"))
-    .digest("hex");
+/**
+ * Khóa dùng lại tệp đã tạo: nhà cung cấp + mục đích + giọng + tốc độ + phiên bản cấu hình giọng + văn bản NFC (hash.ts).
+ * Không chứa dữ liệu học sinh. Cùng khóa ⇒ cùng một tệp; đổi bất kỳ thành phần nào ⇒ tệp/phiên bản khác.
+ */
+export function ttsCacheKey(request: TtsRequest, providerId: string, configVersion = "unversioned"): string {
+  return assetKeyOf({
+    providerId,
+    purpose: request.purpose,
+    text: request.text,
+    voice: { voiceKey: request.voiceKey as TtsVoiceKey, speed: request.speed, configVersion },
+  });
 }
 
 export type SynthesizeParams = {

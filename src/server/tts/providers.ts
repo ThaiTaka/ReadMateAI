@@ -7,7 +7,11 @@ export const noneProvider: TtsProvider = {
   synthesize: async () => ({ ok: false, code: "NO_PROVIDER" }),
 };
 
-/** Tệp "âm thanh" giả cho kiểm thử: tiêu đề cố định + số ký tự; KHÔNG phải âm thanh thật, không bao giờ phát. */
+/**
+ * Tệp "âm thanh" giả cho kiểm thử: tiêu đề cố định + số ký tự; KHÔNG phải âm thanh thật, không bao giờ phát. Nhãn
+ * `audio/mpeg` chỉ để khớp kiểu; `checkSynthesizedAudio` (audio-check.ts) từ chối các byte này, nên chúng không thể
+ * thành ứng viên hay phiên bản đã duyệt. Cần tệp phát được trong kiểm thử: dùng WAV tổng hợp (tests/unit/audio-library/fixtures.ts).
+ */
 export function createMockProvider(
   behavior: { fail?: "PROVIDER_ERROR" | "TIMEOUT" } = {},
 ): TtsProvider & { readonly calls: TtsRequest[] } {

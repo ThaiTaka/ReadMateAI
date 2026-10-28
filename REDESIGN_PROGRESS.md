@@ -1,11 +1,12 @@
 | 2026-10-21 | R06.4 | R06 | Giao diện reset hai bước (BẮT ĐẦU MÙA MỚI → gõ tên lớp), requestId một lần mỗi lần mở, SEASON_MISMATCH/CONFIRMATION_MISMATCH, `season.id` từ máy chủ; unit +9, E2E season-reset 9/9 local (3 project). Không làm R06.5 |
 # REDESIGN_PROGRESS — Tiến độ tái cấu trúc ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-27 — Phiên Claude Code R10.3a (phát bản ghi giáo viên đã duyệt cho học sinh, cờ TẮT; R10.3 chưa nghiệm thu); trước đó 2026-10-26 — R10.1 (Audio Engine, thiết kế); trước đó 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
+> **Cập nhật lần cuối:** 2026-10-28 — Phiên Claude Code R10.3b1 (chuẩn bị TTS: danh mục lời đọc, kế hoạch lô, phiên bản, điều kiện phát; KHÔNG gọi TTS thật); trước đó 2026-10-27 — Phiên Claude Code R10.3a (phát bản ghi giáo viên đã duyệt cho học sinh, cờ TẮT; R10.3 chưa nghiệm thu); trước đó 2026-10-26 — R10.1 (Audio Engine, thiết kế); trước đó 2026-10-25 — Phiên Claude Code R08.6 (chơi lại Mê cung không tính điểm; R08 xong về kỹ thuật, chờ GV duyệt hình/học liệu)
 > Đọc tệp này **đầu tiên** ở mỗi phiên của lộ trình R (sau đó [REDESIGN_TASKS.md](REDESIGN_TASKS.md) và tài liệu liên quan). Lịch sử GĐ1–GĐ4 vẫn ở [PROGRESS.md](PROGRESS.md).
 
 ## 1. Trạng thái hiện tại
 
+- **R10.3b1 xong về kỹ thuật (2026-10-28; CI/E2E xem nhật ký phiên): hệ thống CHUẨN BỊ TTS — TTS Script Catalog (34 lời đọc tĩnh, mọi mục `pending_review`), duyệt lời đọc + phiên bản tệp bất biến, khóa tái sử dụng có phiên bản cấu hình giọng, kiểm tra kỹ thuật tệp (byte mock bị từ chối), điều kiện phát dùng lại AD-35, kế hoạch/chạy lô có giới hạn, trang xem trước `/teacher/tts-script` ("BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA", chỉ đọc). KHÔNG gọi TTS thật, KHÔNG tệp âm thanh TTS, KHÔNG migration/route phát, mọi cờ phát TẮT; R10.3 CHƯA nghiệm thu. Chờ quyết định ở [TTS_APPROVAL_CHECKLIST](docs/TTS_APPROVAL_CHECKLIST.md) (§5v).**
 - **R10.3a nghiệm thu kỹ thuật CI/E2E (2026-10-28, commit `c6b98fa`: CI + E2E push/PR đều xanh, xem §5u "Nghiệm thu CI/E2E").** R10.3a xong về kỹ thuật (2026-10-27): nền tảng phát bản ghi GV đã duyệt cho học sinh — hàm CSDL `gateway_resolve_teacher_audio` + 2 route `…/audio[/{role}]` + `AudioSlot` phát được + `QuestionAudio`; cờ `student_teacher_audio_playback_approved` TẮT; fixture sóng tổng hợp; câu bắt buộc nghe mà thiếu âm thanh không tính điểm. KHÔNG TTS, KHÔNG ghép chuỗi đánh vần; R10.3 chưa nghiệm thu (xem §5u).**
 - **R10.2 xong về kỹ thuật (2026-10-27; CI chờ): trang `/teacher/audio` (ghi âm bằng MediaRecorder + tải tệp, nghe lại, ghi lại, lưu nháp, gửi duyệt, duyệt/yêu cầu ghi lại/thu hồi), 38 âm P0 dự kiến từ kho tri thức, đồng ý dùng giọng (ô không chọn sẵn), bucket Storage riêng tư `teacher-audio`, migration `20261031090000` (3 bảng, 11 hàm, trigger bất biến, cờ `teacher_audio_recording_approved` TẮT), `Permissions-Policy microphone=(self)` chỉ ở `/teacher/audio`, kiểm tra tệp theo nội dung (WAV/Ogg/WebM/MP4/MP3), proxy phát lại có Range, `npm run audio:reconcile`. Kiểm thử: 90+ unit mới, pgTAP 13, DB `audio-library`, E2E `teacher-audio` (CSDL + Storage chạy ở CI; Docker local không chạy). KHÔNG có bản ghi thật, KHÔNG bản nào được duyệt, KHÔNG gọi TTS, `AudioSlot` vẫn khóa. Chờ: GV xác nhận cách đọc (Q-01/Q-02/Q-03), đồng ý dùng giọng, kiểm tra iPhone/micro thật. **CI/E2E GitHub xanh trên commit `0f350d7`** (CI push + PR; E2E: 5 project không CSDL + 4 project có CSDL/Storage; E2E push webkit-mobile bị hủy một lần rồi chạy lại xanh). Hai lỗi do mã thật được E2E bắt và đã sửa: form cách đọc mất thông báo vì `key` đổi theo dữ liệu (remount sau refresh); test chọn nhầm nút `g` ↔ `gh`/`gi`. Không làm R10.3 — [AUDIO_ENGINE §12](docs/AUDIO_ENGINE.md).**
 - **R10.1 xong về thiết kế/mã (CI chờ): [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) (so sánh Google/Azure/FPT.AI theo tài liệu chính thức 2026-10-26), [docs/AUDIO_RECORDING_PLAN.md](docs/AUDIO_RECORDING_PLAN.md) (DỰ KIẾN: 38 âm P0 + 143 vần nhiều chữ, ≈ 60 phút ghi, 4–5 buổi 15–20 phút), adapter `TtsProvider` (`src/server/tts/`: none/mock/google-skeleton, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy`+`checkAudioLeaks`) + 21 unit test. KHÔNG gọi API thật (chưa có khóa được cấp phép — POC BLOCKED), KHÔNG nghe thử giọng, `AudioSlot` vẫn khóa, không route/migration/gọi hàng loạt. Đề xuất POC: Google Neural2 (chưa chọn/mua). Chờ chủ dự án D1–D6 (AUDIO_ENGINE §10). R10.2 chưa làm.**
@@ -38,7 +39,7 @@
 | R06 | ✅ Nghiệm thu (CI `39533560083`, E2E `39533560105`) |
 | R07 | ✅ R07.1–R07.6 xong (CI xanh `8701cfa`); nghiệm thu phần engine/đồ họa/điều khiển/lưu vị trí/bảo mật lượt; mini-game đầy đủ ở R08 |
 | R08 | 🔄 R08.1–R08.3 (§5o–§5q) + R08.4 (§5r) + **R08.5 phần kỹ thuật (§5s)** xong; **GV chưa duyệt quái vật (chờ xác nhận thực tế)**; R08.6 chưa làm |
-| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); **R10.2 xong về kỹ thuật (thư viện bản ghi GV, chưa dùng với GV thật)**; **R10.3a xong về kỹ thuật (phát bản ghi đã duyệt, cờ TẮT, chưa nghiệm thu thực tế)**; R10.3b–R10.7 chưa bắt đầu |
+| R10 | 🔄 R10.1 xong (thiết kế + adapter, POC chờ khóa); **R10.2 xong về kỹ thuật (thư viện bản ghi GV, chưa dùng với GV thật)**; **R10.3a xong về kỹ thuật (phát bản ghi đã duyệt, cờ TẮT, chưa nghiệm thu thực tế)**; **R10.3b1 xong về kỹ thuật (chuẩn bị TTS, không gọi dịch vụ thật)**; R10.3b2–R10.7 chưa bắt đầu |
 | R11 | ⏸ Chưa bắt đầu ([REDESIGN_TASKS](REDESIGN_TASKS.md)) |
 | R09 | ⏸ **Tạm hoãn sau khi nộp dự án** (chủ dự án 2026-10-21) |
 
@@ -431,6 +432,30 @@ R10.3b (khe TTS sau quyết định D1–D6) · nối validate `production` vớ
 
 ---
 
+## 5v. R10.3b1 — Chuẩn bị TTS: danh mục lời đọc, kế hoạch lô, phiên bản, điều kiện phát (2026-10-28)
+
+**Phạm vi (đúng prompt):** chỉ phần lập danh mục, kiểm tra chính sách, chống trùng, định danh phiên bản, điều kiện phát và giao diện xem trước. **Không** gọi TTS thật, không tạo khóa/tài khoản/thanh toán, không migration, không route phát, không bật cờ, không tạo tệp âm thanh TTS, không phát cho học sinh. Không làm R10.3b2/R10.4/R11. Tài liệu: [AUDIO_ENGINE §14](docs/AUDIO_ENGINE.md), [TTS_APPROVAL_CHECKLIST](docs/TTS_APPROVAL_CHECKLIST.md), [TEACHER_AUDIO_GUIDE §7](docs/TEACHER_AUDIO_GUIDE.md).
+
+**Kiểm tra đầu phiên (thật):** nhánh `feature/home-learning-redesign`, working tree sạch, HEAD = `origin/...` = `55c3870`; bốn workflow của `55c3870` (CI + E2E, push + PR) đều `success`.
+
+**Đã làm (`src/server/tts/`):**
+
+- `catalog.ts` — **TTS Script Catalog**: 17 câu lệnh biến thể + 17 phản hồi cố định (34 lời đọc tĩnh, 1.260 ký tự) + khe âm thanh của câu đã sinh (tên tranh/từ/câu/đọc mẫu). Mỗi mục: mã ổn định, chữ NFC, mục đích, vai trò, dạng bài/biến thể + mức khả dụng H3→H0 (từ `audioPolicy`), nguồn + phiên bản, giọng dự kiến, `contentHash`, cờ chú ý (xưng hô, từ phủ định). **Mọi mục `pending_review`**; khe bị chặn vào `excluded` (không lưu chữ). Dùng lại `planSlotSynthesis`/`checkAudioLeaks` — không luật thứ hai.
+- `script-review.ts` — duyệt **lời đọc** (bước 1): chỉ bản duyệt khớp `contentHash`, có người duyệt + xác nhận cách đọc mới `approved`; không có hàm nào tạo bản duyệt.
+- `versions.ts` — phiên bản tệp (bước 2) + `checkVersionUsable` (mock/testOnly, thu hồi, thay thế, chưa nghe, lời đọc chưa duyệt, đổi chữ, khóa giả mạo, giọng chưa chọn/đổi) + `findReusableVersion`.
+- `hash.ts` — `contentHashOf`, `assetKeyOf` (nhà cung cấp + mục đích + mã giọng + tốc độ + **phiên bản cấu hình giọng** + chữ NFC); `ttsCacheKey` (R10.1) nay gọi hàm này.
+- `audio-check.ts` — `checkSynthesizedAudio` dùng `inspectAudio`: byte mock bị từ chối, MIME khai lệch bị từ chối.
+- `playback.ts` — `decideTtsPlayback`/`decideTtsPlay`: dùng lại `decideBefore/AfterGrading`; cờ tắt, tắt âm, âm đơn lẻ → bản ghi giáo viên, bài đọc cấm mọi mức, `hint` khóa (chưa có cơ chế ghi nhận), model/feedback chỉ sau khi chấm.
+- `batch.ts` — `planTtsBatch` (chạy khô, chống trùng, giới hạn 40 tác vụ / 3.000 ký tự) và `runTtsBatch` (`none` → `NO_PROVIDER` không gọi mạng; giọng chưa chọn → `VOICE_NOT_CHOSEN`; ứng viên `pending_review`, mock luôn `testOnly`). Không nơi nào gọi ở mã chạy thật.
+- `voice.ts` — giọng giữ chỗ `provisional-0` (**không phải quyết định**).
+- Giao diện: `/teacher/tts-script` (chỉ đọc, `requireTeacher`, dữ liệu bản chơi thử, nhãn **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**, nút duyệt khóa "Sắp có"); chuỗi ở `vi.ttsScript`. Không sidebar, không micro, không `<audio>`.
+
+**Kiểm thử (local, thật):** `format:check`, `lint` (1 cảnh báo cũ), `typecheck`, `content:check` (0 lỗi, 65 cảnh báo cũ), `test:run` **74 tệp / 1405 test xanh** (mới: `tests/unit/tts/{catalog,batch,playback-versions,safety-scan,ui}.test.ts[x]`), `build` (route `/teacher/tts-script` có mặt), `check:bundle` sạch (61 tệp). Đối chiếu 15 yêu cầu của prompt: (1) chưa duyệt không sinh/phát; (2) `none` → `NO_PROVIDER`, `fetch` không được gọi; (3) âm đơn lẻ → `TEACHER_RECORDING_REQUIRED`; (4) chống lộ đáp án H3–H0 trên toàn bộ câu demo của 17 biến thể; (5) không dữ liệu học sinh (strict schema, quét import, `PERSONAL_DATA_REJECTED`); (6) chống trùng theo chữ/giọng/tốc độ/phiên bản cấu hình/nhà cung cấp; (7) mock không thành âm thanh đã duyệt; (8) đổi chữ → hash + khóa mới; (9) bài đọc không phát trước chấm; (10) `hint` khóa; (11) quét: không địa chỉ Google/Azure/FPT ngoài `providers.ts`, toàn luồng chạy với `fetch` bị chặn; (12) `check:bundle`; (13) R10.2/R10.3a: bộ unit đầy đủ xanh; (14) cờ vẫn TẮT (quét migration + `flagEnabled: true`), không migration mới; (15) scoring/game/bảng xếp hạng không bị import.
+
+**Không chạy local:** pgTAP/DB/Storage và E2E (không đổi CSDL; máy local thiếu RAM — E2E chạy trên GitHub Actions, kết quả ghi ở nhật ký phiên). Lỗi WebKit mobile chập chờn (không hydrate màn mê cung, §5u) **vẫn chưa rõ nguyên nhân**; không đụng tới, không tuyên bố đã sửa, không bỏ qua test.
+
+**Rủi ro/quyết định còn mở:** toàn bộ ở [TTS_APPROVAL_CHECKLIST](docs/TTS_APPROVAL_CHECKLIST.md) (P1–P9 chủ dự án, G1–G9 giáo viên, C1–C7 điều kiện mở) — mọi ô "Chưa quyết định". Thêm: chưa có bảng CSDL/Storage cho phiên bản TTS (R10.3b2); thời lượng tối đa 10 giây là giới hạn của thư viện bản ghi; kiểm tra xưng hô/giọng điệu chỉ là nhắc bằng mẫu chữ; `inspectAudio` không phát hiện tệp im lặng.
+
 ## 5t. R08.6 — Chơi lại Mê cung không tính điểm; nghiệm thu R08.5 kỹ thuật (2026-10-25)
 
 ### Nghiệm thu R08.5 trên `cb3a357` (kiểm tra thật bằng `gh run`)
@@ -688,6 +713,7 @@ JS tải về của route: **206,6 KB gzip** (18 tệp) so với `/login` 201,2 
 
 | Ngày | Phiên | Giai đoạn | Tóm tắt |
 |---|---|---|---|
+| 2026-10-28 | R10.3b1 | R10 | Chuẩn bị TTS (không gọi dịch vụ thật): `src/server/tts/{catalog,script-review,versions,hash,audio-check,playback,batch,voice}.ts`, trang `/teacher/tts-script` (thử nghiệm, chỉ đọc), `docs/TTS_APPROVAL_CHECKLIST.md`, AUDIO_ENGINE §14 (kèm yêu cầu kỹ thuật đánh vần ghép tiếng — chưa làm); local: format/lint/typecheck/content:check/unit 1405 (74 tệp)/build/check:bundle xanh; không đổi CSDL (không chạy pgTAP/DB/E2E local); cờ vẫn TẮT. Không làm R10.3b2/R10.4/R11 |
 | 2026-10-27 | R10.3a | R10 | Phát bản ghi GV đã duyệt cho học sinh (nghe âm): migration `20261101090000` + `gateway_resolve_teacher_audio`, 2 route, `AudioSlot` phát được, AD-35, không điểm khi thiếu âm thanh, cờ TẮT; local: unit 1345, DB 315 (Storage), pgTAP 270, E2E chromium 5/5, build + check:bundle sạch; CI chờ. Chưa bản ghi thật/iPhone/Android/TTS; R10.3 chưa nghiệm thu |
 | 2026-10-28 | R10.3a | R10 | Nghiệm thu CI/E2E: sửa kiểm thử (cách ly fixture âm thanh theo trường, WebKit kiểm tệp âm thanh qua page.request, assertion race reset/start R08.2 có bất biến, chẩn đoán mở mê cung R08.4); không đổi mã sản phẩm/RLS/cờ; commit `c6b98fa` 21/21 job CI+E2E push/PR xanh (đi qua `0872310`, `3696c17` — E2E PR đỏ do mê cung webkit-mobile —, `115b3d5` — E2E push đỏ do thân phản hồi media). Lỗi R08.4/R08.6 webkit-mobile (không hydrate) chưa rõ nguyên nhân gốc, đã gắn chẩn đoán, là việc mở; bộ đầy đủ chạy trên GitHub (local thiếu RAM) |
 | 2026-10-25 | R08.6 | R08 | Nghiệm thu R08.5 kỹ thuật (CI xanh; E2E push 1 lỗi chập chờn webkit-mobile + PR bị hủy — xem §5t); chơi lại Mê cung không tính điểm: `is_replay`, GAME_REPLAY, 7 × 21, điểm không đổi, hai tab, reset mùa; giao diện "Chơi lại cho vui"; pgTAP/DB/unit local xanh; CI chờ. Không làm R10/R11 |

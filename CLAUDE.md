@@ -45,6 +45,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) | **R03** — ma trận RLS đã kiểm thử, bất biến CSDL, quy trình thêm bảng |
 | [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | **R03** — Supabase local, `config.toml`, biến môi trường, danh mục Cloud (chưa tạo), sự cố |
 | [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) · [docs/TEACHER_AUDIO_GUIDE.md](docs/TEACHER_AUDIO_GUIDE.md) | **R10** — âm thanh: TTS (R10.1), thư viện bản ghi giáo viên `/teacher/audio`, Storage riêng tư, duyệt phiên bản (R10.2), hướng dẫn GV |
+| [docs/TTS_APPROVAL_CHECKLIST.md](docs/TTS_APPROVAL_CHECKLIST.md) | **R10.3b1** — bảng quyết định của chủ dự án/giáo viên trước khi dùng TTS (nhà cung cấp, giọng, điều khoản, chi phí, xưng hô); ô chưa xác nhận ghi "Chưa quyết định" |
 | [REDESIGN_TASKS.md](REDESIGN_TASKS.md) · [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md) | Lộ trình R01–R11 và tiến độ hiện tại |
 | [TASKS.md](TASKS.md) | Giai đoạn GĐ1–GĐ4 (GĐ5+ đã được thay bằng REDESIGN_TASKS) |
 | [PROGRESS.md](PROGRESS.md) | Lịch sử GĐ1–GĐ4, quyết định D-xx, câu hỏi mở Q-xx, rủi ro R-xx |
