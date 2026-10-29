@@ -1,35 +1,50 @@
 import Link from "next/link";
 import { House } from "lucide-react";
-import { LogoMark } from "@/components/layout/logo";
+import { MotionScope, MotionToggle } from "@/components/adventure/motion";
+import { LearnPreviewBadge } from "@/components/layout/learn-preview-badge";
+import { LogoWordmark } from "@/components/layout/logo";
 import { MAIN_CONTENT_ID } from "@/components/layout/skip-link";
 import { StudentBottomNav } from "@/components/layout/student-bottom-nav";
-import { Badge } from "@/components/ui/badge";
 import { vi } from "@/strings/vi";
 
 /**
- * Khung khu vực học sinh — ưu tiên điện thoại. Không script bên thứ ba, không liên kết ra ngoài,
- * không ô nhập văn bản tự do (CLAUDE.md §6). Chưa có tài khoản và chưa lưu thông tin học sinh.
+ * Khung khu vực học sinh — ưu tiên điện thoại, mở rộng thành bảng điều khiển trên máy tính bảng/máy tính.
+ * Không script bên thứ ba, không liên kết ra ngoài, không ô nhập văn bản tự do (CLAUDE.md §6). /learn là bản minh
+ * họa hư cấu (R02); /learn/me… là khu vực có xác thực của thiết bị đã liên kết (R03–R04): Học tập và Thi đấu.
  */
 export default function LearnLayout({ children }: LayoutProps<"/learn">) {
   return (
-    <div className="flex flex-1 flex-col bg-linear-to-b from-brand-50 via-canvas to-canvas">
-      <header className="mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-4 pt-4">
-        <span className="flex items-center gap-2">
-          <LogoMark className="size-10" />
-          <Badge tone="sun">{vi.brand.previewBadge}</Badge>
+    <MotionScope className="flex flex-1 flex-col bg-linear-to-b from-jade-50 via-canvas to-canvas">
+      <header className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 pt-4 sm:px-6">
+        <span className="flex items-center gap-3">
+          <Link href="/" aria-label={vi.a11y.homeLink} className="rounded-xl">
+            <LogoWordmark />
+          </Link>
+          {/* Chỉ trang minh họa /learn có nhãn; điện thoại hẹp: đã có dải ghi chú đầu trang. */}
+          <span className="hidden sm:inline-flex">
+            <LearnPreviewBadge />
+          </span>
         </span>
+        {/* Điện thoại: logo + Trang chủ ở dòng đầu, công tắc giảm chuyển động xuống dòng dưới; màn rộng: một dòng. */}
         <Link
           href="/"
-          className="inline-flex min-h-touch items-center gap-2 rounded-full px-4 font-semibold text-ink-soft hover:bg-surface hover:text-ink"
+          className="order-2 ml-auto inline-flex min-h-12 items-center gap-2 rounded-full px-4 font-semibold text-ink-soft hover:bg-surface hover:text-ink sm:order-3 sm:ml-0"
         >
           <House aria-hidden="true" className="size-5" />
           {vi.learn.exit}
         </Link>
+        <span className="order-3 sm:order-2 sm:ml-auto">
+          <MotionToggle />
+        </span>
       </header>
-      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="mx-auto w-full max-w-xl flex-1 px-4 pb-32 pt-4 outline-none">
+      <main
+        id={MAIN_CONTENT_ID}
+        tabIndex={-1}
+        className="mx-auto w-full max-w-6xl flex-1 px-4 pt-4 pb-32 outline-none sm:px-6 md:pb-16"
+      >
         {children}
       </main>
       <StudentBottomNav />
-    </div>
+    </MotionScope>
   );
 }

@@ -5,10 +5,8 @@ import { KNOWLEDGE_BASE } from "../knowledge/default-kb.ts";
 import type { KnowledgeBase } from "../knowledge/load.ts";
 import type { StimulusContent } from "../exercises/core/audio.ts";
 import type { VariantId } from "../exercises/core/module.ts";
-import type { ExerciseTaskContract } from "../exercises/core/worksheet.ts";
 import type { GenerationRequest } from "../exercises/generation/context.ts";
 import { GENERATOR_VERSION, generateExerciseSet, type ExerciseSet } from "../exercises/generation/generate.ts";
-import { generateHomeClassPair, type PairEquivalence } from "../exercises/generation/pair.ts";
 import type { ExerciseItem } from "../exercises/items.ts";
 import { VARIANTS } from "../exercises/registry.ts";
 import { EXERCISE_TYPES } from "../exercises/catalog.ts";
@@ -25,6 +23,9 @@ import {
  * Dựng dữ liệu cho trang /demo (chạy phía server lúc build — trình duyệt chỉ nhận các câu đã sinh và đã
  * qua kiểm tra, không nhận kho tri thức). Chế độ `demo`: hồ sơ minh họa, dữ liệu chờ duyệt có cảnh báo,
  * không lưu, không AI.
+ *
+ * Từ R02 (AD-51) bản chơi thử không còn sinh "bài ở lớp"/phiếu tương đương: mỗi dạng bài chỉ sinh câu luyện tại
+ * nhà và một câu ví dụ "Cô làm mẫu". Bộ sinh cặp nhà–lớp (generation/pair.ts) vẫn giữ và có test tới R11.
  */
 
 export const DEMO_SEED = "readmate-demo-v1";
@@ -43,13 +44,13 @@ export type DemoActivity = {
   unavailableReason: string | null;
   items: ExerciseItem[];
   example: ExerciseItem | null;
-  classroom: { ok: true; contract: ExerciseTaskContract; equivalence: PairEquivalence } | { ok: false; reason: string };
   generation: { requested: number; produced: number; rejectedByCode: Record<string, number> };
 };
 
 export type DemoBlock = {
   id: string;
-  kind: "review" | "practice" | "classroom_like";
+  /** `independent`: thử thách "Tự làm" (H0, không gợi ý) ở cuối buổi luyện. */
+  kind: "review" | "practice" | "independent";
   variant: VariantId;
   title: string;
   supportLevel: SupportLevel;
@@ -99,7 +100,7 @@ export const DEMO_PLANS: Readonly<
     session: [
       { kind: "review", variant: "visual_match", count: 2, focusUnits: ["phoneme:b", "phoneme:d"] },
       { kind: "practice", variant: "picture_build", count: 3 },
-      { kind: "classroom_like", variant: "picture_onset", count: 2 },
+      { kind: "independent", variant: "picture_onset", count: 2 },
     ],
   },
   "vung-buoc": {
@@ -115,7 +116,7 @@ export const DEMO_PLANS: Readonly<
     session: [
       { kind: "review", variant: "which_rime", count: 2, focusUnits: ["rime:an", "rime:ang"] },
       { kind: "practice", variant: "missing_rime", count: 3 },
-      { kind: "classroom_like", variant: "choose_picture", count: 2 },
+      { kind: "independent", variant: "choose_picture", count: 2 },
     ],
   },
   "tang-toc": {
@@ -131,7 +132,7 @@ export const DEMO_PLANS: Readonly<
     session: [
       { kind: "review", variant: "match_pairs", count: 1 },
       { kind: "practice", variant: "sentence_picture", count: 3 },
-      { kind: "classroom_like", variant: "arrange_words", count: 2 },
+      { kind: "independent", variant: "arrange_words", count: 2 },
     ],
   },
 };
@@ -139,7 +140,7 @@ export const DEMO_PLANS: Readonly<
 const BLOCK_TITLES: Readonly<Record<DemoBlock["kind"], string>> = {
   review: "Ôn bài cũ",
   practice: "Luyện tập",
-  classroom_like: "Thử như ở lớp",
+  independent: "Thử thách tự làm",
 };
 
 export function buildDemoPracticeData(kb: KnowledgeBase = KNOWLEDGE_BASE): DemoPracticeData {
@@ -175,25 +176,9 @@ export function buildDemoPracticeData(kb: KnowledgeBase = KNOWLEDGE_BASE): DemoP
         const definition = VARIANTS[variant];
         const info = typeInfo.get(definition.type);
         const seed = `${DEMO_SEED}:${path.id}:${variant}`;
-        const pair = generateHomeClassPair({
-          ...base,
-          variant,
-          count: 4,
-          minCount: 2,
-          classroomCount: 3,
-          seed,
-          homeSupportLevel: supportLevel,
-        });
-        const home = pair.home;
-        // Bài ở lớp (phiếu) và câu ví dụ không được xuất hiện lại trong buổi luyện ở nhà.
-        if (pair.ok) remember(variant, pair.classroom);
-        // Biến thể chỉ có trên ứng dụng (nghe âm – chọn chữ) không có bản phiếu tương đương.
-        const classroom: DemoActivity["classroom"] = !definition.paper.supported
-          ? { ok: false, reason: definition.paper.note ?? "Không có bản phiếu." }
-          : pair.ok
-            ? { ok: true, contract: pair.contracts.classroom, equivalence: pair.equivalence }
-            : { ok: false, reason: pair.message };
-        // Câu ví dụ ("Cô làm mẫu") phải khác cả bài ở nhà lẫn bài ở lớp.
+        const generated = generateExerciseSet({ ...base, variant, count: 4, minCount: 2, seed });
+        const home = generated.ok ? generated.set : null;
+        // Câu ví dụ ("Cô làm mẫu") phải khác các câu luyện; cả hai không xuất hiện lại trong buổi luyện mẫu.
         const example = home
           ? generateExerciseSet({
               ...base,
@@ -205,7 +190,7 @@ export function buildDemoPracticeData(kb: KnowledgeBase = KNOWLEDGE_BASE): DemoP
             })
           : null;
         if (example?.ok) remember(variant, example.set);
-        const homeDiagnostics = pair.ok ? null : pair.diagnostics.home;
+        const homeDiagnostics = generated.ok ? null : generated.diagnostics;
         return {
           variant,
           type: definition.type,
@@ -220,10 +205,9 @@ export function buildDemoPracticeData(kb: KnowledgeBase = KNOWLEDGE_BASE): DemoP
           },
           recommended: plan.recommended.includes(variant),
           status: !home ? "unavailable" : home.previewOnly ? "preview_only" : "ready",
-          unavailableReason: home ? null : pair.ok ? null : pair.message,
+          unavailableReason: generated.ok ? null : generated.message,
           items: home?.items ?? [],
           example: example?.ok ? (example.set.items[0] ?? null) : null,
-          classroom,
           generation: {
             requested: 4,
             produced: home?.items.length ?? 0,
@@ -251,7 +235,7 @@ export function buildDemoPracticeData(kb: KnowledgeBase = KNOWLEDGE_BASE): DemoP
           kind: step.kind,
           variant: step.variant,
           title: `${BLOCK_TITLES[step.kind]}: ${VARIANTS[step.variant].title}`,
-          supportLevel: step.kind === "classroom_like" ? 0 : supportLevel,
+          supportLevel: step.kind === "independent" ? 0 : supportLevel,
           items: result.set.items,
           previewOnly: result.set.previewOnly,
         },

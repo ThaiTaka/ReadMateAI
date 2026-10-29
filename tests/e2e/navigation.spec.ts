@@ -6,24 +6,25 @@ test.describe("điều hướng", () => {
     const mainNav = page.getByRole("navigation", { name: "Điều hướng chính" });
 
     await page.goto("/");
-    await mainNav.getByRole("link", { name: "Bản demo" }).click();
+    await mainNav.getByRole("link", { name: "Chơi thử" }).click();
     await expect(page).toHaveURL(/\/demo$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Chơi thử bài luyện đọc lớp 1");
-    await expect(mainNav.getByRole("link", { name: "Bản demo" })).toHaveAttribute("aria-current", "page");
+    await expect(mainNav.getByRole("link", { name: "Chơi thử" })).toHaveAttribute("aria-current", "page");
 
     await mainNav.getByRole("link", { name: "Liên kết thiết bị" }).click();
     await expect(page).toHaveURL(/\/join$/);
 
     await mainNav.getByRole("link", { name: "Học sinh" }).click();
     await expect(page).toHaveURL(/\/learn$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Chào con!");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Chào Mây!");
 
-    await page.getByRole("link", { name: "Trang chủ" }).click();
+    await page.getByRole("link", { name: "Trang chủ", exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
 
+    // R03: khu vực GV cần đăng nhập → khách được đưa tới trang đăng nhập.
     await page.getByRole("link", { name: "Khu vực giáo viên" }).click();
-    await expect(page).toHaveURL(/\/teacher$/);
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Bảng điều khiển giáo viên");
+    await expect(page).toHaveURL(/\/login\?reason=required/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Đăng nhập giáo viên");
 
     await page.getByRole("link", { name: "ReadMate AI — về trang chủ" }).click();
     await expect(page).toHaveURL(/\/$/);
@@ -45,7 +46,7 @@ test.describe("điều hướng", () => {
     await expect(menu).toBeHidden();
 
     await page.getByRole("button", { name: "Mở menu điều hướng" }).click();
-    await menu.getByRole("link", { name: "Bản demo" }).click();
+    await menu.getByRole("link", { name: "Chơi thử" }).click();
     await expect(page).toHaveURL(/\/demo$/);
     await expect(menu).toBeHidden();
   });

@@ -25,18 +25,19 @@ export default defineConfig({
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] } },
     { name: "webkit-desktop", use: { ...devices["Desktop Safari"] } },
     { name: "webkit-mobile", use: { ...devices["iPhone 13"] } },
-    // Máy tính bảng (TASKS 4.8): chỉ chạy các spec của bản chơi thử và bố cục, để không nhân đôi thời gian E2E.
+    // Máy tính bảng (TASKS 4.8, R02): chỉ chạy các spec của bản chơi thử, Game World và bố cục, để không nhân đôi thời gian E2E.
     {
       name: "webkit-tablet",
       use: { ...devices["iPad (gen 7)"] },
-      testMatch: /(demo-practice|responsive)\.spec\.ts/,
+      testMatch: /(demo-practice|responsive|game-world|treasure-maze-demo)\.spec\.ts/,
     },
   ],
   webServer: {
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${PORT}`,
     url: BASE_URL,
     timeout: 240_000,
-    reuseExistingServer: false,
+    // Mặc định luôn dựng bản build mới (CI). E2E_REUSE_SERVER=1: dùng máy chủ đã tự chạy ở cổng 3100 để lặp không build lại.
+    reuseExistingServer: process.env.E2E_REUSE_SERVER === "1",
     stdout: "ignore",
     stderr: "pipe",
     env: { NEXT_TELEMETRY_DISABLED: "1" },

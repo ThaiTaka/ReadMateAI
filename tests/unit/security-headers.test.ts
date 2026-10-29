@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import nextConfig from "../../next.config";
 import {
+  AUDIO_STUDIO_HEADERS,
+  AUDIO_STUDIO_PATH,
+  AUDIO_STUDIO_PERMISSIONS_POLICY,
   buildContentSecurityPolicy,
   buildSecurityHeaders,
   JOIN_PAGE_HEADERS,
@@ -66,12 +69,35 @@ describe("next.config.ts", () => {
     expect(nextConfig.poweredByHeader).toBe(false);
   });
 
-  it("áp dụng header cho mọi route và ghi đè Referrer-Policy riêng cho /join", async () => {
+  it("áp dụng header cho mọi route, ghi đè Referrer-Policy riêng cho /join và Permissions-Policy riêng cho /teacher/audio", async () => {
     const rules = (await nextConfig.headers?.()) ?? [];
     const sources = rules.map((rule) => rule.source);
-    expect(sources).toEqual(["/:path*", "/join"]);
+    // Quy tắc /teacher/audio phải đứng SAU quy tắc chung để ghi đè Permissions-Policy.
+    expect(sources).toEqual(["/:path*", "/join", AUDIO_STUDIO_PATH]);
+    expect(rules[2]?.headers).toEqual(AUDIO_STUDIO_HEADERS);
     // Quy tắc khai báo sau ghi đè quy tắc trước khi cùng khóa header.
     expect(rules[1]?.headers).toEqual(JOIN_PAGE_HEADERS);
     expect(JOIN_PAGE_HEADERS).toEqual([{ key: "Referrer-Policy", value: "no-referrer" }]);
+  });
+});
+
+describe("micro chỉ mở cho trang ghi âm của giáo viên (R10.2)", () => {
+  it("mặc định mọi trang vẫn microphone=()", () => {
+    expect(toMap(buildSecurityHeaders({ isDev: false })).get("Permissions-Policy")).toContain("microphone=()");
+  });
+
+  it("/teacher/audio được microphone=(self) và các quyền khác vẫn tắt", () => {
+    expect(AUDIO_STUDIO_PATH).toBe("/teacher/audio");
+    expect(AUDIO_STUDIO_PERMISSIONS_POLICY).toContain("microphone=(self)");
+    expect(AUDIO_STUDIO_PERMISSIONS_POLICY).not.toContain("microphone=()");
+    for (const off of ["camera=()", "geolocation=()", "payment=()", "usb=()"]) {
+      expect(AUDIO_STUDIO_PERMISSIONS_POLICY).toContain(off);
+    }
+  });
+
+  it("không có quy tắc header nào mở micro cho route học sinh", async () => {
+    const rules = (await nextConfig.headers?.()) ?? [];
+    const opened = rules.filter((rule) => rule.headers.some((h) => /microphone=\((?!\))/u.test(h.value)));
+    expect(opened.map((rule) => rule.source)).toEqual([AUDIO_STUDIO_PATH]);
   });
 });

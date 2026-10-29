@@ -6,7 +6,7 @@ export type NavItem = {
   label: string;
 };
 
-/** Các route nền tảng của Giai đoạn 2 (docs/ARCHITECTURE.md §6.1). */
+/** Các route chính (docs/ARCHITECTURE.md §6.1; R02: /learn là Game World của học sinh). */
 export const MAIN_NAV: readonly NavItem[] = [
   { href: "/", label: vi.nav.home },
   { href: "/demo", label: vi.nav.demo },
@@ -18,5 +18,7 @@ export const MAIN_NAV: readonly NavItem[] = [
 export const SITE = {
   name: vi.brand.name,
   description: vi.brand.description,
-  themeColor: "#0b7a63",
+  tagline: vi.brand.tagline,
+  keywords: ["Tiếng Việt lớp 1", "luyện đọc", "tự luyện tại nhà", "học qua trò chơi", "ReadMate AI"],
+  themeColor: "#0d8275",
 } as const;

@@ -6,6 +6,8 @@
 
 Tài liệu này mô tả đúng những gì đã chạy được ở GĐ4. Phần dự kiến cho giai đoạn sau được ghi rõ "chưa làm".
 
+> ⚠️ **R01 (2026-10-16):** bộ máy này **giữ nguyên** và trở thành nguồn câu hỏi cho cả buổi luyện lẫn mini-game ([REDESIGN_ARCHITECTURE §3](REDESIGN_ARCHITECTURE.md#3-cơ-chế-liên-kết-giữa-các-phân-hệ)). **Ngừng dùng** (giữ mã, gỡ khỏi giao diện ở R02, xóa ở R11 — AD-51): cặp bài ở nhà – ở lớp, hợp đồng phiếu `ExerciseTaskContract`, `worksheet()`, xem trước phiếu, bước `classroom_like`; mức H0 đổi tên hiển thị từ "Thử như ở lớp" thành "Tự làm". Chế độ có điểm sẽ chấm ở server (AD-41).
+
 ## Mục lục
 
 1. [Kiến trúc](#1-kiến-trúc)
@@ -200,6 +202,8 @@ Mỗi module khai báo **chữ nào được hiển thị/đọc ở trường n
 | A7 | `listen_letter` bắt buộc khe `stimulus` có tệp đã duyệt; thiếu → `MISSING_AUDIO` |
 
 ### 5.3 Âm thanh ở GĐ4
+
+**Cập nhật R10.3a:** `AudioSlot` phát được **bản ghi giáo viên đã duyệt** của bài Nghe âm – chọn chữ khi máy chủ cho phép (cờ TẮT mặc định, chưa có bản ghi thật) — xem [AUDIO_ENGINE §13](AUDIO_ENGINE.md#13-r103a--phát-bản-ghi-giáo-viên-đã-duyệt-cho-học-sinh-nền-tảng-kỹ-thuật-cờ-tắt). Mọi khe còn lại (câu lệnh, tên tranh, từ, câu…) vẫn khóa như mô tả dưới đây.
 
 **Chưa có tệp âm thanh nào** (GĐ6). Mọi nút loa là điểm tích hợp `AudioSlot` **bị khóa**, ghi rõ "Chưa có âm thanh"; chỉ hiện khi chính sách cho phép khe đó ở mức hiện tại. Không giả lập phát âm thanh; **không dùng giọng đọc của trình duyệt** (Web Speech API) dù PRD §12.2 cho phép ở `/demo` — vì giọng tiếng Việt trên Chrome có thể gửi chữ ra máy chủ bên ngoài và chất lượng chưa xác minh (quyết định D-040). Bộ sinh gắn `assetId` khi thư viện media có tệp cùng vai trò + cùng lời đọc.
 

@@ -1,9 +1,19 @@
 # PROGRESS — Tiến độ dự án ReadMate AI
 
-> **Cập nhật lần cuối:** 2026-10-15 — Phiên Claude Code #4 (Giai đoạn 4)
-> Tệp này là "bộ nhớ" giữa các phiên: đọc đầu tiên khi bắt đầu phiên mới; cập nhật trước khi kết thúc phiên.
+> **Cập nhật lần cuối:** 2026-10-16 — Phiên R01 (tái thiết kế)
+> **Từ R01, tiến độ hiện tại nằm ở [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md)** và lộ trình ở [REDESIGN_TASKS.md](REDESIGN_TASKS.md). Tệp này giữ lịch sử GĐ1–GĐ4, các quyết định D-xx, câu hỏi mở Q-xx và rủi ro R-xx (vẫn còn hiệu lực trừ chỗ ghi chú).
 
-## 1. Trạng thái hiện tại
+## 0. Thay đổi định hướng (R01, 2026-10-16)
+
+Người điều phối đổi định hướng sản phẩm thành **nền tảng tự luyện Tiếng Việt tại nhà kết hợp trò chơi phiêu lưu, điểm thưởng và bảng xếp hạng lớp học** ([docs/PRODUCT_REDESIGN.md](docs/PRODUCT_REDESIGN.md)). Hệ quả với tệp này:
+
+- Lộ trình GĐ5 → GĐ12 ở §7 và TASKS.md được **thay thế** bởi R02 → R11 (bảng đối chiếu ở cuối REDESIGN_TASKS). GĐ8 (phiếu PDF, tự lực tại lớp) **bỏ khỏi lộ trình**.
+- D-013 (PDF), D-043 (cặp nhà – lớp) → **ngừng dùng** (AD-51). D-045 giữ cơ chế, nhãn H0 "Thử như ở lớp" đổi ở R02.
+- Quy tắc "không bảng xếp hạng" (PRD P7, CLAUDE.md §6.4) và "không phạt" (§7.10) có **ngoại lệ có điều kiện** do người điều phối quyết định (RD-01, RD-02 trong REDESIGN_PROGRESS).
+- Công việc "Prompt 05 / GĐ5" (âm thanh + Vercel) được báo là bị gián đoạn **không tìm thấy** ở thư mục này hay trên GitHub (REDESIGN_PROGRESS §2).
+- Q-06 (máy in), Q-20 (lượt "như ở lớp") không còn cần thiết; R-06 (trẻ tự thao tác) càng quan trọng hơn với game.
+
+## 1. Trạng thái hiện tại (đến hết GĐ4 — xem REDESIGN_PROGRESS cho trạng thái mới)
 
 - **Giai đoạn hiện tại:** GĐ4 — Interactive Learning Engine (bộ máy bài tập, 6 dạng bài, bản chơi thử `/demo`) → **HOÀN THÀNH về mã nguồn và kiểm thử; chờ người điều phối đánh giá.** GĐ1, GĐ2 đã nghiệm thu; GĐ3 đã được chấp nhận về kỹ thuật.
 - **Điểm còn phụ thuộc giáo viên / bên ngoài:**
@@ -224,6 +234,8 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 
 ## 7. Bước tiếp theo
 
+> **Đã thay thế ở R01:** bước tiếp theo hiện hành ở [REDESIGN_PROGRESS §8](REDESIGN_PROGRESS.md#8-bước-tiếp-theo). Nội dung dưới đây giữ để tra cứu; phần Supabase chuyển sang R03.
+
 **Đề xuất GĐ5 — Supabase: CSDL nền, RLS và xác thực** (chi tiết: [TASKS.md](TASKS.md#gđ5--supabase-csdl-nền-rls-và-xác-thực-l)): migrations + RLS + kiểm thử cách ly, đăng nhập GV, thẻ học QR cho HS (POC trước), seed kho tri thức từ `content/`, ghi nhận đồng ý. Bộ máy GĐ4 nối vào qua student gateway ở GĐ7 (sinh bài theo phiên, ghi `item_attempt` ở máy chủ) — **không** đưa đáp án hay kho tri thức xuống trình duyệt.
 
 Điều kiện trước khi bắt đầu:
@@ -241,3 +253,40 @@ Trạng thái: **Chốt** · **POC** (cần thử nghiệm) · **Hoãn** · **Ch
 | 2026-10-12 → 2026-10-14 | #2 | GĐ2 | Scaffold Next 16.4; cấu hình TS strict/ESLint/Prettier/Vitest/Playwright; design system + 5 trang khung + 404/lỗi; header bảo mật; CI; README; format/lint/typecheck/80 unit/build/139 E2E đều xanh; commit `16d1413` (chủ dự án), `d1210e6`; thêm remote `origin`. **Kết thúc GĐ2 — đã được nghiệm thu.** |
 | 2026-10-14 | #3 | GĐ3 | Thư viện `src/lib/vietnamese/`; kho tri thức `content/` (tất cả chờ GV); lớp tiến độ; `src/features/knowledge/`; `npm run content:check` + CI; 604 unit test; commit `5e63087` + **push `main` lần đầu**; CI xanh trên Linux; commit tài liệu `3035e5b`. **Kết thúc GĐ3 — đã được chấp nhận về kỹ thuật.** |
 | 2026-10-14 → 2026-10-15 | #4 | GĐ4 | Ghép tiếng `compose.ts`; lõi bộ máy bài tập; 6 dạng / 17 biến thể; bộ kiểm tra 9 bước + chống lộ đáp án theo mục tiêu; bộ sinh có seed + cặp nhà – lớp + hợp đồng phiếu; phiên luyện + kết quả trong bộ nhớ; `/demo` tương tác (3 buổi mẫu, H3→H0, không âm thanh, không lưu); 729/729 unit, 199 E2E đạt (thêm iPad, axe), content:check 0 lỗi; 4 đột biến kiểm độ nhạy; tài liệu EXERCISE_ENGINE + cập nhật 7 tài liệu; commit `5861286` (email `noreply`) + push; GitHub Actions run 38709007640 xanh (729/729); commit tài liệu ghi kết quả CI. **Kết thúc GĐ4 — chờ duyệt. Không deploy Vercel, không Supabase, không AI, không đổi public/private.** |
+| 2026-10-16 | — | (ngoài giai đoạn) | Thư mục được clone lại từ GitHub; một phiên Claude tạo 2 báo cáo PDF (`docs/BaoCao_ReadMateAI.pdf`, `docs/LuongHoatDong_ReadMateAI.pdf`), chưa commit |
+| 2026-10-16 | R01 | R01 | Đổi định hướng sản phẩm; nhánh `feature/home-learning-redesign`; checkpoint 2 PDF; 8 tài liệu thiết kế mới (PLANNED); cập nhật CLAUDE.md, PRD, ARCHITECTURE, README, TASKS, tệp này. Chi tiết: [REDESIGN_PROGRESS §9](REDESIGN_PROGRESS.md#9-nhật-ký-phiên) |
+| 2026-10-20 | R02 | R02 | Giao diện mới "Modern 2D Educational Adventure", Student Dashboard + Game World (dữ liệu minh họa), asset SVG chờ GV duyệt, H0 "Tự làm"; chi tiết ở [REDESIGN_PROGRESS.md](REDESIGN_PROGRESS.md). Phát hiện công việc GĐ5 âm thanh chưa commit (RQ-06) → nhánh cục bộ `local/gd5-audio-wip` |
+| 2026-10-20 | R03 | R03 | Supabase local + RLS, đăng nhập GV, thẻ học + liên kết thiết bị, quản lý lớp/học sinh/đồng ý; pgTAP 36, tích hợp 78, unit 819, E2E 262 + 30 (CSDL); chi tiết ở [REDESIGN_PROGRESS §4](REDESIGN_PROGRESS.md#4-việc-đã-làm-trong-r03). Supabase Cloud chưa tạo |
+| 2026-10-21 | R05 | R05 | Ranking Engine 1-2-2-4, bảng xếp hạng lớp (cờ hệ thống tắt), avatar 16 mẫu, trình chiếu GV; nghiệm thu bằng GitHub Actions trên `83b34a7` (unit 952, pgTAP 65, tích hợp CSDL 129, E2E 9/9 job xanh); chi tiết ở [REDESIGN_PROGRESS §5b](REDESIGN_PROGRESS.md) |
+| 2026-10-20 | R04 | R04 | Scoring Engine (+10/−5, sàn 0, sổ cái chỉ ghi thêm), chấm bài ở máy chủ, câu phát hành không lộ đáp án, buổi luyện có điểm, mở thẻ bản đồ, điều kiện mini-game; pgTAP 52, tích hợp 106, unit 900, E2E 262 + 40 (CSDL), p95 104 ms (local); chi tiết ở [REDESIGN_PROGRESS §5](REDESIGN_PROGRESS.md#5-việc-đã-làm-trong-r04). Chỉ fixture hư cấu trên Supabase local; Cloud chưa tạo |
+| 2026-10-21 | R06.2 | R06 | Giao diện vinh danh TOP 3: bục danh dự, hoạt cảnh 3 → 2 → 1, đồng hạng, Bỏ qua/Xem lại, giảm chuyển động, lịch sử; unit +11, E2E honors.spec. Không làm reset (R06.3) |
+| 2026-10-21 | R06.3 | R06 | Backend reset mùa: migration 20261024090000, `teacher_reset_season`, `resetSeason`, khóa ý định + mùa xác nhận, hạng cuối 1-2-2-4, đồng thời/rollback; pgTAP 95, DB 14 mới, unit +12. Chưa có giao diện (R06.4) |
+| 2026-10-21 | R06.4 | R06 | Giao diện reset mùa hai bước nối `resetSeason`; unit +9, E2E season-reset 9/9 local; CI chờ |
+| 2026-10-21 | R06.5 | R06 | API học sinh `GET /api/student/honors/latest` + khóa ý định chống snapshot vinh danh trùng (migration 20261025090000); unit/pgTAP/DB/E2E mục tiêu đạt local; CI chờ |
+| 2026-10-21 | R07.1 | Nghiệm thu R06; nguyên mẫu đồ họa Mê cung kho báu `/demo/treasure-maze` (React + SVG/CSS), số đo FPS/bundle ở REDESIGN_PROGRESS §5h; CI chờ |
+| 2026-10-21 | R07.2 | Lõi Game Engine thuần TS (grid, reducer, level-validate) + 24 unit test; CI chờ |
+| 2026-10-21 | R07.3 | 3 màn Mê cung kho báu (JSON) + schema zod + `content:check` kiểm màn; CI chờ. Không làm R07.4 |
+| 2026-10-21 | R07.4 | Điều khiển nhân vật Mê cung kho báu (bàn phím, 4 nút, giữ/thả, camera 7×7, tạm dừng, thử thách minh họa); unit + E2E 48/48 local; CI chờ. Không làm R07.5 |
+| 2026-10-21 | R07.5a | Database `game_runs` + RPC bắt đầu/tiếp tục/lưu vị trí, reset mùa đóng lượt dở; pgTAP + DB local xanh; CI chờ. Không làm R07.5b |
+| 2026-10-21 | R07.5b2 | Trang Mê cung có xác thực nối API lượt chơi: tự lưu vị trí (5 bước/3 giây/tạm dừng/ẩn trang), khôi phục sau tải lại, STATE_CONFLICT/SEASON_CLOSED/mất mạng; unit + E2E CSDL local; lộ trình nộp: R09 hoãn sau khi nộp. Không làm R07.6/R08 |
+| 2026-10-22 | R07.6 | Lớp phủ tạm dừng, chờ xác nhận lưu khi rời màn, đo lại FPS/bundle (60 FPS, 224,5 KB gzip); R07 nghiệm thu phần engine; CI chờ. Không làm R08 |
+| 2026-10-22 | R08.1 | Database 7 chạm trán (`game_encounters`, `game_level_triggers`), ngữ cảnh game của `question_instances`, chặn lưu vị trí xuyên trigger, reset mùa đóng chạm trán; sửa test chập chờn reset mùa; pgTAP + DB local xanh; CI chờ. Không làm R08.2 |
+| 2026-10-22 | R08.2 | Máy mới dựng lại (Node 24.18, Docker, Supabase local); bắt đầu lượt Mê cung phân bổ 1 lượt + 7 chạm trán + 21 câu trong một giao dịch, thiếu nội dung → `INSUFFICIENT_CONTENT`; pgTAP + DB local xanh; CI + E2E xanh `042ab92`. Không làm R08.3 |
+| 2026-10-22 | Báo cáo (không phát triển) | Tạo bài trình chiếu `docs/presentations/ReadMateAI_BaoCaoDuAn.pptx` (20 slide, ảnh chụp bản chơi thử + nhân vật SVG) và mã tạo ở `scripts/presentations/`; phản ánh đúng tiến độ xong R08.2; không sửa ứng dụng, không làm R08.3 |
+| 2026-10-22 | R08.3 | Đồng bộ máy cũ về `ea915bb`; sửa CI `repo-hygiene`; kích hoạt chạm trán, chấm điểm + HP, kết thúc chạm trán, mở kho báu ở máy chủ (migration + 3 API); pgTAP 226 + DB 253 + unit 1113 local. Không làm R08.4 |
+| 2026-10-22 | R08.4 | Giao diện Mê cung có chạm trán (lưu trước khi kích hoạt, màn quái vật, 3 trái tim, Player GĐ4, hoạt cảnh, tải lại, rương); unit 1133 + E2E toàn trình local xanh. Không làm R08.5 |
+| 2026-10-23 | R08.5 | Soát quái vật: tên/mã trung tính, bộ soát chống lộ đáp án (`monster-audit`), giấy phép hình + hoạt cảnh, hồ sơ GV `docs/reviews/R08_MONSTER_REVIEW.md` (phiếu "Chưa đánh giá"); GV chưa duyệt; CI chờ. Không làm R08.6 |
+| 2026-10-25 | R08.6 | Nghiệm thu R08.5 kỹ thuật (CI xanh; E2E push 1 test chập chờn webkit-mobile, PR bị hủy); chơi lại Mê cung không tính điểm (`is_replay`, GAME_REPLAY, 7 × 21, điểm/sổ cái không đổi, hai tab, reset mùa, giao diện "Chơi lại cho vui"); pgTAP 239 + DB 268 + unit 1163 local; `build` local bị `SecurityFatalError` của Next 16.4.0; CI/E2E chờ. R08 xong về kỹ thuật, chưa duyệt dùng thật. Không làm R10/R11 |
+| 2026-10-25 | R08.7 | Tiếp tục lượt Mê cung tính điểm đang dở khi điểm < 50 (ngưỡng chỉ áp dụng khi bắt đầu lượt mới); sửa `hasLevelProgress`; test unit + DB; CI chờ. Rủi ro mở: Next 16.4.0 `SecurityFatalError` trước khi triển khai |
+
+| 2026-10-25 | Vá Next | Nâng Next.js + eslint-config-next 16.4.0 → 16.4.3 (vá GHSA-673q-mjm6-r5xr và các advisory khác); local: typecheck/lint/format/content/unit 1166/check:bundle xanh, `npm audit --omit=dev` 0 lỗ hổng, `npm run build` thành công (không còn SecurityFatalError); CI/E2E chờ || 2026-10-26 | R10.1 | Audio Engine: AUDIO_ENGINE.md + AUDIO_RECORDING_PLAN.md (dự kiến), `src/server/tts` (none/mock/google skeleton, hạn mức, timeout, planSlotSynthesis dùng checkAudioLeaks), 21 unit test; không gọi API thật, không đổi AudioSlot; CI chờ |
+| 2026-10-27 | R10.2 | Thư viện bản ghi giáo viên: `/teacher/audio`, migration `20261031090000` (audio_assets/versions/consents + 11 hàm + trigger bất biến + cờ TẮT), Storage riêng tư `teacher-audio`, micro chỉ ở trang này, kiểm tra tệp theo nội dung, quy trình duyệt, tài liệu; test unit/pgTAP/DB/E2E bằng dữ liệu giả; CI chờ. Không bản ghi thật/duyệt thật; không TTS; không làm R10.3 |
+
+| 2026-10-27 | R10.3a | Phát bản ghi giáo viên đã duyệt cho học sinh (bài nghe âm), cờ TẮT, kiểm thử bằng sóng tổng hợp; R10.3 chưa nghiệm thu (xem REDESIGN_PROGRESS §5u) |
+| 2026-10-28 | R10.3a | Nghiệm thu CI/E2E R10.3a: sửa kiểm thử, `c6b98fa` CI + E2E push/PR xanh; lỗi chập chờn R08.4/R08.6 webkit-mobile (trang không hydrate) chưa rõ nguyên nhân gốc, đã gắn chẩn đoán (xem REDESIGN_PROGRESS §5u) |
+| 2026-10-28 | R10.3b1 | Chuẩn bị TTS (danh mục lời đọc, duyệt lời đọc/tệp, khóa tái sử dụng, điều kiện phát, kế hoạch lô, trang xem trước `/teacher/tts-script`); không gọi TTS thật, không migration, cờ TẮT; R10.3 chưa nghiệm thu (xem REDESIGN_PROGRESS §5v, docs/TTS_APPROVAL_CHECKLIST.md) |
+| 2026-10-28 | R10.3b2-P0 | Công cụ nghe thử giọng AI tiếng Việt: adapter FPT.AI TTS v5 + khóa giọng Google Neural2 để nghe thử, `npm run tts:poc` (chạy khô mặc định), `/teacher/tts-compare`; **CHƯA THỬ API THẬT** (chưa có khóa); không migration, không đường phát cho học sinh, cờ TẮT (xem REDESIGN_PROGRESS §5w, docs/AUDIO_ENGINE.md §15) |
+| 2026-10-28 | R10.3b2-P0b | Giọng nam miền Nam Viettel AI Minh Quân làm mặc định của `npm run tts:poc`: adapter Viettel (giao thức lấy từ mã chạy của trang web Viettel AI), `TTS_VIETTEL_TOKEN` chỉ máy chủ, `/teacher/tts-compare` cập nhật; **CHƯA GỌI API THẬT, CHƯA NGHE GIỌNG THẬT** (không có token); không đụng bản ghi giáo viên, cờ TẮT (xem REDESIGN_PROGRESS §5x, docs/AUDIO_ENGINE.md §15.9) |
+| 2026-10-29 | Dùng được như ứng dụng (A–D) | Nút "Vào chơi" mở Mê cung thật + tách Học tập/Thi đấu (`3219ae1`); chạm chữ để nghe, tên chữ cái ≠ âm ≠ tiếng/từ (`d8f98e3`); thư viện giọng máy Viettel Minh Quân 0,9 + Audio Coverage + `audio:local-flags` (`4e1e9da`); `npm run teacher:bootstrap` (`e2f4e69`). CI + E2E xanh trên `4e1e9da`. **0 bản ghi/tệp đã duyệt, KHÔNG gọi API Viettel, tài khoản giáo viên của chủ dự án CHƯA tạo, cờ âm thanh TẮT**; WebKit chập chờn đã có chẩn đoán (xem REDESIGN_PROGRESS §5y) |
+| 2026-10-29 | Vá `audio:local-flags` | R10 | Sửa phân tích kết quả `supabase db query` (mảng trần vs phong bì agent), ghim `--agent no --output-format json`, xác minh sau `on`/`off`; test mới; chạy thật local status/on/off, bốn cờ TẮT (xem REDESIGN_PROGRESS §1) |
+| 2026-10-29 | Chế độ trình diễn cuộc thi (âm thanh) | R10 | Miền dữ liệu riêng `contest_audio_assets` (không cột duyệt) + bucket `contest-audio` + hàm `gateway_*contest_audio` (migration `20261104090000`/`…090100`), công cụ `npm run audio:contest`, nối Học tập/câu lệnh/lời nhắn/Mê cung, nút Tắt tiếng, khu giáo viên 4 nhóm; chỉ Supabase local, mặc định TẮT; **nhà cung cấp Viettel trả HTTP 500 gián đoạn nên độ phủ chưa đủ** (xem REDESIGN_PROGRESS §5z) |

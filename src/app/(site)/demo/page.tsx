@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight, Map as MapIcon } from "lucide-react";
+import { AdventureLink } from "@/components/adventure/adventure-button";
+import { AvatarFrame } from "@/components/adventure/avatar-frame";
+import { GameWorldHeader } from "@/components/adventure/game-world-header";
+import { MotionScope, MotionToggle } from "@/components/adventure/motion";
+import { PreviewRibbon } from "@/components/adventure/preview-ribbon";
+import { ScoreBadge } from "@/components/adventure/score-badge";
+import { WorldMapCard } from "@/components/adventure/world-map-card";
+import { DemoLeaderboard } from "@/components/leaderboard/demo-leaderboard";
 import { INSTRUCTION_ICONS, PATH_VISUALS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -7,9 +15,12 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Notice } from "@/components/ui/notice";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { DEMO_LEADERBOARD, DEMO_PLAYER } from "@/features/demo/adventure-data";
 import { DEMO_SUPPORT_LEVELS } from "@/features/demo/demo-data";
 import { buildDemoPracticeData } from "@/features/demo/practice-data";
 import { EXERCISE_TYPES } from "@/features/exercises/catalog";
+import { gameWorld } from "@/features/game-world/catalog";
+import { gameUnlockStates } from "@/features/gamification/unlocks";
 import { LEARNING_PATHS } from "@/features/learning-paths/catalog";
 import { cn } from "@/lib/cn";
 import { vi } from "@/strings/vi";
@@ -25,13 +36,16 @@ const pathName = new Map(LEARNING_PATHS.map((path) => [path.id, path.name]));
 /**
  * /demo — Bản chơi thử (GĐ4). Bài tập được sinh và kiểm tra Ở PHÍA MÁY CHỦ lúc build (trang tĩnh):
  * trình duyệt chỉ nhận các câu đã qua kiểm tra, không nhận kho tri thức; không lưu, không gửi dữ liệu.
+ * R02: thêm phần xem trước Game World (avatar, ô điểm, bốn vùng đất, bảng xếp hạng hư cấu) — chỉ hiển thị.
  */
 export default function DemoPage() {
   const t = vi.demo;
   const data = buildDemoPracticeData();
+  const w = t.worldPreview;
+  const states = gameUnlockStates(DEMO_PLAYER.balance);
 
   return (
-    <>
+    <MotionScope>
       <section aria-labelledby="demo-title" className="border-b border-line bg-surface">
         <Container className="py-10 sm:py-14">
           <div className="flex flex-wrap gap-2">
@@ -52,12 +66,82 @@ export default function DemoPage() {
         </Container>
       </section>
 
-      <section aria-labelledby="demo-practice-title" className="py-10 sm:py-14">
+      <section id="luyen-tap" aria-labelledby="demo-practice-title" className="scroll-mt-20 py-10 sm:py-14">
         <Container>
           <h2 id="demo-practice-title" className="sr-only">
             {t.practice.sectionTitle}
           </h2>
           <DemoPractice data={data} />
+        </Container>
+      </section>
+
+      <section
+        id="xem-truoc-game-world"
+        aria-labelledby="demo-world-title"
+        className="relative overflow-hidden bg-linear-to-b from-jade-50 via-magic-50 to-canvas py-12 sm:py-16"
+      >
+        <Container className="flex flex-col gap-8">
+          <GameWorldHeader
+            id="demo-world-title"
+            eyebrow={w.eyebrow}
+            title={w.title}
+            description={w.description}
+            actions={<MotionToggle />}
+          />
+          <PreviewRibbon />
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
+            <div className="flex flex-col gap-6">
+              <section
+                aria-labelledby="demo-player-title"
+                className="rounded-world bg-surface p-5 shadow-world ring-1 ring-line"
+              >
+                <h3 id="demo-player-title" className="text-lg font-extrabold text-ink">
+                  {w.playerTitle}
+                </h3>
+                <div className="mt-4 flex items-center gap-4">
+                  <AvatarFrame avatar={DEMO_PLAYER.avatar} size="lg" ring="sun" />
+                  <p className="text-2xl font-extrabold text-ink">{DEMO_PLAYER.displayName}</p>
+                </div>
+                <ScoreBadge
+                  points={DEMO_PLAYER.balance}
+                  earnedTotal={DEMO_PLAYER.earnedTotal}
+                  illustrative
+                  className="mt-4"
+                />
+              </section>
+              <section
+                aria-labelledby="demo-leaderboard-title"
+                className="rounded-world bg-surface p-5 shadow-world ring-1 ring-line"
+              >
+                <h3 id="demo-leaderboard-title" className="text-lg font-extrabold text-ink">
+                  {w.leaderboardTitle}
+                </h3>
+                <p className="mt-1 text-sm text-ink-soft">{w.leaderboardNote}</p>
+                <DemoLeaderboard entries={DEMO_LEADERBOARD} className="mt-4" />
+              </section>
+            </div>
+            <section aria-labelledby="demo-maps-title" className="flex flex-col gap-4">
+              <h3 id="demo-maps-title" className="text-lg font-extrabold text-ink">
+                {w.mapsTitle}
+              </h3>
+              <ul className="grid gap-5 sm:grid-cols-2">
+                {states.map((state) => (
+                  <WorldMapCard
+                    key={state.game}
+                    as="li"
+                    idPrefix="demo-game"
+                    compact
+                    game={gameWorld(state.game)}
+                    state={state}
+                  />
+                ))}
+              </ul>
+              <AdventureLink href="/learn#game-world" tone="magic" className="self-start">
+                <MapIcon aria-hidden="true" className="size-6" />
+                {w.openWorld}
+              </AdventureLink>
+            </section>
+          </div>
         </Container>
       </section>
 
@@ -108,9 +192,6 @@ export default function DemoPage() {
                   </div>
                   <h3 className="mt-4 text-lg font-bold leading-snug text-ink">{type.name}</h3>
                   <p className="mt-2 leading-relaxed text-ink-soft">{type.skill}</p>
-                  <p className="mt-3 text-sm text-ink-soft">
-                    <span className="font-semibold text-ink">{t.about.paperLabel}:</span> {type.paperEquivalent}
-                  </p>
                   <div className="mt-auto flex flex-wrap gap-2 pt-4">
                     {type.primaryPaths.map((id) => (
                       <Badge key={id} tone={PATH_VISUALS[id].badgeTone}>
@@ -134,6 +215,6 @@ export default function DemoPage() {
           </div>
         </Container>
       </section>
-    </>
+    </MotionScope>
   );
 }

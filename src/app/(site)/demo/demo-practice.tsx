@@ -1,15 +1,16 @@
 "use client";
 
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Map as MapIcon, Play, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { AdventureLink } from "@/components/adventure/adventure-button";
 import { INSTRUCTION_ICONS, PATH_VISUALS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SUPPORT_LEVELS, SUPPORT_POLICIES } from "@/features/exercises/core/support";
 import { VARIANTS } from "@/features/exercises/runtime-registry";
 import { SessionRunner, type RunnerBlock } from "@/features/exercises/ui/session-runner";
-import { WorksheetPreview } from "@/features/exercises/ui/worksheet-preview";
 import type { DemoActivity, DemoPath, DemoPracticeData } from "@/features/demo/practice-data";
+import { POINTS_CORRECT } from "@/features/gamification/rules";
 import { cn } from "@/lib/cn";
 import { vi } from "@/strings/vi";
 import type { LearningPathId, SupportLevel } from "@/types/learning";
@@ -33,16 +34,42 @@ function sessionBlocks(path: DemoPath, level: SupportLevel): RunnerBlock[] {
     id: block.id,
     title: block.title,
     variant: block.variant,
-    supportLevel: block.kind === "classroom_like" ? 0 : level,
+    supportLevel: block.kind === "independent" ? 0 : level,
     items: block.items,
     example: path.activities.find((activity) => activity.variant === block.variant)?.example ?? null,
     previewOnly: block.previewOnly,
-    classroomLike: block.kind === "classroom_like",
+    independent: block.kind === "independent",
   }));
 }
 
+/** Màn kết quả: lời nhắc điểm thưởng (chỉ minh họa, không tính, không lưu) + đường quay về Game World. */
+function RewardNote() {
+  const t = vi.demo.practice.reward;
+  return (
+    <aside
+      aria-label={t.title}
+      className="flex flex-col gap-4 rounded-card border-2 border-dashed border-sun-300 bg-sun-50 p-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex items-start gap-3">
+        <Star aria-hidden="true" className="mt-0.5 size-6 shrink-0 fill-sun-400 text-sun-600" />
+        <div>
+          <p className="font-extrabold text-ink">
+            {t.title}{" "}
+            <span className="rounded-full bg-sun-200 px-2 py-0.5 text-xs text-sun-800">{vi.status.illustrative}</span>
+          </p>
+          <p className="mt-1 text-sm text-ink-soft">{t.text.replace("{points}", String(POINTS_CORRECT))}</p>
+        </div>
+      </div>
+      <AdventureLink href="/learn#game-world" tone="magic" className="shrink-0">
+        <MapIcon aria-hidden="true" className="size-6" />
+        {t.backToWorld}
+      </AdventureLink>
+    </aside>
+  );
+}
+
 /**
- * Luồng bản chơi thử: chọn lộ trình → chọn buổi luyện/dạng bài → làm bài → kết quả. Toàn bộ trạng thái
+ * Luồng bản chơi thử: chọn lộ trình → chọn buổi luyện/dạng bài → làm bài → kết quả → về Game World. Toàn bộ trạng thái
  * nằm trong bộ nhớ của trang (useState/useReducer) — không localStorage, không gửi dữ liệu đi đâu.
  */
 export function DemoPractice({ data }: { data: DemoPracticeData }) {
@@ -84,16 +111,7 @@ export function DemoPractice({ data }: { data: DemoPracticeData }) {
           heading={t.runnerHeading}
           blocks={blocks}
           onExit={() => setRun(null)}
-          resultsExtra={
-            activity?.classroom.ok ? (
-              <WorksheetPreview contract={activity.classroom.contract} equivalence={activity.classroom.equivalence} />
-            ) : activity && !activity.classroom.ok ? (
-              <p className="rounded-2xl bg-surface-muted p-4 text-sm text-ink-soft">
-                <strong>{vi.practice.worksheet.unavailable}: </strong>
-                {activity.classroom.reason}
-              </p>
-            ) : null
-          }
+          resultsExtra={<RewardNote />}
         />
       </div>
     );
@@ -216,7 +234,7 @@ export function DemoPractice({ data }: { data: DemoPracticeData }) {
               {block.title}{" "}
               <span className="whitespace-nowrap text-sm text-ink-faint">
                 · {t.itemCount.replace("{n}", String(block.items.length))} ·{" "}
-                {SUPPORT_POLICIES[block.kind === "classroom_like" ? 0 : supportLevel].code}
+                {SUPPORT_POLICIES[block.kind === "independent" ? 0 : supportLevel].code}
               </span>
             </li>
           ))}

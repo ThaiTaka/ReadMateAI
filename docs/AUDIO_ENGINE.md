@@ -1,0 +1,650 @@
+# ReadMate AI — Audio Engine (R10.1 thiết kế + R10.2 thư viện bản ghi giáo viên + R10.3a phát bản ghi đã duyệt cho học sinh + R10.3b1 chuẩn bị TTS + chạm chữ để nghe (§16) + thư viện giọng máy (§17))
+
+> **Phiên bản:** 1.0 — R10.1 (2026-10-26). **Phạm vi:** thiết kế + nghiên cứu tài liệu + adapter `TtsProvider` kiểm thử bằng mock. **Chưa** có âm thanh nào được tạo, ghi hay phát; `AudioSlot` vẫn khóa (AD-39). R10.2–R10.7 chưa làm.
+> Liên quan: [ARCHITECTURE §13](ARCHITECTURE.md#13-hệ-thống-âm-thanh), [EXERCISE_ENGINE §5](EXERCISE_ENGINE.md), [PRD §12](PRD.md), [AUDIO_RECORDING_PLAN](AUDIO_RECORDING_PLAN.md).
+
+## 1. Trạng thái thật (đọc trước)
+
+| Hạng mục | Trạng thái |
+|---|---|
+| Interface `TtsProvider`, chế độ `none`, mock, kiểm tra đầu vào, hạn mức, timeout, kế hoạch theo `audioPolicy` | **Đã hiện thực + unit test** (`src/server/tts/`, `tests/unit/tts/`) |
+| Adapter Google Cloud TTS | **Skeleton** theo tài liệu REST; chỉ kiểm thử bằng `fetch` giả. **Chưa gọi API thật** |
+| Adapter FPT.AI TTS v5 | **Đã viết (R10.3b2-P0, §15)**; chỉ kiểm thử bằng `fetch` giả, **chưa gọi API thật** |
+| Adapter Azure | **Chưa viết** (chỉ đánh giá tài liệu; hợp đồng interface đã đủ để thêm) |
+| Gọi API thật, nghe thử chất lượng giọng Việt | **BLOCKED — chờ chủ dự án cấp phép tạo tài khoản/khóa thử nghiệm.** Chưa đánh giá chất lượng tổng hợp |
+| Bảng/migration thư viện âm thanh, giao diện GV `/teacher/audio`, Storage riêng tư, quy trình duyệt | **R10.2 đã có** (§12); kiểm thử với dữ liệu giả trên local/CI |
+| Phát bản ghi GV đã duyệt cho học sinh (bài Nghe âm – chọn chữ) | **R10.3a đã có về kỹ thuật** (§13) dưới cờ `student_teacher_audio_playback_approved` **TẮT**; kiểm thử bằng sóng tổng hợp. **R10.3 CHƯA nghiệm thu**: chưa bản ghi thật, chưa thử iPhone/Android thật, chưa chọn TTS |
+| Chuẩn bị TTS cho câu hướng dẫn/lời động viên (danh mục lời đọc, kế hoạch lô, phiên bản, điều kiện phát, trang xem trước) | **R10.3b1 đã có về kỹ thuật** (§14) với nhà cung cấp `none`/mock; **không** gọi TTS thật, không tệp âm thanh TTS, không migration, không đường phát cho học sinh. Chờ quyết định ở [TTS_APPROVAL_CHECKLIST](TTS_APPROVAL_CHECKLIST.md) |
+| Học tập: chạm chữ để nghe (tên chữ cái ≠ âm của chữ ≠ tiếng/từ) | **Đã có về kỹ thuật** (§16, nhãn R10.4) dưới cờ `student_teacher_audio_playback_approved` **TẮT**; 0 bản ghi thật |
+| Thư viện giọng máy cho câu lệnh/lời phản hồi (Viettel AI Minh Quân 0,9): duyệt lời đọc → tạo → nghe → duyệt; phát câu lệnh cho học sinh | **Đã có về kỹ thuật** (§17, nhãn R10.5) dưới hai cờ mới **TẮT** (`tts_library_approved`, `student_tts_playback_approved`); **R10.5 chưa gọi API thật**; 0 tệp đã duyệt |
+| Báo cáo độ phủ âm thanh `/teacher/audio-coverage` | **Đã có** — [AUDIO_COVERAGE](AUDIO_COVERAGE.md) |
+| Chế độ trình diễn cuộc thi (giọng máy tạo tự động, miền riêng, chỉ local) | **Đã có (2026-10-29, §18 / [CONTEST_AUDIO](CONTEST_AUDIO.md))** — tách hẳn bản ghi giáo viên và thư viện đã duyệt; không cột duyệt; mặc định TẮT; không thay cho bước duyệt thật |
+| Bản ghi âm GV | **Chưa có bản thật nào, chưa bản nào được duyệt**; cờ hệ thống ghi âm TẮT mặc định; chưa GV nào đồng ý dùng giọng |
+
+## 2. Hai nguồn âm thanh
+
+| Nguồn | Dùng cho | Không dùng cho |
+|---|---|---|
+| **A. Bản ghi GV** | Âm đơn lẻ, vần đơn lẻ (PRD A7). Một bản ghi dùng lại ở mọi bài | — |
+| **B. TTS** | Câu lệnh chuẩn của 17 biến thể, tên tranh/từ/câu *khi chính sách cho phép*, lời khen/động viên, âm thanh mẫu **sau** khi chấm | Âm/vần đơn lẻ; bất kỳ lời đọc nào bị `checkAudioLeaks` chặn |
+
+Cấm: Web Speech API (đã có test quét `speechSynthesis`), TTS theo yêu cầu lúc học sinh mở bài, TTS từ trường nhập của học sinh.
+
+## 3. Đánh giá nhà cung cấp (truy cập 2026-10-26)
+
+> Thông tin lấy từ trang tài liệu chính thức qua công cụ đọc trang; các ô ghi **"chưa xác minh"** không được suy đoán. Chưa có tài khoản nên **không có kết quả nghe thử**.
+
+### 3.1 So sánh
+
+| Tiêu chí | Google Cloud TTS | Azure AI Speech | FPT.AI TTS |
+|---|---|---|---|
+| 1. Tiếng Việt | Có, `vi-VN` | Có, `vi-VN` | Có |
+| Giọng | Standard A–D, WaveNet A–D, Neural2 A (nữ)/D (nam), Chirp 3 HD (nhiều giọng, tên thiên thể) — liệt kê theo trang; cần `ListVoices` để xác nhận | `HoaiMyNeural` (nữ), `NamMinhNeural` (nam), `Linh:MAI-Voice-2-Flash` (nữ, HD Flash); có thể còn giọng khác ở phần trang chưa đọc hết | `banmai`, `lannhi`, `linhsan`, `thuminh` (nữ), `leminh`, `giahuy` (nam), `myan` (nữ) |
+| 3. Vùng miền | Không thấy ghi vùng miền (chưa xác minh) | Không thấy ghi vùng miền (chưa xác minh) | **Có ghi** Bắc (banmai, leminh, thuminh), Trung (myan, giahuy), Nam (lannhi, linhsan) |
+| 4. Tốc độ chậm | `speakingRate` cho Standard/WaveNet/Neural2; **Chirp 3 HD không hỗ trợ speaking rate/pitch/SSML** | SSML `prosody` (nói chung; riêng tiếng Việt chưa xác minh) | `speed` −3…+3 |
+| 5–6. Chi phí / gói thử | Chirp 3 HD 30 USD/1 triệu ký tự (miễn phí 1 triệu/tháng); Neural2 16 USD (miễn phí 1 triệu); Standard, WaveNet 4 USD (miễn phí 4 triệu theo bảng giá; một nguồn khác ghi WaveNet 1 triệu — **mâu thuẫn, kiểm lại**). **Phải bật thanh toán** | Bậc F0 miễn phí 0,5 triệu ký tự/tháng (giọng Neural); **đơn giá trả phí không đọc được từ trang** (chưa xác minh) | Miễn phí 100.000 ký tự (giọng v5), hàng đợi, giới hạn yêu cầu/ngày; gói trả phí bằng VND (500.000đ = +1,5 triệu ký tự … 5.000.000đ = +27 triệu); chưa rõ theo tháng hay một lần |
+| 7. Giới hạn API | 5.000 byte/yêu cầu; 200 yêu cầu/phút (Chirp 3 HD), 1.000 (Neural2/khác) mỗi dự án | Chưa xác minh | 5.000 ký tự/yêu cầu (tối thiểu 3); phía miễn phí có giới hạn ngày |
+| 8. Định dạng | MP3, LINEAR16, OGG_OPUS… (chưa đối chiếu đủ danh sách) | Nhiều định dạng (chưa đối chiếu) | `mp3`, `wav` |
+| Cơ chế | Đồng bộ (JSON `audioContent` base64) | Đồng bộ (REST/SDK) | **Bất đồng bộ**: trả liên kết `async`, chờ 5 giây–2 phút, hoặc `callback_url`; thời hạn liên kết **không ghi** → phải tải về ngay |
+| 9. Giấy phép tái dùng/phân phối tệp | **Chưa xác minh** (không tìm thấy điều khoản chính thức; chỉ có ý kiến cộng đồng — không dùng làm căn cứ) | **Chưa xác minh** | **Chưa xác minh** (không tìm thấy điều khoản của FPT.AI) |
+| 10–11. Lưu nội dung gửi tới | "Google không ghi log văn bản/âm thanh TTS của khách; dịch vụ stateless" ([data-logging](https://docs.cloud.google.com/text-to-speech/docs/data-logging)) | API thời gian thực: "Microsoft không lưu văn bản và không lưu âm thanh" ([data-privacy-security](https://learn.microsoft.com/en-us/legal/cognitive-services/speech-service/text-to-speech/data-privacy-security)); batch có lưu ở Azure Storage, xóa được | **Chưa xác minh** (không tìm thấy chính sách của FPT.AI); âm thanh được lưu ở S3 một thời gian không rõ |
+| 12. Thay nhà cung cấp | Dễ: giữ tệp đã duyệt, đổi adapter | Dễ | Dễ, nhưng cần tải tệp ngay (liên kết tạm) |
+
+Nguồn: Google [bảng giá](https://cloud.google.com/text-to-speech/pricing) (số liệu qua tóm tắt tìm kiếm của trang chính thức — trang đầy đủ không đọc được), [hạn mức](https://docs.cloud.google.com/text-to-speech/quotas), [danh sách giọng](https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types); Azure [language support](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts), [bảng giá](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/); FPT.AI [API](https://docs.fpt.ai/docs/en/speech/api/text-to-speech), [giá](https://docs.fpt.ai/docs/en/speech/documentation/tts-pricing).
+
+### 3.2 Đề xuất (chưa phải quyết định mua)
+
+**Ứng viên ưu tiên cho POC: Google Cloud TTS, giọng `vi-VN-Neural2-A/D`** (chế độ tốc độ chậm có tham số, gói miễn phí lớn so với nhu cầu, không ghi log, đồng bộ nên đơn giản, quota rõ). **Phương án thứ hai: FPT.AI** — lợi thế giọng bản địa có ghi vùng Bắc/Trung/Nam (phù hợp Q-03 về giọng vùng miền) nhưng thiếu điều khoản lưu trữ/giấy phép và bất đồng bộ. Azure là phương án dự phòng (cần đọc đủ danh sách giọng/giá).
+
+Lý do không chọn theo chất lượng: **chưa nghe thử bất kỳ giọng nào** — đề xuất dựa trên tính năng, chi phí, quyền riêng tư và độ đơn giản; GV phải nghe và quyết định.
+
+### 3.3 Chi phí ước tính (chỉ tính phần TTS; phép tính của dự án)
+
+Ngữ liệu hiện có: 17 câu lệnh chuẩn ≈ 1.100 ký tự, 60 từ ≈ 230, 31 câu ≈ 410 → < 2.000 ký tự; thêm lời khen/lời nhắc cỡ vài nghìn. Kể cả nhân 10–20 lần cho kho thật, vẫn **< 100.000 ký tự**, nằm trong mọi gói miễn phí ở bảng trên; nếu phải trả theo Neural2 (16 USD/1 triệu) thì ~1,6 USD cho 100.000 ký tự. Rủi ro chi phí chủ yếu là **bật thanh toán** (Google bắt buộc) và gọi lặp — đã giảm bằng cache khóa nội dung và hạn mức lô (§6).
+
+### 3.4 Điều kiện còn phải xác minh trước khi chọn
+
+1. Điều khoản chính thức về **lưu trữ lâu dài và phân phối lại tệp đã tổng hợp** trong ứng dụng cho học sinh (cả ba nhà cung cấp).
+2. Danh sách giọng vi-VN thực tế (`ListVoices`/Voice Gallery) và đơn giá Azure.
+3. **Nghe thử** (POC): phát âm dấu thanh, từ dễ nhầm (b/d, ch/tr, s/x), câu 4–6 tiếng, tốc độ chậm; giọng Bắc hay Nam hợp lớp (Q-03).
+4. Bản quyền/nhãn "giọng tổng hợp" và yêu cầu ghi nguồn.
+5. Điều kiện thanh toán cụ thể và đặt trần chi phí/cảnh báo ngân sách.
+6. (FPT.AI) thời hạn liên kết âm thanh, điều khoản dữ liệu.
+
+### 3.5 Kết quả POC
+
+**Chưa thực hiện.** Không gọi API thật, không có mẫu âm thanh, không có đánh giá chất lượng. Mọi kiểm thử adapter dùng mock/`fetch` giả. Công cụ nghe thử và adapter FPT.AI đã sẵn sàng từ R10.3b2-P0 (§15) nhưng **vẫn CHƯA THỬ API THẬT** vì chưa có khóa được cấp.
+
+## 4. Kiến trúc và luồng dữ liệu
+
+```mermaid
+flowchart LR
+  C[Học liệu / câu bài tập<br/>khe âm thanh + spokenText] --> P{Kế hoạch theo audioPolicy<br/>+ checkAudioLeaks}
+  P -- âm/vần đơn lẻ --> R[Bản ghi GV<br/>/teacher/audio - R10.2]
+  P -- được phép --> T[TtsProvider<br/>server, hạn mức, timeout]
+  T --> Q[Kiểm tra kỹ thuật<br/>định dạng, thời lượng, im lặng]
+  R --> Q
+  Q --> V[GV nghe duyệt<br/>phiên bản bất biến]
+  V --> L[(Thư viện âm thanh đã duyệt<br/>Storage + metadata)]
+  L --> PL[Player: phát tệp đã duyệt<br/>theo audioPolicy H3-H0]
+```
+
+Nguyên tắc: **sinh trước → kiểm tra → GV duyệt → mới phát**. Học sinh chỉ nhận URL của tệp *đã duyệt* qua server; không có đường nào từ học sinh tới nhà cung cấp.
+
+## 5. Interface `TtsProvider` (đã hiện thực)
+
+```ts
+interface TtsProvider {
+  readonly id: "none" | "mock" | "google";
+  readonly external: boolean;
+  synthesize(request: TtsRequest, options: { signal: AbortSignal }): Promise<TtsOutcome>;
+}
+type TtsRequest = { text: string; purpose: "instruction"|"feedback"|"picture_name"|"word"|"sentence"|"model";
+                    voiceKey: "vi-female-1"|"vi-male-1"; speed: "slow"|"normal" };
+type TtsOutcome = { ok: true; data: { bytes: Uint8Array; mimeType: string } } | { ok: false; code: TtsErrorCode };
+```
+
+- `purpose` **không có** `phoneme`/`rime` → âm/vần đơn lẻ không thể đi qua TTS (kiểm bằng schema + `planSlotSynthesis` → `TEACHER_RECORDING_REQUIRED`).
+- `voiceKey` là khóa nội bộ; adapter ánh xạ sang giọng nhà cung cấp → đổi nhà cung cấp không đổi dữ liệu bài.
+- Mã lỗi: `NO_PROVIDER, INVALID_INPUT, PERSONAL_DATA_REJECTED, TEACHER_RECORDING_REQUIRED, AUDIO_ROLE_FORBIDDEN, AUDIO_LEAKS_ANSWER, BUDGET_EXCEEDED, TIMEOUT, PROVIDER_ERROR` — không mang nội dung yêu cầu, khóa hay phản hồi thô.
+- `synthesizeSpeech()` (`service.ts`): zod → từ chối dữ liệu giống cá nhân → bỏ qua nếu `none` → trừ hạn mức ký tự (`CharBudget`, mặc định 3.000/lô) → timeout 8 giây → bắt mọi ngoại lệ.
+- `createTtsProvider(env)`: `TTS_PROVIDER` = `none` (mặc định) | `mock` | `google`; `google` thiếu `TTS_GOOGLE_API_KEY` → `none`. Mô-đun `import "server-only"`; khóa chỉ đọc ở đây, đã thêm vào `check:bundle`.
+- `ttsCacheKey()` = sha256(nhà cung cấp, mục đích, giọng, tốc độ, văn bản NFC) để dùng lại tệp, không chứa dữ liệu học sinh.
+- Không có mã nào gọi `synthesizeSpeech` ở R10.1: **không có route, không tác vụ nền, không gọi hàng loạt**.
+
+## 6. Bảo mật và quyền riêng tư
+
+- Chỉ server; khóa nằm ở biến môi trường server (`TTS_GOOGLE_API_KEY`, không `NEXT_PUBLIC_`); không `fetch` từ trình duyệt; `redirect: "error"`.
+- Văn bản gửi đi chỉ là học liệu/chuỗi cố định do GV duyệt; schema `strictObject` không nhận trường lạ (không `studentId`, `alias`…); chặn email, số điện thoại, URL, mã thẻ học, ký tự ẩn, `<`/`>` (chặn chèn SSML).
+- Log chỉ UUID/mã lỗi (không văn bản, không khóa).
+- Hạn mức ký tự mỗi lô, timeout, không thử lại tự động (tránh nhân chi phí); R10.2 thêm trần theo ngày/tháng và quyền GV `owner`.
+- Chủ dự án quyết định trước khi gửi bất kỳ văn bản nào tới nhà cung cấp ngoài (PRIVACY_AND_SECURITY).
+
+## 7. Chống lộ đáp án (giữ AD-35)
+
+`planSlotSynthesis({ role, slot, policy, exposure })` dùng lại `checkAudioLeaks` và `audioPolicy` của biến thể, nên **không tạo logic thứ hai**:
+
+| Tình huống | Kết quả (đã có test) |
+|---|---|
+| Kích thích là âm đơn lẻ (`listen_letter`) | `TEACHER_RECORDING_REQUIRED` |
+| Bài đọc từ có `stimulus` đọc từ cần đọc | `AUDIO_ROLE_FORBIDDEN` |
+| Câu lệnh chứa từ cần đọc | `AUDIO_LEAKS_ANSWER` |
+| Câu lệnh chuẩn; âm thanh mẫu sau chấm (`modelAfterGrading`) | Được phép |
+| Gợi ý (`hint`) | Chính sách H3–H0 quyết định lúc *phát* (R10.3): chỉ khi trẻ bấm, tính là gợi ý |
+
+Không tạo khe âm thanh mới ngoài 5 vai trò (`instruction, stimulus, options, model, feedback`). `MISSING_AUDIO` của bài nghe âm giữ nguyên (test); mock không làm đổi kết quả kiểm tra. **R10.1 không mở khóa `AudioSlot`.**
+
+## 8. Quy định bản ghi GV, giấy phép, duyệt
+
+- Bản ghi GV là nguồn bắt buộc cho âm/vần đơn lẻ; GV chỉ ghi giọng của mình; **không ghi âm trẻ** (CLAUDE.md §6.6); `/teacher/audio` là route duy nhất bật micro.
+- Mỗi tệp có: mã asset, văn bản đọc (NFC), loại (`phoneme|rime|instruction|word|sentence|feedback`), nguồn (`teacher_recording`|`tts`), người ghi/nhà cung cấp + giọng, định dạng, thời lượng, hash nội dung, phiên bản, giấy phép/nguồn, trạng thái (`draft → pending_review → approved|rejected`), `reviewedBy`, `reviewedAt`, `contentHash`.
+- **Không bao giờ tự đặt `approved`.** Phiên bản đã gửi duyệt là bất biến; sửa = phiên bản mới. TTS cũng phải được GV nghe duyệt.
+- Mở rộng `content/media/licenses.json` hiện chỉ có hình/phông (`kind`) — phần âm thanh dùng bảng riêng ở R10.2 vì tệp âm thanh không nằm trong repo công khai (CLAUDE.md §6.9).
+- **46 tệp Piper** (nhánh `local/gd5-audio-wip`) chưa xác minh quyền sử dụng: **không** đưa vào repo, test, assets hay danh mục.
+
+## 9. Lưu trữ, định dạng, bộ nhớ đệm, lỗi, offline (đề xuất cho R10.2–R10.3, chưa làm)
+
+- **Lưu trữ:** Supabase Storage bucket riêng tư (không trong git); học sinh nhận URL ký ngắn hạn qua gateway; metadata trong bảng `audio_assets` (+ `audio_asset_versions`) — migration và RLS thuộc R10.2.
+- **Định dạng:** MP3 mono 22,05–24 kHz (~32–48 kbps) cho TTS; bản ghi GV chuẩn hóa về MP3/AAC mono (iOS không phát WebM/Opus chắc chắn → cần POC; phương án: GV tải tệp ghi sẵn).
+- **Kiểm tra kỹ thuật tự động (trước khi gửi duyệt):** thời lượng 0,3–10 giây (âm đơn lẻ ≤ 2 giây), không im lặng/cắt cụt, âm lượng chuẩn hóa, kích thước tối đa.
+- **Bộ nhớ đệm:** khóa `ttsCacheKey`; tải trước câu kế tiếp; Cache-Control dài cho URL bất biến theo phiên bản.
+- **Lỗi/offline:** thiếu tệp → bài vẫn làm được nhờ chữ và hình (câu lệnh luôn có bản chữ); riêng bài nghe âm bắt buộc có bản ghi → không phát câu đó (`MISSING_AUDIO`), không giả lập, không dùng giọng trình duyệt. Không có chế độ offline ở R10.
+- **iOS:** mở khóa audio bằng thao tác "Bắt đầu" (R10.3).
+
+## 10. Quyết định cần chủ dự án / GV xác nhận
+
+| # | Ai | Quyết định |
+|---|---|---|
+| D1 | Chủ dự án | Cho phép tạo tài khoản/khóa thử nghiệm (Google trước) và đặt trần chi phí; chấp nhận bật thanh toán nếu bắt buộc |
+| D2 | Chủ dự án | Đọc/chấp thuận điều khoản về lưu trữ và phân phối lại tệp TTS |
+| D3 | GV | Nghe mẫu và chọn giọng (nữ/nam, Bắc/Nam) — Q-03 |
+| D4 | GV | Xưng hô "con/em" trong lời đọc — Q-08 |
+| D5 | GV | Cách gọi âm, tên chữ cái, vần cần ghi (xem [AUDIO_RECORDING_PLAN](AUDIO_RECORDING_PLAN.md) §6) — Q-01/Q-02 |
+| D6 | Chủ dự án | Chấp nhận cho lời khen/câu lệnh chuẩn dùng TTS hay GV ghi hết |
+
+## 11. Điều kiện chuyển R10.2
+
+1. D1–D2 được chấp thuận (hoặc quyết định bỏ TTS, chỉ dùng bản ghi GV — thiết kế vẫn dùng được).
+2. Kết quả nghe thử (nếu dùng TTS) được GV ghi lại.
+3. GV xác nhận danh sách §6 của kế hoạch ghi âm (ít nhất nhóm P0).
+4. Chủ dự án cho phép migration `audio_assets` và bucket Storage.
+5. Q-03 (người ghi, giọng vùng) có trả lời.
+
+R10.1 **không** tự chuyển sang R10.2.
+
+## 12. R10.2 — Thư viện bản ghi giáo viên (đã hiện thực, kiểm thử bằng dữ liệu giả)
+
+> Quyết định chủ dự án: **phương án kết hợp** — GV ghi âm/vần đơn lẻ; TTS dùng cho câu hướng dẫn, lời khen và nội dung chính sách cho phép. R10.2 **không** gọi TTS thật, không tạo tài nguyên Cloud, không yêu cầu GV ghi âm thật. Hướng dẫn GV: [TEACHER_AUDIO_GUIDE](TEACHER_AUDIO_GUIDE.md).
+
+### 12.1 Thành phần
+
+| Lớp | Mã | Ghi chú |
+|---|---|---|
+| Trang | `/teacher/audio` (`src/app/teacher/(console)/audio/`) | Tổng quan, danh sách P0 (38, đọc từ `content/kb/phonemes.json`), lọc/tìm, đồng ý dùng giọng, xác nhận cách đọc, ghi âm (`MediaRecorder`), tải tệp, nghe lại, gửi duyệt, duyệt/ghi lại/thu hồi |
+| Lõi thuần | `src/features/audio-library/` | `inspect.ts` (nhận định dạng + thời lượng theo NỘI DUNG), `limits.ts`, `p0-catalog.ts`, `unit-state.ts`, `review-rules.ts`, `recorder.ts` |
+| Máy chủ | `src/server/audio-library/`, `src/app/api/teacher/audio/**` | Tải lên (Route Handler multipart — Server Action giới hạn thân ~1 MB), phát lại qua proxy có `Range`, Server Actions cho các thao tác trạng thái |
+| CSDL | `supabase/migrations/20261031090000_r10_teacher_audio.sql` | `audio_voice_consents`, `audio_assets`, `audio_asset_versions`; 11 hàm `teacher_*`; cờ `teacher_audio_recording_approved` (TẮT) |
+| Storage | bucket `teacher-audio` (`supabase/config.toml`) | **Riêng tư**, 2 MiB, 5 MIME âm thanh; không policy `storage.objects` cho anon/authenticated |
+
+### 12.2 Vòng đời phiên bản
+
+`draft → pending_review → approved | rejected`; `approved → superseded | revoked`; `draft → discarded | revoked`; `pending_review → revoked`. Trigger `guard_audio_version` (áp dụng cả với `service_role`): chèn luôn là `draft`; nội dung (khóa đối tượng, hash, thời lượng, nhãn đọc…) bất biến; dấu vết gửi/duyệt/thu hồi đặt một lần; không xóa. **Chỉ `teacher_review_audio_version` đặt `approved`**, và chỉ khi: cờ bật; bản đang `pending_review`; người duyệt **đã nghe** (xác nhận); **cách đọc đã được GV xác nhận** và **khớp** nhãn ghi trên bản; người ghi **còn đồng ý** dùng giọng. Duyệt bản mới → bản đang dùng cũ thành `superseded` và `audio_assets.active_version_id` trỏ bản mới; bản mới **không đụng** bản đã duyệt cho tới lúc được duyệt. Từ chối bắt buộc ghi chú. `reviewed_by/at` trống tới khi có thao tác duyệt thật. Người duyệt có thể là chính người ghi (trường có thể chỉ một GV) — hệ thống ghi cả hai.
+
+### 12.3 Lưu trữ và quyền
+
+- Khóa đối tượng do máy chủ sinh: `{school_id}/{asset_id}/{version_id}.{đuôi theo định dạng thật}` (chỉ UUID; không tên GV, tên tệp client, nội dung học sinh). CSDL kiểm tra khóa **đúng** dạng này nên không thể trỏ vào đối tượng của người khác. Tải lên `upsert:false` — không ghi đè.
+- Thứ tự: kiểm tra tệp → tiền kiểm (cờ, đồng ý) → tải lên Storage → ghi metadata. Ghi metadata lỗi → máy chủ gỡ tệp vừa tải; tải lỗi → không có metadata. Phần còn sót (gỡ lỗi) đối soát bằng `npm run audio:reconcile` (báo cáo; `--delete` chỉ local).
+- Phạm vi = **trường**. RLS: tài nguyên cùng trường; **bản nháp chỉ người tạo (và quản trị trường)** thấy; đồng ý chỉ của chính GV. `authenticated` chỉ SELECT. Thiết bị học sinh bị `FORBIDDEN` ở mọi hàm; không có đường tải âm thanh từ khu vực học sinh.
+- Ba lớp: proxy (chuyển hướng thô) → DAL `teacherOrFail` + zod + cùng nguồn + giới hạn tần suất (60/giờ) → hàm CSDL/RLS. Khóa lưu trữ không bao giờ được `select` xuống giao diện.
+
+### 12.4 Kiểm tra tệp (theo nội dung)
+
+`inspectAudio`: ≤ 2 MiB, 0,3–10 giây; WAV PCM; Ogg Opus/Vorbis (granule); WebM Opus/Vorbis (kể cả kích thước "không biết" và không có Duration của Chrome); MP4/M4A AAC (kể cả MP4 phân đoạn mvhd=0 của Safari); MP3 lớp III. Từ chối rỗng, quá lớn, không nhận ra, ảnh/PDF/HTML đổi đuôi, có luồng hình, codec lạ, hỏng/cắt cụt, quá ngắn/dài. **Không giải mã** nên không phát hiện tệp im lặng — GV nghe lại trước khi gửi. Thời lượng WebM Opus ước tính khung 20 ms cuối.
+
+### 12.5 Micro
+
+`Permissions-Policy: microphone=(self)` **chỉ** cho `/teacher/audio` (`next.config.ts`, quy tắc đặt sau cùng; đã xác minh trên bản build thật và bằng unit/E2E); mọi route khác giữ `microphone=()`. Chỉ xin quyền sau khi GV bấm *Bắt đầu ghi*; tắt micro khi dừng/lỗi/rời trang; thiết bị ngắt giữa chừng → bỏ bản ghi dở; kết quả chỉ là bản nghe thử cho tới khi bấm *Lưu bản nháp*. Không Web Speech API. Định dạng ghi chọn theo `MediaRecorder.isTypeSupported` (WebM/Opus → MP4 → Ogg); không hỗ trợ → hướng dẫn tải tệp.
+
+### 12.6 Giới hạn đã biết (trung thực)
+
+- **Chưa kiểm thử trên Safari/iPhone thật** và chưa có micro thật trong CI; ghi trực tiếp trong E2E chưa chạy (chỉ tải tệp tổng hợp).
+- Bản ghi lưu **đúng định dạng đã ghi**; Safari cũ có thể không phát WebM/Opus → R10.3 cần chuẩn hóa (chuyển mã) hoặc yêu cầu tệp M4A/MP3 trước khi phát cho học sinh.
+- Xóa hẳn tệp theo yêu cầu là quy trình quản trị riêng (trigger chặn xóa); chưa có nút tự xóa.
+- Chưa kiểm tra tệp im lặng/ồn; chưa chuẩn hóa âm lượng.
+- Toàn bộ kiểm thử dùng tệp tổng hợp; **không bản ghi nào được duyệt thật**.
+
+### 12.7 Điều kiện chuyển R10.3
+
+Ít nhất các âm P0 cần thiết có bản ghi **được GV duyệt thật** với cách đọc đã xác nhận; GV đồng ý dùng giọng; chủ dự án bật cờ; kiểm tra phát trên Safari/iPhone thật; quyết định D1–D6 (§10) về TTS. Không tự chuyển sang R10.3.
+
+## 13. R10.3a — Phát bản ghi giáo viên đã duyệt cho học sinh (nền tảng kỹ thuật, cờ TẮT)
+
+> **Phạm vi:** chỉ **một bản ghi đã duyệt** của **âm đơn lẻ (P0)** trong bài **Nghe âm – chọn chữ** (`listen_letter`). Chưa có TTS, chưa đọc cả từ/câu/đoạn, chưa tự ghép chuỗi đánh vần (xem §13.9). Kiểm thử bằng **sóng tổng hợp** — không phải bản ghi giáo viên thật. **R10.3 chưa nghiệm thu.**
+
+### 13.1 Luồng
+
+```mermaid
+sequenceDiagram
+  participant GV as Giáo viên (/teacher/audio)
+  participant DB as CSDL (audio_*)
+  participant HS as Trình duyệt học sinh
+  participant API as /api/student/question-instances/{id}/audio
+  participant ST as Storage riêng tư teacher-audio
+  GV->>DB: ghi → gửi duyệt → duyệt (đã nghe + cách đọc khớp + còn đồng ý)
+  HS->>API: GET …/audio (trạng thái, JSON nhỏ)
+  API->>DB: gateway_resolve_teacher_audio (mọi điều kiện)
+  API-->>HS: { muted, slots: { stimulus: { mimeType } } }
+  HS->>API: chạm nút → GET …/audio/stimulus (Range)
+  API->>DB: kiểm tra LẠI mọi điều kiện
+  API->>ST: đọc tệp bằng khóa secret, đối chiếu kích thước + SHA-256
+  API-->>HS: 200/206 audio (private, no-store)
+```
+
+### 13.2 Các điều kiện phát (kiểm lại ở **mỗi** yêu cầu, không lưu bộ nhớ đệm)
+
+| # | Điều kiện | Nơi kiểm | Mã khi thiếu (nội bộ → trả cho trình duyệt) |
+|---|---|---|---|
+| 1 | Cờ `student_teacher_audio_playback_approved` bật | CSDL | `AUDIO_PLAYBACK_DISABLED` |
+| 2 | Thiết bị học sinh đã liên kết, hồ sơ và lớp còn hoạt động; câu thuộc đúng học sinh đó | CSDL (`require_linked_device`) + `ownedQuestion` | `FORBIDDEN` / `NOT_FOUND` |
+| 3 | Đồng ý `learning_data` của học sinh còn hiệu lực | CSDL | `CONSENT_REQUIRED` |
+| 4 | Học sinh không tắt âm thanh trong cài đặt (`sound_preference`) | Máy chủ | `AUDIO_NOT_PERMITTED` (trạng thái báo `muted: true`) |
+| 5 | Chính sách chống lộ đáp án AD-35 cho phép khe này ở mức hỗ trợ hiện tại (§13.5) | Máy chủ (`decidePlayback`) | `AUDIO_NOT_PERMITTED` |
+| 6 | Tài nguyên đúng **trường** của lớp, đúng đơn vị kiến thức (suy từ câu, không từ trình duyệt) | CSDL | `AUDIO_NOT_AVAILABLE` |
+| 7 | Phiên bản là `active_version_id`, trạng thái `approved`, đã nghe + có người duyệt (không bị `draft/pending_review/rejected/superseded/revoked/discarded`) | CSDL | `AUDIO_NOT_AVAILABLE` |
+| 8 | Cách đọc GV đã xác nhận **và** khớp nhãn bản ghi **và** khớp cách đọc mà câu khai báo (kho tri thức) | CSDL | `PRONUNCIATION_UNCONFIRMED` / `LABEL_MISMATCH` → `AUDIO_NOT_AVAILABLE` |
+| 9 | Người ghi còn đồng ý dùng giọng (đúng chứng từ gắn vào phiên bản) | CSDL | `VOICE_CONSENT_REQUIRED` → `AUDIO_NOT_AVAILABLE` |
+| 10 | Tệp còn trong Storage, kích thước và SHA-256 khớp metadata đã duyệt (≤ 2 MiB) | Máy chủ | `AUDIO_NOT_AVAILABLE` (tệp thay/mất/hỏng) |
+
+Trẻ không nhìn thấy **vì sao** chưa có âm thanh (GV chưa duyệt, rút đồng ý, cách đọc lệch…): mọi nguyên nhân về nội dung gộp thành `AUDIO_NOT_AVAILABLE` (`publicAudioCode`). Mã chi tiết chỉ có ở hàm CSDL để kiểm thử.
+
+### 13.3 API (Student Gateway)
+
+| Route | Việc | Ghi chú |
+|---|---|---|
+| `GET /api/student/question-instances/{id}/audio` | Khe nào phát được **ngay bây giờ**: `{ muted, slots: { stimulus?: { mimeType }, model?: { mimeType } } }` | Giới hạn `read`; cờ tắt / chưa có bản ghi → `slots` rỗng (không lỗi). **Không** trả mã tài nguyên, khóa lưu trữ, tên GV, băm |
+| `GET /api/student/question-instances/{id}/audio/{role}` (`role` = `stimulus` \| `model`) | Phát tệp | Giới hạn **40 lần/phút/thiết bị**; chỉ **cùng nguồn** (Sec-Fetch-Site/Origin); `Range` → `206`/`416`; `Cache-Control: private, no-store`, `nosniff`, `Cross-Origin-Resource-Policy: same-origin`, CSP `default-src 'none'; sandbox` |
+
+- Trình duyệt **không** gửi mã tài nguyên/phiên bản/đường dẫn: máy chủ suy ra âm từ chính câu (`bindingFor`: phương án đúng → `phoneme:x`) — không có cách tải bản ghi tùy ý.
+- Máy chủ đọc Storage bằng khóa secret; **không** URL công khai, **không** URL ký, `storageKey` chỉ tồn tại trong mã máy chủ (kiểm bằng test quét + E2E).
+- Không log nội dung hay đường dẫn; mã lỗi là chuỗi máy đọc.
+
+### 13.4 Thu hồi
+
+- GV thu hồi bản ghi hoặc rút đồng ý ⇒ **yêu cầu phát mới bị từ chối ngay** (CSDL kiểm lại ở mỗi lần; phản hồi `no-store` nên trình duyệt phải hỏi máy chủ cho mỗi lần nghe lại). `AudioSlot` đặt `src` ngay trong thao tác chạm, không giữ blob/URL đối tượng.
+- **Không hứa** thu hồi dữ liệu mà trình duyệt đã tải về trước đó (đoạn đang phát hoặc đã nằm trong bộ nhớ của thẻ audio): máy chủ không thể xóa thứ đã gửi đi. Thu hồi chỉ chặn các lần tải **sau**.
+
+### 13.5 Chống lộ đáp án (AD-35) — không thêm logic thứ hai
+
+`decidePlayback` dùng lại **chính** `decideBeforeGrading`/`decideAfterGrading` và `VARIANTS[...].audioPolicy`:
+
+| Khe | Điều kiện phát | Ghi chú |
+|---|---|---|
+| `stimulus` (nghe âm) | `beforeGrading.stimulus` là `allowed` ở mức hỗ trợ của câu (nghe âm: H3–H0) | Đó là nhiệm vụ của bài, không phải lộ đáp án |
+| `stimulus` loại `hint` | **Từ chối** (`HINT_ONLY`) | Chưa có đường ghi nhận "đã dùng gợi ý"; fail-closed. Không biến thể nào có bản ghi GV ở khe `hint` hiện nay |
+| `model` (đọc mẫu) | Câu đã **đóng** (đúng hoặc hết lượt) **và** `modelAfterGrading` | Trước khi chấm → `AUDIO_NOT_PERMITTED` |
+| Bài đọc từ/câu (dạng 5, 6), tên tranh H0… | Không có ràng buộc bản ghi GV (`variantHasRecording`) ⇒ **không đi qua đường này** | Test quét: bài `reading` không phát kích thích trước chấm ở mọi mức |
+
+Việc bấm nghe **không** được coi là hoàn thành câu: điểm chỉ đến từ câu trả lời được nộp và chấm ở máy chủ; quy tắc chấm/điểm không đổi.
+
+### 13.6 Câu bắt buộc nghe mà chưa có âm thanh → không tính điểm
+
+`submitAttempt` (câu `scorable` mà biến thể yêu cầu khe `stimulus` bản ghi GV) kiểm tra việc nghe được trước khi chấm: nếu chưa có bản ghi đã duyệt phát được (kể cả **cờ tắt**) ⇒ `AUDIO_NOT_AVAILABLE`, **không** ghi lượt, **không** điểm; giao diện hiện lời nhắn nhẹ nhàng và giữ nguyên câu. Gửi lại cùng `clientAttemptId` của lượt đã ghi **không** bị chặn (trả đúng kết quả cũ). Cài đặt tắt âm thanh không làm câu mất điểm (chỉ kiểm sự tồn tại của bản ghi). Hiện chưa có câu nghe âm nào được duyệt ở môi trường thật (validate `production` vẫn báo `MISSING_AUDIO` vì thư viện media tĩnh chưa nối với thư viện GV — xem §13.9), nên quy tắc này là lớp bảo vệ thứ hai.
+
+### 13.7 Trình phát `AudioSlot` (`src/components/kid/audio-slot.tsx`)
+
+| Trạng thái | Giao diện |
+|---|---|
+| Không có nguồn / cờ tắt / chưa duyệt | Nút khóa "…: Chưa có âm thanh" (như trước) |
+| Đang hỏi máy chủ | Khóa, "Đang tải âm thanh…" |
+| Học sinh tắt âm thanh | Khóa, "Âm thanh đang tắt…" |
+| Định dạng không phát được | Khóa + lời nhắn "Máy này chưa phát được…" (**không chuyển mã, không đổi sang giọng khác**) |
+| Sẵn sàng | Nút ≥ 64 px "Nghe" — **không tự phát**; chỉ phát trong hàm xử lý chạm (đáp ứng hạn chế autoplay của iOS/Safari) |
+| Đang tải/đang phát | Chạm lại để dừng |
+| Phát xong | "Nghe lại" (mỗi lần là một yêu cầu mới tới máy chủ) |
+| Lỗi mạng / bị từ chối | "Chưa nghe được. Con chạm để thử lại nhé." |
+
+Một âm tại một thời điểm (`claimAudio`: phát cái mới thì dừng cái cũ); đổi câu / rời trang / thoát bài ⇒ gỡ thành phần ⇒ dừng và nhả tài nguyên. Khả năng phát định dạng kiểm bằng `canPlayType` (`mimeSupported`). Không dùng `speechSynthesis`/Web Speech API (test quét). Không có animation riêng ⇒ tôn trọng giảm chuyển động.
+
+### 13.8 Định dạng và giới hạn iPhone/Safari
+
+- Máy chủ phát **đúng định dạng đã lưu** (không chuyển mã ở R10.3a). Safari/iPhone **chắc chắn** phát được M4A (AAC), MP3, WAV; **WebM/Opus có thể không** (tùy phiên bản iOS). Chrome ghi trực tiếp ra WebM/Opus ⇒ bản ghi đó có thể **không nghe được trên iPhone của học sinh**.
+- Khi trình duyệt báo không phát được định dạng, nút khóa kèm lời nhắn; giáo viên cần cung cấp bản **M4A hoặc MP3** (xem [TEACHER_AUDIO_GUIDE §4](TEACHER_AUDIO_GUIDE.md)). Chưa có hệ thống chuyển mã.
+- **Chưa kiểm thử trên iPhone/Safari thật hay Android thật.** CI chỉ có WebKit trên Linux (có thể thiếu codec) nên E2E WebKit chỉ khẳng định yêu cầu mạng đúng (200/206, tiêu đề riêng tư); việc phát ra tiếng chỉ khẳng định trên Chromium.
+- `Cache-Control: no-store` với thẻ audio của Safari **chưa được thử trên thiết bị thật**; nếu Safari phát lỗi vì `no-store`, đổi sang `private, no-cache, max-age=0, must-revalidate` (vẫn buộc hỏi máy chủ ở mỗi lần).
+
+### 13.9 Hạng mục kế tiếp (KHÔNG làm ở R10.3a, không tuyên bố đã hỗ trợ)
+
+1. **R10.3b — khe TTS** (câu lệnh, lời khen, tên tranh) sau khi chủ dự án chọn nhà cung cấp và quyền dùng tệp tổng hợp (D1–D6, §10).
+2. Nối **validate chế độ `production`** với thư viện bản ghi GV (hiện `MISSING_AUDIO` vẫn đúng vì `assetId` trỏ vào thư viện media tĩnh) để câu nghe âm có thể được duyệt khi bản ghi thật đã được duyệt.
+3. **Ghép chuỗi đánh vần** kiểu "bờ – a – ba – huyền – bà": cần **quy tắc đánh vần do GV duyệt** (Q-01/Q-02) và thư viện âm thanh riêng cho tiếng cơ sở, dấu thanh, tiếng hoàn chỉnh. **Chưa triển khai**; R10.3a chỉ phát một bản ghi đã duyệt.
+4. Đường ghi nhận "đã dùng gợi ý" cho khe `hint` bằng âm thanh; vần đơn lẻ (P1/P2); lọc câu nghe âm khỏi buổi luyện/game khi chưa có âm thanh (hiện chặn ở bước chấm).
+5. Chuẩn hóa/chuyển mã định dạng cho iPhone nếu bản ghi thật là WebM/Opus.
+
+### 13.10 Điều kiện BẮT BUỘC trước khi bật cờ cho học sinh thật
+
+Đủ **tất cả**: (1) GV xác nhận Q-01/Q-02/Q-03 và các cách đọc cần dùng; (2) có sự đồng ý dùng giọng hợp lệ của người ghi; (3) có **bản ghi thật được duyệt** cho các âm sử dụng; (4) chủ dự án chấp thuận bật cờ (đổi bằng migration, không bằng mã); (5) đã kiểm thử phát trên **iPhone/Safari thật và ít nhất một thiết bị Android thật**; (6) quyết định TTS và quyền dùng âm tổng hợp nếu triển khai khe TTS. Cờ `student_teacher_audio_playback_approved` và `teacher_audio_recording_approved` luôn **TẮT** trong mọi môi trường cho tới khi đủ điều kiện; chỉ kiểm thử local/CI bật tạm rồi trả về TẮT (pgTAP kiểm).
+
+### 13.11 Kiểm thử R10.3a
+
+| Lớp | Nội dung |
+|---|---|
+| pgTAP `14_student_audio_playback` | Cờ mặc định tắt, quyền hàm (chỉ `service_role`), `security definer` + `search_path` rỗng, hàm chỉ đọc, không mở quyền bảng |
+| Tích hợp CSDL + Storage (`tests/db/student-audio-playback.test.ts`) | Chỉ bản `approved` đang dùng; draft/pending/rejected/superseded/revoked bị chặn; rút đồng ý; cách đọc chưa xác nhận/không khớp; i/y; trường khác; thiết bị lạ/bị thu hồi; học sinh rút đồng ý; tệp bị thay/mất; không đọc được bảng/hàm bằng JWT thiết bị/GV; chấm điểm không có âm thanh |
+| Unit | `bindingFor`, `decidePlayback` (mọi mức H3–H0), `mimeSupported`, `AudioSlot`/`QuestionAudio` (không tự phát, một âm, dừng khi đổi câu, lỗi, không hỗ trợ, không Web Speech), Route Handler (Range, cùng nguồn, tần suất, 401/403/404), quét an toàn mã + migration |
+| E2E có CSDL (`tests/e2e-db/student-audio.spec.ts`) | Nghe fixture tổng hợp ở Chromium/WebKit (yêu cầu mạng đúng, tiêu đề riêng tư, không lộ khóa/URL Storage, không TTS/Web Speech), đọc mẫu chỉ sau chấm, thu hồi khi đang mở trang, cờ tắt không gọi API phát và không tính điểm, 360 px + bàn phím + giảm chuyển động + axe |
+
+## 14. R10.3b1 — Chuẩn bị TTS: danh mục lời đọc, kế hoạch lô, phiên bản, điều kiện phát (KHÔNG gọi TTS thật, KHÔNG phát cho học sinh)
+
+> **Phạm vi:** chỉ phần **lập danh mục, kiểm tra chính sách, chống trùng, định danh phiên bản, điều kiện phát và giao diện xem trước**. Dùng nhà cung cấp `none`/mock; **không** gọi Google/Azure/FPT.AI, không tạo khóa API hay tài khoản, không migration, không route phát, không bật cờ. **Chưa có âm thanh TTS thật nào; R10.3 chưa nghiệm thu.** Các quyết định còn thiếu: [TTS_APPROVAL_CHECKLIST](TTS_APPROVAL_CHECKLIST.md).
+
+### 14.1 Luồng
+
+```mermaid
+flowchart LR
+  S[Câu lệnh biến thể + chuỗi phản hồi cố định<br/>+ khe âm thanh của câu đã sinh] --> C[TTS Script Catalog<br/>mọi mục pending_review]
+  C --> R[Giáo viên duyệt LỜI ĐỌC<br/>chữ + mục đích + cách đọc]
+  R --> P{planTtsBatch<br/>chính sách, chống trùng,<br/>giới hạn tác vụ và ký tự}
+  P --> G[runTtsBatch<br/>nhà cung cấp truyền vào]
+  G --> K[checkSynthesizedAudio<br/>inspectAudio theo nội dung]
+  K --> V[Ứng viên pending_review]
+  V --> L[Giáo viên NGHE và duyệt tệp]
+  L --> U[decideTtsPlay: chính sách AD-35 + tệp đã duyệt]
+```
+
+Hai lần duyệt tách biệt: **(1) lời đọc** (`script-review.ts`) trước khi được phép sinh; **(2) tệp âm thanh** (`versions.ts`) sau khi giáo viên nghe. Chưa qua cả hai thì không phát. Mã nằm ở `src/server/tts/`; **chỉ giao diện xem trước của giáo viên** (`/teacher/tts-script`) import các mô-đun này — không route API, không tác vụ nền, không mã học sinh (test quét `tests/unit/tts/safety-scan.test.ts`).
+
+### 14.2 TTS Script Catalog (`catalog.ts`)
+
+Nguồn (không bịa nội dung giáo dục): **17 câu lệnh chuẩn** của biến thể (`VARIANTS[…].instruction.spoken`), **17 chuỗi phản hồi cố định** (`vi.practice.feedback`: lời khen, lời nhắc thử lại, tiêu đề xem đáp án — câu có phần động như "Đáp án đúng là …" **không** vào danh mục), và (tùy chọn) khe âm thanh của **câu bài tập đã sinh** (tên tranh, từ, câu, đọc mẫu). Mỗi mục:
+
+| Trường | Ý nghĩa |
+|---|---|
+| `id` | Ổn định theo vị trí nguồn: `instruction:<biến thể>`, `feedback:<khóa>`; mục từ câu bài tập: `<mục đích>:<16 ký tự đầu của hash>` |
+| `purpose` / `role` | Sáu mục đích TTS (`instruction, feedback, picture_name, word, sentence, model`) / vai trò âm thanh (`instruction, stimulus, options, model, feedback`) |
+| `text` | Lời đọc chuẩn NFC (đã qua cổng `checkTtsRequest`: không dữ liệu cá nhân/SSML) |
+| `usageNote`, `usages[]` | Mục đích sử dụng bằng tiếng Việt; dạng bài/biến thể áp dụng và **mức khả dụng H3→H0** (`auto, tap, hint_locked, forbidden, after_grading`) lấy từ `audioPolicy` |
+| `source` | `{ kind, ref, version }` — `version` = `c<phiên bản danh mục>.<12 ký tự hash>` |
+| `voice` | Giọng/tốc độ **dự kiến** + `configVersion`; `provisional-0` = **chưa chọn giọng** |
+| `contentHash` | sha256(phiên bản danh mục, mục đích, chữ NFC) — nhận biết thay đổi và tái sử dụng. Không gồm giọng (giọng thuộc khóa tệp) và vai trò |
+| `attention` | Cờ nhắc giáo viên: `ADDRESSING_UNDECIDED` (xưng "con/em" chờ Q-08), `NEGATIVE_WORDING` (ví dụ "Chưa đúng rồi") |
+| `reviewStatus` | **Luôn `pending_review` khi dựng**; trạng thái thật chỉ suy ra từ bản duyệt của giáo viên |
+
+Khe bị chính sách chặn vào `excluded` (kèm mã lỗi, **không lưu chữ** — lời đọc làm lộ đáp án không bị nhân bản): âm/vần đơn lẻ → `TEACHER_RECORDING_REQUIRED`; chính sách cấm khe → `AUDIO_ROLE_FORBIDDEN`; lời đọc chứa dạng đáp án → `AUDIO_LEAKS_ANSWER`. Việc phân xử dùng lại **`planSlotSynthesis`** (→ `checkAudioLeaks`, `audioPolicy`) — không có bộ luật thứ hai. Tính chất: `buildTtsScriptCatalog` là hàm thuần, thứ tự cố định, hai lần dựng cho kết quả giống hệt.
+
+Trạng thái duyệt lời đọc (`scriptStatusOf`): chỉ bản duyệt **khớp `entryId` + `contentHash` hiện tại**, có `reviewedBy` (UUID), `reviewedAt`, **`pronunciationConfirmed = true`** mới cho `approved`; `rejected` nếu bản mới nhất là từ chối; mọi trường hợp còn lại (không có bản duyệt, hash cũ, thiếu xác nhận, dữ liệu sai dạng) là `pending_review`. **Không có hàm nào tạo bản duyệt.**
+
+### 14.3 Phiên bản tệp và điều kiện dùng (`versions.ts`)
+
+`TtsAudioVersion` (zod strict): `status` ∈ `pending_review, approved, rejected, superseded, revoked`; `reviewedBy/At`, `listened`, `pronunciationConfirmed`; `audio` (sha256, kích thước, MIME, thời lượng, `inspected: true` — chỉ có thể là `true`); `provider`, `voice`, `assetKey`, `contentHash`, `testOnly`. Chưa có bảng CSDL (không migration ở R10.3b1) — đây là hợp đồng kiểu cho R10.3b2.
+
+`checkVersionUsable` đòi **tất cả**, theo thứ tự cố định: không phải `mock`/`none`/`testOnly` (`TEST_ONLY`) → trạng thái `approved` (`REVOKED`/`SUPERSEDED`/`NOT_APPROVED`) → giáo viên đã nghe + xác nhận cách đọc (`NOT_REVIEWED`) → **lời đọc đã duyệt** (`SCRIPT_NOT_APPROVED`) → `contentHash` khớp mục hiện tại (`CONTENT_CHANGED`) → khóa tệp tính lại khớp (`ASSET_MISMATCH`, chống dữ liệu giả mạo) → giọng đã được chọn (`VOICE_NOT_CHOSEN`) và trùng cấu hình hiện hành (`VOICE_CHANGED`). Bản ghi hỏng hoặc có trường lạ → `INVALID_RECORD`. **Phiên bản đã duyệt không bao giờ bị sửa**: đổi chữ, giọng, tốc độ, phiên bản cấu hình hoặc nhà cung cấp tạo **khóa tệp mới** và phải duyệt lại.
+
+### 14.4 Khóa tái sử dụng (`hash.ts`) và kiểm tra kỹ thuật (`audio-check.ts`)
+
+- `assetKeyOf` = sha256(nhà cung cấp, mục đích, mã giọng, tốc độ, **phiên bản cấu hình giọng**, chữ NFC). `ttsCacheKey` (R10.1) nay gọi chính hàm này (tham số thứ ba là `configVersion`). Hai nơi dùng chung **một** tệp khi trùng khóa và `findReusableVersion` tìm được phiên bản **dùng được** (duyệt lời đọc của chính mục đó, tệp chưa thu hồi/bị thay, đúng giọng hiện hành). Không chứa dữ liệu học sinh.
+- Byte của **mock** (`MOCK-TTS:…`) **không phải âm thanh**: `checkSynthesizedAudio` (dùng `inspectAudio` — nhận định dạng theo nội dung, thời lượng 0,3–10 giây, ≤ 2 MiB, đối chiếu MIME mà nhà cung cấp khai) từ chối chúng (`AUDIO_UNSUPPORTED`), nên chúng không bao giờ thành ứng viên, không tới trình phát và không giả làm MP3. Kiểm thử phát dùng **WAV tổng hợp hợp lệ** (`tests/unit/audio-library/fixtures.ts`, sóng sin) chỉ trong local/CI; ứng viên của nhà cung cấp `mock` luôn `testOnly`. Không giải mã nên **không phát hiện tệp im lặng**: giáo viên phải nghe.
+
+### 14.5 Điều kiện phát (`playback.ts`) — dùng lại AD-35
+
+`decideTtsPlayback` dùng lại **chính** `decideBeforeGrading`/`decideAfterGrading`:
+
+| Điều kiện | Kết quả |
+|---|---|
+| Cờ phát cho học sinh tắt (bên gọi truyền vào; **TẮT mọi môi trường**, không mã nào bật) | `FLAG_OFF` |
+| Học sinh tắt âm thanh | `MUTED` |
+| Kích thích là âm/vần đơn lẻ (`stimulusContent = phoneme`) | `TEACHER_RECORDING_REQUIRED` — luôn bản ghi giáo viên |
+| `model` / `feedback` trước khi câu đóng | `NOT_GRADED`; sau khi chấm theo `decideAfterGrading` |
+| `instruction`/`stimulus`/`options` bị cấm ở mức đó (bài đọc từ/câu: kích thích và phương án cấm **mọi mức**, trước và sau chấm) | `NOT_PERMITTED` |
+| Khe `hint` (câu lệnh H1…) khi chưa có cơ chế ghi nhận "đã dùng gợi ý" | `HINT_TRACKING_UNAVAILABLE` (**khóa**, fail-closed) |
+| Tệp chưa duyệt / mock / thu hồi / đổi chữ / đổi giọng / giọng chưa chọn | mã `UnusableCode` của §14.3 (`decideTtsPlay` đòi **cả chính sách lẫn tệp**) |
+
+Chưa có route phát TTS: đường duy nhất tới học sinh vẫn là §13 (bản ghi giáo viên). Mở đường phát TTS là việc của R10.3b2 sau quyết định D1–D6.
+
+### 14.6 Kế hoạch và chạy lô (`batch.ts`)
+
+`planTtsBatch` (hàm thuần, chạy khô): bỏ qua mục **chưa duyệt lời đọc** (`SCRIPT_NOT_APPROVED`), mục sai lược đồ (`INVALID_INPUT`), hash giả (`CONTENT_HASH_MISMATCH`), chữ giống dữ liệu cá nhân (`PERSONAL_DATA_REJECTED`), mục chỉ có khe bị cấm (`NOT_SYNTHESIZABLE`); **chống trùng**: khóa tệp đã có phiên bản (`ALREADY_GENERATED`; thu hồi `REVOKED_BLOCKED`; từ chối `PREVIOUSLY_REJECTED`) hoặc trùng trong lô (gộp thành một tác vụ nhiều mục); **giới hạn**: tối đa `TTS_BATCH_MAX_JOBS = 40` tác vụ và `DEFAULT_BATCH_CHAR_BUDGET = 3000` ký tự mỗi lô (`OVER_JOB_LIMIT`/`OVER_CHAR_BUDGET`). Yêu cầu gửi nhà cung cấp chỉ có `text, purpose, voiceKey, speed`.
+
+`runTtsBatch`: nhà cung cấp `none` → mọi tác vụ `NO_PROVIDER`, **không gọi mạng**; nhà cung cấp lệch với kế hoạch bị từ chối; **giọng chưa chọn → `VOICE_NOT_CHOSEN`** (trừ cờ chạy khô của kiểm thử); `CharBudget` + timeout 8 giây + không thử lại tự động (R10.1); mỗi tệp qua §14.4. Kết quả là ứng viên **trong bộ nhớ**, `pending_review` — chưa ghi Storage hay CSDL. **Không có nơi nào gọi `runTtsBatch` ở mã chạy thật.**
+
+### 14.7 Giao diện xem trước giáo viên (`/teacher/tts-script`)
+
+Chỉ đọc, trang tự xác thực giáo viên (`requireTeacher`), dữ liệu từ bản chơi thử (hư cấu), luôn có khung **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"** và đoạn phân biệt giọng máy với bản ghi giáo viên. Mỗi lời đọc hiện: chữ, mục đích, trạng thái (mọi mục "Chờ giáo viên duyệt"), giọng dự kiến ("Giọng chưa được chọn"), nguồn, dạng bài áp dụng, mức phát H3→H0 và cờ cần cân nhắc. Nút "Duyệt lời đọc — Sắp có" **bị khóa**; không có biểu mẫu, không thẻ `audio`, không nhà cung cấp. Micro vẫn tắt ở trang này (chỉ `/teacher/audio` mở micro).
+
+### 14.8 Giới hạn đã biết (trung thực)
+
+- **Chưa có tệp TTS thật, chưa nghe thử giọng nào**, chưa chọn nhà cung cấp/giọng, chưa có lời đọc nào được giáo viên duyệt. Mục `provisional-0` chỉ để lập kế hoạch.
+- Thời lượng tối đa 10 giây là giới hạn của thư viện bản ghi; lời đọc quá dài bị `AUDIO_TOO_LONG` — cần rút ngắn chữ.
+- `inspectAudio` không phát hiện tệp im lặng/ồn. Chưa có bảng CSDL/Storage cho phiên bản TTS và bản duyệt (R10.3b2).
+- Kiểm tra xưng hô/giọng điệu chỉ là **nhắc** bằng mẫu chữ, không phải kiểm duyệt sư phạm.
+- Thời lượng và dung lượng thật của từng giọng phụ thuộc nhà cung cấp — chưa đo.
+- Mẫu lỗi WebKit mobile thỉnh thoảng không hydrate màn mê cung (R08.4/R08.6, REDESIGN_PROGRESS §5u) vẫn **chưa rõ nguyên nhân**; R10.3b1 không đụng tới và **không tuyên bố đã sửa**.
+
+### 14.9 Yêu cầu kỹ thuật cho giai đoạn sau: đánh vần ghép tiếng (CHƯA triển khai)
+
+Mong muốn của chủ dự án: học sinh ghép **"bà"** → máy đọc **"bờ – a – ba – huyền – bà"**. **Không làm ở R10.3b1.** Điều kiện kỹ thuật dự kiến (ví dụ "bà", "bá", "cá", "mẹ", "nhà" chỉ là ví dụ để giáo viên duyệt):
+
+1. **Nhận diện** âm đầu, vần và dấu thanh bằng bộ máy tiếng Việt hiện có (`lib/vietnamese`, theo danh mục vần và tham số hồ sơ lớp) — không đoán khi `unknown`.
+2. **Sinh trình tự đánh vần theo quy tắc do giáo viên xác nhận** (Q-01/Q-02: cách gọi âm, kiểu đánh vần của bộ sách, vị trí dấu thanh, qu/gi). **Không** một quy tắc máy móc cho mọi tiếng; tiếng ngoại lệ (qu, gi, ngh, vần có âm đệm, y/i…) có quy tắc riêng được duyệt.
+3. **Phát các đoạn âm thanh theo đúng thứ tự**, có khoảng ngắt cố định, mỗi đoạn là một tệp **đã duyệt** (bản ghi giáo viên cho âm/vần đơn lẻ và dấu thanh).
+4. **Có âm thanh riêng cho tiếng cơ sở ("ba") và tiếng hoàn chỉnh ("bà")** do giáo viên ghi hoặc duyệt. **Không giả định** nối "bờ" + "a" tự tạo được giọng đọc tự nhiên của "ba" (ghép thô sẽ khác cách đọc thật), và không tạo tiếng hoàn chỉnh bằng cách nối đoạn.
+5. Tuân thủ AD-35: trong bài đọc, không phát chuỗi đánh vần của chữ cần đọc trước khi chấm; chuỗi đánh vần chỉ là phản hồi/đọc mẫu sau chấm hoặc ở hoạt động học (không chấm) do chính sách dạng bài cho phép.
+6. Cần: bảng quy tắc đánh vần (dữ liệu trong `content/`, `pending_review`), danh mục đoạn âm thanh, thử nghiệm với giáo viên trước khi mở cho học sinh.
+
+
+## 15. R10.3b2-P0 / P0b — Công cụ nghe thử giọng AI tiếng Việt (adapter Viettel AI + FPT.AI + so sánh giọng) — CHƯA THỬ API THẬT
+
+> **P0b (2026-10-28):** chủ dự án chọn **giọng nam miền Nam** để nghe thử → thêm adapter **Viettel AI** (`hcm-minhquan`) và đặt làm giọng mặc định của `npm run tts:poc`. Xem §15.9 (nguồn giao thức, phần chưa xác minh). Các đoạn dưới về FPT.AI/Google giữ nguyên làm đối chiếu.
+
+> **Phạm vi:** một POC giới hạn để **giáo viên nghe và so sánh** giọng AI tiếng Việt. **Không** phải R10.3b2 đầy đủ: không bảng/migration TTS, không Storage, không đường phát cho học sinh, không cờ phát nào được bật, không bản ghi `approved` từ tệp AI, không R10.4. **Việc cho phép nghe thử không phải là cho phép bật thanh toán, phát hành nội dung hay mở cho học sinh thật.**
+>
+> **Trạng thái trung thực (2026-10-28): CHƯA THỬ API THẬT.** Chưa có khóa API nào được cấp cho dự án (`.env.local` không có `TTS_VIETTEL_TOKEN` / `TTS_FPT_API_KEY` / `TTS_GOOGLE_API_KEY`), nên **chưa gọi API nào, chưa có tệp âm thanh nào, chưa giọng nào được nghe**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Giao thức FPT.AI bên dưới được viết theo tài liệu chính thức, **chưa được kiểm chứng bằng phản hồi thật** (xem §15.7).
+
+### 15.1 Đối chiếu tài liệu chính thức (2026-10-28)
+
+**FPT.AI TTS v5** ([docs.fpt.ai/…/speech/api/text-to-speech](https://docs.fpt.ai/docs/en/speech/api/text-to-speech)):
+
+- `POST https://api.fpt.ai/hmi/tts/v5`; khóa ở tiêu đề **`api_key`** (gạch dưới — trang tài liệu dùng đúng chữ này); tiêu đề `voice`, `speed` (-3…+3, mặc định 0), `format` (`mp3`|`wav`), `callback_url` (tùy chọn); thân yêu cầu là văn bản, **3–5.000 ký tự**.
+- Giọng: `banmai` (nữ Bắc), `lannhi` (nữ Nam), `leminh` (nam Bắc), `myan` (nữ Trung), `thuminh` (nữ Bắc), `giahuy` (nam Trung), `linhsan` (nữ Nam).
+- Phản hồi JSON `{ error, async, message, request_id }`: `error = 0` là thành công; `async` là **liên kết** tới tệp, tệp **có thể chưa tồn tại** khi phản hồi trả về (tài liệu: chờ khoảng 5 giây tới 2 phút theo độ dài). Tài liệu **không** mô tả cách hỏi lại, thời hạn liên kết hay mã lỗi cụ thể (chỉ `0` = thành công); ví dụ liên kết nằm trên S3 `ap-southeast-1` (đường dẫn `text2speech-v4`) nhưng **không cam kết** tên miền.
+- **FPT TTS v5 và FPT AI Factory Voice Studio là hai giao diện sản phẩm khác nhau**; không mặc định cùng API hay bảng giá. Adapter này chỉ viết cho **API v5** ở trên. Voice Studio **chưa được đánh giá**.
+- Giá: trang bảng giá TTS ([tts-pricing](https://docs.fpt.ai/docs/en/speech/documentation/tts-pricing)) — qua tóm tắt tìm kiếm — nêu gói miễn phí **100.000 ký tự/tháng** cho giọng v5 nhưng tốc độ thấp, xếp hàng, giới hạn số yêu cầu mỗi ngày; gói trả phí cộng thêm ký tự (từ 500.000 VND cho 1,5 triệu ký tự). Trang ghi bản quyền 2025. **Chưa đọc trực tiếp trang đầy đủ; cần xác minh trước khi dựa vào.**
+
+**Google Cloud TTS** ([danh sách giọng](https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types), đã đọc trực tiếp): vi-VN có `Neural2-A` (nữ), `Neural2-D` (nam), 4 Standard, 4 WaveNet và 30 giọng Chirp3-HD. Chirp 3 HD **không** hỗ trợ tham số tốc độ đọc/cao độ/SSML; Neural2 dùng được `speakingRate`. Giá Neural2 (khoảng 16 USD/1 triệu ký tự, miễn phí 1 triệu ký tự/tháng) **chỉ là số nhớ, chưa xác minh** — trang giá không đọc được đầy đủ. Google bắt buộc bật thanh toán.
+
+**Azure** `vi-VN-HoaiMyNeural` (nữ), `vi-VN-NamMinhNeural` (nam): **chỉ là phương án dự phòng, CHƯA có adapter**, không bắt buộc ở POC này.
+
+### 15.2 Thành phần mã
+
+| Tệp | Vai trò |
+|---|---|
+| `src/server/tts/fpt-provider.ts` | Adapter `TtsProvider` cho FPT.AI v5 (`id: "fpt"`): `POST` → lấy liên kết `async` → kiểm tra liên kết (`checkFptAudioUrl`) → hỏi lại có giới hạn → đọc tệp có giới hạn dung lượng |
+| `src/server/tts/viettel-provider.ts` | Adapter `TtsProvider` cho Viettel AI (`id: "viettel"`): một `POST` JSON, token ở tiêu đề `token`, nhận byte MP3 trực tiếp; không đọc thân lỗi, không tin HTTP 200 (§15.9) |
+| `src/server/tts/read-capped.ts` | Đọc thân phản hồi có trần dung lượng, dùng chung cho FPT và Viettel |
+| `src/server/tts/providers.ts` | Adapter Google giữ nguyên; thêm khóa giọng nghe thử `google-neural2-a/d` và tùy chọn `wav` (LINEAR16) |
+| `src/server/tts/poc/voices.ts` | Giọng ứng viên (nhà cung cấp, tên giọng, giới tính, vùng miền) — **không phải quyết định chọn giọng** |
+| `src/server/tts/poc/sentences.ts` | 6 câu lấy từ 34 lời đọc của danh mục (2 lời khen/nhắc ngắn, 1 nhắc dài, 3 câu hướng dẫn gồm câu dài nhất 60 ký tự) + 1 câu chẩn đoán `bà, bá, mẹ, nhà` |
+| `src/server/tts/poc/plan.ts` | Kế hoạch và giới hạn cứng (hàm thuần) |
+| `src/server/tts/poc/options.ts` | Đối số CLI và quyết định chế độ chạy khô/thật (hàm thuần, nhận `env` từ ngoài) |
+| `src/server/tts/poc/run.ts` | Chạy tuần tự, không retry, dừng nhà cung cấp sau 2 lỗi liên tiếp, kiểm tra tệp theo nội dung (`checkSynthesizedAudio`) |
+| `src/server/tts/poc/store.ts`, `manifest.ts` | Lưu cục bộ `.tts-poc/` (tên tệp = sha256 nội dung) và sổ `manifest.json` (zod) |
+| `src/server/tts/poc/serve.ts` + `src/app/api/teacher/tts-poc/[file]/route.ts` | Phát lại cho **giáo viên** (xác thực GV; tên tệp phải khớp mẫu băm và có trong sổ; kiểm lại sha256; `no-store`, `nosniff`, sandbox, Range) |
+| `scripts/tts-poc.ts` → `npm run tts:poc` | Công cụ dòng lệnh |
+| `src/app/teacher/(console)/tts-compare/` | Trang `/teacher/tts-compare` nghe A/B, bảng số đo và bảng ghi nhận khi nghe |
+
+### 15.3 Cách chạy
+
+```
+npm run tts:poc                     # CHẠY KHÔ (mặc định): in kế hoạch, không mạng
+npm run tts:poc -- --live           # gọi API thật — cần ĐỒNG THỜI các điều kiện dưới đây
+npm run tts:poc -- --live --speed slow
+npm run tts:poc -- --live --set diagnostic --voices fpt-banmai,fpt-lannhi
+```
+
+Gọi API thật khi và chỉ khi **cả ba**: cờ `--live`; biến `TTS_POC_COST_CONFIRMED=yes` (người vận hành xác nhận đã kiểm tra quota/thanh toán của nhà cung cấp — công cụ **không tự kiểm tra** quota hay thanh toán, chỉ chặn nếu chưa xác nhận); khóa của nhà cung cấp tương ứng trong môi trường máy chủ (`TTS_FPT_API_KEY`, `TTS_GOOGLE_API_KEY` — `.env.local`, không commit). Thiếu điều kiện nào → thoát mã 3 với dòng **"CHƯA THỬ API THẬT"** và không gọi mạng. Khóa không bao giờ được in, ghi log, ghi vào sổ hay gửi tới trình duyệt.
+
+Giọng mặc định (từ P0b): `viettel-hcm-minhquan` (Viettel AI Minh Quân, nam, miền Nam; khóa `TTS_VIETTEL_TOKEN`). Các giọng cũ vẫn dùng để đối chiếu bằng `--voices`: `fpt-banmai`, `fpt-lannhi`, `fpt-thuminh`, `google-neural2-a`, `google-neural2-d` (tối đa hai giọng cho 6 câu trong một lần chạy vì giới hạn dưới; mặc định chỉ 1 giọng = 6 lần gọi, 219 ký tự). Giọng Viettel chỉ lấy MP3: `--format wav` với giọng Viettel bị từ chối ngay lúc đọc đối số. Tốc độ: `--speed normal` (FPT `0`, Google `1.0`) hoặc `slow` (FPT `-1`, Google `0.8`) — **"chậm vừa phải" chỉ là giá trị thử, chưa phải quyết định G3**. Định dạng `--format mp3|wav`.
+
+### 15.4 Giới hạn chi phí và an toàn (kiểm thử bằng unit test)
+
+- Tối đa **12 lần gọi và 600 ký tự mỗi lần chạy** (6 câu × 2 giọng ≈ 440 ký tự); `--max-requests` chỉ **hạ** được trần; 3 giọng × 6 câu bị từ chối. Không có đường chạy 34 câu hàng loạt.
+- **Chống gọi lặp:** khóa yêu cầu = nhà cung cấp + giọng + tốc độ + định dạng + chữ NFC; yêu cầu đã có tệp được bỏ qua (không tốn ký tự). Tên tệp = sha256 nội dung nên hai yêu cầu cho cùng byte chỉ lưu một tệp.
+- **Không retry**; sau **2 lỗi liên tiếp** một nhà cung cấp bị dừng trong lần chạy đó. Hỏi lại tệp FPT tối đa 24 lần, chờ tăng dần 2→6 giây (≈ 2 phút 14 giây), có hạn thời gian tổng (`FPT_SUGGESTED_TIMEOUT_MS` = 150 giây).
+- **SSRF (liên kết `async` là đầu vào không tin cậy):** chỉ `https`, không IP/`localhost`/tên không có dấu chấm, không cổng, không tài khoản trong địa chỉ, tên miền phải là S3 `ap-southeast-1` hoặc `*.fpt.ai`; mọi `fetch` dùng `redirect: "error"`; giới hạn 2 MB (kiểm tiêu đề lẫn byte thực); chỉ nhận `audio/*` hoặc `application/octet-stream`. Liên kết bị từ chối → `PROVIDER_ERROR`, chẩn đoán chỉ ghi mã `URL_REJECTED` và tên miền. Không dùng `callback_url` (cần địa chỉ công khai). Nếu lần chạy thật cho thấy tên miền thật khác, **thêm có chủ đích** vào danh sách — không nới tự động.
+- Chỉ văn bản học liệu/lời đọc cố định được gửi đi (qua cùng `checkTtsRequest`: NFC, ≤ 300 ký tự, từ chối chữ giống dữ liệu cá nhân, chặn `<` `>`). **Không dữ liệu giáo viên/học sinh.**
+- Byte giả của `mock` không bao giờ thành tệp nghe thử (`checkSynthesizedAudio` từ chối).
+
+### 15.5 Tách biệt hoàn toàn với bản ghi giáo viên
+
+- Giữ nguyên `audio_assets`, `audio_asset_versions` và bucket `teacher-audio`; POC **không** chạm CSDL hay Storage.
+- Tệp nghe thử chỉ ở `.tts-poc/` (trong `.gitignore`, `.prettierignore` theo `.gitignore`), **không** vào Git, Supabase hay Vercel: quyền lưu và phân phối tệp của nhà cung cấp **chưa được xác minh** (TTS_APPROVAL_CHECKLIST P6).
+- Khóa giọng nghe thử (`fpt-*`, `google-neural2-*`) **tách khỏi** khóa giọng sản xuất (`vi-female-1`, `vi-male-1`); danh mục và lô sản xuất (`catalog.ts`, `batch.ts`) không dùng được chúng; adapter FPT từ chối khóa sản xuất (`INVALID_INPUT`).
+- Domain TTS riêng cho giai đoạn sau (R10.3b2 đầy đủ, **chưa làm**): danh mục + duyệt lời đọc TTS, phiên bản tệp TTS (nhà cung cấp, model, giọng, tốc độ, hash), nguồn gốc/quyền sử dụng, nghe duyệt/thu hồi, cờ phát TTS riêng mặc định TẮT. Hai hệ thống chỉ dùng chung chính sách AD-35 và hạ tầng trình phát phù hợp, **không** dùng chung bản ghi hay quyền duyệt.
+- Câu chẩn đoán `bà, bá, mẹ, nhà` **không phải học liệu**: không nằm trong danh mục, không vào thư viện phát cho học sinh và không thay bản ghi giáo viên (âm/vần đơn lẻ luôn do giáo viên ghi).
+
+### 15.6 Trang `/teacher/tts-compare`
+
+Chỉ giáo viên (`requireTeacher`; route phát tệp từ chối thiết bị học sinh), chỉ đọc, luôn có khung **"BẢN THỬ NGHIỆM — DỮ LIỆU MINH HỌA"**. Hiện danh sách giọng ứng viên (nhà cung cấp, vùng miền, giới tính), từng câu với các tệp nghe A/B (`<audio controls preload="none">`, chỉ một đoạn phát tại một thời điểm, phát qua `/api/teacher/tts-poc/…` — **không** từ địa chỉ nhà cung cấp), số liệu đo được (thời gian tạo, dung lượng, thời lượng; chi phí thực tế ghi "Chưa có số liệu") và bảng ghi nhận khi nghe 8 tiêu chí (dấu thanh, phụ âm/nguyên âm, phát âm vùng miền [thêm ở P0b], mức tự nhiên, dễ nghe với học sinh lớp 1, tốc độ và ngắt, câu dài, chất lượng trên trình duyệt). **Không có nút duyệt/chọn giọng, không biểu mẫu, không lưu nhận xét.** Khi chưa có tệp, trang nói rõ chưa gọi API thật.
+
+### 15.7 Việc CHƯA làm / còn chờ
+
+- **Chưa gọi API thật nào**; chưa nghe giọng nào; chưa đo thời gian tạo hay chi phí thật. Giao thức FPT (tiêu đề `api_key`, thân văn bản thô không đặt `Content-Type`, trường `async`, tên miền S3, trạng thái 403/404 khi tệp chưa sẵn sàng, cách phản hồi khi hết hạn mức) **chỉ được kiểm bằng `fetch` giả** theo tài liệu.
+- **Chủ dự án cần:** cấp khóa thử qua kênh bảo mật (không dán vào chat/commit), xác nhận quota/thanh toán trước khi đặt `TTS_POC_COST_CONFIRMED=yes`, và trả lời P1–P9 (đặc biệt **P6 quyền lưu/phân phối tệp** và P7 nhà cung cấp có lưu văn bản không — FPT.AI chưa có điều khoản được xác minh).
+- **Giáo viên cần:** nghe và quyết định giọng (G1–G3), duyệt lời đọc (G4–G7) và từng tệp (G8). Không có mục nào tự động; không giọng nào được coi là đạt chuẩn.
+- Chưa so sánh FPT AI Factory Voice Studio, Azure, hay Chirp 3 HD của Google.
+- Chưa kiểm tra phát trên iPhone/Safari và Android thật (điều kiện C4).
+
+### 15.9 P0b — Viettel AI Minh Quân (giọng nam miền Nam) — CHƯA GỌI API THẬT, CHƯA NGHE GIỌNG THẬT
+
+**Trạng thái trung thực (2026-10-28):** chưa có `TTS_VIETTEL_TOKEN` → **chưa gọi API Viettel, chưa có tệp âm thanh, chưa nghe giọng nào**. Mọi kiểm thử dùng `fetch` giả và sóng tổng hợp. Không tạo tài khoản, không bật thanh toán.
+
+**Nguồn giao thức — nói rõ giới hạn.** Trang tài liệu chính thức `viettelai.vn/en/tai-lieu` là ứng dụng Nuxt dựng bằng JavaScript; công cụ tải trang chỉ thấy tiêu đề, và `viettelgroup.ai` (trang đặc tả cũ) không truy cập được từ máy phát triển. Vì vậy **không đọc được trang đặc tả chính thức**. Các điểm dưới đây lấy từ **mã chạy của chính trang web Viettel AI** (phần "trải nghiệm TTS" trong gói JavaScript do `viettelai.vn` phục vụ, đối chiếu 2026-10-28) — tức cách khách hàng chính thức của dịch vụ gọi API — cộng một nguồn thứ ba chỉ để tham khảo:
+
+| Điểm | Giá trị dùng | Mức xác minh |
+|---|---|---|
+| Endpoint | `POST https://viettelai.vn/tts/speech_synthesis` | Mã chạy của trang Viettel AI (nhiều thành phần cùng dùng) |
+| Xác thực | tiêu đề `token: <token>` (+ `Content-Type: application/json`) | Mã chạy của trang Viettel AI |
+| Thân | `{ speed, voice, text, tts_return_option: 3, without_filter: false }` | Mã chạy của trang Viettel AI |
+| Mã giọng | `hcm-minhquan` | Có trong mã chạy của trang (câu mẫu của giọng này); ví dụ khác lấy `hcm-diemmy`. Giới tính **nam** và vùng **miền Nam** theo tiền tố `hcm` và mô tả sản phẩm — **giáo viên nghe để xác nhận** |
+| Phản hồi | byte âm thanh (mã chạy đặt tên `audio.mp3`); lỗi là JSON (`vi_message`/`en_message`); `429` = hết lượt dùng thử | Mã chạy của trang |
+| Tốc độ | `normal` = 1, `slow` = 0,9 (một bước chậm hơn) | Giao diện thử chỉ cho 0,8–1,2 bước 0,1; dải của API trả phí **chưa xác minh**; "chậm vừa" **chưa phải quyết định G3** |
+| Định dạng | chỉ MP3 (`tts_return_option` = 3) | Mã chạy chỉ dùng 3; nguồn thứ ba nêu 1 = luồng, 2 = wav, 3 = mp3 — **không dựa vào 1, 2** |
+| Trần ký tự | 300 | Là trần của giao diện thử; API trả phí **chưa xác minh** |
+| `without_filter` | luôn `false` | Ý nghĩa chính thức **chưa xác minh** |
+| Giá, hạn mức, điều khoản lưu/phân phối tệp (P6), lưu văn bản gửi đi (P7) | — | **Chưa xác minh**; việc nghe thử không thay xác nhận của chủ dự án |
+
+**Phòng vệ vì giao thức chưa được đặc tả đầy đủ** (đều có unit test):
+
+- Không tin HTTP 200: nhãn `application/json` → `API_ERROR`; nhãn không phải âm thanh → `BAD_RESPONSE`; thân rỗng → `EMPTY_AUDIO`; byte đầu giống JSON/HTML → `API_ERROR`; rồi mọi tệp vẫn qua `checkSynthesizedAudio` (nhận dạng MP3 **theo nội dung**, thời lượng ≥ 300 ms, MIME khớp) trước khi lưu.
+- Lỗi HTTP: `401/403` → `HTTP_UNAUTHORIZED`, `429` → `HTTP_RATE_LIMITED`, còn lại `HTTP_ERROR`; **thân phản hồi lỗi không được đọc hay đưa vào chẩn đoán** (nhà cung cấp có thể phản hồi lại nội dung).
+- Trần dung lượng 2 MB (cả `content-length` khai báo lẫn byte thực), `redirect: "error"`, một lần gọi cho mỗi yêu cầu (không hỏi lại, không retry), thời gian chờ 30 giây (`VIETTEL_SUGGESTED_TIMEOUT_MS`; công cụ dòng lệnh dùng thời gian chờ riêng cho từng nhà cung cấp) — treo giữa lúc kết nối hoặc giữa lúc đọc thân đều → `TIMEOUT`.
+- Token: chỉ ở tiêu đề `token`; không ở URL, thân, log, chẩn đoán, sổ hay lỗi; kiểm tra dạng (ASCII in được, không khoảng trắng, 8–512 ký tự — sai dạng coi như chưa có, không in giá trị) nhưng **không chứng minh còn hiệu lực**. Chỉ `service.ts` (`TTS_PROVIDER=viettel`) và `poc/options.ts` đọc tên biến này; không có tiền tố `NEXT_PUBLIC_` (bộ quét).
+- Giữ nguyên giới hạn: tối đa **12 lần gọi và 600 ký tự mỗi lần chạy**; mặc định 6 lần gọi / 219 ký tự; dừng nhà cung cấp sau 2 lỗi liên tiếp.
+
+**Cách chạy thật (khi chủ dự án sẵn sàng):** đặt `TTS_VIETTEL_TOKEN=<token>` trong `.env.local` (không commit, không dán vào chat), xác nhận quota/chi phí rồi đặt `TTS_POC_COST_CONFIRMED=yes`, chạy `npm run tts:poc -- --live`. Quan sát dòng `[Viettel] <mã>` nếu có lỗi; mã `HTTP_UNAUTHORIZED` nghĩa là token sai/hết hạn, `HTTP_RATE_LIMITED` là hết lượt. Kết quả thật đầu tiên có thể cho thấy tham số cần chỉnh (ví dụ dải `speed`) — chỉnh có chủ đích rồi cập nhật bảng trên, không nới tự động.
+
+**Tách biệt:** TTS vẫn hoàn toàn tách khỏi bản ghi giáo viên — không chạm `audio_assets`, `audio_asset_versions`, bucket `teacher-audio`, quy trình đồng ý ghi âm, và các cờ `student_teacher_audio_playback_approved`, `teacher_audio_recording_approved` (vẫn TẮT; bộ quét `safety-scan` kiểm: mã TTS và `scripts/tts-poc.ts` không nhắc các tên đó). Tệp nghe thử chỉ ở `.tts-poc/`.
+
+**Trang `/teacher/tts-compare`:** thêm hàng Viettel AI (nam, miền Nam), cột **"Tình trạng nghe thử"** (chưa có tệp / có N tệp — chờ giáo viên nghe, chưa quyết định), ghi chú về mức xác minh giao thức, và tiêu chí thứ 2 trong bảng ghi nhận về **phát âm vùng miền** (r/d/gi, tr/ch, hỏi/ngã — người miền Nam hay lẫn các cặp này, trong khi bài học phân biệt chúng). Khi đã có tệp, bảng ghi nhận chỉ giữ cột của giọng đã có tệp. Vẫn **không** có nút duyệt/chọn giọng và không lưu nhận xét; không giọng nào được đánh dấu đã duyệt.
+
+### 15.8 Kiểm thử
+
+`tests/unit/tts/poc/` (adapter FPT bằng `fetch` giả: tiêu đề/thân, ánh xạ giọng–tốc độ, hỏi lại có giới hạn, timeout, lỗi API, tệp quá lớn, 11 kiểu liên kết nguy hiểm, không lộ khóa; adapter Google với khóa nghe thử; kế hoạch/giới hạn/chống trùng; đối số và chế độ chạy; chạy–lưu–sổ–phục vụ tệp bằng thư mục tạm; giao diện so sánh) và cập nhật `safety-scan.test.ts` (địa chỉ dịch vụ ngoài chỉ ở hai adapter; mô-đun nghe thử chỉ dùng ở khu giáo viên; route TTS duy nhất là route nghe lại của giáo viên; `.env.example` không chứa khóa).
+
+---
+
+## 16. Học tập: chạm vào chữ để nghe (nhãn "R10.4" trong mã và commit — KHÔNG phải mục 10.4 "soạn/duyệt nội dung" của REDESIGN_TASKS)
+
+> Cho học sinh **chủ động nghe** chữ mà hoạt động đang dạy. Đây là hoạt động học **không có câu hỏi, đáp án hay điểm** — không phải đánh giá. Báo cáo còn thiếu gì: [AUDIO_COVERAGE](AUDIO_COVERAGE.md).
+
+### 16.1 Ba loại âm thanh KHÁC NHAU (không gộp)
+
+| Loại | Ví dụ | Nguồn | Khóa tài nguyên | Số mục |
+|---|---|---|---|---|
+| **Tên chữ cái** | b → "bê" | Bản ghi giáo viên | (trường, `letter`, chữ) | 29 |
+| **Âm của chữ** | b → "bờ"; ngh → "ngờ"; qu → "quờ" | Bản ghi giáo viên | (trường, `phoneme`, chữ) | 38 (`i`/`y` dùng chung một bản) |
+| **Tiếng/từ hoàn chỉnh** | "bà", "bá" (có dấu thanh, có ngữ cảnh) | Giọng máy theo từng bài — **chưa làm** | — | — |
+
+Bản ghi loại này không bao giờ thay cho loại kia (tài nguyên khóa theo loại). Chữ `q` chỉ có **tên chữ cái**; âm của nó là "qu" nằm ở nhóm chữ ghép. Các ô có quy ước nhà trường (k, gh, ngh, gi, qu, ă, â, i, y…) chỉ ghi âm sau khi giáo viên chốt cách đọc.
+
+### 16.2 Đường phát
+
+- Trang **`/learn/me/study`** ("Nghe cách đọc chữ"): 29 ô chữ cái (tối đa hai nút: **tên chữ** và **âm**) + 11 chữ ghép (chỉ âm). Mã: `src/app/learn/me/study/page.tsx`, danh mục `features/audio-playback/study-catalog.ts` (lấy từ kho tri thức).
+- Thành phần dùng lại được `src/components/kid/learning-audio.tsx` (`LearningAudioProvider`, `ListenButton`, `ListenableLetter`): **mỗi lúc chỉ một âm** (chạm chữ khác thì dừng âm cũ), chạm lại để nghe lại, trạng thái đang tải/đang phát/lỗi, **không tự phát**, `play()` chỉ trong hàm xử lý chạm, vùng chạm ≥ 64 px, tên truy cập mô tả ("Nghe tên chữ b", "Nghe âm của chữ b").
+- Danh sách "nghe được ngay": `GET /api/student/learning-audio` (hàm `gateway_list_learning_audio`; cờ tắt → rỗng, không lỗi → nút khóa ghi "Chưa có âm thanh"). Tệp: `GET /api/student/learning-audio/{kind}/{unit}` → `src/server/audio-playback/learning.ts` → `gateway_resolve_learning_audio`. Trình duyệt chỉ gửi **loại và chữ**; **nhãn cách đọc mong đợi do máy chủ lấy từ kho tri thức** (không từ trình duyệt); khóa lưu trữ không rời máy chủ; phản hồi `private, no-store`; giới hạn 90 lần/phút.
+- **Mỗi lần phát** hàm CSDL (chỉ `service_role`, chỉ đọc) kiểm lại: cờ `student_teacher_audio_playback_approved` bật (cùng cờ R10.3a — **TẮT**), thiết bị liên kết đúng học sinh, đồng ý `learning_data`, cùng trường, bản đang dùng + `approved` + đã nghe, cách đọc đã xác nhận **khớp** nhãn, người ghi còn đồng ý. Không bộ nhớ đệm quyết định.
+- **Chống lộ đáp án (AD-35):** đường này **không** dùng trong buổi luyện/chạm trán (không có `question_instance`). Ở đó chính sách của từng dạng bài (R10.3a) vẫn quyết định, trước khi chấm không phát cách đọc làm lộ đáp án; không có quy tắc thứ hai.
+
+### 16.3 Giáo viên bổ sung bản ghi
+
+`/teacher/audio` liệt kê **67 mục** (29 tên chữ cái + 38 âm) với bộ lọc "Loại âm thanh" (mọi loại / tên chữ cái / âm của chữ) và quy trình như R10.2: ghi hoặc tải tệp → nghe lại → **xác nhận cách đọc** → gửi duyệt → duyệt (đã nghe). Báo cáo "còn thiếu gì": `/teacher/audio-coverage`.
+
+### 16.4 Kiểm thử
+
+pgTAP `15_learning_audio` (13); DB `student-learning-audio.test.ts` (16, có Storage); unit `learning-audio.test.tsx`, `learning-routes.test.ts`; E2E `student-learning-audio.spec.ts` (Chromium desktop/mobile, WebKit mobile).
+
+### 16.5 Giới hạn
+
+Chưa có bản ghi thật nào, cờ TẮT; chưa thử trên iPhone/Android thật (chỉ Playwright WebKit/Chromium); tiếng/từ và vần chưa có nút nghe.
+
+---
+
+## 17. Thư viện giọng máy cho câu lệnh và lời phản hồi (nhãn "R10.5" trong mã và commit — KHÔNG phải mục 10.5 "góc phụ huynh" của REDESIGN_TASKS)
+
+> Tạo trước → giáo viên **nghe và duyệt** → mới phát. Không gọi dịch vụ khi học sinh học. Tách hẳn khỏi bản ghi giáo viên (§12): bảng riêng, bucket riêng, cờ riêng.
+
+### 17.1 Giọng và cấu hình
+
+- **Viettel AI, giọng `hcm-minhquan` (nam, miền Nam), tốc độ 0,9** — là **sự lựa chọn giọng thử nghiệm của chủ dự án** sau khi nghe trên giao diện của Viettel; **không thay** bước giáo viên nghe và duyệt từng tệp.
+- Cấu hình nội bộ `src/server/tts-library/voice.ts`: `voiceKey: vi-male-1` (adapter ánh xạ sang `hcm-minhquan`), `speed: slow`, `configVersion: viettel-minhquan-0.9-v1`. Đổi bất kỳ thành phần nào (hoặc chữ) → **khóa tệp khác** → mọi bản đã duyệt cũ thành "lỗi thời" (không phát) cho tới khi tạo và duyệt lại.
+- Hạn mức: 300 ký tự mỗi lần bấm; "Tạo các lời đã duyệt còn thiếu" tối đa 10 lời mỗi lần bấm.
+
+### 17.2 Quy trình (hai lần giáo viên xác nhận)
+
+1. **Danh mục cố định 34 lời đọc** (17 câu lệnh của 17 biến thể + 17 lời phản hồi) lấy từ câu lệnh chuẩn và chuỗi phản hồi — không bịa nội dung, không dữ liệu học sinh.
+2. Giáo viên **duyệt lời đọc** (chữ + cách đọc; phải tích xác nhận) hoặc từ chối (ghi chú). Bản duyệt gắn với **bản băm nội dung**: đổi chữ thì bản duyệt cũ không còn áp dụng.
+3. Giáo viên bấm **Tạo âm thanh** → máy chủ gửi **đúng một yêu cầu** `{chữ cố định, mục đích, giọng, tốc độ}` tới Viettel (không thử lại tự động) → kiểm tệp theo **nội dung** (`inspectAudio`; byte giả bị loại) → lưu ở bucket riêng tư `tts-audio` (khóa do máy chủ sinh từ UUID) → đăng ký **chờ duyệt**. Chỉ khi: thư viện đã bật, lời đọc đã duyệt, chưa có bản chờ/đang dùng cùng khóa. Lõi `src/server/tts-library/generate.ts` (phụ thuộc tiêm vào) là **nơi duy nhất** gọi `synthesizeSpeech`.
+4. Giáo viên **nghe** (route proxy riêng tư theo mã phiên bản, hỗ trợ Range cho Safari) → tích "đã nghe cả tệp" + "xác nhận cách đọc" → **duyệt**; hoặc từ chối / thu hồi (có lý do).
+5. Mỗi (trường, lời đọc) có tối đa **một** bản đã duyệt; duyệt bản mới → bản cũ `superseded`. Bản đã tạo **bất biến** (trigger); thu hồi luôn được phép.
+
+### 17.3 Dữ liệu và quyền
+
+- Bảng `tts_script_reviews`, `tts_audio_versions` (RLS **chỉ SELECT** theo trường). Hàm `teacher_tts_status`, `teacher_review_tts_script`, `teacher_register_tts_version`, `teacher_review_tts_version`, `teacher_revoke_tts_version` (JWT giáo viên, tự kiểm tra quyền, ghi nhật ký cùng giao dịch); `gateway_resolve_tts_line` (chỉ `service_role`, chỉ đọc).
+- **Hai cờ hệ thống TẮT mặc định:** `tts_library_approved` (duyệt + tạo) và `student_tts_playback_approved` (học sinh nghe). Không mã ứng dụng nào bật chúng; chỉ kiểm thử và `npm run audio:local-flags` (**chỉ Supabase local**) đổi được. Production đổi bằng migration sau khi đạt [điều kiện mở](TTS_APPROVAL_CHECKLIST.md#4-điều-kiện-mở-cho-học-sinh-thật).
+- Ràng buộc cứng ở CSDL: nhà cung cấp ∈ {viettel, fpt, google} (không mock/none), cấu hình không bắt đầu bằng `provisional`, định dạng mp3/wav/ogg, ≤ 2 MiB, ≤ 10 giây, bucket cố định `tts-audio`.
+
+### 17.4 Phát cho học sinh (chỉ câu lệnh)
+
+- Khe `instruction` thuộc `PLAYBACK_ROLES`: `GET /api/student/question-instances/{id}/audio/instruction` → `src/server/tts-library/playback.ts` → `gateway_resolve_tts_line`. **Dùng lại chính sách AD-35** (`decideBeforeGrading`): theo mức hỗ trợ **H3/H2** câu lệnh phát khi trẻ chạm; **H1** (chỉ qua Trợ giúp — chưa có đường ghi nhận gợi ý) và **H0** (tự làm) bị giữ lại: API trả `AUDIO_NOT_PERMITTED` và giao diện **không vẽ nút** (không giả vờ "chưa có").
+- Thiếu tệp đã duyệt / đã thu hồi / lỗi thời → `AUDIO_NOT_AVAILABLE`, nút khóa ghi **"Chưa có âm thanh"** (nói thật với học sinh; giáo viên thấy mục thiếu ở trang độ phủ). Tắt âm thanh của học sinh → nút khóa ghi lý do. Mỗi lần phát kiểm lại mọi điều kiện **và SHA-256 của tệp** (tệp bị thay hoặc mất trong Storage → không phát).
+- Đã nối vào buổi luyện có điểm (`scored-practice`) và chạm trán trong Mê cung (`encounter-play`). Câu `scorable` bắt buộc nghe bản ghi giáo viên mà thiếu → `AUDIO_NOT_AVAILABLE`, không lượt, không điểm (R10.3a, không đổi). `/demo` (bản chơi thử) giữ nút khóa trung thực.
+- **Lời phản hồi (17 câu) có trong thư viện nhưng CHƯA nối vào màn hình học sinh** (báo cáo độ phủ ghi rõ).
+
+### 17.5 Gọi nhà cung cấp thật (sự thật)
+
+- Nút Tạo âm thanh chỉ mở khi máy chủ có `TTS_PROVIDER=viettel` **và** `TTS_VIETTEL_TOKEN` (chỉ phía máy chủ, `.env.local`, không commit). Thiếu → `NO_PROVIDER`: nút khóa và **không có yêu cầu nào đi đâu**.
+- `.tts-poc/manifest.json` trên máy dev ghi **một lần gọi thật** (2026-10-28, câu chẩn đoán 15 ký tự, `hcm-minhquan`, tốc độ chậm, mp3 ≈ 2,1 giây) — thực hiện bằng `npm run tts:poc` **trước** các thay đổi của R10.5. **R10.5 không gọi API trong phiên làm việc**: đường tạo của thư viện được kiểm thử bằng nhà cung cấp giả (lõi `generateLine`) và CSDL/Storage thật, **chưa chạy với Viettel thật**. Giao thức Viettel lấy từ mã chạy của trang web Viettel AI (§15.9); giá/hạn mức, điều khoản **lưu & phân phối lại tệp (P6)** và việc nhà cung cấp **lưu văn bản gửi đi (P7)** chưa xác minh.
+
+### 17.6 Giao diện giáo viên
+
+`/teacher/tts-script`: thống kê (dùng được / chờ nghe và duyệt / chưa có), thông báo trung thực (thư viện chưa bật; chưa kết nối nhà cung cấp; mỗi lần bấm Tạo âm thanh gửi một lời đọc tới Viettel), 34 thẻ lời đọc, nút "Tạo các lời đã duyệt còn thiếu". Phần xem trước lời đọc của từng tiếng/từ/câu bài tập ở dưới **vẫn chỉ đọc và ghi "Sắp có"** (chưa làm). Báo cáo độ phủ: `/teacher/audio-coverage` ([AUDIO_COVERAGE](AUDIO_COVERAGE.md)).
+
+### 17.7 Kiểm thử
+
+pgTAP `16_tts_library` (24); DB `tts-library.test.ts` (19: hai cờ, hai bước duyệt, bất biến, một bản duyệt mỗi lời đọc, thu hồi, cô lập trường, thiết bị/đồng ý, `test_only`, đọc Storage + SHA-256, tệp bị thay/mất); unit `tests/unit/tts-library/` (38: `generateLine` mọi nhánh, trạng thái, danh mục) và `audio-coverage/` (19); E2E `teacher-tts-library` (3), `student-tts-instruction` (4), `teacher-audio-coverage` (3) trên Chromium desktop/mobile và WebKit mobile. Các luật quét an toàn được **siết có chủ đích**: chỉ `generate.ts` gọi `synthesizeSpeech`; Client Component chỉ được nhập `@/server/tts-library/actions` ("use server" — trình duyệt chỉ nhận cuống RPC).
+
+### 17.8 Giới hạn đã biết
+
+Chưa nghe giọng thật qua thư viện; chưa kiểm thử iPhone/Android thật; lời phản hồi chưa nối vào màn hình học; chưa có tiếng/từ/câu; xưng hô "con/em" (Q-08) và 3 câu có chữ phủ định đang chờ giáo viên; hệ thống **không phát hiện tệp im lặng** — giáo viên phải nghe trước khi duyệt.
+
+---
+
+## 18. Chế độ trình diễn cuộc thi — giọng máy tạo tự động, miền riêng (2026-10-29)
+
+> Thiết kế, cổng an toàn, công cụ và giới hạn: **[CONTEST_AUDIO.md](CONTEST_AUDIO.md)**. Tóm tắt kiến trúc:
+
+- **Miền riêng, không trộn:** `contest_audio_assets` (RLS chỉ SELECT; **không có cột duyệt**), bucket `contest-audio`, hàm `gateway_register_contest_audio` / `gateway_revoke_contest_audio` / `gateway_resolve_contest_audio` / `gateway_list_contest_audio` (chỉ `service_role`), migration `20261104090000`. Nguồn gốc cố định `ai_generated` · `contest_preview` · `technical_check_passed`; phiên bản cấu hình `contest-…` (khóa tệp khác thư viện đã duyệt).
+- **Cổng:** cờ `contest_audio_preview_enabled` + cổng local `contest_audio_allowed` (cả hai mặc định TẮT) + `isContestPreviewEnvironment()` ở mã ứng dụng. Cờ `contest_audio_play_unverified` cho phép phát mục chờ kiểm chứng (mặc định TẮT).
+- **Đường phát** (không phá bất biến của thư viện cũ): `tts-library/playback.ts` thử tệp **đã duyệt** trước, thiếu mới thử tệp trình diễn — sau khi chính sách AD-35 đã cho phép; `audio-playback/learning.ts` (Học tập) ưu tiên bản ghi giáo viên đã duyệt, thiếu mới dùng tệp trình diễn. Khe mới `feedback` (lời nhắn sau khi trả lời) chỉ phát khi mã dòng khớp trạng thái thật của câu.
+- **Công cụ:** `npm run audio:contest` (prepare/generate/verify/report/setup/enable/disable/allow-unverified/cleanup-test/revoke). Kiểm tra kỹ thuật bằng **giải mã thật trong Chromium** (thời lượng, biên độ, RMS, tỉ lệ có tiếng).
+- **Kiểm thử:** pgTAP `17_contest_audio` (22); DB `contest-audio.test.ts` (17); unit `tests/unit/contest-audio/` (core, ui, safety-scan); E2E có CSDL `contest-audio.spec.ts`.
+- **Báo cáo độ phủ:** [AUDIO_COVERAGE §7](AUDIO_COVERAGE.md).

@@ -1,8 +1,8 @@
 # ReadMate AI — Kiến trúc kỹ thuật
 
-> **Phiên bản:** 0.4 — cập nhật sau Giai đoạn 4 (Exercise Engine + bản chơi thử: §3.1, AD-32 → AD-39, §5.1, §6.1, §11, §20, §21, §22)
-> **Ngày cập nhật:** 2026-10-15
-> **Trạng thái:** GĐ1–GĐ3 đã được chấp nhận; phần GĐ4 chờ người điều phối đánh giá
+> **Phiên bản:** 0.5 — R01: ghi chú tái thiết kế; quyết định mới AD-40 → AD-53 ở [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md)
+> **Ngày cập nhật:** 2026-10-16
+> **Trạng thái:** GĐ1–GĐ3 đã được chấp nhận; phần GĐ4 chờ người điều phối đánh giá. ⚠️ **Từ R01** (định hướng mới: tự luyện tại nhà + phiêu lưu + thi đua lớp) phần kiến trúc **mới** nằm ở [REDESIGN_ARCHITECTURE.md](REDESIGN_ARCHITECTURE.md) (PLANNED). Tài liệu này vẫn là nền (AD-01 → AD-39) trừ các điểm thay thế: §6.1 bản đồ route (xem REDESIGN_ARCHITECTURE §4, §6), §6.2 chấm tại máy → chấm ở server cho chế độ có điểm (AD-41), §14 giao bài → buổi luyện + câu phát hành (REDESIGN_ARCHITECTURE §7.1), §15 "không có xếp hạng" chỉ còn áp dụng cho dashboard học tập, §16 sinh phiếu PDF **bỏ khỏi lộ trình** (AD-51), các mốc "GĐ5–GĐ11" → R03–R11 ([REDESIGN_TASKS](../REDESIGN_TASKS.md)).
 > **Tài liệu liên quan:** [PRD.md](PRD.md) · [DATA_MODEL.md](DATA_MODEL.md) · [TASKS.md](../TASKS.md) · [CLAUDE.md](../CLAUDE.md)
 
 ## Mục lục
@@ -79,16 +79,19 @@ Kiểm tra lại bằng `npm view` ngay trước khi cài (2026-10-12) — mọi
 
 | Nhóm | Gói | Phiên bản cài | Ghi chú |
 |---|---|---|---|
-| Framework | `next` · `react` · `react-dom` | 16.4.0 · 19.3.0 · 19.3.0 | Ghim chính xác như template `create-next-app@16.4.0` |
+| Framework | `next` · `react` · `react-dom` | 16.4.3 · 19.3.0 · 19.3.0 | Ghim chính xác; nâng 16.4.0 → 16.4.3 (2026-10-25) để vá advisory GHSA-673q-mjm6-r5xr (RCE `use cache`, vá từ 16.4.1) |
 | Ngôn ngữ | `typescript` | 5.9.3 (`^5`) | `typescript-eslint` 8.71.1 chỉ hỗ trợ TypeScript `<6.1` → chưa thể dùng TS 7 |
 | CSS | `tailwindcss` · `@tailwindcss/turbopack` | 4.3.3 · 4.3.3 | Tailwind chạy qua loader Turbopack (không có `postcss.config`) — mặc định của template |
 | Biểu tượng | `lucide-react` | 1.55.0 | Giấy phép ISC |
-| Lint/format | `eslint` · `eslint-config-next` · `prettier` | 9.39.5 · 16.4.0 · 3.9.10 | npm báo ESLint 9 hết hỗ trợ, nhưng `eslint-plugin-react`/`import`/`jsx-a11y` trong `eslint-config-next` chưa khai báo hỗ trợ ESLint 10 |
+| Lint/format | `eslint` · `eslint-config-next` · `prettier` | 9.39.5 · 16.4.3 · 3.9.10 | npm báo ESLint 9 hết hỗ trợ, nhưng `eslint-plugin-react`/`import`/`jsx-a11y` trong `eslint-config-next` chưa khai báo hỗ trợ ESLint 10 |
 | Unit test | `vitest` · `vite` · `@vitejs/plugin-react` · `jsdom` | 5.0.3 · 8.3.4 · 6.1.2 · 30.1.2 | `vite` là peer bắt buộc của Vitest 5; `jsdom` 30 yêu cầu Node `^24.15` |
 | Testing Library | `@testing-library/react` · `dom` · `jest-dom` | 16.3.3 · 10.4.2 · 7.0.1 | |
 | E2E | `@playwright/test` | 1.64.0 | Trình duyệt: Chromium 156 (Chrome for Testing), WebKit 27.2 |
 | Kiểu Node | `@types/node` | 24.19.2 (`^24`) | Template mặc định `^20` lệch peer của Vitest 5 |
 | Validation | `zod` | 4.6.7 (`^4.6.7`) | GĐ3 — kiểm tra `npm view zod version engines peerDependencies` ngày 2026-10-14: không có `engines`/`peerDependencies`, MIT. Trước đó chỉ có 4.6.6 gián tiếp (qua `eslint-plugin-react-hooks`). Từ GĐ4 chỉ dùng ở máy chủ/lúc build — không vào bundle của học sinh (AD-33) |
+| Supabase (R03) | `@supabase/supabase-js` · `@supabase/ssr` · `server-only` | 2.118.0 · 0.12.7 · 0.0.1 (ghim chính xác) | `npm view` ngày 2026-10-20: supabase-js `engines.node >=22`, peer `@opentelemetry/api` tùy chọn; ssr peer `@supabase/supabase-js ^2.114.0`. Không có client trình duyệt (AD-55) — [SUPABASE_SETUP.md](SUPABASE_SETUP.md) |
+| Supabase CLI (R03) | `supabase` (devDependency) | 2.121.0 (ghim) | chạy bằng `npx supabase`; Postgres local 17 |
+| QR thẻ học (R03) | `qrcode-generator` | 2.0.4 (ghim) | MIT, không phụ thuộc; chỉ chạy ở máy chủ (ma trận QR → SVG) |
 | Trợ năng (E2E) | `@axe-core/playwright` (kéo theo `axe-core`) | 4.13.0 (`^4.13.0`) | GĐ4 — devDependency; `npm view @axe-core/playwright version engines peerDependencies license` ngày 2026-10-15: peer `playwright-core >= 1.0.0` (đang có 1.64), MPL-2.0 (chỉ công cụ kiểm thử, không phân phối) |
 
 ### 3.2 Đánh giá công nghệ cho các giai đoạn sau
@@ -98,7 +101,7 @@ Phiên bản được kiểm tra ngày **2026-10-12** bằng `npm view` (npm reg
 | Thành phần | Lựa chọn | Phiên bản | Ghi chú xác minh |
 |---|---|---|---|
 | Runtime | Node.js | Máy: 24.18.0 · Vercel: **24.x** (mặc định), 22.x | `@supabase/supabase-js`, `ai`, Vitest yêu cầu Node ≥ 22; Vercel ngừng hỗ trợ Node 20 từ 2026-10-01 → đặt `engines.node: "24.x"` |
-| Framework | Next.js (App Router) | 16.4.0 | `engines.node >= 20.9.0`; từ v16 **`middleware.ts` đổi thành `proxy.ts`**, chạy Node.js runtime |
+| Framework | Next.js (App Router) | 16.4.3 | `engines.node >= 20.9.0`; từ v16 **`middleware.ts` đổi thành `proxy.ts`**, chạy Node.js runtime |
 | UI | React, React DOM | 19.3.0 | |
 | Ngôn ngữ | TypeScript | **^5 (5.9.3)** | npm `latest` là 7.0.2 (bản native) nhưng `create-next-app` 16.4 vẫn ghim `typescript: "^5"` → dùng 5.9.x, đánh giá TS 7 sau |
 | CSS | Tailwind CSS | 4.3.3 | Kèm `@tailwindcss/postcss` hoặc `@tailwindcss/turbopack` 4.3.3 (template chọn theo bundler) |
@@ -106,7 +109,7 @@ Phiên bản được kiểm tra ngày **2026-10-12** bằng `npm view` (npm reg
 | Supabase | `@supabase/supabase-js` 2.117.3 · `@supabase/ssr` 0.12.7 · CLI `supabase` 2.120.0 | | Dùng khóa mới `sb_publishable_…` / `sb_secret_…`; khóa `anon`/`service_role` cũ bị khai tử **cuối 2026** |
 | PDF | `@react-pdf/renderer` | 4.9.0 | peer `react ^19` hợp lệ |
 | Kiểm thử | Vitest 5.0.3 · Playwright 1.64.0 | | Vitest yêu cầu `@types/node ^22 \|\| >=24` → dùng `@types/node@^24` (template mặc định `^20` sẽ lệch) |
-| Lint/format | ESLint **^9** (9.39.5) + `eslint-config-next` 16.4.0 · Prettier 3.9.10 | | ESLint 10.12 đã phát hành nhưng template Next ghim `^9` |
+| Lint/format | ESLint **^9** (9.39.5) + `eslint-config-next` 16.4.3 · Prettier 3.9.10 | | ESLint 10.12 đã phát hành nhưng template Next ghim `^9` |
 | PWA (ứng viên) | `@serwist/next` | 9.5.13 | Cần POC với Turbopack; phương án dự phòng: service worker viết tay |
 | AI (sau MVP) | `@anthropic-ai/sdk` 0.133.0 (adapter đầu tiên) · `ai` 7.0.137 (phương án đa nhà cung cấp) | | Chọn cách hiện thực adapter khi bắt đầu GĐ11 |
 | TTS (ứng viên) | `@google-cloud/text-to-speech` 7.1.1 · `microsoft-cognitiveservices-speech-sdk` 1.52.0 · nhà cung cấp Việt Nam | | Google Cloud TTS có nhiều giọng `vi-VN` (Standard, WaveNet, Neural2, Chirp3-HD) — đã xác minh; các nhà cung cấp khác cần POC |
@@ -158,6 +161,7 @@ Trạng thái: **Chốt** = áp dụng cho MVP · **POC** = cần thử nghiệm
 | AD-36 | Bộ sinh theo quy tắc: ứng viên **hữu hạn** từ ngữ liệu đọc được, RNG có seed (FNV-1a + mulberry32) cho từng ứng viên, phương án nhiễu ưu tiên cặp dễ nhầm của kho tri thức, **mỗi câu qua toàn bộ chuỗi kiểm tra**, thiếu dữ liệu thì trả lý do | Tái lập được; không sinh tổ hợp vô hạn; không nới quy tắc | Sinh ngẫu nhiên rồi lọc | Chốt (GĐ4) |
 | AD-37 | Cặp bài ở nhà – ở lớp = **bài sinh đôi**: cùng nhóm đơn vị trọng tâm, độ khó ước lượng chênh ≤ 1, khác mục tiêu cụ thể; hợp đồng `ExerciseTaskContract` 8 thông tin; độ khó tương đương ghi rõ là ước lượng chưa kiểm chứng | Hiện thực §11.4/§16 ở tầng dữ liệu trước khi có PDF (GĐ8) | Sinh hai bộ độc lập rồi so mục tiêu chung | Chốt (GĐ4) |
 | AD-38 | Hai chế độ nội dung: `demo` (chỉ hồ sơ minh họa, nội dung `pending_review` kèm cảnh báo, không lưu) và `production` (hồ sơ `confirmed` + mọi ngữ liệu, tranh, câu hỏi, âm thanh bắt buộc và **dữ liệu tham chiếu** đều `approved`) | Bản chơi thử dùng được ngay mà không giả vờ nội dung đã duyệt; học thật không bao giờ nới quy tắc | Một chế độ với cờ "bỏ qua kiểm duyệt" | Chốt (GĐ4) |
+| AD-40 → AD-53 | Kiến trúc tái thiết kế R01: sổ cái điểm, chấm ở server cho chế độ có điểm, chống trùng, mùa theo lớp và reset trong giao dịch, bảng xếp hạng qua DTO, vinh danh bất biến, Game Engine (lõi TS + React/SVG, không Phaser), 7 chạm trán phân bổ sẵn, giảm chuyển động, ngừng dùng luồng "ở lớp", cờ bảng xếp hạng mặc định tắt, mở khóa không tiêu điểm | Xem [REDESIGN_ARCHITECTURE §9](REDESIGN_ARCHITECTURE.md#9-quyết-định-kiến-trúc-mới-ad-40--ad-53) | — | PLANNED (R01) |
 | AD-39 | GĐ4 **không phát âm thanh**: nút loa là điểm tích hợp bị khóa ghi "Chưa có âm thanh"; **không dùng Web Speech API** của trình duyệt kể cả ở `/demo` | Giọng tiếng Việt của Chrome có thể là giọng trực tuyến (gửi chữ ra máy chủ bên ngoài); chất lượng chưa xác minh; yêu cầu GĐ4 cấm nút phát giả | Dùng TTS trình duyệt cho `/demo` như PRD §12.2 cho phép | Chốt (GĐ4) — xem lại ở GĐ6 |
 
 ## 5. Cấu trúc thư mục
@@ -507,6 +511,10 @@ Mọi đề xuất đều **giải thích được** cho GV (ví dụ: "Đề xu
 
 ## 13. Hệ thống âm thanh
 
+> **R10.2 (2026-10-27):** thư viện bản ghi giáo viên — bảng `audio_*`, bucket Storage riêng tư `teacher-audio`, `/teacher/audio` (route duy nhất mở micro), vòng đời phiên bản bất biến: [AUDIO_ENGINE §12](AUDIO_ENGINE.md#12-r102--thư-viện-bản-ghi-giáo-viên-đã-hiện-thực-kiểm-thử-bằng-dữ-liệu-giả). Chưa phát trong Player (R10.3).
+
+> **R10.1 (2026-10-26):** thiết kế chi tiết, so sánh nhà cung cấp và adapter `TtsProvider` (`src/server/tts/`) nằm ở [AUDIO_ENGINE.md](AUDIO_ENGINE.md); kế hoạch bản ghi GV ở [AUDIO_RECORDING_PLAN.md](AUDIO_RECORDING_PLAN.md). Mới có adapter + mock + kế hoạch; **chưa** có âm thanh, thư viện, migration hay phát trong Player (R10.2–R10.3). Bảng AD-09 vẫn: nhà cung cấp chưa chốt.
+
 | Vai trò | Ví dụ | Nguồn ưu tiên |
 |---|---|---|
 | `instruction` | "Con nhìn hình rồi chọn chữ ghi âm đầu." | Ghi âm GV hoặc TTS (câu lệnh chuẩn theo dạng bài) |
@@ -534,9 +542,11 @@ Mọi đề xuất đều **giải thích được** cho GV (ví dụ: "Đề xu
 
 - Truy vấn qua **SQL view/hàm** (security invoker, chịu RLS) trên `item_attempts`, `student_unit_mastery`, `student_type_support`, `class_task_observations`; tổng hợp theo tuần.
 - Quy mô MVP nhỏ (một lớp khoảng 40 học sinh) → truy vấn trực tiếp với chỉ mục phù hợp; chỉ thêm bảng tổng hợp/materialized view khi đo thấy chậm (mục tiêu < 1 giây/trang).
-- Không có xếp hạng; không hiển thị dữ liệu lớp khác; xuất dữ liệu (sau MVP) có nhật ký.
+- Không có xếp hạng **trong dashboard học tập**; không hiển thị dữ liệu lớp khác; xuất dữ liệu (sau MVP) có nhật ký. (*R01:* bảng xếp hạng **điểm thưởng** là tính năng riêng, có điều kiện — [LEADERBOARD_SPEC](LEADERBOARD_SPEC.md).)
 
 ## 16. Sinh phiếu PDF
+
+> ⚠️ *R01:* **bỏ khỏi lộ trình** (AD-51) — giữ để tra cứu.
 
 1. GV chọn biến thể bài giao → bộ sinh "bài sinh đôi" (§11.4) tạo phiên bản bài dạng phiếu cùng dạng, cùng mục tiêu, cùng độ khó, **không trùng câu** với bài ở nhà.
 2. Tạo `worksheet_version` (nháp) → GV xem trước → duyệt.

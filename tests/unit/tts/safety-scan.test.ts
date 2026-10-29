@@ -1,0 +1,179 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { buildTtsScriptCatalog } from "@/server/tts/catalog";
+import { planTtsBatch, runTtsBatch } from "@/server/tts/batch";
+import { approve, syntheticWavProvider, TEST_VOICE } from "./tts-helpers";
+
+const root = process.cwd();
+const norm = (path: string) => path.replaceAll("\\", "/");
+
+function walk(dir: string, accept: RegExp, out: string[] = []): string[] {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) walk(full, accept, out);
+    else if (accept.test(name)) out.push(full);
+  }
+  return out;
+}
+
+const sourceFiles = walk(join(root, "src"), /\.(ts|tsx)$/u);
+const ttsFiles = sourceFiles.filter((file) => norm(file).includes("/src/server/tts/"));
+const outside = sourceFiles.filter((file) => !norm(file).includes("/src/server/tts/"));
+const text = (file: string) => readFileSync(file, "utf8");
+
+afterEach(() => vi.restoreAllMocks());
+
+describe("R10.3b1 — không gọi dịch vụ ngoài, không dữ liệu học sinh, không đường phát", () => {
+  it("toàn bộ luồng (danh mục → duyệt → kế hoạch → sinh → kiểm tra) chạy mà KHÔNG có yêu cầu mạng nào", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("không được gọi mạng"));
+    const catalog = buildTtsScriptCatalog({ voice: TEST_VOICE });
+    const plan = planTtsBatch({
+      entries: catalog.entries,
+      scriptReviews: catalog.entries.map((e) => approve(e)),
+      versions: [],
+      providerId: "mock",
+      voice: TEST_VOICE,
+      limits: { maxChars: 100000 },
+    });
+    const result = await runTtsBatch({ plan, provider: syntheticWavProvider("mock") });
+    expect(result.candidates).toHaveLength(plan.jobs.length);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("địa chỉ dịch vụ ngoài chỉ xuất hiện trong ba adapter (providers.ts = Google, fpt-provider.ts = FPT.AI, viettel-provider.ts = Viettel AI); không có Azure", () => {
+    const adapters = ["/providers.ts", "/fpt-provider.ts", "/viettel-provider.ts"];
+    for (const file of ttsFiles) {
+      const body = text(file);
+      expect(body, file).not.toMatch(/cognitiveservices|speech\.microsoft|tts\.speech/iu);
+      if (!adapters.some((suffix) => norm(file).endsWith(suffix))) {
+        expect(body, file).not.toMatch(/https?:\/\//u);
+        expect(body, file).not.toMatch(/api\.fpt\.ai|texttospeech\.googleapis|viettelai\.vn/iu);
+      }
+    }
+    for (const file of outside)
+      expect(text(file), file).not.toMatch(
+        /texttospeech\.googleapis|cognitiveservices|api\.fpt\.ai|hmi\/tts|viettelai\.vn|viettelgroup\.ai|speech_synthesis/iu,
+      );
+  });
+
+  it("mô-đun TTS không đọc process.env và không import dữ liệu học sinh, xác thực, điểm, game, bảng xếp hạng", () => {
+    for (const file of ttsFiles) {
+      const body = text(file);
+      expect(body, file).not.toMatch(/process\.env/u);
+      expect(body, file).not.toMatch(
+        /from\s+["'][^"']*(student-gateway|server\/auth|supabase|features\/(students|login-codes|consent|gamification|game-|leaderboard|scored-practice|honors|season))/u,
+      );
+    }
+  });
+
+  it("không có route, tác vụ nền hay giao diện học sinh nào gọi lô/danh mục/phát TTS", () => {
+    // R10.5: thư viện giọng máy (src/server/tts-library) là NƠI DUY NHẤT ngoài src/server/tts dùng danh mục TTS và gọi nhà cung cấp,
+    // và chỉ qua hành động bấm của giáo viên; trang /teacher/tts-script chỉ đọc danh mục/trạng thái.
+    const library = (file: string) => norm(file).includes("/src/server/tts-library/");
+    const allowedConsumers = new Set(
+      ["page.tsx", "tts-script-list.tsx"].map((name) => norm(join(root, "src/app/teacher/(console)/tts-script", name))),
+    );
+    for (const file of outside) {
+      const body = text(file);
+      if (/server\/tts\/(batch|catalog|versions|playback|script-review|audio-check)/u.test(body)) {
+        expect(allowedConsumers.has(norm(file)) || library(file), `${relative(root, file)} import mô-đun TTS`).toBe(
+          true,
+        );
+      }
+      // Giao diện giáo viên chỉ được gọi Server Actions của thư viện ("use server": trình duyệt chỉ nhận cuống RPC); mọi đường dẫn TTS khác bị cấm.
+      if (/["']use client["']/u.test(body)) expect(body, file).not.toMatch(/server\/tts(?!-library\/actions["'])/u);
+      expect(body, file).not.toMatch(/runTtsBatch/u);
+      // synthesizeSpeech chỉ được gọi ở lõi tạo tệp của thư viện (do giáo viên bấm), không nơi nào khác.
+      if (/synthesizeSpeech/u.test(body)) {
+        expect(norm(file).endsWith("/src/server/tts-library/generate.ts"), relative(root, file)).toBe(true);
+      }
+    }
+    // Route liên quan TTS: nghe lại tệp thử nghiệm (R10.3b2-P0) và nghe lại tệp thư viện (R10.5) — chỉ cho giáo viên; không route học sinh.
+    expect(
+      outside.filter((file) => /\/api\/.*tts/iu.test(norm(file))).map((file) => norm(relative(root, file))),
+    ).toEqual([
+      "src/app/api/teacher/tts-library/versions/[versionId]/audio/route.ts",
+      "src/app/api/teacher/tts-poc/[file]/route.ts",
+    ]);
+    expect(outside.filter((file) => /\/api\/student\/.*tts/iu.test(norm(file)))).toEqual([]);
+  });
+
+  it("mô-đun nghe thử (poc/, fpt-provider) chỉ được dùng ở khu giáo viên; không ở mã học sinh hay mã trình duyệt", () => {
+    const allowed = new Set(
+      [
+        "src/app/teacher/(console)/tts-compare/page.tsx",
+        "src/app/teacher/(console)/tts-compare/tts-compare-view.tsx",
+        "src/app/api/teacher/tts-poc/[file]/route.ts",
+      ].map((name) => norm(join(root, name))),
+    );
+    for (const file of outside) {
+      const body = text(file);
+      if (/server\/tts\/(poc\/|fpt-provider|viettel-provider)/u.test(body)) {
+        expect(allowed.has(norm(file)), `${relative(root, file)} import mô-đun nghe thử`).toBe(true);
+        expect(body, file).not.toMatch(/["']use client["']/u);
+      }
+    }
+    // Khóa API không bao giờ có tiền tố công khai.
+    for (const file of sourceFiles) expect(text(file), file).not.toMatch(/NEXT_PUBLIC_[A-Z_]*(TTS|VIETTEL)/u);
+    // Token Viettel chỉ được đọc ở dịch vụ TTS phía máy chủ và bộ chọn chế độ của công cụ nghe thử.
+    const readers = sourceFiles
+      .filter((file) => /TTS_VIETTEL_TOKEN/u.test(text(file)))
+      .map((file) => norm(relative(root, file)));
+    // provider.ts của thư viện chỉ NHẮC tên biến trong chú thích và chuyển `process.env` cho createTtsProvider (cổng `TTS_PROVIDER`).
+    expect(readers.sort()).toEqual([
+      "src/server/tts-library/provider.ts",
+      "src/server/tts/poc/options.ts",
+      "src/server/tts/service.ts",
+      "src/server/tts/viettel-provider.ts",
+    ]);
+  });
+
+  it("mô-đun TTS không có đường ghi log (token, nội dung, phản hồi không ra console) và không chạm bảng/bucket âm thanh giáo viên", () => {
+    for (const file of ttsFiles) {
+      const body = text(file);
+      expect(body, file).not.toMatch(/console\.(log|warn|error|info|debug)/u);
+      expect(body, file).not.toMatch(/audio_assets|audio_asset_versions|teacher-audio|teacher_audio/u);
+    }
+    // Công cụ dòng lệnh chỉ in mã chẩn đoán cố định, không bao giờ in token/khóa; cũng không chạm âm thanh giáo viên.
+    const script = readFileSync(join(root, "scripts/tts-poc.ts"), "utf8");
+    expect(script).not.toMatch(/console\.\w+\([^)]*(mode\.keys|\.token|apiKey)/u);
+    expect(script).not.toMatch(/audio_assets|audio_asset_versions|teacher-audio/u);
+  });
+
+  it("không có mã ứng dụng nào bật cờ phát TTS; cờ phát âm thanh và ghi âm vẫn TẮT trong mọi migration", () => {
+    for (const file of sourceFiles) expect(text(file), file).not.toMatch(/flagEnabled:\s*true/u);
+    const migrations = walk(join(root, "supabase/migrations"), /\.sql$/u)
+      .map(text)
+      .join("\n");
+    // R10.5 thêm hai cờ của thư viện giọng máy: phải được khai báo với giá trị TẮT, không dòng nào đặt BẬT.
+    expect(migrations).toMatch(/\('student_tts_playback_approved', false/u);
+    expect(migrations).toMatch(/\('tts_library_approved', false/u);
+    for (const flag of [
+      "student_teacher_audio_playback_approved",
+      "teacher_audio_recording_approved",
+      "student_tts_playback_approved",
+      "tts_library_approved",
+    ]) {
+      // mọi dòng đặt giá trị cờ trong migration phải là `false`
+      const sets = migrations.match(new RegExp(`${flag}[^;]*?(true|false)`, "giu")) ?? [];
+      for (const match of sets) expect(match.toLowerCase(), match).not.toMatch(/\btrue\b/u);
+    }
+  });
+
+  it("cấu hình mẫu giữ TTS_PROVIDER=none và không chứa khóa", () => {
+    const env = readFileSync(join(root, ".env.example"), "utf8");
+    expect(env).toMatch(/^TTS_PROVIDER=none$/mu);
+    expect(env).toMatch(/^TTS_GOOGLE_API_KEY=$/mu);
+    expect(env).toMatch(/^TTS_FPT_API_KEY=$/mu);
+    expect(env).toMatch(/^TTS_VIETTEL_TOKEN=$/mu);
+    expect(env).toMatch(/^TTS_POC_COST_CONFIRMED=$/mu);
+  });
+
+  it("mô-đun danh mục không bị kéo vào mã trình duyệt (node:crypto chỉ ở máy chủ)", () => {
+    for (const file of ttsFiles.filter((f) => /hash\.ts$/u.test(f))) expect(text(file)).toContain("node:crypto");
+    for (const file of outside) {
+      if (/["']use client["']/u.test(text(file))) expect(text(file), file).not.toMatch(/server\/tts\/hash/u);
+    }
+  });
+});

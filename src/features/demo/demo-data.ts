@@ -21,6 +21,11 @@ export type DemoSupportLevel = {
 export const DEMO_SUPPORT_LEVELS: readonly DemoSupportLevel[] = [
   { level: 3, code: "H3", name: "Hỗ trợ đầy đủ", description: "Tự đọc yêu cầu, có phần làm mẫu và gợi ý chủ động." },
   { level: 2, code: "H2", name: "Hỗ trợ một phần", description: "Chạm loa để nghe yêu cầu, gợi ý khi em cần." },
-  { level: 1, code: "H1", name: "Hỗ trợ tối thiểu", description: "Bố cục gần giống phiếu, trợ giúp chỉ khi em bấm." },
-  { level: 0, code: "H0", name: "Tự lực", description: "Thử như ở lớp: giống phiếu, không gợi ý." },
+  {
+    level: 1,
+    code: "H1",
+    name: "Hỗ trợ tối thiểu",
+    description: "Gợi ý và trợ giúp chỉ khi em bấm; tối đa 2 lần trả lời.",
+  },
+  { level: 0, code: "H0", name: "Tự làm", description: "Em tự đọc, tự suy nghĩ và hoàn thành bài — không có gợi ý." },
 ];

@@ -49,4 +49,22 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /*
+   * Công tắc "Giảm chuyển động" trong trang (MotionScope, R02): mọi hoạt cảnh trong vùng dừng hẳn và về
+   * trạng thái tĩnh (khung đầu), chuyển tiếp gần như tức thì. Bổ sung — không thay thế — tùy chọn của hệ điều hành.
+   */
+  [data-motion="reduce"],
+  [data-motion="reduce"] *,
+  [data-motion="reduce"] *::before,
+  [data-motion="reduce"] *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* SVG minh họa: biến đổi (xoay/nhún) quanh chính hình của phần tử, không quanh gốc tọa độ của khung vẽ. */
+@utility origin-fill {
+  transform-box: fill-box;
 }

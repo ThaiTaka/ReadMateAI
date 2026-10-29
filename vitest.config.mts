@@ -8,7 +8,14 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     // Khớp alias "@/*" trong tsconfig.json (chỉ đường dẫn bắt đầu bằng "@/").
-    alias: [{ find: /^@\//, replacement: srcDir }],
+    alias: [
+      { find: /^@\//, replacement: srcDir },
+      // "server-only" chỉ import được trong lớp React Server Components; trong jsdom dùng module rỗng của chính gói.
+      {
+        find: /^server-only$/,
+        replacement: fileURLToPath(new URL("./node_modules/server-only/empty.js", import.meta.url)),
+      },
+    ],
   },
   test: {
     environment: "jsdom",

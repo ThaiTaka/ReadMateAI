@@ -1,0 +1,100 @@
+# E2E (Playwright) trên GitHub-hosted runner — thay cho việc chạy nặng ở máy cục bộ (hay hết RAM).
+# Mỗi project trình duyệt là một job riêng, --workers=1, chỉ cài đúng một trình duyệt. Không secret, không Supabase Cloud:
+#   e2e     — tests/e2e (không CSDL), build production + next start cổng 3100 do webServer của Playwright dựng.
+#   e2e-db  — tests/e2e-db: Supabase LOCAL trong Docker của runner + dữ liệu giả; khóa do CLI tự sinh.
+# Báo cáo/ảnh chụp lỗi chỉ upload khi thất bại và chỉ nằm trong test-results (không có cookie/token do không lưu trace phiên thật
+# ngoài dữ liệu giả); giữ 3 ngày.
+name: E2E
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: chromium-desktop, browser: chromium }
+          - { project: chromium-mobile, browser: chromium }
+          - { project: webkit-desktop, browser: webkit }
+          - { project: webkit-mobile, browser: webkit }
+          - { project: webkit-tablet, browser: webkit }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Playwright (${{ matrix.project }})
+        run: npx playwright test --project=${{ matrix.project }} --workers=1
+      - name: Báo cáo khi lỗi
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ matrix.project }}
+          path: test-results
+          retention-days: 3
+          if-no-files-found: ignore
+
+  e2e-db:
+    name: E2E database ${{ matrix.project }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: chromium-desktop, browser: chromium }
+          - { project: chromium-mobile, browser: chromium }
+          - { project: webkit-mobile, browser: webkit }
+          - { project: webkit-ipad, browser: webkit }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Start Supabase local
+        run: npm run db:start
+      - name: .env.local (khóa local) và dữ liệu giả
+        run: |
+          npm run db:env
+          npm run db:seed
+      - name: Playwright database (${{ matrix.project }})
+        run: npx playwright test --config playwright.db.config.ts --project=${{ matrix.project }} --workers=1
+      - name: Báo cáo khi lỗi
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-db-${{ matrix.project }}
+          path: test-results/db
+          retention-days: 3
+          if-no-files-found: ignore
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop --no-backup
