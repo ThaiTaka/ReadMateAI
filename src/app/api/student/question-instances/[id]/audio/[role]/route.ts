@@ -1,3 +1,4 @@
+import { isFeedbackRef } from "@/features/audio-playback/feedback-lines";
 import { isPlaybackRole } from "@/features/audio-playback/roles";
 import { audioResponse } from "@/server/audio-playback/respond";
 import { loadPlayableAudio } from "@/server/audio-playback/service";
@@ -21,7 +22,10 @@ export async function GET(request: Request, ctx: RouteContext<"/api/student/ques
   if (!context.ok) return json(context);
   const limited = await limitDevice(context.data, STUDENT_RATE_LIMITS.audio);
   if (!limited.ok) return json(limited);
-  const audio = await loadPlayableAudio(context.data, id, role);
+  // Lời phản hồi cần mã dòng (`?line=`); máy chủ vẫn đối chiếu với trạng thái thật của câu.
+  const line = new URL(request.url).searchParams.get("line");
+  if (line !== null && !isFeedbackRef(line)) return json(fail("INVALID_INPUT"));
+  const audio = await loadPlayableAudio(context.data, id, role, line ?? undefined);
   if (!audio.ok) return json(audio);
   return audioResponse(audio.data.bytes, audio.data.mimeType, request.headers.get("range"));
 }

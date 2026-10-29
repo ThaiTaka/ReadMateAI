@@ -42,6 +42,8 @@ export const vi = {
 
   status: {
     inDevelopment: "Chức năng đang phát triển",
+    /** Tiêu đề khung báo LỖI THẬT khi không tải được dữ liệu của chức năng đã hoạt động (không gọi là "đang phát triển"). */
+    loadError: "Chưa tải được",
     comingSoon: "Sắp có",
     comingSoonDev: "Sắp có – Đang phát triển",
     planned: "Dự kiến",
@@ -1116,9 +1118,9 @@ export const vi = {
 
   /** Nghe cách đọc chữ khi học (R10.4): không câu hỏi, không điểm. Hai nút khác nhau: tên chữ cái và âm của chữ. */
   studyAudio: {
-    meta: { title: "Nghe cách đọc chữ", description: "Chạm nút để nghe cô giáo đọc tên chữ cái và âm của chữ." },
+    meta: { title: "Nghe cách đọc chữ", description: "Chạm nút để nghe đọc tên chữ cái và âm của chữ." },
     title: "Nghe cách đọc chữ",
-    intro: "Chạm nút để nghe cô giáo đọc. Chạm lần nữa để nghe lại. Ở đây con chỉ nghe, không tính điểm.",
+    intro: "Chạm nút để nghe đọc. Chạm lần nữa để nghe lại. Ở đây con chỉ nghe, không tính điểm.",
     legend: "Tên chữ là cách gọi tên chữ cái. Âm là cách đọc chữ khi ghép vần.",
     lettersTitle: "Chữ cái",
     digraphsTitle: "Chữ ghép",
@@ -1132,12 +1134,28 @@ export const vi = {
       muted: "Âm thanh đang tắt. Người lớn có thể bật lại ở phần cài đặt của con.",
       none: "Chưa có bản ghi nào của cô giáo được duyệt để phát, nên các nút nghe đang khóa.",
       some: "Có {n} âm thanh nghe được. Nút khóa là chữ cô giáo chưa thu âm.",
+      // Chế độ trình diễn: nói thật đây là giọng máy tạo sẵn, chưa ai nghe duyệt (không gọi là bản ghi của cô giáo).
+      preview: "Chế độ trình diễn: có {n} âm thanh nghe được bằng giọng máy tạo sẵn.",
+      previewHeld: "{n} chữ đang chờ kiểm chứng cách đọc nên chưa phát.",
     },
     entry: {
       title: "Nghe cách đọc chữ",
-      text: "Chạm vào nút để nghe cô giáo đọc tên chữ và âm của chữ. Không tính điểm.",
+      text: "Chạm vào nút để nghe đọc tên chữ và âm của chữ. Không tính điểm.",
       cta: "Nghe cách đọc chữ",
     },
+  },
+
+  /** Nút tắt/bật tiếng ngay trong màn chơi (tạm thời, không lưu). */
+  soundMute: { turnOff: "Tắt tiếng", turnOn: "Bật tiếng" },
+
+  /** Chế độ trình diễn cuộc thi (docs/CONTEST_AUDIO.md): nhãn nhỏ, nói đúng sự thật về nguồn âm thanh. */
+  contest: {
+    chip: "Chế độ trình diễn",
+    voiceNote: "Giọng máy trình diễn",
+    held: "Chờ kiểm chứng cách đọc",
+    unverifiedNote: "Cách đọc chờ kiểm chứng",
+    feedbackButton: "Nghe lời nhắn",
+    feedbackAria: "Nghe lời nhắn của cô",
   },
 
   /** Buổi luyện CÓ ĐIỂM (R04) — chấm ở máy chủ, điểm thật của học sinh đã liên kết. */
@@ -1510,6 +1528,44 @@ export const vi = {
     ],
     playLabel: "Nghe {voice}, {speed}",
   },
+  /** Khu giáo viên: âm thanh TRÌNH DIỄN (giọng máy tạo tự động) — luôn tách khỏi tệp giáo viên đã duyệt. */
+  contestTeacher: {
+    title: "Âm thanh trình diễn (tạo tự động)",
+    intro:
+      "Phần này tách riêng với các mục ở trên. Đây là giọng máy do chương trình tạo tự động để trình diễn trên máy này với học sinh hư cấu. Chưa giáo viên nào nghe hay duyệt, và không thay cho bản ghi giọng giáo viên hay giọng máy đã duyệt. Muốn dùng thật cho học sinh, từng mục phải được giáo viên nghe và duyệt theo quy trình ở trên.",
+    onlyLocal:
+      "Chế độ trình diễn chỉ chạy trên máy phát triển (Supabase trên máy). Trên máy chủ thật, phần này luôn tắt.",
+    stats: {
+      auto: "Có giọng máy trình diễn",
+      missing: "Còn thiếu",
+      verify: "Cần xác minh phát âm",
+      stale: "Tệp cũ không còn khớp",
+    },
+    groups: {
+      auto: {
+        title: "Đã có giọng máy trình diễn",
+        hint: "Khớp với chữ và giọng hiện hành. Mới qua kiểm tra kỹ thuật, chưa kiểm duyệt.",
+      },
+      verify: {
+        title: "Cần xác minh phát âm",
+        hint: "Cách đọc phụ thuộc quy ước của trường hoặc dễ bị bộ tổng hợp đọc sai. Mặc định học sinh không nghe được các mục này; chủ dự án chỉ bật khi trình diễn và giao diện luôn ghi rõ.",
+        withFile: "Có tệp, đang được giữ",
+        noFile: "Chưa có tệp",
+      },
+      missing: {
+        title: "Còn thiếu",
+        hint: 'Chưa có tệp trình diễn. Nút nghe tương ứng ở phía học sinh sẽ khóa và ghi "Chưa có âm thanh".',
+      },
+      stale: {
+        title: "Tệp cũ không còn khớp",
+        hint: "Chữ hoặc giọng đã đổi từ khi tạo tệp nên tệp này không phát nữa.",
+      },
+    },
+    kinds: { letter: "Tên chữ cái", phoneme: "Âm của chữ", instruction: "Câu hướng dẫn", feedback: "Lời phản hồi" },
+    total: "{auto}/{total} mục có giọng máy trình diễn.",
+    none: "Chưa có mục nào.",
+  },
+
   audioCoverage: {
     meta: {
       title: "Độ phủ âm thanh",

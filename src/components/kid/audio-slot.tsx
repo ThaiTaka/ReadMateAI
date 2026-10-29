@@ -26,6 +26,8 @@ type AudioSlotProps = {
   fill?: boolean;
   /** Tên truy cập khi sẵn sàng (phải chứa chữ hiển thị). Ví dụ "Nghe tên chữ b". */
   ariaLabel?: string;
+  /** Lý do KHÔNG phát khi không có nguồn (mặc định "Chưa có âm thanh"). Ví dụ "Chờ kiểm chứng cách đọc": nói đúng sự thật thay vì "chưa có". */
+  unavailableReason?: string;
 };
 
 type PlayState = "ready" | "loading" | "playing" | "error";
@@ -57,6 +59,7 @@ export function AudioSlot({
   muted = false,
   fill = false,
   ariaLabel,
+  unavailableReason,
 }: AudioSlotProps) {
   const [state, setState] = useState<PlayState>("ready");
   const [played, setPlayed] = useState(false);
@@ -131,7 +134,7 @@ export function AudioSlot({
 
   if (muted) return locked(vi.practice.audio.muted);
   if (pending) return locked(vi.practice.audio.loading, true);
-  if (!source) return locked(vi.practice.audio.unavailable);
+  if (!source) return locked(unavailableReason ?? vi.practice.audio.unavailable);
   if (!browserSupportsMime(source.mimeType)) {
     return (
       <span className={cn("inline-flex flex-col items-start gap-1", fill && "w-full", className)}>

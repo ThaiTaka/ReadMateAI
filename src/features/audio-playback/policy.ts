@@ -21,6 +21,8 @@ export function decidePlayback(input: {
   /** Câu đã đóng: đúng hoặc hết lượt. */
   graded: boolean;
 }): PlaybackDecision {
+  // Câu lệnh và lời phản hồi là giọng máy: có đường riêng; bản ghi giáo viên không bao giờ phục vụ chúng.
+  if (input.role === "instruction" || input.role === "feedback") return { ok: false, reason: "NOT_PERMITTED" };
   if (input.role === "model") {
     if (!input.graded) return { ok: false, reason: "NOT_GRADED" };
     return decideAfterGrading(input.policy, "model") ? { ok: true } : { ok: false, reason: "NOT_PERMITTED" };

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { UnitRef } from "@/features/audio-playback/study-catalog";
 import { vi } from "@/strings/vi";
 import { AudioSlot, type AudioSource } from "./audio-slot";
+import { useSoundMuted } from "./sound-mute";
 
 /**
  * "Chữ có thể nghe" (R10.4): chạm nút để nghe cô giáo đọc TÊN chữ cái hoặc ÂM của chữ khi học (không có câu hỏi, không điểm).
@@ -15,7 +16,21 @@ import { AudioSlot, type AudioSource } from "./audio-slot";
  *  - Trình duyệt chỉ gửi mã học sinh (do trang đã chọn) + loại + chữ; không bao giờ gửi mã tài nguyên, đường dẫn hay cách đọc.
  */
 
-type Availability = { phase: "pending" } | { phase: "done"; muted: boolean; mimeByUnit: ReadonlyMap<string, string> };
+type Availability =
+  | { phase: "pending" }
+  | {
+      phase: "done";
+      muted: boolean;
+      mimeByUnit: ReadonlyMap<string, string>;
+      /** Chữ/âm đang phát bằng tệp CHẾ ĐỘ TRÌNH DIỄN (giọng máy tạo sẵn, chưa giáo viên duyệt). */
+      previewUnits: ReadonlySet<string>;
+      /** Trong số đó, mục có rủi ro cách đọc đã được chủ dự án cho phép phát: luôn ghi chú rõ. */
+      unverifiedUnits: ReadonlySet<string>;
+      /** Có tệp trình diễn nhưng bị giữ lại vì cách đọc chưa kiểm chứng. */
+      heldUnits: ReadonlySet<string>;
+    };
+
+const EMPTY: ReadonlySet<string> = new Set();
 
 type Context = { studentId: string; availability: Availability };
 const LearningAudioContext = createContext<Context | null>(null);
@@ -29,7 +44,14 @@ export function LearningAudioProvider({ studentId, children }: { studentId: stri
   useEffect(() => {
     const controller = new AbortController();
     void (async () => {
-      let value: Availability = { phase: "done", muted: false, mimeByUnit: new Map() };
+      let value: Availability = {
+        phase: "done",
+        muted: false,
+        mimeByUnit: new Map(),
+        previewUnits: EMPTY,
+        unverifiedUnits: EMPTY,
+        heldUnits: EMPTY,
+      };
       try {
         const response = await fetch(`/api/student/learning-audio?student=${encodeURIComponent(studentId)}`, {
           cache: "no-store",
@@ -37,7 +59,17 @@ export function LearningAudioProvider({ studentId, children }: { studentId: stri
         });
         const body = (await response.json()) as {
           ok?: boolean;
-          data?: { muted?: boolean; units?: Array<{ kind?: unknown; text?: unknown; mimeType?: unknown }> };
+          data?: {
+            muted?: boolean;
+            units?: Array<{
+              kind?: unknown;
+              text?: unknown;
+              mimeType?: unknown;
+              source?: unknown;
+              unverified?: unknown;
+            }>;
+            held?: Array<{ kind?: unknown; text?: unknown }>;
+          };
         };
         if (body.ok === true && body.data) {
           const entries = (body.data.units ?? []).flatMap((unit) =>
@@ -47,7 +79,16 @@ export function LearningAudioProvider({ studentId, children }: { studentId: stri
               ? [[`${unit.kind}:${unit.text}`, unit.mimeType] as const]
               : [],
           );
-          value = { phase: "done", muted: body.data.muted === true, mimeByUnit: new Map(entries) };
+          const units = body.data.units ?? [];
+          const keyOf = (unit: { kind?: unknown; text?: unknown }) => `${String(unit.kind)}:${String(unit.text)}`;
+          value = {
+            phase: "done",
+            muted: body.data.muted === true,
+            mimeByUnit: new Map(entries),
+            previewUnits: new Set(units.filter((unit) => unit.source === "contest_preview").map(keyOf)),
+            unverifiedUnits: new Set(units.filter((unit) => unit.unverified === true).map(keyOf)),
+            heldUnits: new Set((body.data.held ?? []).map(keyOf)),
+          };
         }
       } catch {
         if (controller.signal.aborted) return;
@@ -76,8 +117,15 @@ export function LearningAudioStatus() {
   let text: string;
   if (availability.phase === "pending") text = t.pending;
   else if (availability.muted) text = t.muted;
-  else if (availability.mimeByUnit.size === 0) text = t.none;
-  else text = t.some.replace("{n}", String(availability.mimeByUnit.size));
+  else if (availability.mimeByUnit.size === 0 && availability.heldUnits.size === 0) text = t.none;
+  else if (availability.mimeByUnit.size === 0) {
+    text = `${vi.contest.chip}: ${t.previewHeld.replace("{n}", String(availability.heldUnits.size))}`;
+  } else if (availability.previewUnits.size > 0) {
+    // Nói thật nguồn: giọng máy tạo sẵn cho trình diễn, KHÔNG phải bản ghi của cô giáo.
+    text = t.preview.replace("{n}", String(availability.mimeByUnit.size));
+    if (availability.heldUnits.size > 0)
+      text += ` ${t.previewHeld.replace("{n}", String(availability.heldUnits.size))}`;
+  } else text = t.some.replace("{n}", String(availability.mimeByUnit.size));
   return (
     <p aria-live="polite" data-testid="learning-audio-status" className="text-sm font-semibold text-ink-soft">
       {text}
@@ -88,9 +136,12 @@ export function LearningAudioStatus() {
 /** Một nút nghe một chữ/âm. Dùng lại ở mọi bài học có chữ cần nghe (nhận `unit` + nhãn). */
 export function ListenButton({ unit, label, ariaLabel }: { unit: UnitRef; label: string; ariaLabel: string }) {
   const context = useContext(LearningAudioContext);
+  const soundOff = useSoundMuted();
   const key = unitKey(unit);
   const availability = context?.availability ?? ({ phase: "pending" } as const);
   const mimeType = availability.phase === "done" ? (availability.mimeByUnit.get(key) ?? null) : null;
+  const held = availability.phase === "done" && availability.heldUnits.has(key);
+  const unverified = availability.phase === "done" && availability.unverifiedUnits.has(key);
   const source: AudioSource | null =
     context && mimeType
       ? {
@@ -105,8 +156,10 @@ export function ListenButton({ unit, label, ariaLabel }: { unit: UnitRef; label:
       ariaLabel={ariaLabel}
       fill
       pending={availability.phase === "pending"}
-      muted={availability.phase === "done" && availability.muted}
+      muted={soundOff || (availability.phase === "done" && availability.muted)}
       source={source}
+      {...(held ? { unavailableReason: vi.contest.held } : {})}
+      {...(unverified ? { note: vi.contest.unverifiedNote } : {})}
     />
   );
 }

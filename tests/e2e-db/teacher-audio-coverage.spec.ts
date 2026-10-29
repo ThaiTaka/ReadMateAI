@@ -48,7 +48,8 @@ test.describe("R10.5 — báo cáo độ phủ âm thanh", () => {
     await expect(page.locator('[data-testid="coverage-instruction-list"] li')).toHaveCount(17);
     await expect(page.locator('[data-testid="coverage-feedback-list"] li')).toHaveCount(17);
     await expect(page.getByTestId("coverage-todo")).toContainText("Chưa có bản ghi đã duyệt");
-    await expect(page.getByText(t.sections.feedback.notWired)).toBeVisible();
+    // Lời phản hồi đã nối vào màn hình học sinh (khe feedback) nên báo cáo không còn nói "chưa nối".
+    await expect(page.getByText(t.sections.feedback.notWired)).toHaveCount(0);
     await expect(page.getByTestId("coverage-untracked")).toContainText("Vần:");
     await expect(page.getByTestId("coverage-untracked")).toContainText("Tiếng, từ và câu");
     // Thanh bên có nhãn "Sắp có" cho các mục khu giáo viên chưa xây dựng — phần nội dung của trang này thì không.

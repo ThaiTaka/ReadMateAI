@@ -81,7 +81,7 @@ async function TtsScriptContent() {
           bulkLimit={LIBRARY_BULK_LIMIT}
         />
       ) : (
-        <Notice tone="progress" title={vi.status.inDevelopment} className="mt-6">
+        <Notice tone="progress" title={vi.status.loadError} className="mt-6">
           {vi.errors[library.code]}
         </Notice>
       )}

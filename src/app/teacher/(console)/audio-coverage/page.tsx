@@ -3,14 +3,19 @@ import { Suspense } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { buildAudioCoverage } from "@/features/audio-coverage/build";
+import { buildContestOverview } from "@/features/contest-audio/overview";
+import { isContestPreviewEnvironment } from "@/features/contest-audio/environment";
 import { RIME_TOTAL, WIRED_PURPOSES } from "@/features/audio-coverage/catalog";
 import { AUDIO_UNITS } from "@/features/audio-library/p0-catalog";
 import { STUDY_UNITS } from "@/features/audio-playback/study-catalog";
 import { requireTeacher } from "@/server/auth/teacher";
 import { loadAudioStudio } from "@/server/audio-library/queries";
+import { CONTEST_ENTRIES } from "@/server/contest-audio/catalog";
+import { loadContestRows } from "@/server/contest-audio/queries";
 import { LIBRARY_ENTRIES } from "@/server/tts-library/entries";
 import { loadTtsLibrary } from "@/server/tts-library/queries";
 import { vi } from "@/strings/vi";
+import { ContestSection } from "./contest-section";
 import { CoverageView } from "./coverage-view";
 
 export const metadata: Metadata = {
@@ -59,5 +64,12 @@ async function CoverageContent() {
     rimeTotal: RIME_TOTAL,
     wiredPurposes: WIRED_PURPOSES,
   });
-  return <CoverageView coverage={coverage} />;
+  // Âm thanh trình diễn: chỉ hiện ở môi trường local (miền riêng, tách khỏi mọi số liệu "đã duyệt" ở trên).
+  const contest = isContestPreviewEnvironment(process.env) ? await loadContestRows(teacher) : null;
+  return (
+    <>
+      <CoverageView coverage={coverage} />
+      {contest?.ok ? <ContestSection overview={buildContestOverview(CONTEST_ENTRIES, contest.data)} /> : null}
+    </>
+  );
 }

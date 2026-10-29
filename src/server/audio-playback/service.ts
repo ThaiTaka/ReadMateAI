@@ -6,7 +6,12 @@ import { isTtsRole, PLAYBACK_ROLES, type PlaybackRole } from "@/features/audio-p
 import { readAudioObject } from "@/server/audio-library/storage";
 import { loadItem, ownedQuestion, readableNow } from "@/server/question-instances/service";
 import { fail, ok, type Result } from "@/server/result";
-import { loadInstructionAudio, resolveInstructionAudio } from "@/server/tts-library/playback";
+import {
+  loadFeedbackAudio,
+  loadInstructionAudio,
+  resolveFeedbackAudio,
+  resolveInstructionAudio,
+} from "@/server/tts-library/playback";
 import type { StudentContext } from "@/server/student-gateway/context";
 import { publicAudioCode, resolveTeacherAudio } from "./resolve";
 
@@ -29,9 +34,15 @@ export type AudioStatusDto = {
    * Chỉ có khi không rỗng.
    */
   withheld?: PlaybackRole[];
+  /** Khe nào đang phát bằng tệp CHẾ ĐỘ TRÌNH DIỄN (tạo tự động, chưa giáo viên duyệt) — giao diện ghi chú nhỏ "giọng trình diễn". */
+  preview?: PlaybackRole[];
 };
 
-export async function audioStatus(context: StudentContext, questionId: string): Promise<Result<AudioStatusDto>> {
+export async function audioStatus(
+  context: StudentContext,
+  questionId: string,
+  feedbackRef?: string,
+): Promise<Result<AudioStatusDto>> {
   const row = await ownedQuestion(context, questionId);
   if (!row || !(await readableNow(context.admin, row))) return fail("NOT_FOUND");
   const student = context.students.find((entry) => entry.id === row.student_id);
@@ -42,19 +53,32 @@ export async function audioStatus(context: StudentContext, questionId: string): 
 
   const slots: AudioStatusDto["slots"] = {};
   const withheld: PlaybackRole[] = [];
+  const preview: PlaybackRole[] = [];
   for (const role of PLAYBACK_ROLES) {
     if (isTtsRole(role)) {
-      // Câu lệnh: giọng máy đã duyệt (thư viện TTS), không phải bản ghi giáo viên.
-      const instruction = await resolveInstructionAudio(context, row, item);
-      if (instruction.ok) slots[role] = { mimeType: instruction.data.mimeType };
-      else if (instruction.code === "AUDIO_NOT_PERMITTED") withheld.push(role);
+      // Câu lệnh / lời phản hồi: giọng máy (thư viện đã duyệt, hoặc tệp trình diễn ở máy local), không phải bản ghi giáo viên.
+      // Lời phản hồi chỉ được hỏi khi giao diện có mã dòng cụ thể và dòng đó khớp trạng thái thật của câu.
+      if (role === "feedback" && !feedbackRef) continue;
+      const line =
+        role === "feedback"
+          ? await resolveFeedbackAudio(context, row, item, feedbackRef as string)
+          : await resolveInstructionAudio(context, row, item);
+      if (line.ok) {
+        slots[role] = { mimeType: line.data.mimeType };
+        if (line.data.origin === "contest_preview") preview.push(role);
+      } else if (line.code === "AUDIO_NOT_PERMITTED" && role === "instruction") withheld.push(role);
       continue;
     }
     if (!bindingFor(item, role)) continue;
     const resolved = await resolveTeacherAudio(context, row, item, role);
     if (resolved.ok) slots[role] = { mimeType: resolved.data.mimeType };
   }
-  return ok({ muted: false, slots, ...(withheld.length > 0 ? { withheld } : {}) });
+  return ok({
+    muted: false,
+    slots,
+    ...(withheld.length > 0 ? { withheld } : {}),
+    ...(preview.length > 0 ? { preview } : {}),
+  });
 }
 
 export type PlayableBytes = { bytes: Uint8Array<ArrayBuffer>; mimeType: string };
@@ -63,14 +87,19 @@ export async function loadPlayableAudio(
   context: StudentContext,
   questionId: string,
   role: PlaybackRole,
+  feedbackRef?: string,
 ): Promise<Result<PlayableBytes>> {
   const row = await ownedQuestion(context, questionId);
   if (!row || !(await readableNow(context.admin, row))) return fail("NOT_FOUND");
   const item = await loadItem(context.admin, row.exercise_item_id);
   if (!item) return fail("UNKNOWN");
   if (isTtsRole(role)) {
-    const instruction = await loadInstructionAudio(context, row, item);
-    return instruction.ok ? ok(instruction.data) : fail(publicAudioCode(instruction.code));
+    if (role === "feedback" && !feedbackRef) return fail("NOT_FOUND");
+    const line =
+      role === "feedback"
+        ? await loadFeedbackAudio(context, row, item, feedbackRef as string)
+        : await loadInstructionAudio(context, row, item);
+    return line.ok ? ok(line.data) : fail(publicAudioCode(line.code));
   }
   const resolved = await resolveTeacherAudio(context, row, item, role);
   if (!resolved.ok) return fail(publicAudioCode(resolved.code));

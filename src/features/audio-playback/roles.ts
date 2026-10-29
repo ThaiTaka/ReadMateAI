@@ -7,10 +7,11 @@
  */
 
 /**
- * `stimulus` / `model`: bản ghi GIÁO VIÊN. `instruction`: giọng MÁY của câu lệnh chuẩn (thư viện TTS đã duyệt, R10.5) — nguồn khác,
- * miền dữ liệu khác, cùng đường phát và cùng chính sách chống lộ đáp án.
+ * `stimulus` / `model`: bản ghi GIÁO VIÊN. `instruction` / `feedback`: giọng MÁY của câu lệnh chuẩn và lời phản hồi cố định (thư viện TTS đã
+ * duyệt R10.5, hoặc — chỉ ở máy local — tệp chế độ trình diễn cuộc thi): nguồn khác, miền dữ liệu khác, cùng đường phát và cùng chính
+ * sách chống lộ đáp án. Khe `feedback` cần thêm mã dòng và chỉ phát khi trạng thái câu khớp (feedback-lines.ts).
  */
-export const PLAYBACK_ROLES = ["stimulus", "model", "instruction"] as const;
+export const PLAYBACK_ROLES = ["stimulus", "model", "instruction", "feedback"] as const;
 export type PlaybackRole = (typeof PLAYBACK_ROLES)[number];
 
 export function isPlaybackRole(value: string): value is PlaybackRole {
@@ -21,9 +22,9 @@ const BOUND_ROLES: Readonly<Record<string, readonly PlaybackRole[]>> = {
   listen_letter: ["stimulus", "model"],
 };
 
-/** Khe lấy từ thư viện giọng máy (không phải bản ghi giáo viên). */
+/** Khe lấy từ giọng máy (không phải bản ghi giáo viên): câu lệnh và lời phản hồi cố định. */
 export function isTtsRole(role: PlaybackRole): boolean {
-  return role === "instruction";
+  return role === "instruction" || role === "feedback";
 }
 
 /** Trình duyệt chỉ biết `variant` (không có đáp án): có nên hỏi máy chủ về âm thanh khe này không. */

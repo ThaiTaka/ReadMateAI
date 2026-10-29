@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HeartIndicator } from "@/components/adventure/heart-indicator";
 import { StarMark } from "@/components/adventure/score-badge";
 import { FeedbackBanner } from "@/components/kid/feedback-banner";
+import { SoundMuteButton } from "@/components/kid/sound-mute";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
@@ -295,6 +296,7 @@ export function EncounterPlay({
           <Pause aria-hidden="true" className="size-6" />
           {t.pause}
         </Button>
+        <SoundMuteButton />
       </div>
 
       <MonsterView monsterKey={initial.monsterKey} entrance={number === 1 && hp === 3} key={hp} />
@@ -375,6 +377,14 @@ export function EncounterPlay({
         {checking ? <p className="text-lg font-bold text-ink-soft">{t.checking}</p> : null}
         {notice ? <p className="font-semibold text-ink">{notice}</p> : null}
         {showMarks || !open ? <FeedbackBanner feedback={question.feedback} /> : null}
+        {(showMarks || !open) && question.feedback ? (
+          <QuestionAudio
+            questionId={question.id}
+            role="feedback"
+            feedbackRef={question.feedback.audioRef}
+            label={vi.contest.feedbackButton}
+          />
+        ) : null}
         {!replay && points && (showMarks || !open) ? <PointsChip points={points} /> : null}
       </div>
 

@@ -18,6 +18,7 @@
 | Học tập: chạm chữ để nghe (tên chữ cái ≠ âm của chữ ≠ tiếng/từ) | **Đã có về kỹ thuật** (§16, nhãn R10.4) dưới cờ `student_teacher_audio_playback_approved` **TẮT**; 0 bản ghi thật |
 | Thư viện giọng máy cho câu lệnh/lời phản hồi (Viettel AI Minh Quân 0,9): duyệt lời đọc → tạo → nghe → duyệt; phát câu lệnh cho học sinh | **Đã có về kỹ thuật** (§17, nhãn R10.5) dưới hai cờ mới **TẮT** (`tts_library_approved`, `student_tts_playback_approved`); **R10.5 chưa gọi API thật**; 0 tệp đã duyệt |
 | Báo cáo độ phủ âm thanh `/teacher/audio-coverage` | **Đã có** — [AUDIO_COVERAGE](AUDIO_COVERAGE.md) |
+| Chế độ trình diễn cuộc thi (giọng máy tạo tự động, miền riêng, chỉ local) | **Đã có (2026-10-29, §18 / [CONTEST_AUDIO](CONTEST_AUDIO.md))** — tách hẳn bản ghi giáo viên và thư viện đã duyệt; không cột duyệt; mặc định TẮT; không thay cho bước duyệt thật |
 | Bản ghi âm GV | **Chưa có bản thật nào, chưa bản nào được duyệt**; cờ hệ thống ghi âm TẮT mặc định; chưa GV nào đồng ý dùng giọng |
 
 ## 2. Hai nguồn âm thanh
@@ -634,3 +635,16 @@ pgTAP `16_tts_library` (24); DB `tts-library.test.ts` (19: hai cờ, hai bước
 ### 17.8 Giới hạn đã biết
 
 Chưa nghe giọng thật qua thư viện; chưa kiểm thử iPhone/Android thật; lời phản hồi chưa nối vào màn hình học; chưa có tiếng/từ/câu; xưng hô "con/em" (Q-08) và 3 câu có chữ phủ định đang chờ giáo viên; hệ thống **không phát hiện tệp im lặng** — giáo viên phải nghe trước khi duyệt.
+
+---
+
+## 18. Chế độ trình diễn cuộc thi — giọng máy tạo tự động, miền riêng (2026-10-29)
+
+> Thiết kế, cổng an toàn, công cụ và giới hạn: **[CONTEST_AUDIO.md](CONTEST_AUDIO.md)**. Tóm tắt kiến trúc:
+
+- **Miền riêng, không trộn:** `contest_audio_assets` (RLS chỉ SELECT; **không có cột duyệt**), bucket `contest-audio`, hàm `gateway_register_contest_audio` / `gateway_revoke_contest_audio` / `gateway_resolve_contest_audio` / `gateway_list_contest_audio` (chỉ `service_role`), migration `20261104090000`. Nguồn gốc cố định `ai_generated` · `contest_preview` · `technical_check_passed`; phiên bản cấu hình `contest-…` (khóa tệp khác thư viện đã duyệt).
+- **Cổng:** cờ `contest_audio_preview_enabled` + cổng local `contest_audio_allowed` (cả hai mặc định TẮT) + `isContestPreviewEnvironment()` ở mã ứng dụng. Cờ `contest_audio_play_unverified` cho phép phát mục chờ kiểm chứng (mặc định TẮT).
+- **Đường phát** (không phá bất biến của thư viện cũ): `tts-library/playback.ts` thử tệp **đã duyệt** trước, thiếu mới thử tệp trình diễn — sau khi chính sách AD-35 đã cho phép; `audio-playback/learning.ts` (Học tập) ưu tiên bản ghi giáo viên đã duyệt, thiếu mới dùng tệp trình diễn. Khe mới `feedback` (lời nhắn sau khi trả lời) chỉ phát khi mã dòng khớp trạng thái thật của câu.
+- **Công cụ:** `npm run audio:contest` (prepare/generate/verify/report/setup/enable/disable/allow-unverified/cleanup-test/revoke). Kiểm tra kỹ thuật bằng **giải mã thật trong Chromium** (thời lượng, biên độ, RMS, tỉ lệ có tiếng).
+- **Kiểm thử:** pgTAP `17_contest_audio` (22); DB `contest-audio.test.ts` (17); unit `tests/unit/contest-audio/` (core, ui, safety-scan); E2E có CSDL `contest-audio.spec.ts`.
+- **Báo cáo độ phủ:** [AUDIO_COVERAGE §7](AUDIO_COVERAGE.md).

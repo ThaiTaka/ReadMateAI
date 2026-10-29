@@ -538,6 +538,105 @@ export type Database = {
           },
         ];
       };
+      contest_audio_assets: {
+        Row: {
+          asset_key: string;
+          config_version: string;
+          content_hash: string;
+          content_sha256: string;
+          created_at: string;
+          duration_ms: number;
+          entry_id: string;
+          entry_kind: string;
+          id: string;
+          mime_type: string;
+          origin: string;
+          peak_milli: number;
+          provider: string;
+          purpose: string;
+          revoke_reason: string | null;
+          revoked_at: string | null;
+          risk_class: string;
+          risk_reasons: string;
+          rms_milli: number;
+          school_id: string;
+          size_bytes: number;
+          speed: string;
+          spoken_text: string;
+          storage_bucket: string;
+          storage_key: string;
+          technical_check: string;
+          voice_key: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          asset_key: string;
+          config_version: string;
+          content_hash: string;
+          content_sha256: string;
+          created_at?: string;
+          duration_ms: number;
+          entry_id: string;
+          entry_kind: string;
+          id?: string;
+          mime_type: string;
+          origin?: string;
+          peak_milli: number;
+          provider: string;
+          purpose?: string;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          risk_class: string;
+          risk_reasons?: string;
+          rms_milli: number;
+          school_id: string;
+          size_bytes: number;
+          speed: string;
+          spoken_text: string;
+          storage_bucket?: string;
+          storage_key: string;
+          technical_check?: string;
+          voice_key: string;
+        };
+        Update: {
+          asset_key?: string;
+          config_version?: string;
+          content_hash?: string;
+          content_sha256?: string;
+          created_at?: string;
+          duration_ms?: number;
+          entry_id?: string;
+          entry_kind?: string;
+          id?: string;
+          mime_type?: string;
+          origin?: string;
+          peak_milli?: number;
+          provider?: string;
+          purpose?: string;
+          revoke_reason?: string | null;
+          revoked_at?: string | null;
+          risk_class?: string;
+          risk_reasons?: string;
+          rms_milli?: number;
+          school_id?: string;
+          size_bytes?: number;
+          speed?: string;
+          spoken_text?: string;
+          storage_bucket?: string;
+          storage_key?: string;
+          technical_check?: string;
+          voice_key?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "contest_audio_assets_school_id_fkey";
+            columns: ["school_id"];
+            isOneToOne: false;
+            referencedRelation: "schools";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       curriculum_lessons: {
         Row: {
           code: string;
@@ -2403,6 +2502,10 @@ export type Database = {
         Returns: boolean;
       };
       gateway_latest_honors: { Args: { p_auth_user_id: string; p_student_id: string }; Returns: Json };
+      gateway_list_contest_audio: {
+        Args: { p_auth_user_id: string; p_student_id: string; p_units: Json };
+        Returns: Json;
+      };
       gateway_list_learning_audio: {
         Args: { p_auth_user_id: string; p_student_id: string; p_units: Json };
         Returns: Json;
@@ -2434,6 +2537,37 @@ export type Database = {
           outcome: string;
           student_id: string;
         }[];
+      };
+      gateway_register_contest_audio: {
+        Args: {
+          p_asset_key: string;
+          p_config_version: string;
+          p_content_hash: string;
+          p_content_sha256: string;
+          p_duration_ms: number;
+          p_entry_id: string;
+          p_mime_type: string;
+          p_peak_milli: number;
+          p_risk_class: string;
+          p_risk_reasons: string;
+          p_rms_milli: number;
+          p_school_id: string;
+          p_size_bytes: number;
+          p_spoken_text: string;
+          p_storage_key: string;
+          p_version_id: string;
+        };
+        Returns: Json;
+      };
+      gateway_resolve_contest_audio: {
+        Args: {
+          p_asset_key: string;
+          p_auth_user_id: string;
+          p_content_hash: string;
+          p_entry_id: string;
+          p_student_id: string;
+        };
+        Returns: Json;
       };
       gateway_resolve_learning_audio: {
         Args: {
@@ -2478,6 +2612,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      gateway_revoke_contest_audio: { Args: { p_reason: string; p_school_id: string }; Returns: number };
       gateway_save_game_position: {
         Args: { p_auth_user_id: string; p_path: Json; p_run_id: string; p_state_version: number; p_student_id: string };
         Returns: Json;

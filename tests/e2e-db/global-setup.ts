@@ -5,6 +5,7 @@ import {
   setLocalLeaderboardApproval,
   setLocalStudentAudioPlayback,
   setLocalStudentTtsPlayback,
+  setLocalContestAudio,
   setLocalTeacherAudioApproval,
   setLocalTtsLibrary,
 } from "../../scripts/lib/test-fixtures";
@@ -39,4 +40,6 @@ export default async function globalSetup() {
   // R10.5: cờ thư viện giọng máy + phát giọng máy cho học sinh (global-teardown trả về TẮT).
   setLocalTtsLibrary(true);
   setLocalStudentTtsPlayback(true);
+  // Chế độ trình diễn âm thanh: các kịch bản khác chạy với chế độ TẮT (như production); chỉ contest-audio.spec tự bật rồi tắt lại.
+  setLocalContestAudio({ enabled: false, gate: false });
 }

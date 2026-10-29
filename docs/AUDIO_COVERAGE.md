@@ -19,7 +19,7 @@
 | **Âm của chữ** (ví dụ b → "bờ"; gồm chữ ghép ngh, qu…) | 38 (danh mục P0 dự kiến; `i`/`y` dùng chung một bản) | Bản ghi giáo viên | như trên |
 | **Nút nghe trong Học tập** | mỗi nút trên `/learn/me/study` | tên chữ cái hoặc âm ở trên | nút trỏ tới một mục **có** tệp đã duyệt; nút trỏ tới đơn vị không có trong danh sách ghi âm được báo riêng (hiện: **0**) |
 | **Câu lệnh** (17 dạng/biến thể bài) | 17 | Giọng máy (Viettel AI Minh Quân 0,9) — [thư viện giọng máy](AUDIO_ENGINE.md) (§17) | lời đọc đã duyệt **và** tệp đã duyệt khớp cấu hình giọng hiện hành |
-| **Lời phản hồi** (lời khen/nhắc thử lại) | 17 | Giọng máy | như trên — **học sinh chưa nghe được** vì chưa nối vào màn hình học (báo cáo ghi rõ) |
+| **Lời phản hồi** (lời khen/nhắc thử lại) | 17 | Giọng máy | như trên — từ 2026-10-29 đã **nối vào màn hình học** (khe `feedback`, nút "Nghe lời nhắn"); báo cáo suy trạng thái nối từ danh sách khe phát thật |
 | **Vần** | 153 trong kho tri thức | — | **Chưa theo dõi**: công cụ ghi âm hiện chỉ hỗ trợ tên chữ cái và âm; học sinh chưa có nút nghe vần; giáo viên cần quyết định cách đọc vần trước khi ghi |
 | **Tiếng, từ, câu** | — | Giọng máy theo từng bài (chưa làm) | **Chưa theo dõi**: chưa tạo tệp nào; mỗi tệp sẽ cần giáo viên nghe và duyệt |
 
@@ -56,3 +56,16 @@ Trên máy dev của chủ dự án **chưa có bản ghi giáo viên nào và c
 - Danh mục 38 âm là **đề xuất chờ giáo viên xác nhận** (Q-02); đổi danh mục thì tổng đổi theo.
 - Báo cáo **không phát hiện tệp im lặng hay chất lượng kém** — giáo viên phải **nghe** trước khi duyệt (bước bắt buộc của quy trình).
 - Chưa có báo cáo cho vần/tiếng/từ/câu và chưa xuất ra tệp (CSV/PDF); chỉ xem trên trang.
+
+## 7. Âm thanh TRÌNH DIỄN — tách riêng, không cộng vào số liệu "đã duyệt" (2026-10-29)
+
+Từ chế độ trình diễn cuộc thi ([CONTEST_AUDIO](CONTEST_AUDIO.md)), cuối trang `/teacher/audio-coverage` có phần **"Âm thanh trình diễn (tạo tự động)"** — chỉ hiện ở máy local, đọc bằng JWT giáo viên (RLS theo trường), gồm bốn nhóm riêng:
+
+| Nhóm | Nghĩa |
+|---|---|
+| **Đã có giọng máy trình diễn** | có tệp khớp danh mục hiện hành; mới qua kiểm tra kỹ thuật, **chưa ai nghe/duyệt** |
+| **Cần xác minh phát âm** | k, q, gi, gh, ng, ngh, qu, i, y, ă, â, lời đọc một ký tự, nhãn có "kép" — mặc định học sinh không nghe được |
+| **Còn thiếu** | chưa có tệp trình diễn |
+| **Tệp cũ không còn khớp** | chữ/giọng đã đổi từ khi tạo tệp |
+
+Quy tắc: **không bao giờ** cộng các số này vào "Tên chữ cái / Âm của chữ / Câu lệnh / Lời phản hồi đã duyệt" ở các mục trên; tệp trình diễn không bao giờ làm báo cáo chính nói "đủ". Báo cáo dòng lệnh: `npm run audio:contest -- report` (nêu số tệp qua kiểm tra kỹ thuật, số phát được ngay, số yêu cầu đã gửi nhà cung cấp, mục thiếu và mục cần kiểm chứng).

@@ -2,6 +2,7 @@ import {
   setLocalGameRunFixtures,
   setLocalHonorsApproval,
   setLocalLeaderboardApproval,
+  setLocalContestAudio,
   setLocalStudentAudioPlayback,
   setLocalStudentTtsPlayback,
   setLocalTeacherAudioApproval,
@@ -17,4 +18,5 @@ export default function globalTeardown() {
   setLocalStudentAudioPlayback(false);
   setLocalTtsLibrary(false);
   setLocalStudentTtsPlayback(false);
+  setLocalContestAudio({ enabled: false, gate: false });
 }

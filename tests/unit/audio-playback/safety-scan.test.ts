@@ -65,7 +65,9 @@ describe("máy chủ phát âm thanh", () => {
 
   it("âm thanh được suy ra từ câu: route không nhận mã tài nguyên/phiên bản/đường dẫn từ trình duyệt", () => {
     const stream = read("src/app/api/student/question-instances/[id]/audio/[role]/route.ts");
-    expect(stream).not.toMatch(/searchParams|request\.json|formData|assetId|versionId|asset_id|version_id/u);
+    // Ngoại lệ DUY NHẤT: mã dòng lời phản hồi (`?line=`), được máy chủ đối chiếu với trạng thái thật của câu (feedback-lines.ts).
+    const withoutLine = stream.replace(/new URL\(request\.url\)\.searchParams\.get\("line"\)/gu, "");
+    expect(withoutLine).not.toMatch(/searchParams|request\.json|formData|assetId|versionId|asset_id|version_id/u);
     const service = read("src/server/audio-playback/service.ts");
     expect(service).not.toMatch(/searchParams|assetId:|versionId:/u);
   });

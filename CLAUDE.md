@@ -45,6 +45,7 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 | [docs/RLS_SECURITY.md](docs/RLS_SECURITY.md) | **R03** — ma trận RLS đã kiểm thử, bất biến CSDL, quy trình thêm bảng |
 | [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | **R03** — Supabase local, `config.toml`, biến môi trường, danh mục Cloud (chưa tạo), sự cố |
 | [docs/AUDIO_ENGINE.md](docs/AUDIO_ENGINE.md) · [docs/TEACHER_AUDIO_GUIDE.md](docs/TEACHER_AUDIO_GUIDE.md) | **R10** — âm thanh: TTS (R10.1), thư viện bản ghi giáo viên `/teacher/audio`, Storage riêng tư, duyệt phiên bản (R10.2), hướng dẫn GV; **chạm chữ để nghe (§16) và thư viện giọng máy Viettel Minh Quân 0,9 (§17, 2026-10-29)** |
+| [docs/CONTEST_AUDIO.md](docs/CONTEST_AUDIO.md) | **Chế độ trình diễn cuộc thi (2026-10-29)** — âm thanh giọng máy tạo tự động, miền dữ liệu RIÊNG (`contest_audio_assets`, bucket `contest-audio`), chỉ Supabase local, không cột duyệt, `npm run audio:contest`, mục chờ kiểm chứng cách đọc bị giữ |
 | [docs/TTS_APPROVAL_CHECKLIST.md](docs/TTS_APPROVAL_CHECKLIST.md) | **R10.3b1** — bảng quyết định của chủ dự án/giáo viên trước khi dùng TTS (nhà cung cấp, giọng, điều khoản, chi phí, xưng hô); ô chưa xác nhận ghi "Chưa quyết định" |
 | [docs/AUDIO_COVERAGE.md](docs/AUDIO_COVERAGE.md) | **R10.5** — báo cáo độ phủ âm thanh `/teacher/audio-coverage`: chỉ đếm tệp ĐÃ DUYỆT, nêu mục còn thiếu, không bao giờ kết luận "mọi chữ đều đọc được" khi còn thiếu |
 | [docs/TEACHER_ACCOUNT_GUIDE.md](docs/TEACHER_ACCOUNT_GUIDE.md) | Tạo tài khoản giáo viên cho chủ dự án trên Supabase local (`npm run teacher:bootstrap`, mật khẩu nhập ẩn) và quy trình thử âm thanh trên máy |
@@ -234,6 +235,18 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 9. **Đọc kết quả `supabase db query`:** không cắt chuỗi quanh dấu `{`/`[` để "đoán" JSON. CLI trả mảng trần ở `--agent no` và phong bì `{boundary, rows, warning}` ở `--agent yes` (thông báo CLI ở stderr) — ghim `--agent no --output-format json` (`-o` là cờ của `supabase status`, không phải của `db query`), phân tích toàn bộ stdout và kiểm schema bằng `scripts/lib/flag-query.ts`; sai định dạng/thiếu cờ là lỗi, không mặc định "TẮT". Sau `on`/`off` phải đọc lại CSDL để xác minh.
 10. **Nhãn:** "R10.4"/"R10.5" trong mã/commit = 10.3c/10.3d của REDESIGN_TASKS, không phải hai mục 10.4/10.5 chưa làm.
 
+### 9.11 Quy tắc chế độ trình diễn cuộc thi — `contest_audio_preview` (BẮT BUỘC)
+
+> **Ngoại lệ có chủ đích** (chủ dự án chỉ đạo 2026-10-29, dự án đang chuẩn bị TRÌNH DIỄN trong cuộc thi, chưa triển khai cho lớp học thật): âm thanh giọng máy tạo tự động, **chưa giáo viên nghe/duyệt**, được phát cho **học sinh hư cấu trên máy local**, kể cả tên chữ cái/âm của chữ (mà §7.7 vốn dành cho bản ghi giáo viên). Ngoại lệ này **chỉ** tồn tại trong miền dưới đây và **không bao giờ** mở rộng sang học sinh thật hay môi trường thật; §7.3 (mọi nội dung phải được GV duyệt trước khi đến tay học sinh thật) vẫn nguyên hiệu lực.
+
+1. **Miền dữ liệu riêng, không trộn:** bảng `contest_audio_assets`, bucket `contest-audio`, hàm `gateway_*contest_audio`, khóa cấu hình `contest-…`. **Không** có cột duyệt/trạng thái/giáo viên (test cấm); nguồn gốc cố định `ai_generated`/`contest_preview`/`technical_check_passed`. Không bao giờ ghi vào `audio_assets`, `audio_asset_versions`, `tts_audio_versions`, `tts_script_reviews`; không bao giờ gọi `teacher_review_*`; không bao giờ tính vào số liệu "đã duyệt". Tệp trình diễn **không tự thành** tệp đã duyệt.
+2. **Chỉ local, mặc định TẮT:** hàm CSDL chỉ chạy khi cờ `contest_audio_preview_enabled` **và** cổng `private.test_environment.contest_audio_allowed` cùng bật; mã ứng dụng chỉ hỏi CSDL/Storage khi `isContestPreviewEnvironment()` (Supabase local, không Vercel). Chỉ `npm run audio:contest` và kiểm thử đổi công tắc (kiểm thử phải trả về TẮT; sau khi chạy kiểm thử CSDL/E2E trên máy dev, bật lại bằng `audio:contest -- enable`). Không bật bằng mã ứng dụng; không migration nào bật.
+3. **Mục `needs_verification` mặc định KHÔNG phát** (cờ `contest_audio_play_unverified` riêng); khi chủ dự án cho phép, giao diện luôn ghi chú "Cách đọc chờ kiểm chứng". Không âm thầm phát cách đọc có thể sai.
+4. **AD-35 giữ nguyên:** nơi gọi áp `decideBeforeGrading`/`decideAfterGrading` **trước** khi hỏi nguồn trình diễn. Lời nhắn sau khi trả lời chỉ phát khi mã dòng khớp trạng thái thật của câu (`features/audio-playback/feedback-lines.ts`). Công thức điểm, HP, kho báu không đổi.
+5. **Gọi nhà cung cấp chỉ ở `src/server/contest-audio/generate.ts`** (do `scripts/contest-audio.ts` điều khiển); chỉ gửi văn bản cố định của danh mục; **hạn mức yêu cầu** (40/lần mặc định, trần 120, tổng 150 theo sổ ghi), tuần tự, không tự thử lại, khóa từng lỗi không tự gọi lại, ghi sổ **trước** khi gửi. Token chỉ đọc từ `.env.local`, **không bao giờ in ra** (test quét). `.contest-audio/` và mọi tệp âm thanh **không commit**.
+6. **Không tuyên bố "hoàn thành toàn bộ âm thanh"** khi còn thiếu tệp hoặc chưa kiểm tra chất lượng; kiểm tra kỹ thuật (giải mã bằng Chromium) **không phải** kiểm duyệt phát âm; báo cáo luôn nêu số tệp thật, số phát được, số cần kiểm chứng, số yêu cầu đã gọi.
+7. Bash tool: lệnh có heredoc/`node -e` làm mất dấu gạch chéo ngược trong biểu thức chính quy (`\.` thành `.`, `\m` thành `m`) — viết biểu thức chính quy bằng công cụ Write/Edit rồi chạy tệp. Công cụ Write giải mã chuỗi thoát unicode (ví dụ tổ hợp dấu U+0301) thành ký tự thật → dùng `String.fromCharCode`; đã gặp lại ở `tests/unit/contest-audio/core.test.ts` (test vệ sinh NFC bắt được). Sau khi ghi tệp, quét byte các tệp mới/sửa.
+
 ## 10. Kiểm thử và Definition of Done
 
 Một nhiệm vụ chỉ "xong" khi:
@@ -264,6 +277,7 @@ Một nhiệm vụ chỉ "xong" khi:
 | `npm run db:lint` · `db:test` · `test:db` · `test:e2e:db` | Lint CSDL · pgTAP · tích hợp RLS (JWT thật) · E2E có CSDL (cần `db:env` + `db:seed`) |
 | `npm run teacher:bootstrap -- --email <email>` | Tạo tài khoản giáo viên cho máy dev (CHỈ Supabase local; mật khẩu nhập ẩn; chạy lại không trùng, không đổi mật khẩu có sẵn) |
 | `npm run audio:local-flags -- status` (hoặc `on`, `off`) | Xem/bật/tắt bốn cờ âm thanh CHỈ ở Supabase local; production luôn TẮT |
+| `npm run audio:contest -- setup --live --yes` (hoặc `prepare`, `generate`, `verify`, `report`, `enable`, `disable`, `allow-unverified`, `cleanup-test`, `revoke`) | Chế độ TRÌNH DIỄN âm thanh (CHỈ Supabase local): tạo giọng máy bằng Viettel (có hạn mức yêu cầu), kiểm tra kỹ thuật bằng giải mã Chromium, đăng ký, báo cáo, thu hồi — [CONTEST_AUDIO](docs/CONTEST_AUDIO.md) |
 
 Thay đổi CSDL/route/xác thực: chạy thêm `db:lint`, `db:test`, `test:db`, `test:e2e:db`. Trong PowerShell nhớ đặt `$env:NEXT_TELEMETRY_DISABLED = '1'` nếu không muốn gửi telemetry của Next.js.
 

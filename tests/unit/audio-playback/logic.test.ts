@@ -15,7 +15,8 @@ const listen = (letter: string) => listenLetterItem(LISTEN_SPECS[letter]!, 0);
 
 describe("khe nào dùng bản ghi giáo viên", () => {
   it("bản ghi giáo viên chỉ ở bài nghe âm (stimulus + model); câu lệnh (instruction) là giọng MÁY của thư viện TTS, không có bản ghi giáo viên ở bất kỳ biến thể nào", () => {
-    expect(PLAYBACK_ROLES).toEqual(["stimulus", "model", "instruction"]);
+    expect(PLAYBACK_ROLES).toEqual(["stimulus", "model", "instruction", "feedback"]);
+    expect(isTtsRole("feedback")).toBe(true);
     expect(isTtsRole("instruction")).toBe(true);
     expect(isTtsRole("stimulus")).toBe(false);
     expect(isTtsRole("model")).toBe(false);
@@ -30,7 +31,7 @@ describe("khe nào dùng bản ghi giáo viên", () => {
     expect(isPlaybackRole("stimulus")).toBe(true);
     expect(isPlaybackRole("instruction")).toBe(true);
     expect(isPlaybackRole("options")).toBe(false);
-    expect(isPlaybackRole("feedback")).toBe(false);
+    expect(isPlaybackRole("feedback")).toBe(true);
     expect(isPlaybackRole("../x")).toBe(false);
   });
 

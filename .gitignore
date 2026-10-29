@@ -56,3 +56,5 @@ exports/
 
 # R10.3b2-P0: tệp giọng máy nghe thử — quyền lưu/phân phối chưa xác minh, chỉ ở máy người vận hành
 .tts-poc/
+# Tệp âm thanh trình diễn (giọng máy tạo tự động), sổ ghi yêu cầu và kết quả kiểm tra: chỉ trên máy dev, không bao giờ commit
+.contest-audio/

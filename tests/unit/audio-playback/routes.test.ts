@@ -55,7 +55,7 @@ describe("GET …/audio/[role]", () => {
     expect(response.headers.get("Accept-Ranges")).toBe("bytes");
     expect(response.headers.get("Content-Length")).toBe(String(BYTES.byteLength));
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(BYTES);
-    expect(mocks.loadPlayableAudio).toHaveBeenCalledWith(context.data, QID, "stimulus");
+    expect(mocks.loadPlayableAudio).toHaveBeenCalledWith(context.data, QID, "stimulus", undefined);
   });
 
   it("Range (Safari): 206 đúng đoạn + Content-Range; Range sai → 416", async () => {
@@ -74,7 +74,6 @@ describe("GET …/audio/[role]", () => {
   it("khe lạ hoặc mã không phải UUID → 404 JSON, không gọi dịch vụ", async () => {
     for (const [role, id] of [
       ["options", QID],
-      ["feedback", QID],
       ["../x", QID],
       ["stimulus", "khong-phai-uuid"],
     ] as const) {

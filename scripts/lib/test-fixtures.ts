@@ -112,3 +112,20 @@ export function setLocalFixturesAllowed(allowed: boolean): void {
     { stdio: ["ignore", "ignore", "pipe"] },
   );
 }
+
+/**
+ * Bật/tắt CHẾ ĐỘ TRÌNH DIỄN âm thanh (docs/CONTEST_AUDIO.md) CHỈ trên Supabase LOCAL để kiểm thử: cờ hệ thống, cổng local của CSDL và cờ
+ * "phát cả mục chờ kiểm chứng". Production không bao giờ chạy hàm này; cả ba mặc định TẮT. Kiểm thử phải trả về TẮT khi xong
+ * (hoặc khôi phục trạng thái ban đầu của máy dev bằng `npm run audio:contest -- status`).
+ */
+export function setLocalContestAudio(state: { enabled: boolean; gate: boolean; playUnverified?: boolean }): void {
+  const run = (statement: string) =>
+    execSync(`npx supabase db query --local "${statement}"`, { stdio: ["ignore", "ignore", "pipe"] });
+  run(
+    `update private.feature_flags set enabled = ${state.enabled}, updated_at = now() where key = 'contest_audio_preview_enabled'`,
+  );
+  run(
+    `update private.feature_flags set enabled = ${state.playUnverified === true}, updated_at = now() where key = 'contest_audio_play_unverified'`,
+  );
+  run(`update private.test_environment set contest_audio_allowed = ${state.gate}, updated_at = now() where singleton`);
+}

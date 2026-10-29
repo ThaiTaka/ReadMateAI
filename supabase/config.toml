@@ -135,6 +135,12 @@ public = false
 file_size_limit = "2MiB"
 allowed_mime_types = ["audio/mpeg", "audio/wav", "audio/ogg"]
 
+# Âm thanh giọng máy của CHẾ ĐỘ TRÌNH DIỄN cuộc thi (docs/CONTEST_AUDIO.md): miền dữ liệu RIÊNG, riêng tư, không dùng chung với tts-audio hay teacher-audio.
+[storage.buckets.contest-audio]
+public = false
+file_size_limit = "2MiB"
+allowed_mime_types = ["audio/mpeg", "audio/wav", "audio/ogg"]
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true

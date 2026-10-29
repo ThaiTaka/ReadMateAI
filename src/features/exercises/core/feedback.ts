@@ -13,6 +13,8 @@ export type Feedback = {
   tone: FeedbackTone;
   title: string;
   message: string;
+  /** Mã dòng giọng nói của lời này (features/audio-playback/feedback-lines.ts): đúng → lời khen; còn lượt → lời nhắc; hết lượt → tiêu đề xem đáp án. */
+  audioRef: string;
   /** Chỉ có khi `tone === "reveal"` hoặc `"correct"` (câu đã chấm xong). */
   reveal: RevealView | null;
 };
@@ -69,18 +71,27 @@ export function feedbackFor(input: FeedbackInput): Feedback {
       tone: "correct",
       title: titles[input.position % titles.length] ?? titles[0],
       message: texts.correctMessage,
+      audioRef: `correct_title_${(input.position % titles.length) + 1}`,
       reveal: input.reveal,
     };
   }
   if (input.attemptNo < input.maxAttempts) {
+    const category = retryCategory(input.variant, input.grade);
     return {
       tone: "retry",
       title: texts.retryTitle,
-      message: texts.retry[retryCategory(input.variant, input.grade)],
+      message: texts.retry[category],
+      audioRef: `retry.${category}`,
       reveal: null,
     };
   }
-  return { tone: "reveal", title: texts.revealTitle, message: texts.revealMessage, reveal: input.reveal };
+  return {
+    tone: "reveal",
+    title: texts.revealTitle,
+    message: texts.revealMessage,
+    audioRef: "reveal_title",
+    reveal: input.reveal,
+  };
 }
 
 /** Mọi lời phản hồi có thể xuất hiện khi CÒN lượt thử — để bộ kiểm tra soát không chứa đáp án. */

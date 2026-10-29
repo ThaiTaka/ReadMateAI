@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { KidAvatar } from "@/components/art/avatars";
 import { safeAvatarKey } from "@/components/forms/avatar-choices";
 import { LearningAudioProvider, LearningAudioStatus, ListenableLetter } from "@/components/kid/learning-audio";
+import { SoundMuteButton } from "@/components/kid/sound-mute";
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -105,6 +106,9 @@ async function Content({ searchParams }: Pick<PageProps<"/learn/me/study">, "sea
           <p className="text-lg font-semibold text-ink">{t.intro}</p>
           <p className="text-ink-soft">{t.legend}</p>
           <LearningAudioStatus />
+          <div>
+            <SoundMuteButton />
+          </div>
         </div>
         <TileList tiles={STUDY_LETTERS} title={t.lettersTitle} id="study-letters" />
         <TileList tiles={STUDY_DIGRAPHS} title={t.digraphsTitle} id="study-digraphs" />

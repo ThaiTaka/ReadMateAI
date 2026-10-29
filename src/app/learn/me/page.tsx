@@ -133,7 +133,7 @@ async function StudentArea({ searchParams }: Pick<PageProps<"/learn/me">, "searc
       {home.ok ? (
         <StudentDashboard home={home.data} studentId={student.id} query={query} />
       ) : (
-        <Notice tone="progress" title={vi.status.inDevelopment}>
+        <Notice tone="progress" title={vi.status.loadError}>
           {vi.errors[home.code]}
         </Notice>
       )}

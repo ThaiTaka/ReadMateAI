@@ -238,11 +238,11 @@ describe("lời đọc giọng máy", () => {
     expect(coverage.instruction.missing).toBe(0);
   });
 
-  it("chỉ câu lệnh đã nối vào màn hình học sinh; lời phản hồi thì chưa — báo cáo nói đúng như vậy", () => {
-    expect(WIRED_PURPOSES).toEqual(["instruction"]);
+  it("câu lệnh VÀ lời phản hồi đều đã nối vào màn hình học sinh (khe feedback) — báo cáo suy từ danh sách khe phát thật", () => {
+    expect(WIRED_PURPOSES).toEqual(["instruction", "feedback"]);
     const coverage = buildAudioCoverage(base());
     expect(coverage.instruction.rows.every((row) => row.wiredForStudents)).toBe(true);
-    expect(coverage.feedback.rows.every((row) => !row.wiredForStudents)).toBe(true);
+    expect(coverage.feedback.rows.every((row) => row.wiredForStudents)).toBe(true);
   });
 });
 
@@ -256,7 +256,6 @@ describe("khung hiển thị", () => {
     expect(screen.getByTestId("coverage-letters").textContent).toBe("1 / 29 đã duyệt");
     expect(screen.getByTestId("coverage-todo").textContent).toMatch(/Chưa có bản ghi đã duyệt/u);
     expect(screen.getByTestId("coverage-untracked").textContent).toMatch(/Vần:/u);
-    expect(screen.getByText(/chưa nghe được lời phản hồi/iu)).toBeInTheDocument();
     expect(document.querySelectorAll('[data-testid="coverage-letters-list"] li')).toHaveLength(29);
     expect(document.querySelectorAll('[data-unit="letter:b"][data-state="approved"]')).toHaveLength(1);
   });

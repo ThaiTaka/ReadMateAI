@@ -100,7 +100,7 @@ async function Content({ searchParams }: Pick<PageProps<"/learn/me/games/treasur
 
   let body;
   if (!home.ok) {
-    body = <Notice title={vi.status.inDevelopment}>{vi.errors[home.code]}</Notice>;
+    body = <Notice title={vi.status.loadError}>{vi.errors[home.code]}</Notice>;
   } else if (!home.data.learningDataConsent) {
     body = <Notice title={vi.learnMe.practice.title}>{vi.learnMe.practice.blocked.CONSENT_REQUIRED}</Notice>;
   } else if (home.data.score.balance < min && !keepsAccess) {

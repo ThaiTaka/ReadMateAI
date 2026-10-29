@@ -6,6 +6,7 @@ import { ArrowRight, ClipboardCheck, Lightbulb, Map as MapIcon, RotateCw, Sparkl
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StarMark } from "@/components/adventure/score-badge";
 import { FeedbackBanner } from "@/components/kid/feedback-banner";
+import { SoundMuteButton } from "@/components/kid/sound-mute";
 import { INSTRUCTION_ICONS } from "@/components/learning/visuals";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonClasses } from "@/components/ui/button";
@@ -317,6 +318,7 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
       </h1>
 
       <div className="flex flex-wrap items-center gap-2">
+        <SoundMuteButton />
         {!question.scorable ? <Badge tone="lagoon">{t.practiceOnly}</Badge> : null}
         {open ? (
           <Badge tone="neutral">
@@ -384,6 +386,14 @@ export function ScoredPractice({ studentId, homeHref }: ScoredPracticeProps) {
         {checking ? <p className="text-lg font-bold text-ink-soft">{t.checking}</p> : null}
         {notice ? <p className="font-semibold text-ink">{notice}</p> : null}
         {showMarks || !open ? <FeedbackBanner feedback={question.feedback} /> : null}
+        {(showMarks || !open) && question.feedback ? (
+          <QuestionAudio
+            questionId={question.id}
+            role="feedback"
+            feedbackRef={question.feedback.audioRef}
+            label={vi.contest.feedbackButton}
+          />
+        ) : null}
         {points && (showMarks || !open) ? <PointsChip points={points} /> : null}
       </div>
 
