@@ -71,6 +71,8 @@ npm run audio:local-flags -- on          # bật (hỏi xác nhận; --yes để
 npm run audio:local-flags -- off         # tắt lại
 ```
 
+Sau `on`/`off`, công cụ **đọc lại từ CSDL** và chỉ báo thành công khi cả bốn cờ đúng giá trị. Nếu báo "Đã cập nhật … nhưng không đọc lại được" thì lệnh đổi đã chạy xong — **đừng chạy lại**, chỉ cần `status`. Kết quả sai định dạng hoặc thiếu cờ là lỗi (mã thoát 4/5/6), không bao giờ bị hiểu thành "TẮT". Công cụ gọi `supabase db query --local --agent no --output-format json` cố định nên đầu ra không phụ thuộc việc chạy trong terminal thường hay trong môi trường agent.
+
 Công cụ chỉ nói chuyện với CSDL Docker trên máy bạn, từ chối khi địa chỉ không phải local và chỉ đổi đúng bốn cờ cố định (`teacher_audio_recording_approved`, `student_teacher_audio_playback_approved`, `tts_library_approved`, `student_tts_playback_approved`). `npm run db:reset` đưa cả bốn về **TẮT**. Production vẫn **TẮT**: đổi bằng migration, sau khi đạt điều kiện ở [TTS_APPROVAL_CHECKLIST §4](TTS_APPROVAL_CHECKLIST.md#4-điều-kiện-mở-cho-học-sinh-thật).
 
 Quy trình đầy đủ:

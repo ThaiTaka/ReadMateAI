@@ -11,9 +11,10 @@
  * bốn cờ (đổi bằng migration sau khi đạt điều kiện mở, không bằng lệnh này). Danh sách cờ cố định trong mã, không nhận tên cờ từ dòng lệnh.
  * Cờ chỉ ảnh hưởng máy bạn; khi `npm run db:reset` thì tự về TẮT.
  */
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { exit, stderr, stdout } from "node:process";
 import { parseArgs } from "node:util";
+import { assertAllFlags, parseFlagRows, stdoutOrThrow } from "./lib/flag-query.ts";
 import { askLine, InputError } from "./lib/hidden-input.ts";
 import { isLocalUrl, scriptEnv } from "./lib/local-supabase.ts";
 
@@ -27,29 +28,31 @@ const FLAGS = [
 const out = (line = "") => stdout.write(`${line}\n`);
 const err = (line = "") => stderr.write(`${line}\n`);
 
+const FLAG_KEYS: readonly string[] = FLAGS.map(([key]) => key);
+
 function query(sql: string): string {
   // SQL do mã này dựng từ danh sách cờ cố định (không nhận chữ từ dòng lệnh) và chỉ có nháy đơn → an toàn khi bọc trong nháy kép.
-  return execSync(`npx supabase db query --local -o json "${sql}"`, {
+  // `--agent no --output-format json` cố định để đầu ra không phụ thuộc việc CLI tự nhận diện môi trường agent (xem scripts/lib/flag-query.ts).
+  const result = spawnSync(`npx supabase db query --local --agent no --output-format json "${sql}"`, {
     encoding: "utf8",
+    shell: true,
     stdio: ["ignore", "pipe", "pipe"],
   });
+  return stdoutOrThrow(result);
 }
 
 function readFlags(): Map<string, boolean> {
-  const keys = FLAGS.map(([key]) => `'${key}'`).join(", ");
+  const keys = FLAG_KEYS.map((key) => `'${key}'`).join(", ");
   const raw = query(`select key, enabled from private.feature_flags where key in (${keys}) order by key`);
-  const json = JSON.parse(raw.slice(raw.indexOf("{"))) as { rows?: Array<{ key: string; enabled: boolean }> };
-  return new Map((json.rows ?? []).map((row) => [row.key, row.enabled]));
+  return parseFlagRows(raw, FLAG_KEYS);
 }
 
-function show(prefix: string) {
-  const flags = readFlags();
+function print(prefix: string, flags: ReadonlyMap<string, boolean>) {
   out(prefix);
-  for (const [key, label] of FLAGS) {
-    const state = flags.get(key);
-    out(`  ${state === undefined ? "?  " : state ? "BẬT" : "TẮT"}  ${key}  — ${label}`);
-  }
+  for (const [key, label] of FLAGS) out(`  ${flags.get(key) ? "BẬT" : "TẮT"}  ${key}  — ${label}`);
 }
+
+const reason = (error: unknown) => (error instanceof Error ? error.message.split("\n")[0] : "không rõ");
 
 async function main(): Promise<number> {
   const { values, positionals } = parseArgs({
@@ -75,7 +78,7 @@ async function main(): Promise<number> {
   }
 
   if (command === "status") {
-    show("Cờ âm thanh trên Supabase LOCAL:");
+    print("Cờ âm thanh trên Supabase LOCAL:", readFlags());
     return 0;
   }
 
@@ -91,11 +94,35 @@ async function main(): Promise<number> {
       return 3;
     }
   }
-  const keys = FLAGS.map(([key]) => `'${key}'`).join(", ");
-  query(
-    `update private.feature_flags set enabled = ${enable ? "true" : "false"}, updated_at = now() where key in (${keys})`,
-  );
-  show("Sau khi đổi:");
+  const keys = FLAG_KEYS.map((key) => `'${key}'`).join(", ");
+  try {
+    query(
+      `update private.feature_flags set enabled = ${enable ? "true" : "false"}, updated_at = now() where key in (${keys})`,
+    );
+  } catch (error) {
+    err(`Lỗi khi gửi lệnh cập nhật: ${reason(error)}`);
+    err(
+      "Không biết lệnh đã chạy hay chưa — chạy `npm run audio:local-flags -- status` để xem trạng thái thật trước khi làm gì tiếp.",
+    );
+    return 4;
+  }
+
+  // Lệnh cập nhật đã thành công; từ đây trạng thái được xác minh bằng cách đọc lại từ CSDL.
+  let after: Map<string, boolean>;
+  try {
+    after = readFlags();
+  } catch (error) {
+    err(`Đã cập nhật (Supabase CLI báo thành công) nhưng không đọc lại được trạng thái để xác minh: ${reason(error)}`);
+    err("KHÔNG cần chạy lại lệnh này; chạy `npm run audio:local-flags -- status` để xem trạng thái.");
+    return 5;
+  }
+  print("Sau khi đổi (đọc lại từ CSDL):", after);
+  try {
+    assertAllFlags(after, enable);
+  } catch (error) {
+    err(`Lỗi xác minh: ${reason(error)}`);
+    return 6;
+  }
   return 0;
 }
 
@@ -106,6 +133,6 @@ main()
       err("Cần terminal tương tác hoặc --yes.");
       exit(2);
     }
-    err(`Lỗi: ${error instanceof Error ? error.message.split("\n")[0] : "không rõ"}`);
+    err(`Lỗi: ${reason(error)}`);
     exit(4);
   });

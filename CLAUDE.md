@@ -231,7 +231,8 @@ Dự án thật, triển khai trên Vercel, người dùng là trẻ 6–7 tuổ
 6. **Tài khoản giáo viên đầu tiên** bằng `npm run teacher:bootstrap` (chỉ Supabase local; mật khẩu không có trong mã, tệp, tham số, biến môi trường, log hay Git). Không tạo hộ tài khoản có mật khẩu của chủ dự án; báo đúng "đã tạo" hay "mới có công cụ".
 7. **Playwright:** mã máy chủ có `server-only` chỉ nhập được vào fixture E2E qua `import "./server-only-shim"` đứng đầu tệp; danh sách cho phép prefetch ở `demo-practice.spec.ts` phải gồm mọi trang `/demo` liên kết tới (prefetch `?_rsc` tới lúc có lúc không tùy cuộn); assert "không còn 'Sắp có'" phải giới hạn trong vùng nội dung (`getByRole("main")` hoặc thẻ cụ thể) vì thanh bên và phần xem trước chưa xây dựng ghi "Sắp có" đúng sự thật.
 8. **Lỗi chập chờn WebKit trên CI:** chẩn đoán bằng trace (`gh run download` → `trace.network`/`trace.trace`) trước khi kết luận; đã gặp `BrowserContext.newPage` đứng ~30 s trên runner (không phải ứng dụng). Không nâng thời gian chờ, không bỏ test; chạy lại job lỗi (`gh run rerun --failed`) và báo trung thực.
-9. **Nhãn:** "R10.4"/"R10.5" trong mã/commit = 10.3c/10.3d của REDESIGN_TASKS, không phải hai mục 10.4/10.5 chưa làm.
+9. **Đọc kết quả `supabase db query`:** không cắt chuỗi quanh dấu `{`/`[` để "đoán" JSON. CLI trả mảng trần ở `--agent no` và phong bì `{boundary, rows, warning}` ở `--agent yes` (thông báo CLI ở stderr) — ghim `--agent no --output-format json` (`-o` là cờ của `supabase status`, không phải của `db query`), phân tích toàn bộ stdout và kiểm schema bằng `scripts/lib/flag-query.ts`; sai định dạng/thiếu cờ là lỗi, không mặc định "TẮT". Sau `on`/`off` phải đọc lại CSDL để xác minh.
+10. **Nhãn:** "R10.4"/"R10.5" trong mã/commit = 10.3c/10.3d của REDESIGN_TASKS, không phải hai mục 10.4/10.5 chưa làm.
 
 ## 10. Kiểm thử và Definition of Done
 
