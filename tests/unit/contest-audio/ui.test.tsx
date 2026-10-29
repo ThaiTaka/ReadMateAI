@@ -177,6 +177,34 @@ describe("Học tập ở chế độ trình diễn", () => {
   });
 });
 
+describe("tắt tiếng giữa chừng", () => {
+  it("bật tiếng lại sau khi tắt lúc đang phát: nút KHÔNG kẹt ở 'Đang phát' dù trình duyệt không phát sự kiện pause", async () => {
+    answer({
+      muted: false,
+      preview: true,
+      units: [{ kind: "letter", text: "b", mimeType: "audio/mpeg", source: "contest_preview" }],
+    });
+    render(study());
+    const b = document.querySelector('[data-letter="b"]') as HTMLElement;
+    const name = await waitFor(() => {
+      const button = within(b).getByRole("button", { name: t.nameAria.replace("{letter}", "b") });
+      expect(button).toBeEnabled();
+      return button;
+    });
+    fireEvent.click(name);
+    const audio = FakeAudio.instances[0]!;
+    // Mô phỏng trình duyệt làm rơi sự kiện `pause` khi âm bị dừng từ bên ngoài.
+    audio.pause = () => {
+      audio.paused = true;
+    };
+    act(() => audio.emit("playing"));
+    expect(within(b).getByRole("button", { name: audioT.playing })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("sound-mute"));
+    fireEvent.click(screen.getByTestId("sound-mute"));
+    expect(within(b).getByRole("button", { name: t.nameAria.replace("{letter}", "b") })).toBeEnabled();
+  });
+});
+
 describe("QuestionAudio — lời nhắn và ghi chú giọng trình diễn", () => {
   it("lời nhắn: hỏi kèm mã dòng; có tệp → vẽ nút, URL phát mang mã dòng; ghi chú 'Giọng máy trình diễn' khi là tệp trình diễn", async () => {
     answer({ muted: false, slots: { feedback: { mimeType: "audio/mpeg" } }, preview: ["feedback"] });

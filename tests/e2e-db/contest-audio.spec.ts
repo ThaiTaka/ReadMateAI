@@ -10,7 +10,7 @@ import { CONTEST_BUCKET, CONTEST_VOICE } from "../../src/features/contest-audio/
 import { LIBRARY_ENTRIES } from "../../src/server/tts-library/entries";
 import { vi } from "../../src/strings/vi";
 import { wav } from "../unit/audio-library/fixtures";
-import { exec, freshTeacher, mustRow as must } from "./audio-fixtures";
+import { approvedRecording, exec, freshTeacher, mustRow as must, rpc } from "./audio-fixtures";
 import { admin, axeClean, link, newMember, noHorizontalScroll, type ClassRow } from "./class-fixtures";
 
 /**
@@ -256,6 +256,18 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
   }, testInfo) => {
     test.setTimeout(240_000);
     const w = await world(true);
+    // Câu nghe âm BẮT BUỘC có bản ghi giáo viên đã duyệt (R10.3a, không đổi): tệp trình diễn KHÔNG thay thế nó, nên không có bản ghi này thì
+    // câu không chấm được. Đây là bản ghi tổng hợp đi qua đúng các hàm teacher_*.
+    await rpc(w.teacher, "teacher_grant_audio_consent", { p_notice_version: "v1" });
+    for (const [index, [unit, label]] of [
+      ["b", "bờ"],
+      ["c", "cờ"],
+      ["d", "dờ"],
+      ["i", "i"],
+      ["k", "ca"],
+    ].entries()) {
+      await approvedRecording(w, unit!, label!, index);
+    }
     const member = await newMember(w.cls, "Luyen", "developing"); // Nhóm 2 → H2
     await register(w, "instruction:listen_letter");
     for (const line of catalog.entries.filter((e) => e.kind === "feedback")) await register(w, line.id);

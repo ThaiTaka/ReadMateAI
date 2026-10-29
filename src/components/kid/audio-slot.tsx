@@ -63,6 +63,13 @@ export function AudioSlot({
 }: AudioSlotProps) {
   const [state, setState] = useState<PlayState>("ready");
   const [played, setPlayed] = useState(false);
+  // Tắt tiếng giữa chừng: âm đã bị dừng ở ngoài (stopAllAudio) nhưng trình duyệt không phải lúc nào cũng phát sự kiện `pause`, nên nút có thể kẹt ở
+  // "Đang phát" khi bật tiếng lại. Khi `muted` bật lên thì đưa nút về trạng thái sẵn sàng (điều chỉnh state ngay lúc render, không cần effect).
+  const [wasMuted, setWasMuted] = useState(muted);
+  if (muted !== wasMuted) {
+    setWasMuted(muted);
+    if (muted) setState("ready");
+  }
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(
