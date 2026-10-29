@@ -273,7 +273,13 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
     for (const line of catalog.entries.filter((e) => e.kind === "feedback")) await register(w, line.id);
     await link(page, member.backup);
     const requests: Request[] = [];
-    page.on("request", (r) => requests.push(r));
+    // Mã dòng lời nhắn mà giao diện thực sự hỏi (nhóm lời nhắc phụ thuộc thẻ lỗi nên không đoán trước).
+    const feedbackRefs: string[] = [];
+    page.on("request", (r) => {
+      requests.push(r);
+      const match = /\/audio\?feedback=([^&]+)/u.exec(r.url());
+      if (match) feedbackRefs.push(decodeURIComponent(match[1]!));
+    });
 
     const statusSeen = page.waitForResponse((r) => /\/question-instances\/[0-9a-f-]+\/audio$/u.test(r.url()));
     const question = await openPractice(page);
@@ -319,10 +325,12 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
     await check(page);
     const feedbackButton = page.getByRole("button", { name: new RegExp(`^${contest.feedbackButton}`, "u") });
     await expect(feedbackButton).toBeEnabled({ timeout: 20_000 });
+    const retryRef = feedbackRefs.at(-1)!;
+    expect(retryRef).toMatch(/^retry\.[a-z]+$/u);
     const retried = await pressAndObserve(
       page,
       testInfo,
-      `/api/student/question-instances/${question.id}/audio/feedback?line=retry.sound`,
+      `/api/student/question-instances/${question.id}/audio/feedback?line=${retryRef}`,
       () => feedbackButton.click(),
     );
     expect([200, 206]).toContain(retried.status);
@@ -337,17 +345,19 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
     await check(page);
     const praise = page.getByRole("button", { name: new RegExp(`^${contest.feedbackButton}`, "u") });
     await expect(praise).toBeEnabled({ timeout: 20_000 });
+    const praiseRef = feedbackRefs.at(-1)!;
+    expect(praiseRef).toMatch(/^correct_title_[1-3]$/u);
     const praised = await pressAndObserve(
       page,
       testInfo,
-      `/api/student/question-instances/${question.id}/audio/feedback?line=correct_title_1`,
+      `/api/student/question-instances/${question.id}/audio/feedback?line=${praiseRef}`,
       () => praise.click(),
     );
     expect([200, 206]).toContain(praised.status);
     // Sau khi đúng, lời nhắc "thử lại" không còn hợp trạng thái.
     expect(
       (
-        await page.request.get(`/api/student/question-instances/${question.id}/audio/feedback?line=retry.sound`)
+        await page.request.get(`/api/student/question-instances/${question.id}/audio/feedback?line=${retryRef}`)
       ).status(),
     ).toBe(403);
 
