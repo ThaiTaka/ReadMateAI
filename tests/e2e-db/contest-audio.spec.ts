@@ -1,3 +1,4 @@
+import "./server-only-shim";
 import { expect, test, type Page, type Request, type Response, type TestInfo } from "@playwright/test";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
