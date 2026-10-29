@@ -114,7 +114,7 @@ async function pressAndObserve(page: Page, testInfo: TestInfo, path: string, pre
 
 type Question = {
   id: string;
-  view: { variant: string; content: { sample: string; options: Array<{ id: string; text: string }> } };
+  view: { variant: string; content: { options: Array<{ id: string; text: string }> } };
 };
 const isSessionPost = (r: Response) =>
   /\/api\/student\/practice-sessions$/u.test(r.url()) && r.request().method() === "POST";
@@ -320,7 +320,14 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
 
     // Trả lời SAI → khung phản hồi có nút lời nhắn; phát đúng dòng "retry".
     const options = question.view.content.options;
-    const wrong = options.find((option) => option.text !== question.view.content.sample)!.text;
+    // Đáp án đúng của câu nghe âm nằm ở CSDL (câu này không có `sample`): lấy bằng khóa dịch vụ của bộ kiểm thử, như student-audio.spec.
+    const asked = await must(
+      admin.from("question_instances").select("exercise_item_id").eq("id", question.id).single(),
+    );
+    const itemRow = await must(admin.from("exercise_items").select("answer").eq("id", asked.exercise_item_id).single());
+    const correctId = (itemRow.answer as { optionId: string }).optionId;
+    const correctText = options.find((option) => option.id === correctId)!.text;
+    const wrong = options.find((option) => option.id !== correctId)!.text;
     await choose(page, question, wrong);
     await check(page);
     const feedbackButton = page.getByRole("button", { name: new RegExp(`^${contest.feedbackButton}`, "u") });
@@ -341,7 +348,7 @@ test.describe("Bài luyện — câu hướng dẫn và lời nhắn bằng gi�
     expect(premature.status()).toBe(403);
 
     // Trả lời ĐÚNG → lời khen.
-    await choose(page, question, question.view.content.sample);
+    await choose(page, question, correctText);
     await check(page);
     const praise = page.getByRole("button", { name: new RegExp(`^${contest.feedbackButton}`, "u") });
     await expect(praise).toBeEnabled({ timeout: 20_000 });
